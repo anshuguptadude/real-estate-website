@@ -39,7 +39,7 @@ export default function App() {
       id: 'RAE-OWNER-01',
       name: 'Shrey Gupta',
       phone: '+91 91490 79913',
-      email: 'shrey@royalagraestate.com',
+      email: 'shrey@royalagraestate.in',
       role: 'owner',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       memberSince: '2023',

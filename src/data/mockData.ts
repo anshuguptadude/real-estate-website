@@ -91,7 +91,7 @@ export const PROPERTIES_DATA: Property[] = [
       name: 'Shrey Gupta',
       role: 'Managing Partner & Co-Founder',
       phone: '+91 91490 79913',
-      email: 'shrey@royalagraestate.com',
+      email: 'shrey@royalagraestate.in',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       experience: 'Luxury Residential & HNI Advisory'
     },
@@ -163,7 +163,7 @@ export const PROPERTIES_DATA: Property[] = [
       name: 'Abhishek Singh Jadon',
       role: 'Managing Partner & Co-Founder',
       phone: '+91 95571 38449',
-      email: 'abhishek@royalagraestate.com',
+      email: 'abhishek@royalagraestate.in',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
       experience: 'Commercial Investments & Legal Diligence'
     },
@@ -235,7 +235,7 @@ export const PROPERTIES_DATA: Property[] = [
       name: 'Shrey Gupta',
       role: 'Managing Partner & Co-Founder',
       phone: '+91 91490 79913',
-      email: 'shrey@royalagraestate.com',
+      email: 'shrey@royalagraestate.in',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       experience: 'Luxury Residential & HNI Advisory'
     },
@@ -304,7 +304,7 @@ export const PROPERTIES_DATA: Property[] = [
       name: 'Shrey Gupta',
       role: 'Managing Partner & Co-Founder',
       phone: '+91 91490 79913',
-      email: 'shrey@royalagraestate.com',
+      email: 'shrey@royalagraestate.in',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       experience: 'Luxury Residential & HNI Advisory'
     },
@@ -371,7 +371,7 @@ export const PROPERTIES_DATA: Property[] = [
       name: 'Abhishek Singh Jadon',
       role: 'Managing Partner & Co-Founder',
       phone: '+91 95571 38449',
-      email: 'abhishek@royalagraestate.com',
+      email: 'abhishek@royalagraestate.in',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
       experience: 'Commercial Investments & Legal Diligence'
     },
@@ -438,7 +438,7 @@ export const PROPERTIES_DATA: Property[] = [
       name: 'Abhishek Singh Jadon',
       role: 'Managing Partner & Co-Founder',
       phone: '+91 95571 38449',
-      email: 'abhishek@royalagraestate.com',
+      email: 'abhishek@royalagraestate.in',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
       experience: 'Commercial Investments & Legal Diligence'
     },
@@ -502,7 +502,7 @@ export const PROPERTIES_DATA: Property[] = [
       name: 'Abhishek Singh Jadon',
       role: 'Managing Partner & Co-Founder',
       phone: '+91 95571 38449',
-      email: 'abhishek@royalagraestate.com',
+      email: 'abhishek@royalagraestate.in',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
       experience: 'Commercial Investments & Legal Diligence'
     },
@@ -568,7 +568,7 @@ export const PROPERTIES_DATA: Property[] = [
       name: 'Shrey Gupta',
       role: 'Managing Partner & Co-Founder',
       phone: '+91 91490 79913',
-      email: 'shrey@royalagraestate.com',
+      email: 'shrey@royalagraestate.in',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       experience: 'Luxury Residential & HNI Advisory'
     },

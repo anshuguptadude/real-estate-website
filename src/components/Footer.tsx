@@ -64,7 +64,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </div>
             <div className="flex items-center gap-2">
               <Mail className="w-3.5 h-3.5 text-[#C5A869]" />
-              <span>concierge@royalagraestate.com</span>
+              <span>concierge@royalagraestate.in</span>
             </div>
           </div>
 

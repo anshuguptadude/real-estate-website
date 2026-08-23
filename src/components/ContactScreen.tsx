@@ -77,8 +77,8 @@ export const ContactScreen: React.FC = () => {
                   <Mail className="w-5 h-5 text-[#C5A869] shrink-0 mt-0.5" />
                   <div>
                     <strong className="block text-white">Confidential Desk:</strong>
-                    <a href="mailto:concierge@royalagraestate.com" className="text-gray-300 hover:text-white underline">
-                      concierge@royalagraestate.com
+                    <a href="mailto:concierge@royalagraestate.in" className="text-gray-300 hover:text-white underline">
+                      concierge@royalagraestate.in
                     </a>
                   </div>
                 </div>

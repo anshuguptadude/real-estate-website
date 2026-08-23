@@ -60,7 +60,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   // Profile form state
   const [name, setName] = useState(user?.name || 'Valued Client');
   const [phone, setPhone] = useState(user?.phone || '+91 91490 79913');
-  const [email, setEmail] = useState(user?.email || 'client@royalagraestate.com');
+  const [email, setEmail] = useState(user?.email || 'client@royalagraestate.in');
   const [role, setRole] = useState<'buyer' | 'owner'>(user?.role || 'owner');
   const [avatar, setAvatar] = useState(user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80');
   const [preferredLocality, setPreferredLocality] = useState(user?.preferredLocality || 'Fatehabad Road, Agra');

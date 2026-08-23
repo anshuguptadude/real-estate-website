@@ -42,7 +42,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const [possession, setPossession] = useState('Ready to Move');
   const [ownerName, setOwnerName] = useState(user?.name || '');
   const [ownerPhone, setOwnerPhone] = useState(user?.phone || '+91 91490 79913');
-  const [ownerEmail, setOwnerEmail] = useState(user?.email || 'shrey@royalagraestate.com');
+  const [ownerEmail, setOwnerEmail] = useState(user?.email || 'shrey@royalagraestate.in');
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([
     'Swimming Pool',
     '100% Power Backup',
@@ -186,7 +186,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         name: 'Shrey Gupta',
         role: 'Managing Partner & Co-Founder',
         phone: '+91 91490 79913',
-        email: 'shrey@royalagraestate.com',
+        email: 'shrey@royalagraestate.in',
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
         experience: 'Luxury Residential & HNI Advisory'
       },
@@ -748,7 +748,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         <input
                           type="email"
                           required
-                          placeholder="owner@royalagraestate.com"
+                          placeholder="owner@royalagraestate.in"
                           value={ownerEmail}
                           onChange={(e) => setOwnerEmail(e.target.value)}
                           className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"

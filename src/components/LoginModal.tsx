@@ -72,7 +72,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     const userToAuth: UserProfile = {
       id: `RAE-${Math.floor(1000 + Math.random() * 9000)}`,
       name: role === 'owner' ? 'Shrey Gupta' : 'Premium Investor',
-      email: isEmail ? identifier : 'client@royalagraestate.com',
+      email: isEmail ? identifier : 'client@royalagraestate.in',
       phone: isEmail ? '+91 91490 79913' : identifier,
       role: role,
       avatar: role === 'owner' 
@@ -92,7 +92,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       id: `RAE-${Math.floor(1000 + Math.random() * 9000)}`,
       name: signupName.trim() || 'Distinguished Member',
       phone: signupPhone.trim() || '+91 91490 79913',
-      email: signupEmail.trim() || 'member@royalagraestate.com',
+      email: signupEmail.trim() || 'member@royalagraestate.in',
       role: role,
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       memberSince: new Date().getFullYear().toString(),
@@ -125,7 +125,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       id: targetRole === 'owner' ? 'RAE-OWNER-01' : 'RAE-BUYER-01',
       name: targetRole === 'owner' ? 'Shrey Gupta (Property Owner)' : 'Vikram Sharma (Premium Buyer)',
       phone: targetRole === 'owner' ? '+91 91490 79913' : '+91 95571 38449',
-      email: targetRole === 'owner' ? 'shrey@royalagraestate.com' : 'vikram.investments@agravip.in',
+      email: targetRole === 'owner' ? 'shrey@royalagraestate.in' : 'vikram.investments@agravip.in',
       role: targetRole,
       avatar: targetRole === 'owner'
         ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
@@ -316,7 +316,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       <input
                         type="email"
                         required
-                        placeholder="shrey@royalagraestate.com"
+                        placeholder="shrey@royalagraestate.in"
                         value={signupEmail}
                         onChange={(e) => setSignupEmail(e.target.value)}
                         className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
