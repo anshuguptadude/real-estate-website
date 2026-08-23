@@ -1,0 +1,6 @@
+{
+  "name": "Royal Agra Estate",
+  "description": "Exclusive luxury real estate portal for Agra's most distinguished residential and commercial properties.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
