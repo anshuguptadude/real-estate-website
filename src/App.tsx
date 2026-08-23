@@ -34,18 +34,7 @@ export default function App() {
     } catch {
       // ignore
     }
-    // Default initial simulated user (or null) - start with pre-configured partner account for immediate access
-    return {
-      id: 'RAE-OWNER-01',
-      name: 'Shrey Gupta',
-      phone: '+91 91490 79913',
-      email: 'shrey@royalagraestate.in',
-      role: 'owner',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-      memberSince: '2023',
-      city: 'Agra',
-      preferredLocality: 'Fatehabad Road, Agra'
-    };
+    return null;
   });
 
   // Global Properties State (with persistence & user additions/edits)

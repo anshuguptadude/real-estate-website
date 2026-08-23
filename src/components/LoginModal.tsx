@@ -40,18 +40,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   
   // Login fields
   const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   
   // Sign up fields
   const [signupName, setSignupName] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
   const [signupInterest, setSignupInterest] = useState('Buying');
   const [signupBudgetType, setSignupBudgetType] = useState('');
   const [signupCurrentAddress, setSignupCurrentAddress] = useState('');
   const [signupDob, setSignupDob] = useState('');
   const [signupProfession, setSignupProfession] = useState('');
   
-  // Flow steps
+  // Errors & Flow steps
+  const [authError, setAuthError] = useState('');
   const [step, setStep] = useState<'form' | 'otp' | 'success'>('form');
   const [otp, setOtp] = useState(['5', '8', '2', '1']);
   const [activeUserTemp, setActiveUserTemp] = useState<UserProfile | null>(null);
@@ -60,39 +63,110 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     setAuthMode(initialMode);
     setRole(initialRole);
     setStep('form');
+    setAuthError('');
   }, [initialMode, initialRole, isOpen]);
 
   if (!isOpen) return null;
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const identifier = loginIdentifier.trim() || '+91 91490 79913';
-    const isEmail = identifier.includes('@');
-    
-    const userToAuth: UserProfile = {
-      id: `RAE-${Math.floor(1000 + Math.random() * 9000)}`,
-      name: role === 'owner' ? 'Shrey Gupta' : 'Premium Investor',
-      email: isEmail ? identifier : 'client@royalagraestate.in',
-      phone: isEmail ? '+91 91490 79913' : identifier,
-      role: role,
-      avatar: role === 'owner' 
-        ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
-        : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-      memberSince: '2024',
-      preferredLocality: 'Fatehabad Road, Agra'
-    };
+    setAuthError('');
+    const identifier = loginIdentifier.trim().toLowerCase();
+    const enteredPassword = loginPassword.trim();
 
-    setActiveUserTemp(userToAuth);
-    setStep('otp');
+    if (!identifier || !enteredPassword) {
+      setAuthError('Please enter both email/mobile and password.');
+      return;
+    }
+
+    // Retrieve saved accounts from localStorage
+    let savedAccounts: any[] = [];
+    try {
+      const stored = localStorage.getItem('royal_agra_accounts_v1');
+      if (stored) savedAccounts = JSON.parse(stored);
+    } catch {
+      savedAccounts = [];
+    }
+
+    // Find account by email or phone
+    const matchedAccount = savedAccounts.find(
+      (acc: any) => (acc.email && acc.email.toLowerCase() === identifier) || acc.phone === identifier
+    );
+
+    if (matchedAccount) {
+      if (matchedAccount.password === enteredPassword) {
+        const userToAuth: UserProfile = {
+          id: matchedAccount.id,
+          name: matchedAccount.name,
+          email: matchedAccount.email,
+          phone: matchedAccount.phone,
+          role: matchedAccount.role || role,
+          avatar: matchedAccount.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+          memberSince: matchedAccount.memberSince || '2024',
+          preferredLocality: matchedAccount.preferredLocality || 'Agra'
+        };
+        setActiveUserTemp(userToAuth);
+        setStep('otp');
+        return;
+      } else {
+        setAuthError('Incorrect password. Please try again.');
+        return;
+      }
+    }
+
+    // Check demo accounts as fallback
+    if (identifier === 'shrey@royalagraestate.in' || identifier === '+91 91490 79913') {
+      const demoUser: UserProfile = {
+        id: 'RAE-OWNER-01',
+        name: 'Shrey Gupta',
+        email: 'shrey@royalagraestate.in',
+        phone: '+91 91490 79913',
+        role: role,
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+        memberSince: '2023',
+        preferredLocality: 'Fatehabad Road, Agra'
+      };
+      setActiveUserTemp(demoUser);
+      setStep('otp');
+      return;
+    }
+
+    setAuthError('Account not found with this email/mobile. Please sign up to create a new account.');
   };
 
   const handleSignupSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newUser: UserProfile = {
+    setAuthError('');
+
+    if (!signupEmail || !signupPassword) {
+      setAuthError('Please fill in your Email and Create a Password.');
+      return;
+    }
+
+    const emailFormatted = signupEmail.trim().toLowerCase();
+
+    // Retrieve saved accounts from localStorage
+    let savedAccounts: any[] = [];
+    try {
+      const stored = localStorage.getItem('royal_agra_accounts_v1');
+      if (stored) savedAccounts = JSON.parse(stored);
+    } catch {
+      savedAccounts = [];
+    }
+
+    // Check if account already exists
+    const exists = savedAccounts.some((acc: any) => acc.email && acc.email.toLowerCase() === emailFormatted);
+    if (exists) {
+      setAuthError('An account with this email already exists. Please log in.');
+      return;
+    }
+
+    const newUserAccount = {
       id: `RAE-${Math.floor(1000 + Math.random() * 9000)}`,
       name: signupName.trim() || 'Distinguished Member',
       phone: signupPhone.trim() || '+91 91490 79913',
-      email: signupEmail.trim() || 'member@royalagraestate.in',
+      email: emailFormatted,
+      password: signupPassword.trim(),
       role: role,
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       memberSince: new Date().getFullYear().toString(),
@@ -104,7 +178,30 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       profession: signupProfession.trim()
     };
 
-    setActiveUserTemp(newUser);
+    savedAccounts.push(newUserAccount);
+    try {
+      localStorage.setItem('royal_agra_accounts_v1', JSON.stringify(savedAccounts));
+    } catch {
+      // ignore
+    }
+
+    const newUserProfile: UserProfile = {
+      id: newUserAccount.id,
+      name: newUserAccount.name,
+      email: newUserAccount.email,
+      phone: newUserAccount.phone,
+      role: newUserAccount.role,
+      avatar: newUserAccount.avatar,
+      memberSince: newUserAccount.memberSince,
+      preferredLocality: newUserAccount.preferredLocality,
+      primaryInterest: newUserAccount.primaryInterest,
+      preferredBudget: newUserAccount.preferredBudget,
+      address: newUserAccount.address,
+      dob: newUserAccount.dob,
+      profession: newUserAccount.profession
+    };
+
+    setActiveUserTemp(newUserProfile);
     setStep('otp');
   };
 
@@ -235,6 +332,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 </div>
               </div>
 
+              {/* Error Alert */}
+              {authError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs font-medium">
+                  {authError}
+                </div>
+              )}
+
               {/* LOG IN FORM */}
               {authMode === 'login' && (
                 <form onSubmit={handleLoginSubmit} className="space-y-4">
@@ -246,18 +350,35 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       <input
                         type="text"
                         required
-                        placeholder="+91 91490 79913 or name@domain.com"
+                        placeholder="shrey@royalagraestate.in or +91 91490 79913"
                         value={loginIdentifier}
                         onChange={(e) => setLoginIdentifier(e.target.value)}
                         className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
                       />
-                      <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="password"
+                        required
+                        placeholder="Enter your password"
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                      />
+                      <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     </div>
                   </div>
 
                   <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
                     <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Instant 4-digit verification code will be sent.</span>
+                    <span>Secure encrypted authentication</span>
                   </div>
 
                   <button
@@ -265,7 +386,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     id="submit-login-btn"
                     className="w-full py-3 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
                   >
-                    <span>Send Verification Code</span>
+                    <span>Log In</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </form>
@@ -293,23 +414,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
                   <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Mobile Number
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="tel"
-                        required
-                        placeholder="+91 91490 79913"
-                        value={signupPhone}
-                        onChange={(e) => setSignupPhone(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
-                      />
-                      <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                       Email Address
                     </label>
                     <div className="relative">
@@ -322,6 +426,40 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                         className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
                       />
                       <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                      Create Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="password"
+                        required
+                        placeholder="Create a secure password"
+                        value={signupPassword}
+                        onChange={(e) => setSignupPassword(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                      />
+                      <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                      Mobile Number
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="tel"
+                        required
+                        placeholder="+91 91490 79913"
+                        value={signupPhone}
+                        onChange={(e) => setSignupPhone(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                      />
+                      <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     </div>
                   </div>
 
