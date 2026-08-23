@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Property } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  X, 
+import { MapComponent } from './MapComponent';
+import {
+  X,
+
   MapPin, 
   Bed, 
   Bath, 
@@ -328,6 +330,14 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Map */}
+              <div>
+                <h4 className="text-sm font-bold text-[#0F382C] uppercase tracking-wider mb-3">
+                  Property Location
+                </h4>
+                <MapComponent lat={property.coordinates.lat} lng={property.coordinates.lng} />
               </div>
 
             </div>

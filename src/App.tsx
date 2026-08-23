@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ActiveScreen, Property, FilterState, PropertyType, ListingType, UserProfile } from './types';
 import { PROPERTIES_DATA } from './data/mockData';
 import { Navbar } from './components/Navbar';
@@ -12,7 +12,6 @@ import { ProjectsScreen } from './components/ProjectsScreen';
 import { PostPropertyScreen } from './components/PostPropertyScreen';
 import { AboutScreen } from './components/AboutScreen';
 import { ContactScreen } from './components/ContactScreen';
-import { ScreenNavigator } from './components/ScreenNavigator';
 import { LoginModal } from './components/LoginModal';
 import { EditPropertyModal } from './components/EditPropertyModal';
 import { UserDashboardScreen } from './components/UserDashboardScreen';
@@ -25,6 +24,7 @@ export default function App() {
   // Navigation & Screen state
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>('home');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const hasOpenedModalInApp = useRef(false);
 
   // User Authentication State
   const [user, setUser] = useState<UserProfile | null>(() => {
@@ -91,22 +91,6 @@ export default function App() {
     }
   }, [properties]);
 
-  // Deep linking: parse query param '?property=id' and open detail modal on load
-  useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const propId = params.get('property');
-      if (propId) {
-        const found = properties.find(p => p.id === propId);
-        if (found) {
-          setSelectedProperty(found);
-        }
-      }
-    } catch {
-      // ignore
-    }
-  }, [properties]);
-
   // Search & Filter state
   const initialFilterState: FilterState = {
     searchQuery: '',
@@ -157,7 +141,7 @@ export default function App() {
   const [savedDrawerOpen, setSavedDrawerOpen] = useState(false);
 
   // Scroll to top on screen change
-  const navigateTo = (screen: ActiveScreen) => {
+  const navigateTo = (screen: ActiveScreen, propertyId: string | null = null, addToHistory: boolean = true) => {
     if (screen === 'sell-rent' && !user) {
       handleInitiatePostProperty();
       return;
@@ -168,9 +152,90 @@ export default function App() {
       setLoginModalOpen(true);
       return;
     }
+
+    // Avoid pushing duplicate states into browser history
+    const currentParams = new URLSearchParams(window.location.search);
+    const currentScreen = currentParams.get('screen') || 'home';
+    const currentProperty = currentParams.get('property');
+    if (addToHistory && screen === currentScreen && propertyId === currentProperty) {
+      return;
+    }
+
     setActiveScreen(screen);
+    
+    if (propertyId) {
+      const found = properties.find(p => p.id === propertyId);
+      if (found) {
+        setSelectedProperty(found);
+        if (addToHistory) {
+          hasOpenedModalInApp.current = true;
+        }
+      }
+    } else {
+      setSelectedProperty(null);
+    }
+    
+    // Manage browser history
+    if (addToHistory) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('screen', screen);
+      if (propertyId) {
+        url.searchParams.set('property', propertyId);
+      } else {
+        url.searchParams.delete('property');
+      }
+      window.history.pushState({ screen, propertyId }, '', url.pathname + url.search);
+    }
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const handleClosePropertyDetail = () => {
+    if (hasOpenedModalInApp.current) {
+      hasOpenedModalInApp.current = false;
+      window.history.back();
+    } else {
+      navigateTo(activeScreen, null);
+    }
+  };
+
+  // Handle browser back button and initial load
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state) {
+        const { screen, propertyId } = event.state;
+        if (!propertyId) {
+          hasOpenedModalInApp.current = false;
+        }
+        navigateTo(screen, propertyId, false);
+      } else {
+        // Handle case where state is null (initial load or browser default)
+        const params = new URLSearchParams(window.location.search);
+        const screen = (params.get('screen') as ActiveScreen) || 'home';
+        const propertyId = params.get('property');
+        hasOpenedModalInApp.current = false;
+        navigateTo(screen, propertyId, false);
+      }
+    };
+
+    // Initialize state on load
+    const params = new URLSearchParams(window.location.search);
+    const screen = (params.get('screen') as ActiveScreen) || 'home';
+    const propertyId = params.get('property');
+    
+    // Set initial state without adding to history (it's already the current state)
+    setActiveScreen(screen);
+    if (propertyId) {
+      const found = properties.find(p => p.id === propertyId);
+      if (found) setSelectedProperty(found);
+    }
+    
+    // Replace current state with correct state object so popstate works for the first entry
+    window.history.replaceState({ screen, propertyId }, '', window.location.pathname + window.location.search);
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [properties, user]); 
 
   // Protected Post Property trigger
   const handleInitiatePostProperty = () => {
@@ -179,8 +244,7 @@ export default function App() {
       setPendingPostRedirect(true);
       setLoginModalOpen(true);
     } else {
-      setActiveScreen('sell-rent');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      navigateTo('sell-rent');
     }
   };
 
@@ -191,19 +255,17 @@ export default function App() {
 
     if (pendingPostRedirect) {
       setPendingPostRedirect(false);
-      setActiveScreen('sell-rent');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      navigateTo('sell-rent');
     } else if (pendingDashboardRedirect) {
       setPendingDashboardRedirect(false);
-      setActiveScreen('dashboard');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      navigateTo('dashboard');
     }
   };
 
   const handleLogout = () => {
     setUser(null);
     if (activeScreen === 'dashboard' || activeScreen === 'sell-rent') {
-      setActiveScreen('home');
+      navigateTo('home');
     }
   };
 
@@ -276,7 +338,7 @@ export default function App() {
   };
 
   const handleBookVisit = (prop: Property) => {
-    setSelectedProperty(prop);
+    navigateTo(activeScreen, prop.id);
   };
 
   const savedProperties = properties.filter(p => savedPropertyIds.includes(p.id));
@@ -318,7 +380,7 @@ export default function App() {
 
             <FeaturedProperties
               properties={properties}
-              onSelectProperty={(prop) => setSelectedProperty(prop)}
+              onSelectProperty={(prop) => navigateTo(activeScreen, prop.id)}
               onToggleSave={handleToggleSave}
               savedIds={savedPropertyIds}
               onBookVisit={handleBookVisit}
@@ -344,7 +406,7 @@ export default function App() {
             filterState={filterState}
             onUpdateFilters={(patch) => setFilterState(prev => ({ ...prev, ...patch }))}
             onResetFilters={() => setFilterState(initialFilterState)}
-            onSelectProperty={(prop) => setSelectedProperty(prop)}
+            onSelectProperty={(prop) => navigateTo(activeScreen, prop.id)}
             onToggleSave={handleToggleSave}
             savedIds={savedPropertyIds}
             onBookVisit={handleBookVisit}
@@ -364,7 +426,7 @@ export default function App() {
             onEditProperty={(prop) => setEditingProperty(prop)}
             onDeleteProperty={handleDeleteProperty}
             onTogglePropertyStatus={handleTogglePropertyStatus}
-            onViewProperty={(prop) => setSelectedProperty(prop)}
+            onViewProperty={(prop) => navigateTo('properties', prop.id)}
             onNavigatePostProperty={handleInitiatePostProperty}
             onNavigateProperties={() => navigateTo('properties')}
             onLogout={handleLogout}
@@ -408,20 +470,12 @@ export default function App() {
         onOpenPostProperty={handleInitiatePostProperty}
       />
 
-      {/* 4. Floating Screen Navigator */}
-      <ScreenNavigator
-        activeScreen={activeScreen}
-        onNavigate={navigateTo}
-        hasSelectedProperty={Boolean(selectedProperty)}
-        onOpenSampleDetail={() => setSelectedProperty(properties[0])}
-      />
-
-      {/* 5. Modals & Drawers */}
+      {/* 4. Modals & Drawers */}
       
       {/* Property Detail Modal */}
       <PropertyDetailModal
         property={selectedProperty}
-        onClose={() => setSelectedProperty(null)}
+        onClose={() => navigateTo(activeScreen, null)}
         onBookVisit={handleBookVisit}
         onOpenEmiCalc={(price) => handleOpenEmiCalculator(price)}
         onToggleSave={handleToggleSave}
@@ -464,7 +518,7 @@ export default function App() {
         compareList={compareList}
         onRemoveFromCompare={(id) => setCompareList(prev => prev.filter(p => p.id !== id))}
         onSelectProperty={(prop) => {
-          setSelectedProperty(prop);
+          navigateTo(activeScreen, prop.id);
           setCompareModalOpen(false);
         }}
       />
@@ -476,7 +530,7 @@ export default function App() {
         savedProperties={savedProperties}
         onRemove={handleToggleSave}
         onSelectProperty={(prop) => {
-          setSelectedProperty(prop);
+          navigateTo(activeScreen, prop.id);
           setSavedDrawerOpen(false);
         }}
       />
