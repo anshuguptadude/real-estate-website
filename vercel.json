@@ -1,4 +1,5 @@
 {
+  "name": "royalagraestate",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
