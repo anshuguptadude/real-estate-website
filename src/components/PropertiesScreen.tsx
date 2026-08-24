@@ -31,6 +31,9 @@ interface PropertiesScreenProps {
   onToggleCompare: (property: Property) => void;
   compareList: Property[];
   onOpenCompareModal: () => void;
+  onInquireContact?: (property: Property) => void;
+  isAdminUser?: boolean;
+  onDeleteProperty?: (id: string) => void;
 }
 
 export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
@@ -44,7 +47,10 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
   onBookVisit,
   onToggleCompare,
   compareList,
-  onOpenCompareModal
+  onOpenCompareModal,
+  onInquireContact,
+  isAdminUser,
+  onDeleteProperty
 }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -473,6 +479,9 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
                         onBookVisit={onBookVisit}
                         onToggleCompare={onToggleCompare}
                         isComparing={compareList.some(p => p.id === property.id)}
+                        onInquireContact={onInquireContact}
+                        isAdminUser={isAdminUser}
+                        onDeleteProperty={onDeleteProperty}
                       />
                     </motion.div>
                   ))}

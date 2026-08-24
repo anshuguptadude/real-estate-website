@@ -34,7 +34,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </span>
             </div>
             <p className="text-xs text-gray-300 leading-relaxed">
-              Curated luxury residences, heritage estates, and prime developments across Agra.
+              Curated luxury residences, heritage estates, and prime developments across Agra. Managed by Shrey Gupta & Abhishek Singh Jadon.
             </p>
           </div>
 
@@ -52,17 +52,21 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             ))}
           </div>
 
-          {/* Core Contact Info */}
-          <div className="text-xs text-gray-300 space-y-2 flex flex-col items-center md:items-end">
+          {/* Core Contact Info with clean dual lines */}
+          <div className="text-xs text-gray-300 space-y-1.5 flex flex-col items-center md:items-end">
             <div className="flex items-center gap-2">
               <Phone className="w-3.5 h-3.5 text-[#C5A869]" />
-              <div className="flex items-center gap-1.5">
-                <a href="tel:+919149079913" className="hover:text-white transition-colors">+91 91490 79913</a>
-                <span>/</span>
-                <a href="tel:+919557138449" className="hover:text-white transition-colors">+91 95571 38449</a>
-              </div>
+              <a href="tel:+919149079913" className="hover:text-white transition-colors">
+                Shrey Gupta: +91 9149079913
+              </a>
             </div>
             <div className="flex items-center gap-2">
+              <Phone className="w-3.5 h-3.5 text-[#C5A869]" />
+              <a href="tel:+919557138449" className="hover:text-white transition-colors">
+                Abhishek Singh Jadon: +91 9557138449
+              </a>
+            </div>
+            <div className="flex items-center gap-2 pt-1">
               <Mail className="w-3.5 h-3.5 text-[#C5A869]" />
               <span>concierge@royalagraestate.in</span>
             </div>
@@ -73,7 +77,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         {/* Bottom Copyright */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400 gap-3 text-center sm:text-left">
           <span>
-            © {new Date().getFullYear()} Royal Agra Estate. All rights reserved.
+            © {new Date().getFullYear()} Royal Agra Estate. Managed by Shrey Gupta & Abhishek Singh Jadon. All rights reserved.
           </span>
         </div>
 

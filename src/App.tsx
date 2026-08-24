@@ -339,9 +339,28 @@ export default function App() {
   };
 
   const handleToggleSave = (id: string) => {
+    if (!user) {
+      setLoginPromptMessage('Please log in or create an account to save properties to your favorites.');
+      setLoginModalOpen(true);
+      return;
+    }
     setSavedPropertyIds(prev =>
       prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );
+  };
+
+  const handleInquireContact = (property: Property) => {
+    const newLead: LeadSubmission = {
+      id: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
+      propertyId: property.id,
+      propertyTitle: property.title,
+      buyerName: user?.name || 'Prospective Buyer',
+      phone: user?.phone || '+91 9149079913',
+      email: user?.email || 'buyer@royalagraestate.in',
+      preferredTime: 'Direct WhatsApp Inquire / Contact',
+      timestamp: new Date().toLocaleString()
+    };
+    setLeads(prev => [newLead, ...prev]);
   };
 
   const handleToggleCompare = (prop: Property) => {
@@ -413,6 +432,9 @@ export default function App() {
               onExploreAll={() => navigateTo('properties')}
               onToggleCompare={handleToggleCompare}
               compareList={compareList}
+              onInquireContact={handleInquireContact}
+              isAdminUser={isAdmin(user)}
+              onDeleteProperty={handleDeleteProperty}
             />
 
             <NeighborhoodExplorer
@@ -439,6 +461,9 @@ export default function App() {
             onToggleCompare={handleToggleCompare}
             compareList={compareList}
             onOpenCompareModal={() => setCompareModalOpen(true)}
+            onInquireContact={handleInquireContact}
+            isAdminUser={isAdmin(user)}
+            onDeleteProperty={handleDeleteProperty}
           />
         )}
 

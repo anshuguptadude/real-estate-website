@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserProfile, Property, UserDashboardTab } from '../types';
-import { isAdmin, LeadSubmission } from '../utils/security';
+import { isAdmin, LeadSubmission, ADMIN_CREDENTIALS } from '../utils/security';
 import { 
   Building2, 
   User, 
@@ -76,6 +76,13 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   const [profession, setProfession] = useState(user?.profession || '');
   const [profileSuccessMsg, setProfileSuccessMsg] = useState(false);
 
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+
   // Sync state with user when user changes
   React.useEffect(() => {
     if (user) {
@@ -96,6 +103,47 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    setPasswordError('');
+
+    if (newPassword || currentPassword) {
+      if (!currentPassword) {
+        setPasswordError('Please enter your current password.');
+        return;
+      }
+      if (newPassword !== confirmNewPassword) {
+        setPasswordError('New passwords do not match.');
+        return;
+      }
+      let savedAccounts: any[] = [];
+      try {
+        const stored = localStorage.getItem('royal_agra_accounts_v1');
+        if (stored) savedAccounts = JSON.parse(stored);
+      } catch {}
+
+      const account = savedAccounts.find((acc: any) => acc.email && acc.email.toLowerCase() === user.email.toLowerCase());
+      if (account) {
+        if (account.password !== currentPassword) {
+          setPasswordError('Current password is incorrect.');
+          return;
+        }
+        account.password = newPassword.trim();
+        try {
+          localStorage.setItem('royal_agra_accounts_v1', JSON.stringify(savedAccounts));
+        } catch {}
+      } else {
+        const adminAcc = ADMIN_CREDENTIALS.find(a => a.email.toLowerCase() === user.email.toLowerCase());
+        if (adminAcc && adminAcc.password !== currentPassword) {
+          setPasswordError('Current password is incorrect.');
+          return;
+        }
+      }
+      setPasswordSuccess(true);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+      setTimeout(() => setPasswordSuccess(false), 3000);
+    }
+
     const updated: UserProfile = {
       ...user,
       name,
@@ -766,6 +814,55 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                     onChange={(e) => setDob(e.target.value)}
                     className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
                   />
+                </div>
+              </div>
+
+              {/* Password Change Section */}
+              <div className="pt-6 border-t border-gray-200 space-y-4">
+                <h3 className="text-sm font-bold text-[#0F382C] uppercase tracking-wider">
+                  Change Account Password
+                </h3>
+                {passwordError && (
+                  <div className="p-3 bg-red-50 text-red-700 rounded-lg text-xs font-medium">
+                    {passwordError}
+                  </div>
+                )}
+                {passwordSuccess && (
+                  <div className="p-3 bg-emerald-50 text-emerald-800 rounded-lg text-xs font-medium">
+                    Password updated successfully!
+                  </div>
+                )}
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Current Password</label>
+                  <input
+                    type="password"
+                    placeholder="Enter current password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white"
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">New Password</label>
+                    <input
+                      type="password"
+                      placeholder="Enter new password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Confirm New Password</label>
+                    <input
+                      type="password"
+                      placeholder="Confirm new password"
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white"
+                    />
+                  </div>
                 </div>
               </div>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Property } from '../types';
-import { Bed, Bath, Maximize, MapPin, ShieldCheck, Heart, Sparkles, Eye, Calendar, ArrowRight, MessageSquare } from 'lucide-react';
+import { Bed, Bath, Maximize, MapPin, ShieldCheck, Heart, Sparkles, Eye, Calendar, ArrowRight, MessageSquare, Trash2 } from 'lucide-react';
 
 interface PropertyCardProps {
   property: Property;
@@ -10,6 +10,9 @@ interface PropertyCardProps {
   onBookVisit: (property: Property) => void;
   onToggleCompare?: (property: Property) => void;
   isComparing?: boolean;
+  onInquireContact?: (property: Property) => void;
+  isAdminUser?: boolean;
+  onDeleteProperty?: (id: string) => void;
 }
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({
@@ -19,7 +22,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   isSaved,
   onBookVisit,
   onToggleCompare,
-  isComparing
+  isComparing,
+  onInquireContact,
+  isAdminUser,
+  onDeleteProperty
 }) => {
   return (
     <div className="bg-white rounded-xl overflow-hidden border border-gray-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group h-full">
@@ -39,8 +45,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         {/* Top-Left: Price Tag Badge + Optional Exclusive tags + Status */}
         <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5 pointer-events-none z-10">
           {property.status && property.status !== 'Active' ? (
-            <div className="bg-amber-600 text-white px-3 py-1 rounded-md shadow-md text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-              <span>{property.status === 'Sold' ? 'SOLD OUT' : 'RENTED OUT'}</span>
+            <div className={`px-3 py-1 rounded-md shadow-md text-xs font-bold uppercase tracking-wider flex items-center gap-1 ${
+              property.status === 'Pending Approval' ? 'bg-amber-700 text-white' : 'bg-amber-600 text-white'
+            }`}>
+              <span>{property.status}</span>
             </div>
           ) : (
             /* Main Price Tag Badge */
@@ -60,7 +68,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           )}
         </div>
 
-        {/* Top-Right: Favorite Button */}
+        {/* Top-Right: Favorite Button (Gated if unauthenticated handled in App.tsx) */}
         <button
           type="button"
           id={`fav-btn-${property.id}`}
@@ -70,26 +78,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           }}
           className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-gray-700 hover:text-red-500 flex items-center justify-center shadow-md transition-transform hover:scale-110 pointer-events-auto z-10"
           aria-label="Save property"
+          title="Save property (Requires Login)"
         >
           <Heart className={`w-4 h-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} />
         </button>
-
-        {/* Floating Quick Inquiry WhatsApp Button */}
-        <a
-          href={`https://wa.me/919149079913?text=${encodeURIComponent(
-            `Hello Shrey & Abhishek, I am interested in inquiring about the property: "${property.title}" (ID: ${property.id}). Please share more details.`
-          )}`}
-          target="_blank"
-          rel="noreferrer"
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-          className="absolute bottom-11 right-3 flex items-center gap-1 px-2.5 py-1.5 bg-[#25D366] hover:bg-[#1ebd54] text-white rounded-full shadow-lg transition-all hover:scale-105 pointer-events-auto z-20 text-[9px] font-bold uppercase tracking-wider"
-          title="Quick WhatsApp Inquiry with Founders"
-        >
-          <MessageSquare className="w-3 h-3 text-white fill-white" />
-          <span>Quick Inquiry</span>
-        </a>
 
         {/* Bottom Image Info: Property Type & Rate / Sq.Ft cleanly docked */}
         <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white z-10 pointer-events-none">
@@ -188,29 +180,23 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         {/* Card Footer Actions */}
         <div className="space-y-2 pt-3 mt-2 border-t border-gray-100">
           
-          {/* Dual WhatsApp Action Buttons */}
-          <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-            <a
-              href={`https://wa.me/919149079913?text=${encodeURIComponent(`Hi Shrey, I am interested in Property ID ${property.id}`)}`}
-              target="_blank"
-              rel="noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="py-1 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 rounded font-bold border border-emerald-200 flex items-center justify-center gap-1 transition-colors truncate"
-              title="Contact Shrey Gupta on WhatsApp"
-            >
-              <span>💬 Contact Shrey</span>
-            </a>
-            <a
-              href={`https://wa.me/919557138449?text=${encodeURIComponent(`Hi Abhishek, I am interested in Property ID ${property.id}`)}`}
-              target="_blank"
-              rel="noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="py-1 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 rounded font-bold border border-emerald-200 flex items-center justify-center gap-1 transition-colors truncate"
-              title="Contact Abhishek Singh on WhatsApp"
-            >
-              <span>💬 Contact Abhishek</span>
-            </a>
-          </div>
+          {/* Unified Clean "Inquire / Contact" Button */}
+          <a
+            href={`https://wa.me/919149079913?text=${encodeURIComponent(
+              `Hi Royal Agra Estate, I am interested in Property ID #${property.id}.`
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onInquireContact) onInquireContact(property);
+            }}
+            className="w-full py-2 bg-[#25D366] hover:bg-[#1ebd54] text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all"
+            title="Inquire via WhatsApp & Log Inquiry"
+          >
+            <MessageSquare className="w-3.5 h-3.5 fill-white" />
+            <span>Inquire / Contact</span>
+          </a>
 
           <div className="flex items-center justify-between gap-2 pt-1">
             {onToggleCompare && (
@@ -229,6 +215,23 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             )}
 
             <div className="flex items-center gap-2 ml-auto">
+              {isAdminUser && onDeleteProperty && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (window.confirm(`Delete property #${property.id}?`)) {
+                      onDeleteProperty(property.id);
+                    }
+                  }}
+                  className="text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1.5 rounded shadow-xs transition-all flex items-center gap-1"
+                  title="Admin Delete Property"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 id={`book-tour-btn-${property.id}`}

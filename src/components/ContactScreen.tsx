@@ -37,6 +37,9 @@ export const ContactScreen: React.FC = () => {
           <p className="text-sm sm:text-base text-gray-600 mt-3 leading-relaxed">
             Schedule a confidential consultation, request a private architectural chauffeur tour, or discuss bespoke estate acquisitions in Agra.
           </p>
+          <div className="mt-4 p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-[#0F382C] font-semibold">
+            Royal Agra Estate – Managed by Shrey Gupta (+91 9149079913) & Abhishek Singh Jadon (+91 9557138449)
+          </div>
         </div>
 
         {/* 2-Column Layout */}
@@ -52,7 +55,7 @@ export const ContactScreen: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-brand-title font-bold text-lg text-white">Royal Agra Estate</h3>
-                  <span className="text-xs text-[#E4D5B7]">Private Client Concierge & Advisory</span>
+                  <span className="text-xs text-[#E4D5B7]">Managed by Shrey Gupta & Abhishek Singh Jadon</span>
                 </div>
               </div>
 
@@ -60,14 +63,13 @@ export const ContactScreen: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <Phone className="w-5 h-5 text-[#C5A869] shrink-0 mt-0.5" />
                   <div>
-                    <strong className="block text-white">Direct Phone:</strong>
-                    <div className="flex flex-col sm:flex-row sm:gap-2">
+                    <strong className="block text-white">Co-Owner Direct Lines:</strong>
+                    <div className="flex flex-col gap-1 mt-1">
                       <a href="tel:+919149079913" className="text-gray-300 hover:text-white underline">
-                        +91 91490 79913 (Shrey)
+                        Shrey Gupta (+91 9149079913)
                       </a>
-                      <span className="hidden sm:inline text-gray-400">•</span>
                       <a href="tel:+919557138449" className="text-gray-300 hover:text-white underline">
-                        +91 95571 38449 (Abhishek)
+                        Abhishek Singh Jadon (+91 9557138449)
                       </a>
                     </div>
                   </div>

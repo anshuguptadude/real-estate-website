@@ -14,6 +14,9 @@ interface FeaturedPropertiesProps {
   onExploreAll: () => void;
   onToggleCompare?: (property: Property) => void;
   compareList?: Property[];
+  onInquireContact?: (property: Property) => void;
+  isAdminUser?: boolean;
+  onDeleteProperty?: (id: string) => void;
 }
 
 export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
@@ -24,7 +27,10 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
   onBookVisit,
   onExploreAll,
   onToggleCompare,
-  compareList = []
+  compareList = [],
+  onInquireContact,
+  isAdminUser,
+  onDeleteProperty
 }) => {
   const [selectedFilter, setSelectedFilter] = useState<PropertyType>('All');
   const [isLoading, setIsLoading] = useState(false);
@@ -114,6 +120,9 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
                     onBookVisit={onBookVisit}
                     onToggleCompare={onToggleCompare}
                     isComparing={compareList.some(p => p.id === property.id)}
+                    onInquireContact={onInquireContact}
+                    isAdminUser={isAdminUser}
+                    onDeleteProperty={onDeleteProperty}
                   />
                 </motion.div>
               ))}

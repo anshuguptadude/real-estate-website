@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Property, PropertyType, UserProfile } from '../types';
 import { AGRA_LOCALITIES, PROPERTY_TYPES } from '../data/mockData';
+import { isAdmin } from '../utils/security';
 import { 
   Building, 
   MapPin, 
@@ -155,10 +156,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       featured: true,
       isExclusive: true,
       verified: isLegallyVerified,
-      verificationStatus: resolvedVerificationStatus,
+      verificationStatus: isAdmin(user) ? resolvedVerificationStatus : 'In Process',
       verifiedBy: resolvedAuthorityName,
       verificationNumber: verificationDocNumber.trim() || undefined,
-      status: 'Active',
+      status: isAdmin(user) ? 'Active' : 'Pending Approval',
       isUserListing: true,
       ownerId: user?.id || 'RAE-OWNER-01',
       ownerName: ownerName || user?.name || 'Property Owner',

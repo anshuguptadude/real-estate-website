@@ -11,12 +11,12 @@ import {
   Phone, 
   Mail, 
   User, 
-  Building,
   Sparkles,
   KeyRound,
   Compass,
   MapPin,
-  Briefcase
+  Briefcase,
+  HelpCircle
 } from 'lucide-react';
 
 interface LoginModalProps {
@@ -28,6 +28,13 @@ interface LoginModalProps {
   promptMessage?: string;
 }
 
+const SECURITY_QUESTIONS = [
+  'What is your favorite Agra monument?',
+  'What was your first car or bike model?',
+  'What is your mother maiden name?',
+  'What city were you born in?'
+];
+
 export const LoginModal: React.FC<LoginModalProps> = ({ 
   isOpen, 
   onClose,
@@ -36,35 +43,43 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   initialRole = 'buyer',
   promptMessage
 }) => {
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>(initialMode);
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'forgot'>(initialMode);
   const [role, setRole] = useState<'buyer' | 'owner'>(initialRole);
   
   // Login fields
   const [loginIdentifier, setLoginIdentifier] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   
-  // Sign up fields
+  // Sign up fields (1. Name/Phone at top, 2. Security Q&A in middle, 3. Email/Password/Confirm at bottom)
   const [signupName, setSignupName] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
+  const [signupSecurityQuestion, setSignupSecurityQuestion] = useState(SECURITY_QUESTIONS[0]);
+  const [signupSecurityAnswer, setSignupSecurityAnswer] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
   const [signupInterest, setSignupInterest] = useState('Buying');
   const [signupBudgetType, setSignupBudgetType] = useState('');
   const [signupCurrentAddress, setSignupCurrentAddress] = useState('');
   const [signupDob, setSignupDob] = useState('');
   const [signupProfession, setSignupProfession] = useState('');
   
-  // Errors & Flow steps
+  // Forgot Password fields
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotAnswer, setForgotAnswer] = useState('');
+  const [forgotNewPassword, setForgotNewPassword] = useState('');
+  const [forgotStep, setForgotStep] = useState<1 | 2>(1);
+
+  // Errors & Success
   const [authError, setAuthError] = useState('');
-  const [step, setStep] = useState<'form' | 'otp' | 'success'>('form');
-  const [otp, setOtp] = useState(['5', '8', '2', '1']);
-  const [activeUserTemp, setActiveUserTemp] = useState<UserProfile | null>(null);
+  const [successMsg, setSuccessMsg] = useState('');
 
   useEffect(() => {
     setAuthMode(initialMode);
     setRole(initialRole);
-    setStep('form');
     setAuthError('');
+    setSuccessMsg('');
+    setForgotStep(1);
   }, [initialMode, initialRole, isOpen]);
 
   if (!isOpen) return null;
@@ -97,8 +112,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         memberSince: '2023',
         preferredLocality: 'Fatehabad Road, Agra'
       };
-      setActiveUserTemp(adminUserProfile);
-      setStep('otp');
+      onLoginSuccess(adminUserProfile);
+      onClose();
       return;
     }
 
@@ -128,8 +143,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           memberSince: matchedAccount.memberSince || '2024',
           preferredLocality: matchedAccount.preferredLocality || 'Agra'
         };
-        setActiveUserTemp(userToAuth);
-        setStep('otp');
+        onLoginSuccess(userToAuth);
+        onClose();
         return;
       } else {
         setAuthError('Incorrect password. Please try again.');
@@ -149,8 +164,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         memberSince: '2023',
         preferredLocality: 'Fatehabad Road, Agra'
       };
-      setActiveUserTemp(demoUser);
-      setStep('otp');
+      onLoginSuccess(demoUser);
+      onClose();
       return;
     }
 
@@ -161,8 +176,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     e.preventDefault();
     setAuthError('');
 
-    if (!signupEmail || !signupPassword) {
-      setAuthError('Please fill in your Email and Create a Password.');
+    if (!signupName || !signupPhone || !signupEmail || !signupPassword || !signupConfirmPassword) {
+      setAuthError('Please fill in all required fields.');
+      return;
+    }
+
+    if (signupPassword !== signupConfirmPassword) {
+      setAuthError('Passwords do not match');
       return;
     }
 
@@ -186,10 +206,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
     const newUserAccount = {
       id: `RAE-${Math.floor(1000 + Math.random() * 9000)}`,
-      name: signupName.trim() || 'Distinguished Member',
-      phone: signupPhone.trim() || '+91 91490 79913',
+      name: signupName.trim(),
+      phone: signupPhone.trim(),
       email: emailFormatted,
       password: signupPassword.trim(),
+      securityQuestion: signupSecurityQuestion,
+      securityAnswer: signupSecurityAnswer.trim().toLowerCase(),
       role: role,
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       memberSince: new Date().getFullYear().toString(),
@@ -224,37 +246,55 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       profession: newUserAccount.profession
     };
 
-    setActiveUserTemp(newUserProfile);
-    setStep('otp');
-  };
-
-  const handleVerifyOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    setStep('success');
-    setTimeout(() => {
-      if (activeUserTemp) {
-        onLoginSuccess(activeUserTemp);
-      }
-      onClose();
-      setStep('form');
-    }, 1500);
-  };
-
-  const handleQuickDemoLogin = (targetRole: 'buyer' | 'owner') => {
-    const demoUser: UserProfile = {
-      id: targetRole === 'owner' ? 'RAE-OWNER-01' : 'RAE-BUYER-01',
-      name: targetRole === 'owner' ? 'Shrey Gupta (Property Owner)' : 'Vikram Sharma (Premium Buyer)',
-      phone: targetRole === 'owner' ? '+91 91490 79913' : '+91 95571 38449',
-      email: targetRole === 'owner' ? 'shrey@royalagraestate.in' : 'vikram.investments@agravip.in',
-      role: targetRole,
-      avatar: targetRole === 'owner'
-        ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
-        : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-      memberSince: '2023',
-      preferredLocality: 'Fatehabad Road, Agra'
-    };
-    onLoginSuccess(demoUser);
+    onLoginSuccess(newUserProfile);
     onClose();
+  };
+
+  const handleForgotSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+
+    let savedAccounts: any[] = [];
+    try {
+      const stored = localStorage.getItem('royal_agra_accounts_v1');
+      if (stored) savedAccounts = JSON.parse(stored);
+    } catch {
+      savedAccounts = [];
+    }
+
+    const emailF = forgotEmail.trim().toLowerCase();
+    const account = savedAccounts.find((acc: any) => acc.email && acc.email.toLowerCase() === emailF);
+
+    if (!account) {
+      setAuthError('No account found with this email address.');
+      return;
+    }
+
+    if (forgotStep === 1) {
+      if (!forgotAnswer || forgotAnswer.trim().toLowerCase() !== (account.securityAnswer || '')) {
+        setAuthError('Incorrect security question answer.');
+        return;
+      }
+      setForgotStep(2);
+      return;
+    }
+
+    if (forgotStep === 2) {
+      if (!forgotNewPassword) {
+        setAuthError('Please enter a new password.');
+        return;
+      }
+      account.password = forgotNewPassword.trim();
+      try {
+        localStorage.setItem('royal_agra_accounts_v1', JSON.stringify(savedAccounts));
+      } catch {}
+      setSuccessMsg('Password reset successfully! You can now log in.');
+      setTimeout(() => {
+        setAuthMode('login');
+        setSuccessMsg('');
+        setForgotStep(1);
+      }, 2000);
+    }
   };
 
   return (
@@ -283,7 +323,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         </div>
 
         {/* Prompt Notice if redirected from Post Property or restricted action */}
-        {promptMessage && step === 'form' && (
+        {promptMessage && authMode !== 'forgot' && (
           <div className="bg-[#FAF8F5] border-b border-[#E4D5B7]/50 px-6 py-2.5 flex items-center gap-2 text-xs text-[#0F382C] font-medium">
             <Sparkles className="w-4 h-4 text-[#C5A869] shrink-0" />
             <span>{promptMessage}</span>
@@ -293,365 +333,397 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         {/* Modal Body */}
         <div className="p-6 sm:p-8">
           
-          {step === 'form' && (
-            <div className="space-y-5">
-              
-              {/* Tab Switcher: Log In vs Create Account */}
-              <div className="flex bg-gray-100 p-1 rounded-xl">
-                <button
-                  type="button"
-                  id="tab-auth-login"
-                  onClick={() => setAuthMode('login')}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
-                    authMode === 'login' 
-                      ? 'bg-[#0F382C] text-white shadow-xs' 
-                      : 'text-gray-600 hover:text-black'
-                  }`}
-                >
-                  Log In
-                </button>
-                <button
-                  type="button"
-                  id="tab-auth-signup"
-                  onClick={() => setAuthMode('signup')}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
-                    authMode === 'signup' 
-                      ? 'bg-[#0F382C] text-white shadow-xs' 
-                      : 'text-gray-600 hover:text-black'
-                  }`}
-                >
-                  Create Account / Sign Up
-                </button>
-              </div>
-
-              {/* Role Selection */}
-              <div>
-                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                  Select Your Account Role
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setRole('buyer')}
-                    className={`py-2 px-3 text-xs font-bold rounded-lg border transition-all text-center ${
-                      role === 'buyer'
-                        ? 'bg-emerald-50 text-emerald-900 border-emerald-500 ring-1 ring-emerald-500/20'
-                        : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-                    }`}
-                  >
-                    Buyer / Investor
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRole('owner')}
-                    className={`py-2 px-3 text-xs font-bold rounded-lg border transition-all text-center ${
-                      role === 'owner'
-                        ? 'bg-emerald-50 text-emerald-900 border-emerald-500 ring-1 ring-emerald-500/20'
-                        : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-                    }`}
-                  >
-                    Property Owner / Seller
-                  </button>
-                </div>
-              </div>
-
-              {/* Error Alert */}
-              {authError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs font-medium">
-                  {authError}
-                </div>
-              )}
-
-              {/* LOG IN FORM */}
-              {authMode === 'login' && (
-                <form onSubmit={handleLoginSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Mobile Number or Email
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        required
-                        placeholder="shrey@royalagraestate.in or +91 91490 79913"
-                        value={loginIdentifier}
-                        onChange={(e) => setLoginIdentifier(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
-                      />
-                      <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Password
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="password"
-                        required
-                        placeholder="Enter your password"
-                        value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
-                      />
-                      <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Secure encrypted authentication</span>
-                  </div>
-
-                  <button
-                    type="submit"
-                    id="submit-login-btn"
-                    className="w-full py-3 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
-                  >
-                    <span>Log In</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </form>
-              )}
-
-              {/* SIGN UP FORM */}
-              {authMode === 'signup' && (
-                <form onSubmit={handleSignupSubmit} className="space-y-3.5 max-h-[380px] overflow-y-auto pr-1">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Full Name
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Shrey Gupta"
-                        value={signupName}
-                        onChange={(e) => setSignupName(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
-                      />
-                      <User className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="email"
-                        required
-                        placeholder="shrey@royalagraestate.in"
-                        value={signupEmail}
-                        onChange={(e) => setSignupEmail(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
-                      />
-                      <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Create Password
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="password"
-                        required
-                        placeholder="Create a secure password"
-                        value={signupPassword}
-                        onChange={(e) => setSignupPassword(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
-                      />
-                      <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Mobile Number
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="tel"
-                        required
-                        placeholder="+91 91490 79913"
-                        value={signupPhone}
-                        onChange={(e) => setSignupPhone(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
-                      />
-                      <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    </div>
-                  </div>
-
-                  {/* Primary Interest */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Primary Interest
-                    </label>
-                    <select
-                      value={signupInterest}
-                      onChange={(e) => setSignupInterest(e.target.value)}
-                      className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
-                    >
-                      <option value="Buying">Buying / Investing</option>
-                      <option value="Selling/Listing">Selling / Listing Property</option>
-                      <option value="Renting">Renting</option>
-                    </select>
-                  </div>
-
-                  {/* Preferred Budget / Property Type */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Preferred Budget & Property Type
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. ₹2.5 Cr+ Gated Villa"
-                        value={signupBudgetType}
-                        onChange={(e) => setSignupBudgetType(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
-                      />
-                      <Compass className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    </div>
-                  </div>
-
-                  {/* Current Living Address */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Address Living In
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Dayalbagh, Agra"
-                        value={signupCurrentAddress}
-                        onChange={(e) => setSignupCurrentAddress(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
-                      />
-                      <MapPin className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    </div>
-                  </div>
-
-                  {/* Date of Birth */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Date of Birth
-                    </label>
-                    <input
-                      type="date"
-                      required
-                      value={signupDob}
-                      onChange={(e) => setSignupDob(e.target.value)}
-                      className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
-                    />
-                  </div>
-
-                  {/* Profession / Earning occupation */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                      Profession / Occupation
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Senior Medical Consultant"
-                        value={signupProfession}
-                        onChange={(e) => setSignupProfession(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
-                      />
-                      <Briefcase className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    id="submit-signup-btn"
-                    className="w-full py-3 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 mt-4 shrink-0"
-                  >
-                    <span>Create Account</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </form>
-              )}
-
+          {/* Tab Switcher: Log In vs Create Account */}
+          {authMode !== 'forgot' && (
+            <div className="flex bg-gray-100 p-1 rounded-xl mb-5">
+              <button
+                type="button"
+                id="tab-auth-login"
+                onClick={() => setAuthMode('login')}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                  authMode === 'login' 
+                    ? 'bg-[#0F382C] text-white shadow-xs' 
+                    : 'text-gray-600 hover:text-black'
+                }`}
+              >
+                Log In
+              </button>
+              <button
+                type="button"
+                id="tab-auth-signup"
+                onClick={() => setAuthMode('signup')}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                  authMode === 'signup' 
+                    ? 'bg-[#0F382C] text-white shadow-xs' 
+                    : 'text-gray-600 hover:text-black'
+                }`}
+              >
+                Create Account / Sign Up
+              </button>
             </div>
           )}
 
-          {/* OTP STEP */}
-          {step === 'otp' && (
-            <form onSubmit={handleVerifyOtp} className="space-y-4 text-center">
-              <div className="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-full flex items-center justify-center mx-auto">
-                <Lock className="w-6 h-6" />
+          {/* Role Selection */}
+          {authMode !== 'forgot' && (
+            <div className="mb-5">
+              <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                Select Your Account Role
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRole('buyer')}
+                  className={`py-2 px-3 text-xs font-bold rounded-lg border transition-all text-center ${
+                    role === 'buyer'
+                      ? 'bg-emerald-50 text-emerald-900 border-emerald-500 ring-1 ring-emerald-500/20'
+                      : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  Buyer / Investor
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole('owner')}
+                  className={`py-2 px-3 text-xs font-bold rounded-lg border transition-all text-center ${
+                    role === 'owner'
+                      ? 'bg-emerald-50 text-emerald-900 border-emerald-500 ring-1 ring-emerald-500/20'
+                      : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  Property Owner / Seller
+                </button>
               </div>
+            </div>
+          )}
+
+          {/* Error Alert */}
+          {authError && (
+            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs font-medium">
+              {authError}
+            </div>
+          )}
+
+          {successMsg && (
+            <div className="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-700 px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>{successMsg}</span>
+            </div>
+          )}
+
+          {/* LOG IN FORM */}
+          {authMode === 'login' && (
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
-                <h4 className="text-base font-bold text-gray-800 font-serif-luxury">
-                  Enter 4-Digit Security Code
-                </h4>
-                <p className="text-xs text-gray-500 mt-1">
-                  Sent to {activeUserTemp?.phone || activeUserTemp?.email || '+91 91490 79913'}
-                </p>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  Mobile Number or Email
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    placeholder="shrey123@gmail.com or +91 9149079913"
+                    value={loginIdentifier}
+                    onChange={(e) => setLoginIdentifier(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                  />
+                  <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                </div>
               </div>
 
-              <div className="flex justify-center gap-3 my-4">
-                {[0, 1, 2, 3].map((idx) => (
-                  <input
-                    key={idx}
-                    type="text"
-                    maxLength={1}
-                    value={otp[idx]}
-                    onChange={(e) => {
-                      const newOtp = [...otp];
-                      newOtp[idx] = e.target.value;
-                      setOtp(newOtp);
-                      if (e.target.value && idx < 3) {
-                        const nextInput = document.getElementById(`otp-input-${idx + 1}`);
-                        nextInput?.focus();
-                      }
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-gray-700 uppercase">
+                    Password
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMode('forgot');
+                      setAuthError('');
+                      setForgotStep(1);
                     }}
-                    id={`otp-input-${idx}`}
-                    className="w-12 h-12 text-center text-lg font-bold bg-gray-50 border border-gray-300 rounded-xl focus:border-[#0F382C] focus:bg-white text-gray-900"
+                    className="text-[11px] text-[#0F382C] font-semibold hover:underline"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type="password"
+                    required
+                    placeholder="Enter your password"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
                   />
-                ))}
+                  <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>Secure encrypted authentication</span>
               </div>
 
               <button
                 type="submit"
-                id="verify-otp-btn"
-                className="w-full py-3 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all"
+                id="submit-login-btn"
+                className="w-full py-3 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
               >
-                Verify & Enter Royal Agra Estate
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setStep('form')}
-                className="text-xs text-gray-500 hover:text-[#0F382C] underline block mx-auto mt-2"
-              >
-                Change details or re-send OTP
+                <span>Log In</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             </form>
           )}
 
-          {/* SUCCESS STEP */}
-          {step === 'success' && (
-            <div className="text-center py-6 space-y-3">
-              <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto animate-bounce">
-                <CheckCircle2 className="w-8 h-8" />
+          {/* SIGN UP FORM */}
+          {authMode === 'signup' && (
+            <form onSubmit={handleSignupSubmit} className="space-y-3.5 max-h-[385px] overflow-y-auto pr-1">
+              
+              {/* 1. Full Name & Phone Number at the top */}
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  Full Name
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Shrey Gupta"
+                    value={signupName}
+                    onChange={(e) => setSignupName(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                  />
+                  <User className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                </div>
               </div>
-              <h4 className="text-lg font-serif-luxury font-bold text-[#0F382C]">
-                Authentication Verified
-              </h4>
-              <p className="text-xs text-gray-600">
-                Welcome, <strong>{activeUserTemp?.name}</strong>! Access granted to your Portfolio & Dashboard.
-              </p>
-            </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  Mobile Number
+                </label>
+                <div className="relative">
+                  <input
+                    type="tel"
+                    required
+                    placeholder="+91 9149079913"
+                    value={signupPhone}
+                    onChange={(e) => setSignupPhone(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                  />
+                  <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                </div>
+              </div>
+
+              {/* 2. Security Question dropdown & Answer field in the middle */}
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  Security Question (For Password Recovery)
+                </label>
+                <div className="relative">
+                  <select
+                    value={signupSecurityQuestion}
+                    onChange={(e) => setSignupSecurityQuestion(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                  >
+                    {SECURITY_QUESTIONS.map((q, idx) => (
+                      <option key={idx} value={q}>{q}</option>
+                    ))}
+                  </select>
+                  <HelpCircle className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  Security Answer
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Taj Mahal"
+                  value={signupSecurityAnswer}
+                  onChange={(e) => setSignupSecurityAnswer(e.target.value)}
+                  className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                />
+              </div>
+
+              {/* Additional optional fields */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">Primary Interest</label>
+                  <select
+                    value={signupInterest}
+                    onChange={(e) => setSignupInterest(e.target.value)}
+                    className="w-full px-2.5 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
+                  >
+                    <option value="Buying">Buying / Investing</option>
+                    <option value="Selling/Listing">Selling Property</option>
+                    <option value="Renting">Renting</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">Target Budget</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. ₹2.5 Cr+"
+                    value={signupBudgetType}
+                    onChange={(e) => setSignupBudgetType(e.target.value)}
+                    className="w-full px-2.5 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
+                  />
+                </div>
+              </div>
+
+              {/* 3. Email, Password, and Confirm Password fields at the very bottom */}
+              <div className="pt-2 border-t border-gray-100 space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      required
+                      placeholder="shrey@royalagraestate.in"
+                      value={signupEmail}
+                      onChange={(e) => setSignupEmail(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                    />
+                    <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    Create Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      required
+                      placeholder="Create password"
+                      value={signupPassword}
+                      onChange={(e) => {
+                        setSignupPassword(e.target.value);
+                        if (authError === 'Passwords do not match') setAuthError('');
+                      }}
+                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                    />
+                    <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      required
+                      placeholder="Confirm password"
+                      value={signupConfirmPassword}
+                      onChange={(e) => {
+                        setSignupConfirmPassword(e.target.value);
+                        if (authError === 'Passwords do not match') setAuthError('');
+                      }}
+                      className={`w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border rounded-lg text-gray-900 focus:bg-white ${
+                        signupConfirmPassword && signupPassword !== signupConfirmPassword
+                          ? 'border-red-500 bg-red-50/30'
+                          : 'border-gray-200 focus:border-[#0F382C]'
+                      }`}
+                    />
+                    <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  </div>
+                  {signupConfirmPassword && signupPassword !== signupConfirmPassword && (
+                    <p className="text-[11px] text-red-600 font-semibold mt-1">Passwords do not match</p>
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                id="submit-signup-btn"
+                className="w-full py-3 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 mt-4 shrink-0"
+              >
+                <span>Create Account</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+          )}
+
+          {/* FORGOT PASSWORD FORM */}
+          {authMode === 'forgot' && (
+            <form onSubmit={handleForgotSubmit} className="space-y-4">
+              <div className="text-center mb-2">
+                <h4 className="text-sm font-bold text-[#0F382C]">Password Recovery</h4>
+                <p className="text-xs text-gray-500">Verify your registered email and security answer.</p>
+              </div>
+
+              {forgotStep === 1 ? (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Registered Email</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="e.g. shrey123@gmail.com"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Security Question Answer</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Answer provided during signup"
+                      value={forgotAnswer}
+                      onChange={(e) => setForgotAnswer(e.target.value)}
+                      className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full py-3 bg-[#0F382C] text-white rounded-lg font-bold text-xs uppercase tracking-wider"
+                  >
+                    Verify Security Answer
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">New Password</label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="Enter new password"
+                      value={forgotNewPassword}
+                      onChange={(e) => setForgotNewPassword(e.target.value)}
+                      className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full py-3 bg-[#0F382C] text-white rounded-lg font-bold text-xs uppercase tracking-wider"
+                  >
+                    Reset Password
+                  </button>
+                </>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode('login');
+                  setAuthError('');
+                }}
+                className="text-xs text-gray-500 hover:text-[#0F382C] underline block mx-auto mt-2"
+              >
+                Back to Login
+              </button>
+            </form>
           )}
 
         </div>
