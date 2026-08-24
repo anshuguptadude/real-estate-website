@@ -342,60 +342,8 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
 
             </div>
 
-            {/* Right 1 Col: Booking & Advisor Card */}
+            {/* Right 1 Col: Schedule Tour Form only */}
             <div className="lg:col-span-1 space-y-6">
-              
-              {/* Senior Advisor Card */}
-              <div className="bg-[#0F382C] text-white p-5 rounded-xl border border-[#164E3D] shadow-md space-y-4">
-                <span className="text-[11px] uppercase tracking-widest text-[#E4D5B7] font-semibold block">
-                  Dedicated Portfolio Advisor
-                </span>
-                
-                <div className="flex items-center gap-3">
-                  <img
-                    src={property.agent.avatar}
-                    alt={property.agent.name}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-[#C5A869]"
-                  />
-                  <div>
-                    <h5 className="text-sm font-bold text-white">{property.agent.name}</h5>
-                    <p className="text-xs text-gray-300">{property.agent.role}</p>
-                    <p className="text-[11px] text-[#E4D5B7]">{property.agent.experience}</p>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-[#164E3D] flex flex-col gap-2">
-                  <a
-                    href={`tel:${property.agent.phone}`}
-                    className="w-full py-2 bg-white text-[#0F382C] rounded-lg font-bold text-xs flex items-center justify-center gap-2 shadow-xs hover:bg-[#FAF8F5] transition-colors"
-                  >
-                    <Phone className="w-3.5 h-3.5" />
-                    <span>Call {property.agent.phone}</span>
-                  </a>
-                  
-                  {/* Dual WhatsApp Action Buttons */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <a
-                      href={`https://wa.me/919149079913?text=${encodeURIComponent(`Hi Shrey, I am interested in Property ID ${property.id}`)}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="w-full py-2 bg-[#25D366] hover:bg-[#1ebd54] text-white rounded-lg font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs transition-colors"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5 fill-white" />
-                      <span>Shrey Gupta</span>
-                    </a>
-                    <a
-                      href={`https://wa.me/919557138449?text=${encodeURIComponent(`Hi Abhishek, I am interested in Property ID ${property.id}`)}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="w-full py-2 bg-[#25D366] hover:bg-[#1ebd54] text-white rounded-lg font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs transition-colors"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5 fill-white" />
-                      <span>Abhishek Singh</span>
-                    </a>
-                  </div>
-                </div>
-              </div>
 
               {/* Schedule Private Viewing Form */}
               <div className="bg-[#FAF8F5] p-5 rounded-xl border border-gray-200 shadow-2xs">

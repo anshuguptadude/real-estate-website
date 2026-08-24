@@ -37,9 +37,6 @@ export const ContactScreen: React.FC = () => {
           <p className="text-sm sm:text-base text-gray-600 mt-3 leading-relaxed">
             Schedule a confidential consultation, request a private architectural chauffeur tour, or discuss bespoke estate acquisitions in Agra.
           </p>
-          <div className="mt-4 p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-[#0F382C] font-semibold">
-            Royal Agra Estate – Managed by Shrey Gupta (+91 9149079913) & Abhishek Singh Jadon (+91 9557138449)
-          </div>
         </div>
 
         {/* 2-Column Layout */}

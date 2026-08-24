@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ActiveScreen, Property, FilterState, PropertyType, ListingType, UserProfile } from './types';
-import { PROPERTIES_DATA } from './data/mockData';
+import { PROPERTIES_DATA, PROJECTS_DATA } from './data/mockData';
 import { isAdmin, getMaskedProperty, LeadSubmission } from './utils/security';
 import { LeadInquiryModal } from './components/LeadInquiryModal';
 import { Navbar } from './components/Navbar';
@@ -151,6 +151,36 @@ export default function App() {
 
   const handleDeleteLead = (leadId: string) => {
     setLeads(prev => prev.filter(l => l.id !== leadId));
+  };
+
+  // Projects State
+  const [projectsList, setProjectsList] = useState<Project[]>(() => {
+    try {
+      const stored = localStorage.getItem('royal_agra_projects_v1');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return PROJECTS_DATA;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('royal_agra_projects_v1', JSON.stringify(projectsList));
+    } catch {}
+  }, [projectsList]);
+
+  const handleAddProject = (newProj: Project) => {
+    setProjectsList(prev => [newProj, ...prev]);
+  };
+
+  const handleEditProject = (updatedProj: Project) => {
+    setProjectsList(prev => prev.map(p => p.id === updatedProj.id ? updatedProj : p));
+  };
+
+  const handleDeleteProject = (projId: string) => {
+    setProjectsList(prev => prev.filter(p => p.id !== projId));
   };
 
   // Modals state
@@ -499,9 +529,14 @@ export default function App() {
         {/* SCREEN: New Projects */}
         {activeScreen === 'projects' && (
           <ProjectsScreen
+            projects={projectsList}
+            isAdminUser={isAdmin(user)}
             onContactProject={() => {
               navigateTo('contact');
             }}
+            onAddProject={handleAddProject}
+            onEditProject={handleEditProject}
+            onDeleteProject={handleDeleteProject}
           />
         )}
 
