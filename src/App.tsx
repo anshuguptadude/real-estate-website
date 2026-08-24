@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ActiveScreen, Property, FilterState, PropertyType, ListingType, UserProfile } from './types';
 import { PROPERTIES_DATA } from './data/mockData';
+import { isAdmin, getMaskedProperty, LeadSubmission } from './utils/security';
+import { LeadInquiryModal } from './components/LeadInquiryModal';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { FeaturedProperties } from './components/FeaturedProperties';
@@ -116,6 +118,40 @@ export default function App() {
 
   // Compare properties state (max 3)
   const [compareList, setCompareList] = useState<Property[]>([]);
+
+  // Leads State
+  const [leads, setLeads] = useState<LeadSubmission[]>(() => {
+    try {
+      const stored = localStorage.getItem('royal_agra_leads_v1');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('royal_agra_leads_v1', JSON.stringify(leads));
+    } catch {
+      // ignore
+    }
+  }, [leads]);
+
+  const [leadModalOpen, setLeadModalOpen] = useState(false);
+  const [leadModalProperty, setLeadModalProperty] = useState<Property | null>(null);
+
+  const handleOpenLeadModal = (prop: Property | null = null) => {
+    setLeadModalProperty(prop);
+    setLeadModalOpen(true);
+  };
+
+  const handleLeadSubmitted = (newLead: LeadSubmission) => {
+    setLeads(prev => [newLead, ...prev]);
+  };
+
+  const handleDeleteLead = (leadId: string) => {
+    setLeads(prev => prev.filter(l => l.id !== leadId));
+  };
 
   // Modals state
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -327,13 +363,14 @@ export default function App() {
   };
 
   const handleBookVisit = (prop: Property) => {
-    navigateTo(activeScreen, prop.id);
+    handleOpenLeadModal(prop);
   };
 
-  const savedProperties = properties.filter(p => savedPropertyIds.includes(p.id));
+  const displayedProperties = properties.map(p => getMaskedProperty(p, user));
+  const savedProperties = displayedProperties.filter(p => savedPropertyIds.includes(p.id));
 
-  // Properties belonging to current user
-  const userProperties = properties.filter(p => 
+  // Properties belonging to current user or all properties if admin
+  const userProperties = isAdmin(user) ? properties : properties.filter(p => 
     p.isUserListing || (user && p.ownerId === user.id) || (user && user.role === 'owner' && (p.isUserListing || p.id === 'prop-1' || p.id === 'prop-3'))
   );
 
@@ -368,7 +405,7 @@ export default function App() {
             />
 
             <FeaturedProperties
-              properties={properties}
+              properties={displayedProperties}
               onSelectProperty={(prop) => navigateTo(activeScreen, prop.id)}
               onToggleSave={handleToggleSave}
               savedIds={savedPropertyIds}
@@ -391,7 +428,7 @@ export default function App() {
         {/* SCREEN: Properties Explorer */}
         {activeScreen === 'properties' && (
           <PropertiesScreen
-            properties={properties}
+            properties={displayedProperties}
             filterState={filterState}
             onUpdateFilters={(patch) => setFilterState(prev => ({ ...prev, ...patch }))}
             onResetFilters={() => setFilterState(initialFilterState)}
@@ -411,6 +448,7 @@ export default function App() {
             user={user}
             userProperties={userProperties}
             savedProperties={savedProperties}
+            leads={leads}
             onUpdateProfile={(updated) => setUser(updated)}
             onEditProperty={(prop) => setEditingProperty(prop)}
             onDeleteProperty={handleDeleteProperty}
@@ -419,6 +457,7 @@ export default function App() {
             onNavigatePostProperty={handleInitiatePostProperty}
             onNavigateProperties={() => navigateTo('properties')}
             onLogout={handleLogout}
+            onDeleteLead={handleDeleteLead}
           />
         )}
 
@@ -512,7 +551,13 @@ export default function App() {
         }}
       />
 
-      {/* Saved Favorites Drawer */}
+      {/* Lead Generation & Tour Booking Modal */}
+      <LeadInquiryModal
+        isOpen={leadModalOpen}
+        onClose={() => setLeadModalOpen(false)}
+        property={leadModalProperty}
+        onLeadSubmitted={handleLeadSubmitted}
+      />
       <SavedPropertiesDrawer
         isOpen={savedDrawerOpen}
         onClose={() => setSavedDrawerOpen(false)}

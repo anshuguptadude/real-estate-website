@@ -80,7 +80,7 @@ export interface UserProfile {
   profession?: string;
 }
 
-export type UserDashboardTab = 'listings' | 'profile' | 'saved' | 'inquiries';
+export type UserDashboardTab = 'listings' | 'profile' | 'saved' | 'inquiries' | 'leads';
 
 export interface Project {
   id: string;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { UserProfile, Property, UserDashboardTab } from '../types';
+import { isAdmin, LeadSubmission } from '../utils/security';
 import { 
   Building2, 
   User, 
@@ -29,6 +30,7 @@ interface UserDashboardScreenProps {
   user: UserProfile | null;
   userProperties: Property[];
   savedProperties: Property[];
+  leads?: LeadSubmission[];
   onUpdateProfile: (updated: UserProfile) => void;
   onEditProperty: (property: Property) => void;
   onDeleteProperty: (propertyId: string) => void;
@@ -37,6 +39,7 @@ interface UserDashboardScreenProps {
   onNavigatePostProperty: () => void;
   onNavigateProperties: () => void;
   onLogout: () => void;
+  onDeleteLead?: (leadId: string) => void;
   initialTab?: UserDashboardTab;
 }
 
@@ -44,6 +47,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   user,
   userProperties,
   savedProperties,
+  leads,
   onUpdateProfile,
   onEditProperty,
   onDeleteProperty,
@@ -52,6 +56,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   onNavigatePostProperty,
   onNavigateProperties,
   onLogout,
+  onDeleteLead,
   initialTab = 'listings'
 }) => {
   const [activeTab, setActiveTab] = useState<UserDashboardTab>(initialTab);
@@ -150,9 +155,14 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                     {user?.name || 'Client'}
                   </h1>
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#E4D5B7] text-[#0F382C] shadow-xs">
-                    {user?.role === 'owner' ? 'Property Owner / Seller' : 'Buyer / Investor'}
+                    {isAdmin(user) ? 'Administrator & Co-Founder' : user?.role === 'owner' ? 'Property Owner / Seller' : 'Buyer / Investor'}
                   </span>
                 </div>
+                {isAdmin(user) && (
+                  <p className="text-xs text-[#E4D5B7] font-semibold mt-1">
+                    Royal Agra Estate - Managed by Shrey Gupta & Abhishek Singh Jadon
+                  </p>
+                )}
                 <p className="text-xs text-gray-300 mt-1 flex items-center gap-3">
                   <span>ID: #{user?.id || 'RAE-Client'}</span>
                   <span>•</span>
@@ -304,6 +314,27 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
               {savedProperties.length}
             </span>
           </button>
+
+          {isAdmin(user) && (
+            <button
+              type="button"
+              id="tab-admin-leads"
+              onClick={() => setActiveTab('leads')}
+              className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
+                activeTab === 'leads'
+                  ? 'bg-[#0F382C] text-white shadow-md'
+                  : 'text-gray-600 hover:text-black hover:bg-gray-100'
+              }`}
+            >
+              <Calendar className="w-4 h-4" />
+              <span>Incoming Leads</span>
+              <span className={`px-2 py-0.5 text-[10px] rounded-full ${
+                activeTab === 'leads' ? 'bg-[#E4D5B7] text-[#0F382C]' : 'bg-gray-200 text-gray-700'
+              }`}>
+                {leads?.length || 0}
+              </span>
+            </button>
+          )}
         </div>
 
         {/* TAB 1: My Listed Properties */}
@@ -818,6 +849,88 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 4: Incoming Leads & Inquiries (Admin Only) */}
+        {activeTab === 'leads' && isAdmin(user) && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-serif-luxury font-bold text-[#0F382C]">
+                Incoming Leads & Tour Inquiries ({leads?.length || 0})
+              </h2>
+              <p className="text-xs text-gray-600 mt-0.5">
+                All tour bookings and quick inquiries captured from potential buyers across the platform.
+              </p>
+            </div>
+
+            {(!leads || leads.length === 0) ? (
+              <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center space-y-3">
+                <Calendar className="w-10 h-10 text-gray-300 mx-auto" />
+                <h4 className="text-base font-bold text-gray-700">No Leads Captured Yet</h4>
+                <p className="text-xs text-gray-500">Inquiries submitted via 'Quick Inquiry' or 'Book Tour' will appear here.</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-[#0F382C] text-white uppercase text-[10px] tracking-wider">
+                        <th className="p-4">Lead ID & Date</th>
+                        <th className="p-4">Buyer Name & Contact</th>
+                        <th className="p-4">Property Reference</th>
+                        <th className="p-4">Preferred Visit Time</th>
+                        <th className="p-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 text-gray-800">
+                      {leads.map((lead) => (
+                        <tr key={lead.id} className="hover:bg-gray-50/80 transition-colors">
+                          <td className="p-4 font-mono">
+                            <span className="font-bold text-[#0F382C] block">#{lead.id}</span>
+                            <span className="text-[10px] text-gray-400">{lead.timestamp}</span>
+                          </td>
+                          <td className="p-4">
+                            <span className="font-bold text-gray-900 block">{lead.buyerName}</span>
+                            <span className="text-emerald-700 font-medium block">{lead.phone}</span>
+                            <span className="text-gray-500 block">{lead.email}</span>
+                          </td>
+                          <td className="p-4">
+                            <span className="font-semibold text-[#0F382C] block">{lead.propertyTitle}</span>
+                            <span className="text-[10px] font-mono text-gray-400">ID: {lead.propertyId}</span>
+                          </td>
+                          <td className="p-4 font-medium text-gray-700">
+                            {lead.preferredTime ? new Date(lead.preferredTime).toLocaleString() : 'Not Specified'}
+                          </td>
+                          <td className="p-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <a
+                                href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${lead.buyerName}, regarding your inquiry for Royal Agra Estate...`)}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[10px]"
+                              >
+                                WhatsApp
+                              </a>
+                              {onDeleteLead && (
+                                <button
+                                  type="button"
+                                  onClick={() => onDeleteLead(lead.id)}
+                                  className="p-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded"
+                                  title="Delete lead"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>

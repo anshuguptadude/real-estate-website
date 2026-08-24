@@ -372,15 +372,28 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                     <Phone className="w-3.5 h-3.5" />
                     <span>Call {property.agent.phone}</span>
                   </a>
-                  <a
-                    href={`https://wa.me/${property.agent.phone.replace(/[^0-9]/g, '')}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full py-2 bg-emerald-600 text-white rounded-lg font-bold text-xs flex items-center justify-center gap-2 shadow-xs hover:bg-emerald-500 transition-colors"
-                  >
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    <span>WhatsApp Inquiry</span>
-                  </a>
+                  
+                  {/* Dual WhatsApp Action Buttons */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <a
+                      href={`https://wa.me/919149079913?text=${encodeURIComponent(`Hi Shrey, I am interested in Property ID ${property.id}`)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full py-2 bg-[#25D366] hover:bg-[#1ebd54] text-white rounded-lg font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs transition-colors"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 fill-white" />
+                      <span>Shrey Gupta</span>
+                    </a>
+                    <a
+                      href={`https://wa.me/919557138449?text=${encodeURIComponent(`Hi Abhishek, I am interested in Property ID ${property.id}`)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full py-2 bg-[#25D366] hover:bg-[#1ebd54] text-white rounded-lg font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs transition-colors"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 fill-white" />
+                      <span>Abhishek Singh</span>
+                    </a>
+                  </div>
                 </div>
               </div>
 

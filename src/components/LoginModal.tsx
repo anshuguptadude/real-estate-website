@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
+import { ADMIN_CREDENTIALS } from '../utils/security';
 import { 
   X, 
   Landmark, 
@@ -76,6 +77,28 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
     if (!identifier || !enteredPassword) {
       setAuthError('Please enter both email/mobile and password.');
+      return;
+    }
+
+    // Check default admin accounts
+    const foundAdmin = ADMIN_CREDENTIALS.find(
+      adm => (adm.email.toLowerCase() === identifier || adm.phone === identifier) && adm.password === enteredPassword
+    );
+    if (foundAdmin) {
+      const adminUserProfile: UserProfile = {
+        id: foundAdmin.id,
+        name: foundAdmin.name,
+        email: foundAdmin.email,
+        phone: foundAdmin.phone,
+        role: 'admin',
+        avatar: foundAdmin.email.includes('shrey')
+          ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
+          : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+        memberSince: '2023',
+        preferredLocality: 'Fatehabad Road, Agra'
+      };
+      setActiveUserTemp(adminUserProfile);
+      setStep('otp');
       return;
     }
 

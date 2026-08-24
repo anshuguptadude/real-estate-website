@@ -186,45 +186,70 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         </div>
 
         {/* Card Footer Actions */}
-        <div className="pt-3 mt-2 border-t border-gray-100 flex items-center justify-between gap-2">
+        <div className="space-y-2 pt-3 mt-2 border-t border-gray-100">
           
-          {onToggleCompare && (
-            <button
-              type="button"
-              id={`compare-btn-${property.id}`}
-              onClick={() => onToggleCompare(property)}
-              className={`text-xs font-medium px-2.5 py-1.5 rounded transition-colors ${
-                isComparing
-                  ? 'bg-[#0F382C] text-white font-semibold'
-                  : 'text-gray-600 hover:text-[#0F382C] hover:bg-gray-100'
-              }`}
+          {/* Dual WhatsApp Action Buttons */}
+          <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+            <a
+              href={`https://wa.me/919149079913?text=${encodeURIComponent(`Hi Shrey, I am interested in Property ID ${property.id}`)}`}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="py-1 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 rounded font-bold border border-emerald-200 flex items-center justify-center gap-1 transition-colors truncate"
+              title="Contact Shrey Gupta on WhatsApp"
             >
-              {isComparing ? '✓ Comparing' : '+ Compare'}
-            </button>
-          )}
-
-          <div className="flex items-center gap-2 ml-auto">
-            <button
-              type="button"
-              id={`book-tour-btn-${property.id}`}
-              onClick={() => onBookVisit(property)}
-              className="text-xs font-semibold text-[#0F382C] hover:text-[#164E3D] px-2.5 py-1.5 rounded border border-[#0F382C]/30 hover:bg-[#0F382C]/5 transition-colors flex items-center gap-1"
+              <span>💬 Contact Shrey</span>
+            </a>
+            <a
+              href={`https://wa.me/919557138449?text=${encodeURIComponent(`Hi Abhishek, I am interested in Property ID ${property.id}`)}`}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="py-1 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 rounded font-bold border border-emerald-200 flex items-center justify-center gap-1 transition-colors truncate"
+              title="Contact Abhishek Singh on WhatsApp"
             >
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Book Tour</span>
-            </button>
-
-            <button
-              type="button"
-              id={`view-details-btn-${property.id}`}
-              onClick={() => onSelect(property)}
-              className="text-xs font-semibold bg-[#0F382C] hover:bg-[#164E3D] text-white px-3.5 py-1.5 rounded shadow-xs hover:shadow-sm transition-all flex items-center gap-1"
-            >
-              <span>View</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+              <span>💬 Contact Abhishek</span>
+            </a>
           </div>
 
+          <div className="flex items-center justify-between gap-2 pt-1">
+            {onToggleCompare && (
+              <button
+                type="button"
+                id={`compare-btn-${property.id}`}
+                onClick={() => onToggleCompare(property)}
+                className={`text-xs font-medium px-2.5 py-1.5 rounded transition-colors ${
+                  isComparing
+                    ? 'bg-[#0F382C] text-white font-semibold'
+                    : 'text-gray-600 hover:text-[#0F382C] hover:bg-gray-100'
+                }`}
+              >
+                {isComparing ? '✓ Comparing' : '+ Compare'}
+              </button>
+            )}
+
+            <div className="flex items-center gap-2 ml-auto">
+              <button
+                type="button"
+                id={`book-tour-btn-${property.id}`}
+                onClick={() => onBookVisit(property)}
+                className="text-xs font-semibold text-[#0F382C] hover:text-[#164E3D] px-2.5 py-1.5 rounded border border-[#0F382C]/30 hover:bg-[#0F382C]/5 transition-colors flex items-center gap-1"
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Book Tour</span>
+              </button>
+
+              <button
+                type="button"
+                id={`view-details-btn-${property.id}`}
+                onClick={() => onSelect(property)}
+                className="text-xs font-semibold bg-[#0F382C] hover:bg-[#164E3D] text-white px-3.5 py-1.5 rounded shadow-xs hover:shadow-sm transition-all flex items-center gap-1"
+              >
+                <span>View</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>
