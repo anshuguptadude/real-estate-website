@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Property, PropertyType, UserProfile } from '../types';
 import { AGRA_LOCALITIES, PROPERTY_TYPES } from '../data/mockData';
 import { isAdmin } from '../utils/security';
@@ -13,7 +13,15 @@ import {
   ArrowLeft, 
   ShieldCheck,
   Check,
-  LayoutDashboard
+  LayoutDashboard,
+  Camera,
+  Video,
+  Image as ImageIcon,
+  Trash2,
+  Play,
+  Film,
+  FileText,
+  AlertCircle
 } from 'lucide-react';
 
 interface PostPropertyScreenProps {
@@ -50,9 +58,20 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     '24/7 Security',
     'Private Garden'
   ]);
-  const [coverImageUrl, setCoverImageUrl] = useState<string>(
+
+  // Media Upload States (Files, Videos, Live Camera, DataURLs)
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaPreview, setMediaPreview] = useState<string>(
     'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80'
   );
+  const [mediaType, setMediaType] = useState<'image' | 'video' | null>('image');
+  const [mediaName, setMediaName] = useState<string>('default-villa-cover.jpg');
+  const [mediaSize, setMediaSize] = useState<string>('1.8 MB');
+  const [isDragging, setIsDragging] = useState(false);
+  const [mediaError, setMediaError] = useState<string>('');
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   
   // Verification states
   const [isVerified, setIsVerified] = useState<'yes' | 'no' | 'in_process'>('yes');
@@ -85,19 +104,84 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     'Covered Car Garage'
   ];
 
-  const sampleCoverImages = [
-    'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80'
-  ];
-
   const toggleAmenity = (item: string) => {
     if (selectedAmenities.includes(item)) {
       setSelectedAmenities(selectedAmenities.filter(a => a !== item));
     } else {
       setSelectedAmenities([...selectedAmenities, item]);
     }
+  };
+
+  const handleProcessFile = (file: File) => {
+    setMediaError('');
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    const validVideoTypes = ['video/mp4', 'video/quicktime', 'video/mov'];
+    
+    const isImage = validImageTypes.includes(file.type) || file.type.startsWith('image/');
+    const isVideo = validVideoTypes.includes(file.type) || file.type.startsWith('video/') || file.name.toLowerCase().endsWith('.mov') || file.name.toLowerCase().endsWith('.mp4');
+
+    if (!isImage && !isVideo) {
+      setMediaError('Unsupported format. Please upload JPEG, PNG, WEBP, MP4, or MOV files.');
+      return;
+    }
+
+    // Size limit check (50MB for video, 20MB for image)
+    const maxBytes = isVideo ? 50 * 1024 * 1024 : 20 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      setMediaError(`File is too large. Maximum size is ${isVideo ? '50MB for video' : '20MB for images'}.`);
+      return;
+    }
+
+    setMediaFile(file);
+    setMediaName(file.name);
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    setMediaSize(`${sizeInMB} MB`);
+    setMediaType(isVideo ? 'video' : 'image');
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (reader.result) {
+        setMediaPreview(reader.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleProcessFile(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleProcessFile(file);
+    }
+  };
+
+  const handleRemoveMedia = () => {
+    setMediaFile(null);
+    setMediaPreview('');
+    setMediaType(null);
+    setMediaName('');
+    setMediaSize('');
+    setMediaError('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
   };
 
   const formatPriceDisplay = (amt: number, type: 'Sale' | 'Rent') => {
@@ -132,6 +216,8 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         : `${verifiedByAuthority} (Under Review)`;
     }
 
+    const finalCover = mediaPreview || 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80';
+
     const newProperty: Property = {
       id: generatedId,
       title: projectTitle.trim() || `Luxury ${propertyType} in ${locality}`,
@@ -165,11 +251,11 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       ownerName: ownerName || user?.name || 'Property Owner',
       ownerContact: ownerPhone || user?.phone || '+91 91490 79913',
       images: [
-        coverImageUrl,
+        finalCover,
         'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
         'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=80'
       ],
-      coverImage: coverImageUrl,
+      coverImage: finalCover,
       description: `Spectacular ${propertyType} situated in the prestigious enclave of ${locality}, Agra. Designed for distinguished living with spacious layouts, high ceilings, premium fittings, and comprehensive security infrastructure.`,
       highlights: [
         `${furnishing} with bespoke craftsmanship`,
@@ -218,135 +304,157 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
             List Your Luxury Property in Agra
           </h1>
           <p className="text-sm text-gray-600 mt-2">
-            Connect directly with verified High-Net-Worth Individuals (HNIs), NRIs, and serious buyers in Agra with complete confidentiality.
+            Showcase your exclusive property directly to verified HNI buyers and elite investors across Uttar Pradesh and Delhi NCR.
           </p>
         </div>
 
-        {/* Multi-step Card */}
-        <div className="bg-white rounded-2xl border border-gray-200/80 shadow-lg overflow-hidden">
-          
-          {/* Step Progress Bar */}
-          <div className="bg-[#0F382C] px-6 py-4 text-white flex items-center justify-between border-b border-[#164E3D]">
+        {/* Multi-step Navigation Stepper */}
+        <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-200 mb-8">
+          <div className="flex items-center justify-between">
             {[
-              { num: 1, title: 'Basic Info' },
-              { num: 2, title: 'Specs & Price' },
-              { num: 3, title: 'Amenities & Media' },
-              { num: 4, title: 'Legal & Owner Info' }
+              { num: 1, label: 'Basic Details' },
+              { num: 2, label: 'Area & Price' },
+              { num: 3, label: 'Amenities & Media' },
+              { num: 4, label: 'Legal & Owner' }
             ].map((s) => (
-              <div key={s.num} className="flex items-center gap-2">
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                  step === s.num
-                    ? 'bg-[#E4D5B7] text-[#0F382C]'
-                    : step > s.num
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-[#164E3D] text-gray-400'
+              <div 
+                key={s.num} 
+                onClick={() => {
+                  if (s.num < step) setStep(s.num as any);
+                }}
+                className={`flex items-center gap-2 cursor-pointer transition-all ${
+                  step === s.num 
+                    ? 'text-[#0F382C] font-bold' 
+                    : step > s.num 
+                    ? 'text-emerald-700 font-semibold' 
+                    : 'text-gray-400 font-medium'
+                }`}
+              >
+                <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                  step === s.num 
+                    ? 'bg-[#0F382C] text-white ring-4 ring-[#0F382C]/10' 
+                    : step > s.num 
+                    ? 'bg-emerald-100 text-emerald-800' 
+                    : 'bg-gray-100 text-gray-400'
                 }`}>
-                  {step > s.num ? '✓' : s.num}
+                  {step > s.num ? <Check className="w-4 h-4" /> : s.num}
                 </div>
-                <span className="hidden sm:inline-block text-xs font-medium text-gray-200">
-                  {s.title}
-                </span>
+                <span className="hidden sm:inline text-xs">{s.label}</span>
               </div>
             ))}
           </div>
+        </div>
 
+        {/* Step Content Card */}
+        <div className="bg-white rounded-2xl p-6 sm:p-10 shadow-md border border-gray-200/90">
           {submitted ? (
-            <div className="p-10 sm:p-16 text-center space-y-5">
-              <div className="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-2">
+            /* SUCCESS STATE AFTER SUBMISSION */
+            <div className="text-center py-12 space-y-5">
+              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto animate-bounce">
                 <CheckCircle className="w-10 h-10" />
               </div>
-              <h2 className="text-2xl font-serif-luxury font-bold text-[#0F382C]">
-                Property Published & Added to Dashboard!
+              <h2 className="text-2xl sm:text-3xl font-serif-luxury font-bold text-[#0F382C]">
+                Property Registered Successfully!
               </h2>
               <p className="text-sm text-gray-600 max-w-lg mx-auto">
-                Thank you, <strong>{ownerName || 'Property Owner'}</strong>. Your luxury listing in <strong>{locality}</strong> has been registered with reference ID <strong>#{createdPropertyRef || 'RAE-892140'}</strong> and is now visible in your dashboard and the property showcase.
+                Thank you, <strong>{ownerName || 'Property Owner'}</strong>. Your luxury listing in <strong>{locality}</strong> has been registered with reference ID <strong>#{createdPropertyRef || 'RAE-892140'}</strong>.
               </p>
               
-              <div className="pt-6 flex flex-wrap items-center justify-center gap-4">
+              <div className="bg-emerald-50 rounded-xl p-4 max-w-md mx-auto border border-emerald-200 text-xs text-emerald-900 space-y-1">
+                <p className="font-bold">Next Steps:</p>
+                <p>1. Your listing is now saved to your owner portfolio dashboard.</p>
+                <p>2. Our legal diligence advisory cell will review the property verification status within 4 hours.</p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                 {onNavigateDashboard && (
                   <button
                     type="button"
-                    id="post-view-dashboard-btn"
                     onClick={onNavigateDashboard}
-                    className="bg-[#0F382C] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#164E3D] flex items-center gap-2 shadow-md"
+                    className="w-full sm:w-auto bg-[#0F382C] text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#164E3D] flex items-center justify-center gap-2 shadow-md"
                   >
                     <LayoutDashboard className="w-4 h-4" />
-                    <span>View in My Dashboard</span>
+                    <span>Go to My Dashboard</span>
                   </button>
                 )}
-
                 <button
                   type="button"
-                  id="post-success-home-btn"
                   onClick={onSuccessNavigate}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider"
+                  className="w-full sm:w-auto bg-gray-100 hover:bg-gray-200 text-gray-800 px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider"
                 >
-                  Return to Home
+                  Explore Property Showcase
                 </button>
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-8">
               
-              {/* STEP 1: Basic Info */}
+              {/* STEP 1: Basic Details */}
               {step === 1 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-serif-luxury font-bold text-[#0F382C]">
-                    Step 1: Property Type & Agra Locality
+                    Step 1: Property Type & Agra Location
                   </h3>
 
-                  {/* Intent Switcher */}
-                  <div className="space-y-2">
-                    <label className="block text-xs font-bold text-gray-700 uppercase">Listing Intent</label>
-                    <div className="grid grid-cols-2 gap-4">
+                  {/* Intent Switcher: Sale vs Rent */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-2">Listing Intent</label>
+                    <div className="grid grid-cols-2 gap-3 max-w-md">
                       <button
                         type="button"
                         onClick={() => setListingIntent('Sale')}
-                        className={`py-3 rounded-xl border text-sm font-bold transition-all ${
-                          listingIntent === 'Sale'
-                            ? 'bg-[#0F382C] text-white border-[#0F382C] shadow-sm'
+                        className={`py-3 rounded-xl border text-xs font-bold transition-all ${
+                          listingIntent === 'Sale' 
+                            ? 'bg-[#0F382C] text-white border-[#0F382C] shadow-sm' 
                             : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
                         }`}
                       >
-                        Sell Property
+                        Sell Property (Capital Sale)
                       </button>
                       <button
                         type="button"
                         onClick={() => setListingIntent('Rent')}
-                        className={`py-3 rounded-xl border text-sm font-bold transition-all ${
-                          listingIntent === 'Rent'
-                            ? 'bg-[#0F382C] text-white border-[#0F382C] shadow-sm'
+                        className={`py-3 rounded-xl border text-xs font-bold transition-all ${
+                          listingIntent === 'Rent' 
+                            ? 'bg-[#0F382C] text-white border-[#0F382C] shadow-sm' 
                             : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
                         }`}
                       >
-                        Lease / Rent Out
+                        Lease / Rent Property
                       </button>
                     </div>
                   </div>
 
-                  {/* Property Type */}
-                  <div className="space-y-2">
-                    <label className="block text-xs font-bold text-gray-700 uppercase">Property Type</label>
-                    <select
-                      value={propertyType}
-                      onChange={(e) => setPropertyType(e.target.value as PropertyType)}
-                      className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-medium focus:bg-white"
-                    >
-                      {PROPERTY_TYPES.filter(t => t !== 'All').map(t => (
-                        <option key={t} value={t}>{t}</option>
+                  {/* Property Category */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-2">Property Typology</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                      {PROPERTY_TYPES.filter(t => t !== 'All').map((type) => (
+                        <button
+                          key={type}
+                          type="button"
+                          onClick={() => setPropertyType(type)}
+                          className={`p-3 rounded-lg border text-xs font-semibold text-left transition-all ${
+                            propertyType === type
+                              ? 'bg-emerald-50 text-emerald-950 border-emerald-500 ring-1 ring-emerald-500/20'
+                              : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                          }`}
+                        >
+                          {type}
+                        </button>
                       ))}
-                    </select>
+                    </div>
                   </div>
 
-                  {/* Locality */}
+                  {/* Locality in Agra */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-gray-700 uppercase">Agra Locality</label>
+                    <label className="block text-xs font-bold text-gray-700 uppercase">Primary Agra Locality</label>
                     <select
                       value={locality}
                       onChange={(e) => setLocality(e.target.value)}
-                      className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-medium focus:bg-white"
+                      className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
                     >
-                      {AGRA_LOCALITIES.filter(l => l !== 'All Localities').map(l => (
+                      {AGRA_LOCALITIES.filter(l => l !== 'All Localities').map((l) => (
                         <option key={l} value={l}>{l}</option>
                       ))}
                     </select>
@@ -436,9 +544,6 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         onChange={(e) => setAskingPrice(e.target.value)}
                         className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-mono"
                       />
-                      <span className="text-[11px] text-gray-500 font-mono">
-                        ≈ {formatPriceDisplay(Number(askingPrice) || 0, listingIntent)}
-                      </span>
                     </div>
 
                     <div className="space-y-2">
@@ -477,11 +582,11 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                 </div>
               )}
 
-              {/* STEP 3: Amenities & Photos */}
+              {/* STEP 3: Amenities & Photos / Videos Upload */}
               {step === 3 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-serif-luxury font-bold text-[#0F382C]">
-                    Step 3: Select Amenities & Cover Photo
+                    Step 3: Select Amenities & Media Upload
                   </h3>
 
                   <div>
@@ -510,34 +615,159 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     </div>
                   </div>
 
-                  {/* Photo Selection / Presets */}
-                  <div className="space-y-2">
-                    <label className="block text-xs font-bold text-gray-700 uppercase">Cover Image Photo</label>
+                  {/* DEDICATED MEDIA UPLOAD COMPONENT (Photos & Videos) */}
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-bold text-gray-700 uppercase">
+                        Property Cover Media (Photo / Walkthrough Video)
+                      </label>
+                      <span className="text-[11px] text-gray-500 font-medium">
+                        JPEG, PNG, WEBP, MP4, MOV (Up to 50MB)
+                      </span>
+                    </div>
+
+                    {/* Hidden Native File Inputs */}
                     <input
-                      type="url"
-                      value={coverImageUrl}
-                      onChange={(e) => setCoverImageUrl(e.target.value)}
-                      className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white"
-                      placeholder="https://images.unsplash.com/..."
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept="image/jpeg,image/png,image/webp,image/jpg,video/mp4,video/quicktime,video/mov,image/*,video/*"
+                      className="hidden"
+                    />
+                    <input
+                      type="file"
+                      ref={cameraInputRef}
+                      onChange={handleFileChange}
+                      accept="image/*,video/*"
+                      capture="environment"
+                      className="hidden"
                     />
 
-                    <div className="flex items-center gap-3 pt-2">
-                      <span className="text-[11px] text-gray-500 font-semibold">Select Architectural Preset:</span>
-                      <div className="flex gap-2 overflow-x-auto py-1">
-                        {sampleCoverImages.map((img, idx) => (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => setCoverImageUrl(img)}
-                            className={`w-14 h-10 rounded-lg overflow-hidden border-2 transition-all ${
-                              coverImageUrl === img ? 'border-[#0F382C] scale-105' : 'border-gray-200 opacity-60 hover:opacity-100'
-                            }`}
-                          >
-                            <img src={img} alt="preset" className="w-full h-full object-cover" />
-                          </button>
-                        ))}
+                    {mediaError && (
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center gap-2 font-medium">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        <span>{mediaError}</span>
                       </div>
-                    </div>
+                    )}
+
+                    {/* MEDIA PREVIEW CARD IF SELECTED */}
+                    {mediaPreview ? (
+                      <div className="relative rounded-2xl overflow-hidden border-2 border-[#0F382C]/20 bg-gray-900 shadow-md">
+                        <div className="aspect-[16/9] w-full max-h-[360px] flex items-center justify-center overflow-hidden bg-black">
+                          {mediaType === 'video' ? (
+                            <video
+                              src={mediaPreview}
+                              controls
+                              className="w-full h-full object-contain"
+                            />
+                          ) : (
+                            <img
+                              src={mediaPreview}
+                              alt="Property Cover Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                        </div>
+
+                        {/* Top Overlay Badge & Actions */}
+                        <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
+                          <div className="flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-semibold border border-white/20">
+                            {mediaType === 'video' ? (
+                              <>
+                                <Film className="w-3.5 h-3.5 text-[#E4D5B7]" />
+                                <span>Video Preview</span>
+                              </>
+                            ) : (
+                              <>
+                                <ImageIcon className="w-3.5 h-3.5 text-[#E4D5B7]" />
+                                <span>Cover Image Preview</span>
+                              </>
+                            )}
+                            {mediaSize && (
+                              <span className="text-[10px] text-gray-300 ml-1">({mediaSize})</span>
+                            )}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={handleRemoveMedia}
+                            className="pointer-events-auto bg-rose-600 hover:bg-rose-700 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center gap-1 text-xs font-bold"
+                            title="Remove Selected Media"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span className="hidden sm:inline pr-1">Remove</span>
+                          </button>
+                        </div>
+
+                        {/* Bottom Actions Bar */}
+                        <div className="p-3 bg-white border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-2">
+                          <div className="text-xs text-gray-600 truncate max-w-[280px]">
+                            <strong>Selected:</strong> {mediaName || 'Custom Uploaded Media'}
+                          </div>
+                          
+                          <div className="flex items-center gap-2 w-full sm:w-auto">
+                            <button
+                              type="button"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="flex-1 sm:flex-initial px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                            >
+                              <Upload className="w-3.5 h-3.5" />
+                              <span>Replace File</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => cameraInputRef.current?.click()}
+                              className="flex-1 sm:flex-initial px-3.5 py-1.5 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                            >
+                              <Camera className="w-3.5 h-3.5 text-[#E4D5B7]" />
+                              <span>Retake Photo/Video</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      /* INTERACTIVE DRAG & DROP DROPZONE */
+                      <div
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center transition-all ${
+                          isDragging
+                            ? 'border-emerald-600 bg-emerald-50/70 scale-[1.01]'
+                            : 'border-gray-300 hover:border-[#0F382C] bg-gray-50/60 hover:bg-white'
+                        }`}
+                      >
+                        <div className="w-16 h-16 rounded-2xl bg-emerald-100/70 text-[#0F382C] flex items-center justify-center mx-auto mb-4 shadow-xs">
+                          <Upload className="w-8 h-8 text-[#0F382C]" />
+                        </div>
+                        <h4 className="text-base font-serif-luxury font-bold text-[#0F382C]">
+                          Drag & drop your property photos or walk-through video here
+                        </h4>
+                        <p className="text-xs text-gray-500 mt-1 mb-6 max-w-sm mx-auto">
+                          Directly upload high-resolution property photos or video walkthroughs from your computer, mobile gallery, or live camera.
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="w-full sm:w-auto px-5 py-2.5 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm flex items-center justify-center gap-2 transition-all"
+                          >
+                            <Upload className="w-4 h-4 text-[#E4D5B7]" />
+                            <span>Browse Files (Laptop / Mobile)</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => cameraInputRef.current?.click()}
+                            className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-gray-100 text-[#0F382C] border border-[#0F382C]/30 rounded-xl text-xs font-bold uppercase tracking-wider shadow-2xs flex items-center justify-center gap-2 transition-all"
+                          >
+                            <Camera className="w-4 h-4 text-[#0F382C]" />
+                            <span>Live Camera Capture</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex justify-between pt-4">
@@ -638,133 +868,68 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       </button>
                     </div>
 
-                    {/* Authority Selection if Verified or In-Process */}
+                    {/* Custom Authority Verification */}
                     {isVerified !== 'no' && (
                       <div className="pt-3 border-t border-gray-200/80 space-y-3">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                              {isVerified === 'yes' ? 'Verified / Approved By Which Authority?' : 'Applied With Which Authority?'}
-                            </label>
-                            <select
-                              id="verified-authority-select"
-                              value={verifiedByAuthority}
-                              onChange={(e) => setVerifiedByAuthority(e.target.value)}
-                              className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-800 font-medium focus:border-[#0F382C] focus:ring-1 focus:ring-[#0F382C]"
-                            >
-                              <option value="Agra Development Authority (ADA)">Agra Development Authority (ADA)</option>
-                              <option value="UP RERA (Real Estate Regulatory Authority)">UP RERA (Real Estate Regulatory Authority)</option>
-                              <option value="Tehsil Registry / Sub-Registrar Agra">Tehsil Registry / Sub-Registrar Agra</option>
-                              <option value="Nagar Nigam Agra (Municipal Corporation)">Nagar Nigam Agra (Municipal Corporation)</option>
-                              <option value="Royal Agra Legal Advisory Cell">Royal Agra Legal Advisory Cell</option>
-                              <option value="Agra Cantonment Board">Agra Cantonment Board</option>
-                              <option value="Nationalized / Private Bank (Home Loan Approved)">Nationalized / Private Bank (Home Loan Approved)</option>
-                              <option value="Other Authority (Specify)">Other Authority (Specify)</option>
-                            </select>
-                          </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                            Approved / Verified By Authority
+                          </label>
+                          <input
+                            type="text"
+                            value={customAuthority || verifiedByAuthority}
+                            onChange={(e) => {
+                              setCustomAuthority(e.target.value);
+                              setVerifiedByAuthority(e.target.value);
+                            }}
+                            placeholder="e.g., ADA Approved, RERA Verified, Agra Cantonment Board"
+                            className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-800 font-medium focus:border-[#0F382C] focus:ring-1 focus:ring-[#0F382C]"
+                          />
+                        </div>
 
-                          {verifiedByAuthority === 'Other Authority (Specify)' && (
-                            <div>
-                              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                                Specify Authority / Organization Name
-                              </label>
-                              <input
-                                type="text"
-                                required
-                                placeholder="e.g. Housing Society, Zila Panchayat, Advocate Cell"
-                                value={customAuthority}
-                                onChange={(e) => setCustomAuthority(e.target.value)}
-                                className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-800 focus:border-[#0F382C]"
-                              />
-                            </div>
-                          )}
-
-                          <div>
-                            <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                              Approval / RERA / Khasra Reference No. (Optional)
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="e.g. ADA/2024/782 or UPRERAAGT2024"
-                              value={verificationDocNumber}
-                              onChange={(e) => setVerificationDocNumber(e.target.value)}
-                              className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-800 font-mono focus:border-[#0F382C]"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                              Title & Land Conversion Type
-                            </label>
-                            <select
-                              value={titleType}
-                              onChange={(e) => setTitleType(e.target.value)}
-                              className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-800 font-medium focus:border-[#0F382C]"
-                            >
-                              <option value="Freehold Clear Title">Freehold Clear Title (Registered)</option>
-                              <option value="143 Converted (Agri to Residential)">Section 143 Land Converted (Agri to Residential)</option>
-                              <option value="ADA Sanctioned Map">ADA Sanctioned Map Approved</option>
-                              <option value="Society Allotment / Transfer">Society Allotment / Transfer</option>
-                              <option value="Ancestral Heritage Freehold">Ancestral Heritage Freehold</option>
-                            </select>
-                          </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                            Sanction / RERA / Approval File Reference Number (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. ADA/2024/9912 or UPRERAAGT2024"
+                            value={verificationDocNumber}
+                            onChange={(e) => setVerificationDocNumber(e.target.value)}
+                            className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-800 font-mono"
+                          />
                         </div>
                       </div>
                     )}
                   </div>
 
-                  {/* 2. Owner Contact Details */}
-                  <div className="space-y-4 pt-2">
-                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Owner & Trustee Contact Details
-                    </h4>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Owner / Trustee Full Name</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Seth Shanti Prasad"
-                        value={ownerName}
-                        onChange={(e) => setOwnerName(e.target.value)}
-                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"
-                      />
-                    </div>
+                  {/* 2. Owner Contact Information */}
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-4">
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      Confidential Owner / Developer Contact
+                    </label>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Mobile Number</label>
+                        <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">Owner Name</label>
+                        <input
+                          type="text"
+                          required
+                          value={ownerName}
+                          onChange={(e) => setOwnerName(e.target.value)}
+                          className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">Owner Contact Phone</label>
                         <input
                           type="tel"
                           required
-                          placeholder="+91 91490 79913"
                           value={ownerPhone}
                           onChange={(e) => setOwnerPhone(e.target.value)}
-                          className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"
+                          className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg"
                         />
                       </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address</label>
-                        <input
-                          type="email"
-                          required
-                          placeholder="owner@royalagraestate.in"
-                          value={ownerEmail}
-                          onChange={(e) => setOwnerEmail(e.target.value)}
-                          className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 space-y-1">
-                      <div className="flex items-center gap-1.5 font-bold">
-                        <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                        <span>Confidential Discretion Guarantee</span>
-                      </div>
-                      <p className="text-[11px] text-emerald-700">
-                        Your direct contact details are never made public. Inquiries are vetted by our Senior Agra Portfolio Advisors before connecting with you.
-                      </p>
                     </div>
                   </div>
 
@@ -777,12 +942,14 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       <ArrowLeft className="w-4 h-4" />
                       <span>Back</span>
                     </button>
+                    
                     <button
                       type="submit"
-                      id="submit-post-property-final-btn"
-                      className="bg-emerald-700 hover:bg-emerald-800 text-white px-8 py-3 rounded-lg text-xs font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all"
+                      id="submit-property-listing-btn"
+                      className="bg-[#0F382C] hover:bg-[#164E3D] text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
                     >
-                      Publish Property to Dashboard & Network
+                      <span>Publish Property Listing</span>
+                      <Sparkles className="w-4 h-4 text-[#E4D5B7]" />
                     </button>
                   </div>
                 </div>
@@ -790,7 +957,6 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
             </form>
           )}
-
         </div>
 
       </div>
