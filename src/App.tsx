@@ -43,9 +43,8 @@ export default function App() {
   const [properties, setProperties] = useState<Property[]>(() => {
     try {
       const stored = localStorage.getItem('royal_agra_properties_v2');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (stored !== null) {
+        return JSON.parse(stored);
       }
     } catch {
       // ignore
@@ -157,9 +156,8 @@ export default function App() {
   const [projectsList, setProjectsList] = useState<Project[]>(() => {
     try {
       const stored = localStorage.getItem('royal_agra_projects_v1');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (stored !== null) {
+        return JSON.parse(stored);
       }
     } catch {}
     return PROJECTS_DATA;
