@@ -51,8 +51,6 @@ export const getMaskedProperty = (property: Property, user: UserProfile | null):
     ...property,
     address: `${property.locality}, Agra`,
     ownerContact: undefined,
-    owner_phone: undefined,
-    owner_email: undefined,
     agent: {
       name: 'Royal Agra Estate Concierge',
       role: 'Senior Advisory Desk',

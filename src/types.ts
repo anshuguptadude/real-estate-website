@@ -56,7 +56,7 @@ export interface Property {
   gatedSecurity: boolean;
   powerBackup: boolean;
   coordinates: { lat: number; lng: number };
-  status?: 'Active' | 'Sold' | 'Rented';
+  status?: 'Active' | 'Sold' | 'Rented' | 'pending_verification' | 'published' | 'rejected';
   isUserListing?: boolean;
   ownerId?: string;
   ownerName?: string;
@@ -68,7 +68,7 @@ export interface UserProfile {
   name: string;
   email: string;
   phone: string;
-  role: 'buyer' | 'owner';
+  role: 'buyer' | 'owner' | 'admin';
   avatar?: string;
   memberSince: string;
   city?: string;
@@ -80,7 +80,7 @@ export interface UserProfile {
   profession?: string;
 }
 
-export type UserDashboardTab = 'listings' | 'profile' | 'saved' | 'inquiries' | 'leads';
+export type UserDashboardTab = 'listings' | 'profile' | 'saved' | 'inquiries' | 'leads' | 'approvals';
 
 export interface Project {
   id: string;

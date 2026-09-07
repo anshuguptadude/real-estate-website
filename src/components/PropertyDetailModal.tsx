@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Property } from '../types';
+import { Property, UserProfile } from '../types';
+import { isAdmin } from '../utils/security';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapComponent } from './MapComponent';
 import {
@@ -34,6 +35,7 @@ interface PropertyDetailModalProps {
   onOpenEmiCalc: (price: number) => void;
   onToggleSave: (id: string) => void;
   isSaved: boolean;
+  user?: UserProfile | null;
 }
 
 export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
@@ -42,7 +44,8 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   onBookVisit,
   onOpenEmiCalc,
   onToggleSave,
-  isSaved
+  isSaved,
+  user
 }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [inquiryName, setInquiryName] = useState('');
@@ -61,6 +64,18 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   }, [property?.id]);
 
   if (!property) return null;
+
+  const canSeeExactAddress = Boolean(
+    isAdmin(user) || 
+    (user && property && (
+      property.ownerId === user.id ||
+      (property.isUserListing && (property.ownerName === user.name || property.ownerContact === user.phone))
+    ))
+  );
+
+  const displayAddress = canSeeExactAddress 
+    ? property.address 
+    : (property.locality ? `${property.locality}, Agra` : `${property.location}`);
 
   const handleCopyLink = () => {
     const shareUrl = `${window.location.origin}?property=${property.id}`;
@@ -188,7 +203,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
                   <MapPin className="w-4 h-4 text-[#0F382C]" />
-                  <span>{property.address}</span>
+                  <span>{displayAddress}</span>
                 </div>
 
                 {/* Verification Authority Badge */}

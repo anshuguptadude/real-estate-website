@@ -41,6 +41,8 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const [listingIntent, setListingIntent] = useState<'Sale' | 'Rent'>('Sale');
   const [propertyType, setPropertyType] = useState<PropertyType>('Luxury Villa');
   const [locality, setLocality] = useState<string>('Fatehabad Road');
+  const [customLocality, setCustomLocality] = useState<string>('');
+  const [isOtherLocality, setIsOtherLocality] = useState<boolean>(false);
   const [projectTitle, setProjectTitle] = useState('');
   const [address, setAddress] = useState('');
   const [superArea, setSuperArea] = useState<string>('3500');
@@ -195,6 +197,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const finalLocality = isOtherLocality ? (customLocality.trim() || 'Custom Locality') : locality;
     const numPrice = Number(askingPrice) || 25000000;
     const numSuperArea = Number(superArea) || 3000;
     const generatedId = `prop-user-${Date.now()}`;
@@ -220,16 +223,16 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
     const newProperty: Property = {
       id: generatedId,
-      title: projectTitle.trim() || `Luxury ${propertyType} in ${locality}`,
-      tagline: `Exclusive ${furnishing} estate (${titleType}) with prime connectivity on ${locality}, Agra.`,
+      title: projectTitle.trim() || `Luxury ${propertyType} in ${finalLocality}`,
+      tagline: `Exclusive ${furnishing} estate (${titleType}) with prime connectivity on ${finalLocality}, Agra.`,
       propertyType,
       listingType: listingIntent,
       price: numPrice,
       priceDisplay: formatPriceDisplay(numPrice, listingIntent),
       pricePerSqFt: Math.round(numPrice / numSuperArea),
-      location: `${locality}, Agra`,
-      locality,
-      address: address.trim() || `${locality}, Agra, Uttar Pradesh`,
+      location: `${finalLocality}, Agra`,
+      locality: finalLocality,
+      address: address.trim() || `${finalLocality}, Agra, Uttar Pradesh`,
       bedrooms: Number(bedrooms) || 4,
       bathrooms: Number(bathrooms) || 4,
       balconies: 2,
@@ -245,7 +248,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       verificationStatus: isAdmin(user) ? resolvedVerificationStatus : 'In Process',
       verifiedBy: resolvedAuthorityName,
       verificationNumber: verificationDocNumber.trim() || undefined,
-      status: isAdmin(user) ? 'Active' : 'Pending Approval',
+      status: 'pending_verification',
       isUserListing: true,
       ownerId: user?.id || 'RAE-OWNER-01',
       ownerName: ownerName || user?.name || 'Property Owner',
@@ -256,7 +259,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=80'
       ],
       coverImage: finalCover,
-      description: `Spectacular ${propertyType} situated in the prestigious enclave of ${locality}, Agra. Designed for distinguished living with spacious layouts, high ceilings, premium fittings, and comprehensive security infrastructure.`,
+      description: `Spectacular ${propertyType} situated in the prestigious enclave of ${finalLocality}, Agra. Designed for distinguished living with spacious layouts, high ceilings, premium fittings, and comprehensive security infrastructure.`,
       highlights: [
         `${furnishing} with bespoke craftsmanship`,
         '100% Vastu Compliant Orientation',
@@ -265,7 +268,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       ],
       amenities: selectedAmenities,
       landmarks: [
-        { name: `${locality} Metro Station`, distance: '1.2 km', travelTime: '3 mins' },
+        { name: `${finalLocality} Metro Station`, distance: '1.2 km', travelTime: '3 mins' },
         { name: 'Taj Mahal East Gate', distance: '4.5 km', travelTime: '10 mins' },
         { name: 'Agra-Lucknow Expressway', distance: '5.8 km', travelTime: '12 mins' }
       ],
@@ -450,14 +453,40 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                   <div className="space-y-2">
                     <label className="block text-xs font-bold text-gray-700 uppercase">Primary Agra Locality</label>
                     <select
-                      value={locality}
-                      onChange={(e) => setLocality(e.target.value)}
+                      value={isOtherLocality ? 'Other' : locality}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'Other') {
+                          setIsOtherLocality(true);
+                          setLocality(customLocality);
+                        } else {
+                          setIsOtherLocality(false);
+                          setLocality(val);
+                        }
+                      }}
                       className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
                     >
                       {AGRA_LOCALITIES.filter(l => l !== 'All Localities').map((l) => (
                         <option key={l} value={l}>{l}</option>
                       ))}
+                      <option value="Other">Other (Specify Custom Locality)</option>
                     </select>
+
+                    {isOtherLocality && (
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          required
+                          placeholder="Enter custom Agra locality name (e.g. Dayalbagh, Bodla)"
+                          value={customLocality}
+                          onChange={(e) => {
+                            setCustomLocality(e.target.value);
+                            setLocality(e.target.value);
+                          }}
+                          className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Property / Project Name */}

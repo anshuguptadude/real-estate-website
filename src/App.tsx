@@ -1,7 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ActiveScreen, Property, FilterState, PropertyType, ListingType, UserProfile } from './types';
-import { PROPERTIES_DATA, PROJECTS_DATA } from './data/mockData';
+import { ActiveScreen, Property, Project, FilterState, PropertyType, ListingType, UserProfile } from './types';
 import { isAdmin, getMaskedProperty, LeadSubmission } from './utils/security';
+import { 
+  fetchFirestoreProperties, 
+  subscribeFirestoreProperties,
+  saveFirestoreProperty, 
+  deleteFirestoreProperty, 
+  fetchFirestoreProjects, 
+  subscribeFirestoreProjects,
+  saveFirestoreProject, 
+  deleteFirestoreProject, 
+  fetchFirestoreLeads, 
+  saveFirestoreLead, 
+  deleteFirestoreLead 
+} from './services/firebaseService';
 import { LeadInquiryModal } from './components/LeadInquiryModal';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
@@ -39,25 +51,8 @@ export default function App() {
     return null;
   });
 
-  // Global Properties State (with persistence & user additions/edits)
-  const [properties, setProperties] = useState<Property[]>(() => {
-    try {
-      const stored = localStorage.getItem('royal_agra_properties_v2');
-      if (stored !== null) {
-        return JSON.parse(stored);
-      }
-    } catch {
-      // ignore
-    }
-    // Seed initial properties with owner listing tags for user's properties
-    return PROPERTIES_DATA.map((p, idx) => ({
-      ...p,
-      status: p.status || (idx === 3 ? 'Sold' : 'Active'),
-      isUserListing: idx === 0 || idx === 2, // First and third properties belong to Shrey Gupta
-      ownerId: (idx === 0 || idx === 2) ? 'RAE-OWNER-01' : undefined,
-      ownerName: (idx === 0 || idx === 2) ? 'Shrey Gupta' : p.agent?.name || 'Managing Partner'
-    }));
-  });
+  // Global Properties State (fetched directly from Firebase Firestore via real-time onSnapshot)
+  const [properties, setProperties] = useState<Property[]>([]);
 
   // Sync user state to localStorage
   useEffect(() => {
@@ -72,14 +67,25 @@ export default function App() {
     }
   }, [user]);
 
-  // Sync properties state to localStorage
+  // Subscribe to real-time Firestore updates for properties and projects across all devices globally
   useEffect(() => {
-    try {
-      localStorage.setItem('royal_agra_properties_v2', JSON.stringify(properties));
-    } catch {
-      // ignore
-    }
-  }, [properties]);
+    const unsubscribeProps = subscribeFirestoreProperties(fetched => {
+      if (fetched && fetched.length > 0) setProperties(fetched);
+    });
+
+    const unsubscribeProjects = subscribeFirestoreProjects(fetched => {
+      if (fetched && fetched.length > 0) setProjectsList(fetched);
+    });
+
+    fetchFirestoreLeads().then(fetched => {
+      if (fetched && fetched.length > 0) setLeads(fetched);
+    });
+
+    return () => {
+      unsubscribeProps();
+      unsubscribeProjects();
+    };
+  }, []);
 
   // Search & Filter state
   const initialFilterState: FilterState = {
@@ -152,33 +158,19 @@ export default function App() {
     setLeads(prev => prev.filter(l => l.id !== leadId));
   };
 
-  // Projects State
-  const [projectsList, setProjectsList] = useState<Project[]>(() => {
-    try {
-      const stored = localStorage.getItem('royal_agra_projects_v1');
-      if (stored !== null) {
-        return JSON.parse(stored);
-      }
-    } catch {}
-    return PROJECTS_DATA;
-  });
+  // Projects State (fetched directly from Firebase Firestore via real-time onSnapshot)
+  const [projectsList, setProjectsList] = useState<Project[]>([]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('royal_agra_projects_v1', JSON.stringify(projectsList));
-    } catch {}
-  }, [projectsList]);
-
-  const handleAddProject = (newProj: Project) => {
-    setProjectsList(prev => [newProj, ...prev]);
+  const handleAddProject = async (newProj: Project) => {
+    await saveFirestoreProject(newProj);
   };
 
-  const handleEditProject = (updatedProj: Project) => {
-    setProjectsList(prev => prev.map(p => p.id === updatedProj.id ? updatedProj : p));
+  const handleEditProject = async (updatedProj: Project) => {
+    await saveFirestoreProject(updatedProj);
   };
 
-  const handleDeleteProject = (projId: string) => {
-    setProjectsList(prev => prev.filter(p => p.id !== projId));
+  const handleDeleteProject = async (projId: string) => {
+    await deleteFirestoreProject(projId);
   };
 
   // Modals state
@@ -323,19 +315,19 @@ export default function App() {
   };
 
   // Property Management Handlers
-  const handlePropertyCreated = (newProp: Property) => {
-    setProperties(prev => [newProp, ...prev]);
+  const handlePropertyCreated = async (newProp: Property) => {
+    await saveFirestoreProperty(newProp);
   };
 
-  const handleSavePropertyEdit = (updatedProperty: Property) => {
-    setProperties(prev => prev.map(p => (p.id === updatedProperty.id ? updatedProperty : p)));
+  const handleSavePropertyEdit = async (updatedProperty: Property) => {
+    await saveFirestoreProperty(updatedProperty);
     if (selectedProperty && selectedProperty.id === updatedProperty.id) {
       setSelectedProperty(updatedProperty);
     }
   };
 
-  const handleDeleteProperty = (propertyId: string) => {
-    setProperties(prev => prev.filter(p => p.id !== propertyId));
+  const handleDeleteProperty = async (propertyId: string) => {
+    await deleteFirestoreProperty(propertyId);
     setSavedPropertyIds(prev => prev.filter(id => id !== propertyId));
     setCompareList(prev => prev.filter(p => p.id !== propertyId));
     if (selectedProperty && selectedProperty.id === propertyId) {
@@ -343,17 +335,15 @@ export default function App() {
     }
   };
 
-  const handleTogglePropertyStatus = (propertyId: string) => {
-    setProperties(prev => prev.map(p => {
-      if (p.id === propertyId) {
-        const current = p.status || 'Active';
-        const nextStatus = current === 'Active' 
-          ? (p.listingType === 'Rent' ? 'Rented' : 'Sold')
-          : 'Active';
-        return { ...p, status: nextStatus };
-      }
-      return p;
-    }));
+  const handleTogglePropertyStatus = async (propertyId: string) => {
+    const prop = properties.find(p => p.id === propertyId);
+    if (!prop) return;
+    const current = prop.status || 'Active';
+    const nextStatus = current === 'Active' 
+      ? (prop.listingType === 'Rent' ? 'Rented' : 'Sold')
+      : 'Active';
+    const updated = { ...prop, status: nextStatus };
+    await saveFirestoreProperty(updated);
   };
 
   const handleHeroSearch = (newFilters: Partial<FilterState>) => {
@@ -413,7 +403,22 @@ export default function App() {
     handleOpenLeadModal(prop);
   };
 
-  const displayedProperties = properties.map(p => getMaskedProperty(p, user));
+  const handleApproveProperty = async (propertyId: string) => {
+    const prop = properties.find(p => p.id === propertyId);
+    if (!prop) return;
+    const updated = { ...prop, status: 'published' as const };
+    await saveFirestoreProperty(updated);
+  };
+
+  const handleRejectProperty = async (propertyId: string) => {
+    const prop = properties.find(p => p.id === propertyId);
+    if (!prop) return;
+    const updated = { ...prop, status: 'rejected' as const };
+    await saveFirestoreProperty(updated);
+  };
+
+  const publicProperties = properties.filter(p => p.status === 'published');
+  const displayedProperties = publicProperties.map(p => getMaskedProperty(p, user));
   const savedProperties = displayedProperties.filter(p => savedPropertyIds.includes(p.id));
 
   // Properties belonging to current user or all properties if admin
@@ -502,10 +507,13 @@ export default function App() {
             userProperties={userProperties}
             savedProperties={savedProperties}
             leads={leads}
+            allProperties={properties}
             onUpdateProfile={(updated) => setUser(updated)}
             onEditProperty={(prop) => setEditingProperty(prop)}
             onDeleteProperty={handleDeleteProperty}
             onTogglePropertyStatus={handleTogglePropertyStatus}
+            onApproveProperty={handleApproveProperty}
+            onRejectProperty={handleRejectProperty}
             onViewProperty={(prop) => navigateTo('properties', prop.id)}
             onNavigatePostProperty={handleInitiatePostProperty}
             onNavigateProperties={() => navigateTo('properties')}
@@ -566,6 +574,7 @@ export default function App() {
         onOpenEmiCalc={(price) => handleOpenEmiCalculator(price)}
         onToggleSave={handleToggleSave}
         isSaved={selectedProperty ? savedPropertyIds.includes(selectedProperty.id) : false}
+        user={user}
       />
 
       {/* Unified Login & Sign Up Modal */}
