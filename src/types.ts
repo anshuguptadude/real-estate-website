@@ -1,11 +1,4 @@
-export type PropertyType = 
-  | 'All'
-  | 'Luxury Villa'
-  | 'Penthouse'
-  | 'Heritage Haveli'
-  | 'Apartment'
-  | 'Gated Township Plot'
-  | 'Commercial / Retail';
+export type PropertyType = string;
 
 export type ListingType = 'Buy' | 'Rent' | 'Commercial' | 'Projects' | 'Plots';
 

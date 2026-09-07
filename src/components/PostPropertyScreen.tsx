@@ -39,13 +39,16 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 }) => {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [listingIntent, setListingIntent] = useState<'Sale' | 'Rent'>('Sale');
-  const [propertyType, setPropertyType] = useState<PropertyType>('Luxury Villa');
+  const [propertyType, setPropertyType] = useState<string>('Luxury Villa');
+  const [customPropertyType, setCustomPropertyType] = useState<string>('');
+  const [isOtherPropertyType, setIsOtherPropertyType] = useState<boolean>(false);
   const [locality, setLocality] = useState<string>('Fatehabad Road');
   const [customLocality, setCustomLocality] = useState<string>('');
   const [isOtherLocality, setIsOtherLocality] = useState<boolean>(false);
   const [projectTitle, setProjectTitle] = useState('');
   const [address, setAddress] = useState('');
   const [superArea, setSuperArea] = useState<string>('3500');
+  const [areaUnit, setAreaUnit] = useState<'Sq.Ft' | 'Sq.Yard'>('Sq.Ft');
   const [bedrooms, setBedrooms] = useState<string>('4');
   const [bathrooms, setBathrooms] = useState<string>('4');
   const [askingPrice, setAskingPrice] = useState<string>('28500000');
@@ -56,19 +59,17 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const [ownerEmail, setOwnerEmail] = useState(user?.email || 'shrey@royalagraestate.in');
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([
     'Swimming Pool',
-    '100% Power Backup',
     '24/7 Security',
     'Private Garden'
   ]);
 
-  // Media Upload States (Files, Videos, Live Camera, DataURLs)
-  const [mediaFile, setMediaFile] = useState<File | null>(null);
-  const [mediaPreview, setMediaPreview] = useState<string>(
-    'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80'
-  );
-  const [mediaType, setMediaType] = useState<'image' | 'video' | null>('image');
-  const [mediaName, setMediaName] = useState<string>('default-villa-cover.jpg');
-  const [mediaSize, setMediaSize] = useState<string>('1.8 MB');
+  // Media Upload States (Multiple files supported with NO size limit)
+  const [uploadedMediaList, setUploadedMediaList] = useState<{
+    url: string;
+    type: 'image' | 'video';
+    name: string;
+    size: string;
+  }[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [mediaError, setMediaError] = useState<string>('');
 
@@ -96,15 +97,39 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const amenityOptions = [
     'Swimming Pool',
     'Private Garden',
-    '100% Power Backup',
     '24/7 Security',
     'Home Theater',
     'Private Gym / Spa',
-    'Servant Quarters',
-    'EV Charging Point',
-    'Vastu Compliant',
-    'Covered Car Garage'
+    'EV Charging Point'
   ];
+
+  const formatINRCommas = (numStr: string): string => {
+    const clean = numStr.replace(/[^0-9]/g, '');
+    const num = parseFloat(clean);
+    if (isNaN(num)) return '';
+    return num.toLocaleString('en-IN');
+  };
+
+  const convertNumberToIndianWords = (num: number): string => {
+    if (num <= 0 || isNaN(num)) return '';
+    let result = '';
+    const crore = Math.floor(num / 10000000);
+    let remainder = num % 10000000;
+    const lakh = Math.floor(remainder / 100000);
+    remainder = remainder % 100000;
+    const thousand = Math.floor(remainder / 1000);
+    remainder = remainder % 1000;
+    const hundred = Math.floor(remainder / 100);
+    remainder = remainder % 100;
+
+    if (crore > 0) result += `${crore} Crore `;
+    if (lakh > 0) result += `${lakh} Lakh `;
+    if (thousand > 0) result += `${thousand} Thousand `;
+    if (hundred > 0) result += `${hundred} Hundred `;
+    if (remainder > 0) result += `${remainder} `;
+    
+    return result.trim() + ' Rupees';
+  };
 
   const toggleAmenity = (item: string) => {
     if (selectedAmenities.includes(item)) {
@@ -114,45 +139,46 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     }
   };
 
-  const handleProcessFile = (file: File) => {
+  const handleProcessFiles = (files: FileList | File[]) => {
     setMediaError('');
-    const validImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-    const validVideoTypes = ['video/mp4', 'video/quicktime', 'video/mov'];
+    const fileArray = Array.from(files);
     
-    const isImage = validImageTypes.includes(file.type) || file.type.startsWith('image/');
-    const isVideo = validVideoTypes.includes(file.type) || file.type.startsWith('video/') || file.name.toLowerCase().endsWith('.mov') || file.name.toLowerCase().endsWith('.mp4');
+    fileArray.forEach((file) => {
+      const validImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+      const validVideoTypes = ['video/mp4', 'video/quicktime', 'video/mov'];
+      
+      const isImage = validImageTypes.includes(file.type) || file.type.startsWith('image/');
+      const isVideo = validVideoTypes.includes(file.type) || file.type.startsWith('video/') || file.name.toLowerCase().endsWith('.mov') || file.name.toLowerCase().endsWith('.mp4');
 
-    if (!isImage && !isVideo) {
-      setMediaError('Unsupported format. Please upload JPEG, PNG, WEBP, MP4, or MOV files.');
-      return;
-    }
-
-    // Size limit check (50MB for video, 20MB for image)
-    const maxBytes = isVideo ? 50 * 1024 * 1024 : 20 * 1024 * 1024;
-    if (file.size > maxBytes) {
-      setMediaError(`File is too large. Maximum size is ${isVideo ? '50MB for video' : '20MB for images'}.`);
-      return;
-    }
-
-    setMediaFile(file);
-    setMediaName(file.name);
-    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
-    setMediaSize(`${sizeInMB} MB`);
-    setMediaType(isVideo ? 'video' : 'image');
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (reader.result) {
-        setMediaPreview(reader.result as string);
+      if (!isImage && !isVideo) {
+        setMediaError('Some files were skipped due to unsupported format. Please upload JPEG, PNG, WEBP, MP4, or MOV files.');
+        return;
       }
-    };
-    reader.readAsDataURL(file);
+
+      // No file size limit! Any size picture or video is allowed.
+      const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+      
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (reader.result) {
+          setUploadedMediaList((prev) => [
+            ...prev,
+            {
+              url: reader.result as string,
+              type: isVideo ? 'video' : 'image',
+              name: file.name,
+              size: `${sizeInMB} MB`
+            }
+          ]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleProcessFile(file);
+    if (e.target.files && e.target.files.length > 0) {
+      handleProcessFiles(e.target.files);
     }
   };
 
@@ -169,21 +195,13 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      handleProcessFile(file);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleProcessFiles(e.dataTransfer.files);
     }
   };
 
-  const handleRemoveMedia = () => {
-    setMediaFile(null);
-    setMediaPreview('');
-    setMediaType(null);
-    setMediaName('');
-    setMediaSize('');
-    setMediaError('');
-    if (fileInputRef.current) fileInputRef.current.value = '';
-    if (cameraInputRef.current) cameraInputRef.current.value = '';
+  const handleRemoveMedia = (index: number) => {
+    setUploadedMediaList((prev) => prev.filter((_, idx) => idx !== index));
   };
 
   const formatPriceDisplay = (amt: number, type: 'Sale' | 'Rent') => {
@@ -198,8 +216,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const finalLocality = isOtherLocality ? (customLocality.trim() || 'Custom Locality') : locality;
-    const numPrice = Number(askingPrice) || 25000000;
-    const numSuperArea = Number(superArea) || 3000;
+    const numPrice = Number(askingPrice.replace(/[^0-9]/g, '')) || 25000000;
+    const rawArea = Number(superArea) || 3000;
+    const numSuperArea = areaUnit === 'Sq.Yard' ? Math.round(rawArea * 9) : rawArea;
+
     const generatedId = `prop-user-${Date.now()}`;
     const refCode = `RAE-${Math.floor(100000 + Math.random() * 900000)}`;
     setCreatedPropertyRef(refCode);
@@ -219,7 +239,13 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         : `${verifiedByAuthority} (Under Review)`;
     }
 
-    const finalCover = mediaPreview || 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80';
+    const uploadedUrls = uploadedMediaList.map(m => m.url);
+    const finalCover = uploadedUrls[0] || 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80';
+    const finalImages = uploadedUrls.length > 0 ? uploadedUrls : [
+      finalCover,
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=80'
+    ];
 
     const newProperty: Property = {
       id: generatedId,
@@ -253,11 +279,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       ownerId: user?.id || 'RAE-OWNER-01',
       ownerName: ownerName || user?.name || 'Property Owner',
       ownerContact: ownerPhone || user?.phone || '+91 91490 79913',
-      images: [
-        finalCover,
-        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=80'
-      ],
+      images: finalImages,
       coverImage: finalCover,
       description: `Spectacular ${propertyType} situated in the prestigious enclave of ${finalLocality}, Agra. Designed for distinguished living with spacious layouts, high ceilings, premium fittings, and comprehensive security infrastructure.`,
       highlights: [
@@ -432,13 +454,17 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                   <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase mb-2">Property Typology</label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                      {PROPERTY_TYPES.filter(t => t !== 'All').map((type) => (
+                      {['Luxury Villa', 'Penthouse', 'Heritage Haveli', 'Apartment', 'Gated Township Plot', 'Commercial / Retail', 'House'].map((type) => (
                         <button
                           key={type}
                           type="button"
-                          onClick={() => setPropertyType(type)}
+                          onClick={() => {
+                            setPropertyType(type);
+                            setIsOtherPropertyType(false);
+                            setCustomPropertyType('');
+                          }}
                           className={`p-3 rounded-lg border text-xs font-semibold text-left transition-all ${
-                            propertyType === type
+                            !isOtherPropertyType && propertyType === type
                               ? 'bg-emerald-50 text-emerald-950 border-emerald-500 ring-1 ring-emerald-500/20'
                               : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
                           }`}
@@ -446,7 +472,37 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                           {type}
                         </button>
                       ))}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOtherPropertyType(true);
+                          setPropertyType(customPropertyType || 'Other Typology');
+                        }}
+                        className={`p-3 rounded-lg border text-xs font-semibold text-left transition-all ${
+                          isOtherPropertyType
+                            ? 'bg-emerald-50 text-emerald-950 border-emerald-500 ring-1 ring-emerald-500/20'
+                            : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                        }`}
+                      >
+                        Other (Specify Custom)
+                      </button>
                     </div>
+
+                    {isOtherPropertyType && (
+                      <div className="mt-2.5">
+                        <input
+                          type="text"
+                          required
+                          placeholder="Type custom property type (e.g. Row House, Studio, Farmhouse)"
+                          value={customPropertyType}
+                          onChange={(e) => {
+                            setCustomPropertyType(e.target.value);
+                            setPropertyType(e.target.value);
+                          }}
+                          className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Locality in Agra */}
@@ -536,24 +592,55 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Super Area + Unit Selector */}
                     <div className="space-y-2">
-                      <label className="block text-xs font-bold text-gray-700 uppercase">Super Area (Sq.Ft)</label>
-                      <input
-                        type="number"
-                        required
-                        value={superArea}
-                        onChange={(e) => setSuperArea(e.target.value)}
-                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"
-                      />
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-bold text-gray-700 uppercase">Super Area</label>
+                        <div className="flex items-center gap-1 bg-gray-100 p-0.5 rounded-md border border-gray-200 text-[10px] font-bold">
+                          <button
+                            type="button"
+                            onClick={() => setAreaUnit('Sq.Ft')}
+                            className={`px-2 py-0.5 rounded transition-all ${
+                              areaUnit === 'Sq.Ft' ? 'bg-[#0F382C] text-white' : 'text-gray-600 hover:text-black'
+                            }`}
+                          >
+                            Sq.Ft
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAreaUnit('Sq.Yard')}
+                            className={`px-2 py-0.5 rounded transition-all ${
+                              areaUnit === 'Sq.Yard' ? 'bg-[#0F382C] text-white' : 'text-gray-600 hover:text-black'
+                            }`}
+                          >
+                            Sq.Yard
+                          </button>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          required
+                          value={superArea}
+                          onChange={(e) => setSuperArea(e.target.value)}
+                          placeholder="e.g. 3500"
+                          className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
+                        />
+                        <span className="absolute right-3 top-3 text-xs text-gray-400 font-semibold pointer-events-none">
+                          {areaUnit}
+                        </span>
+                      </div>
                     </div>
 
+                    {/* Bedrooms (BHK) */}
                     <div className="space-y-2">
                       <label className="block text-xs font-bold text-gray-700 uppercase">Bedrooms (BHK)</label>
                       <select
                         value={bedrooms}
                         onChange={(e) => setBedrooms(e.target.value)}
-                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"
+                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white"
                       >
+                        <option value="1">1 BHK</option>
                         <option value="2">2 BHK</option>
                         <option value="3">3 BHK</option>
                         <option value="4">4 BHK</option>
@@ -562,31 +649,66 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       </select>
                     </div>
 
+                    {/* Bathrooms */}
                     <div className="space-y-2">
-                      <label className="block text-xs font-bold text-gray-700 uppercase">
-                        {listingIntent === 'Sale' ? 'Expected Sale Price (₹ INR)' : 'Expected Monthly Rent (₹ INR)'}
-                      </label>
-                      <input
-                        type="number"
-                        required
-                        value={askingPrice}
-                        onChange={(e) => setAskingPrice(e.target.value)}
-                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-mono"
-                      />
+                      <label className="block text-xs font-bold text-gray-700 uppercase">Bathrooms</label>
+                      <select
+                        value={bathrooms}
+                        onChange={(e) => setBathrooms(e.target.value)}
+                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white"
+                      >
+                        <option value="1">1 Bathroom</option>
+                        <option value="2">2 Bathrooms</option>
+                        <option value="3">3 Bathrooms</option>
+                        <option value="4">4 Bathrooms</option>
+                        <option value="5">5+ Bathrooms</option>
+                        <option value="0">Not Applicable</option>
+                      </select>
                     </div>
 
+                    {/* Furnishing Status */}
                     <div className="space-y-2">
                       <label className="block text-xs font-bold text-gray-700 uppercase">Furnishing Status</label>
                       <select
                         value={furnishing}
                         onChange={(e) => setFurnishing(e.target.value)}
-                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"
+                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white"
                       >
                         <option value="Designer Fitted">Designer Fitted</option>
                         <option value="Fully Furnished">Fully Furnished</option>
                         <option value="Semi-Furnished">Semi-Furnished</option>
                         <option value="Unfurnished">Unfurnished</option>
                       </select>
+                    </div>
+
+                    {/* Asking Price with Comma Format & Word Breakdown */}
+                    <div className="space-y-2 sm:col-span-2">
+                      <label className="block text-xs font-bold text-gray-700 uppercase">
+                        {listingIntent === 'Sale' ? 'Expected Sale Price (₹ INR)' : 'Expected Monthly Rent (₹ INR)'}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={askingPrice}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/[^0-9]/g, '');
+                          setAskingPrice(raw);
+                        }}
+                        placeholder="e.g. 28500000"
+                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-mono focus:bg-white focus:border-[#0F382C]"
+                      />
+
+                      {askingPrice && Number(askingPrice) > 0 && (
+                        <div className="p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl text-xs space-y-1">
+                          <div className="flex items-center justify-between text-emerald-950 font-mono font-bold">
+                            <span>Formatted Amount (INR):</span>
+                            <span className="text-sm">₹ {formatINRCommas(askingPrice)}</span>
+                          </div>
+                          <div className="text-emerald-900 font-medium text-[11px] capitalize">
+                            <strong>Amount in Words:</strong> {convertNumberToIndianWords(Number(askingPrice))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -648,10 +770,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                   <div className="space-y-3 pt-2">
                     <div className="flex items-center justify-between">
                       <label className="block text-xs font-bold text-gray-700 uppercase">
-                        Property Cover Media (Photo / Walkthrough Video)
+                        Property Photos & Videos ({uploadedMediaList.length} Uploaded)
                       </label>
                       <span className="text-[11px] text-gray-500 font-medium">
-                        JPEG, PNG, WEBP, MP4, MOV (Up to 50MB)
+                        JPEG, PNG, WEBP, MP4, MOV (Multiple files, No size limit)
                       </span>
                     </div>
 
@@ -660,7 +782,8 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       type="file"
                       ref={fileInputRef}
                       onChange={handleFileChange}
-                      accept="image/jpeg,image/png,image/webp,image/jpg,video/mp4,video/quicktime,video/mov,image/*,video/*"
+                      accept="image/*,video/*"
+                      multiple
                       className="hidden"
                     />
                     <input
@@ -669,6 +792,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       onChange={handleFileChange}
                       accept="image/*,video/*"
                       capture="environment"
+                      multiple
                       className="hidden"
                     />
 
@@ -679,77 +803,73 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       </div>
                     )}
 
-                    {/* MEDIA PREVIEW CARD IF SELECTED */}
-                    {mediaPreview ? (
-                      <div className="relative rounded-2xl overflow-hidden border-2 border-[#0F382C]/20 bg-gray-900 shadow-md">
-                        <div className="aspect-[16/9] w-full max-h-[360px] flex items-center justify-center overflow-hidden bg-black">
-                          {mediaType === 'video' ? (
-                            <video
-                              src={mediaPreview}
-                              controls
-                              className="w-full h-full object-contain"
-                            />
-                          ) : (
-                            <img
-                              src={mediaPreview}
-                              alt="Property Cover Preview"
-                              className="w-full h-full object-cover"
-                            />
-                          )}
+                    {/* MULTIPLE MEDIA PREVIEW GALLERY IF SELECTED */}
+                    {uploadedMediaList.length > 0 ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {uploadedMediaList.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-900 group aspect-[4/3]"
+                            >
+                              {item.type === 'video' ? (
+                                <video
+                                  src={item.url}
+                                  controls
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <img
+                                  src={item.url}
+                                  alt={`Upload ${idx + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              )}
+
+                              {/* Index Badge */}
+                              <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded border border-white/20">
+                                {idx === 0 ? 'Cover Photo' : `#${idx + 1}`}
+                              </div>
+
+                              {/* Remove Button */}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveMedia(idx)}
+                                className="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 text-white p-1.5 rounded-full shadow-md transition-transform hover:scale-110"
+                                title="Remove File"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+
+                              <div className="absolute bottom-2 left-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[10px] px-2 py-0.5 rounded truncate">
+                                {item.name} ({item.size})
+                              </div>
+                            </div>
+                          ))}
                         </div>
 
-                        {/* Top Overlay Badge & Actions */}
-                        <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
-                          <div className="flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-semibold border border-white/20">
-                            {mediaType === 'video' ? (
-                              <>
-                                <Film className="w-3.5 h-3.5 text-[#E4D5B7]" />
-                                <span>Video Preview</span>
-                              </>
-                            ) : (
-                              <>
-                                <ImageIcon className="w-3.5 h-3.5 text-[#E4D5B7]" />
-                                <span>Cover Image Preview</span>
-                              </>
-                            )}
-                            {mediaSize && (
-                              <span className="text-[10px] text-gray-300 ml-1">({mediaSize})</span>
-                            )}
-                          </div>
+                        {/* Additional Action Buttons */}
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                          <span className="text-xs text-gray-600 font-medium">
+                            First photo will be used as the primary listing cover.
+                          </span>
 
-                          <button
-                            type="button"
-                            onClick={handleRemoveMedia}
-                            className="pointer-events-auto bg-rose-600 hover:bg-rose-700 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center gap-1 text-xs font-bold"
-                            title="Remove Selected Media"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            <span className="hidden sm:inline pr-1">Remove</span>
-                          </button>
-                        </div>
-
-                        {/* Bottom Actions Bar */}
-                        <div className="p-3 bg-white border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-2">
-                          <div className="text-xs text-gray-600 truncate max-w-[280px]">
-                            <strong>Selected:</strong> {mediaName || 'Custom Uploaded Media'}
-                          </div>
-                          
                           <div className="flex items-center gap-2 w-full sm:w-auto">
                             <button
                               type="button"
                               onClick={() => fileInputRef.current?.click()}
-                              className="flex-1 sm:flex-initial px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                              className="flex-1 sm:flex-initial px-4 py-2 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
                             >
-                              <Upload className="w-3.5 h-3.5" />
-                              <span>Replace File</span>
+                              <Upload className="w-3.5 h-3.5 text-[#E4D5B7]" />
+                              <span>Upload More Pictures</span>
                             </button>
                             <button
                               type="button"
                               onClick={() => cameraInputRef.current?.click()}
-                              className="flex-1 sm:flex-initial px-3.5 py-1.5 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                              className="flex-1 sm:flex-initial px-4 py-2 bg-white hover:bg-gray-100 text-[#0F382C] border border-[#0F382C]/30 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
                             >
-                              <Camera className="w-3.5 h-3.5 text-[#E4D5B7]" />
-                              <span>Retake Photo/Video</span>
+                              <Camera className="w-3.5 h-3.5 text-[#0F382C]" />
+                              <span>Camera Capture</span>
                             </button>
                           </div>
                         </div>
@@ -770,10 +890,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                           <Upload className="w-8 h-8 text-[#0F382C]" />
                         </div>
                         <h4 className="text-base font-serif-luxury font-bold text-[#0F382C]">
-                          Drag & drop your property photos or walk-through video here
+                          Drag & drop multiple property photos or video walkthroughs here
                         </h4>
                         <p className="text-xs text-gray-500 mt-1 mb-6 max-w-sm mx-auto">
-                          Directly upload high-resolution property photos or video walkthroughs from your computer, mobile gallery, or live camera.
+                          Upload high-resolution property photos or video walkthroughs without any size limits. Select multiple files at once.
                         </p>
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -783,7 +903,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                             className="w-full sm:w-auto px-5 py-2.5 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm flex items-center justify-center gap-2 transition-all"
                           >
                             <Upload className="w-4 h-4 text-[#E4D5B7]" />
-                            <span>Browse Files (Laptop / Mobile)</span>
+                            <span>Select Multiple Files</span>
                           </button>
 
                           <button
