@@ -70,6 +70,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     name: string;
     size: string;
   }[]>([]);
+  const [selectedCoverIndex, setSelectedCoverIndex] = useState<number>(0);
   const [isDragging, setIsDragging] = useState(false);
   const [mediaError, setMediaError] = useState<string>('');
 
@@ -239,13 +240,25 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         : `${verifiedByAuthority} (Under Review)`;
     }
 
+    const isUserAdmin = isAdmin(user);
+    const initialStatus = isUserAdmin ? 'published' : 'pending_verification';
+
     const uploadedUrls = uploadedMediaList.map(m => m.url);
-    const finalCover = uploadedUrls[0] || 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80';
-    const finalImages = uploadedUrls.length > 0 ? uploadedUrls : [
-      finalCover,
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=80'
-    ];
+    const coverIdx = selectedCoverIndex >= 0 && selectedCoverIndex < uploadedUrls.length ? selectedCoverIndex : 0;
+    const finalCover = uploadedUrls[coverIdx] || 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80';
+    
+    let finalImages: string[] = [];
+    if (uploadedUrls.length > 0) {
+      const chosenCover = uploadedUrls[coverIdx];
+      const otherImages = uploadedUrls.filter((_, i) => i !== coverIdx);
+      finalImages = [chosenCover, ...otherImages];
+    } else {
+      finalImages = [
+        finalCover,
+        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=80'
+      ];
+    }
 
     const newProperty: Property = {
       id: generatedId,
@@ -271,10 +284,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       featured: true,
       isExclusive: true,
       verified: isLegallyVerified,
-      verificationStatus: isAdmin(user) ? resolvedVerificationStatus : 'In Process',
+      verificationStatus: isUserAdmin ? 'Verified' : resolvedVerificationStatus,
       verifiedBy: resolvedAuthorityName,
       verificationNumber: verificationDocNumber.trim() || undefined,
-      status: 'pending_verification',
+      status: initialStatus,
       isUserListing: true,
       ownerId: user?.id || 'RAE-OWNER-01',
       ownerName: ownerName || user?.name || 'Property Owner',
@@ -379,16 +392,29 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                 <CheckCircle className="w-10 h-10" />
               </div>
               <h2 className="text-2xl sm:text-3xl font-serif-luxury font-bold text-[#0F382C]">
-                Property Registered Successfully!
+                {isAdmin(user) ? 'Property Published Live!' : 'Property Submitted for Admin Approval!'}
               </h2>
               <p className="text-sm text-gray-600 max-w-lg mx-auto">
-                Thank you, <strong>{ownerName || 'Property Owner'}</strong>. Your luxury listing in <strong>{locality}</strong> has been registered with reference ID <strong>#{createdPropertyRef || 'RAE-892140'}</strong>.
+                {isAdmin(user) ? (
+                  <>Your administrator listing in <strong>{locality}</strong> has been published directly to the live website with reference ID <strong>#{createdPropertyRef || 'RAE-892140'}</strong>.</>
+                ) : (
+                  <>Thank you, <strong>{ownerName || 'Property Owner'}</strong>. Your luxury listing in <strong>{locality}</strong> has been submitted with reference ID <strong>#{createdPropertyRef || 'RAE-892140'}</strong>. It will be reviewed by our administrator and published once approved.</>
+                )}
               </p>
               
               <div className="bg-emerald-50 rounded-xl p-4 max-w-md mx-auto border border-emerald-200 text-xs text-emerald-900 space-y-1">
                 <p className="font-bold">Next Steps:</p>
-                <p>1. Your listing is now saved to your owner portfolio dashboard.</p>
-                <p>2. Our legal diligence advisory cell will review the property verification status within 4 hours.</p>
+                {isAdmin(user) ? (
+                  <>
+                    <p>1. Your listing is live across all public property grids immediately.</p>
+                    <p>2. You can manage or edit this property at any time from your Admin Dashboard.</p>
+                  </>
+                ) : (
+                  <>
+                    <p>1. Your listing is saved to your dashboard in 'Pending Verification' status.</p>
+                    <p>2. Our admin advisory desk will verify documents and approve the listing to go live.</p>
+                  </>
+                )}
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
@@ -806,52 +832,93 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     {/* MULTIPLE MEDIA PREVIEW GALLERY IF SELECTED */}
                     {uploadedMediaList.length > 0 ? (
                       <div className="space-y-4">
+                        <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-xl text-xs text-amber-950 flex items-center justify-between">
+                          <span className="font-semibold">
+                            👉 Select which image to use as your <strong>Main Property Display Photo</strong>:
+                          </span>
+                          <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
+                            Photo #{selectedCoverIndex + 1} Selected as Cover
+                          </span>
+                        </div>
+
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          {uploadedMediaList.map((item, idx) => (
-                            <div
-                              key={idx}
-                              className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-900 group aspect-[4/3]"
-                            >
-                              {item.type === 'video' ? (
-                                <video
-                                  src={item.url}
-                                  controls
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <img
-                                  src={item.url}
-                                  alt={`Upload ${idx + 1}`}
-                                  className="w-full h-full object-cover"
-                                />
-                              )}
-
-                              {/* Index Badge */}
-                              <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded border border-white/20">
-                                {idx === 0 ? 'Cover Photo' : `#${idx + 1}`}
-                              </div>
-
-                              {/* Remove Button */}
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveMedia(idx)}
-                                className="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 text-white p-1.5 rounded-full shadow-md transition-transform hover:scale-110"
-                                title="Remove File"
+                          {uploadedMediaList.map((item, idx) => {
+                            const isChosenCover = selectedCoverIndex === idx;
+                            return (
+                              <div
+                                key={idx}
+                                onClick={() => setSelectedCoverIndex(idx)}
+                                className={`relative rounded-xl overflow-hidden border-2 bg-gray-900 group aspect-[4/3] cursor-pointer transition-all ${
+                                  isChosenCover
+                                    ? 'border-emerald-500 ring-4 ring-emerald-500/20 shadow-lg'
+                                    : 'border-gray-200 hover:border-[#0F382C]'
+                                }`}
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                                {item.type === 'video' ? (
+                                  <video
+                                    src={item.url}
+                                    controls
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <img
+                                    src={item.url}
+                                    alt={`Upload ${idx + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                )}
 
-                              <div className="absolute bottom-2 left-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[10px] px-2 py-0.5 rounded truncate">
-                                {item.name} ({item.size})
+                                {/* Cover Photo Badge */}
+                                <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                                  {isChosenCover ? (
+                                    <span className="bg-emerald-700 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1 border border-emerald-400">
+                                      <Check className="w-3 h-3 text-white" />
+                                      ★ Main Display Cover
+                                    </span>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedCoverIndex(idx);
+                                      }}
+                                      className="bg-black/70 hover:bg-[#0F382C] backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded border border-white/20 transition-colors"
+                                    >
+                                      Set as Display Cover
+                                    </button>
+                                  )}
+                                </div>
+
+                                {/* Remove Button */}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveMedia(idx);
+                                    if (selectedCoverIndex === idx) {
+                                      setSelectedCoverIndex(0);
+                                    } else if (selectedCoverIndex > idx) {
+                                      setSelectedCoverIndex(prev => prev - 1);
+                                    }
+                                  }}
+                                  className="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 text-white p-1.5 rounded-full shadow-md transition-transform hover:scale-110 z-10"
+                                  title="Remove File"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+
+                                <div className="absolute bottom-2 left-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[10px] px-2 py-0.5 rounded truncate pointer-events-none">
+                                  {item.name} ({item.size})
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
 
                         {/* Additional Action Buttons */}
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
                           <span className="text-xs text-gray-600 font-medium">
-                            First photo will be used as the primary listing cover.
+                            {uploadedMediaList.length} media item(s) will be permanently saved to the website.
                           </span>
 
                           <div className="flex items-center gap-2 w-full sm:w-auto">

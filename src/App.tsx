@@ -417,7 +417,12 @@ export default function App() {
     await saveFirestoreProperty(updated);
   };
 
-  const publicProperties = properties.filter(p => p.status === 'published');
+  const publicProperties = properties.filter(p => 
+    (p.status === 'published' || p.status === 'Active') && 
+    p.status !== 'pending_verification' && 
+    p.status !== 'Pending Approval' && 
+    p.status !== 'rejected'
+  );
   const displayedProperties = publicProperties.map(p => getMaskedProperty(p, user));
   const savedProperties = displayedProperties.filter(p => savedPropertyIds.includes(p.id));
 

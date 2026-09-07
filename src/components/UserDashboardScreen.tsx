@@ -171,8 +171,9 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
     }, 3000);
   };
 
-  const activeCount = userProperties.filter(p => (p.status || 'Active') === 'Active').length;
+  const activeCount = userProperties.filter(p => (p.status || 'Active') === 'Active' || p.status === 'published').length;
   const soldCount = userProperties.filter(p => p.status === 'Sold' || p.status === 'Rented').length;
+  const userPendingCount = userProperties.filter(p => p.status === 'pending_verification' || p.status === 'Pending Approval').length;
   const pendingProperties = (allProperties || userProperties).filter(
     p => p.status === 'pending_verification' || p.status === 'Pending Approval'
   );
@@ -262,7 +263,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-white/10">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mt-6 pt-6 border-t border-white/10">
             <div className="bg-[#0B2B22]/60 backdrop-blur-xs p-3.5 rounded-xl border border-white/5">
               <span className="text-[11px] uppercase tracking-wider text-gray-300 block">Total Listed</span>
               <span className="text-xl font-bold text-white font-serif-luxury mt-0.5 block">{userProperties.length}</span>
@@ -270,6 +271,16 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
             <div className="bg-[#0B2B22]/60 backdrop-blur-xs p-3.5 rounded-xl border border-white/5">
               <span className="text-[11px] uppercase tracking-wider text-gray-300 block">Active Live</span>
               <span className="text-xl font-bold text-emerald-400 font-serif-luxury mt-0.5 block">{activeCount}</span>
+            </div>
+            <div className="bg-[#0B2B22]/60 backdrop-blur-xs p-3.5 rounded-xl border border-white/5">
+              <span className="text-[11px] uppercase tracking-wider text-gray-300 block">
+                {isAdmin(user) ? 'Pending Approval' : 'Under Review'}
+              </span>
+              <span className={`text-xl font-bold font-serif-luxury mt-0.5 block ${
+                (isAdmin(user) ? pendingProperties.length : userPendingCount) > 0 ? 'text-amber-400 animate-pulse' : 'text-gray-300'
+              }`}>
+                {isAdmin(user) ? pendingProperties.length : userPendingCount}
+              </span>
             </div>
             <div className="bg-[#0B2B22]/60 backdrop-blur-xs p-3.5 rounded-xl border border-white/5">
               <span className="text-[11px] uppercase tracking-wider text-gray-300 block">Sold / Rented</span>
@@ -317,6 +328,34 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
             </div>
           ) : null}
         </div>
+
+        {/* ADMIN TOP ALERT BANNER IF PENDING SUBMISSIONS EXIST */}
+        {isAdmin(user) && pendingProperties.length > 0 && (
+          <div className="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-white rounded-2xl p-4 sm:p-5 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-fadeIn">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-xs flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-serif-luxury font-bold text-base text-white">
+                  {pendingProperties.length} Property Submission{pendingProperties.length > 1 ? 's' : ''} Awaiting Admin Approval
+                </h3>
+                <p className="text-xs text-white/90">
+                  New properties submitted by owners/sellers are pending verification before going live on the public website.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('approvals')}
+              className="w-full sm:w-auto px-5 py-2.5 bg-white text-amber-900 hover:bg-amber-50 font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition-all shrink-0 flex items-center justify-center gap-2"
+            >
+              <span>Review & Approve Listings ({pendingProperties.length})</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* Tab Navigation */}
         <div className="flex items-center space-x-2 border-b border-gray-200 pb-2">
@@ -482,6 +521,14 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                               <CheckCircle2 className="w-3.5 h-3.5" />
                               {prop.status === 'Sold' ? 'SOLD OUT' : 'RENTED OUT'}
                             </span>
+                          ) : prop.status === 'pending_verification' || prop.status === 'Pending Approval' ? (
+                            <span className="px-3 py-1 rounded-md bg-amber-600 text-white text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-1">
+                              <span>⏳ UNDER REVIEW</span>
+                            </span>
+                          ) : prop.status === 'rejected' ? (
+                            <span className="px-3 py-1 rounded-md bg-rose-600 text-white text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-1">
+                              <span>REJECTED</span>
+                            </span>
                           ) : (
                             <span className="px-3 py-1 rounded-md bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-1">
                               <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
@@ -587,9 +634,33 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                               className="py-2 px-2.5 rounded-lg text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-800 flex items-center justify-center gap-1.5 transition-colors"
                             >
                               <Eye className="w-3.5 h-3.5" />
-                              <span>View Public</span>
+                              <span>View Details</span>
                             </button>
                           </div>
+
+                          {/* Quick Admin Approve / Reject if pending */}
+                          {isAdmin(user) && (prop.status === 'pending_verification' || prop.status === 'Pending Approval') && onApproveProperty && (
+                            <div className="grid grid-cols-2 gap-2 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => onApproveProperty(prop.id)}
+                                className="py-2 px-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-xs flex items-center justify-center gap-1 transition-colors"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span>Approve Live</span>
+                              </button>
+                              {onRejectProperty && (
+                                <button
+                                  type="button"
+                                  onClick={() => onRejectProperty(prop.id)}
+                                  className="py-2 px-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-xs flex items-center justify-center gap-1 transition-colors"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <span>Reject</span>
+                                </button>
+                              )}
+                            </div>
+                          )}
 
                           {/* Row 2: Edit Property + Delete Listing */}
                           <div className="grid grid-cols-2 gap-2">

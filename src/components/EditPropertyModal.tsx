@@ -28,7 +28,7 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
   const [furnishing, setFurnishing] = useState(property?.furnishing || 'Fully Furnished');
   const [possession, setPossession] = useState(property?.possession || 'Ready to Move');
   const [coverImage, setCoverImage] = useState(property?.coverImage || '');
-  const [status, setStatus] = useState<'Active' | 'Sold' | 'Rented'>(property?.status || 'Active');
+  const [status, setStatus] = useState<Property['status']>(property?.status || 'Active');
   const [verified, setVerified] = useState<boolean>(property?.verified ?? true);
   const [verifiedBy, setVerifiedBy] = useState<string>(property?.verifiedBy || 'Agra Development Authority (ADA)');
   const [verificationNumber, setVerificationNumber] = useState<string>(property?.verificationNumber || '');
@@ -146,9 +146,9 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
                 <button
                   key={st}
                   type="button"
-                  onClick={() => setStatus(st)}
+                  onClick={() => setStatus(st === 'Active' ? 'published' : st)}
                   className={`py-2 px-3 rounded-lg text-xs font-bold transition-all ${
-                    status === st
+                    status === st || (st === 'Active' && status === 'published')
                       ? st === 'Active'
                         ? 'bg-emerald-700 text-white shadow-xs'
                         : 'bg-amber-600 text-white shadow-xs'
