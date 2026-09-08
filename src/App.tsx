@@ -418,7 +418,7 @@ export default function App() {
   };
 
   const publicProperties = properties.filter(p => 
-    (p.status === 'published' || p.status === 'Active') && 
+    (p.status === 'published' || p.status === 'Active' || p.status === 'Sold' || p.status === 'Rented' || !p.status) && 
     p.status !== 'pending_verification' && 
     p.status !== 'Pending Approval' && 
     p.status !== 'rejected'
