@@ -43,6 +43,7 @@ interface UserDashboardScreenProps {
   onNavigateProperties: () => void;
   onLogout: () => void;
   onDeleteLead?: (leadId: string) => void;
+  onPurgeDemoProperties?: () => void;
   initialTab?: UserDashboardTab;
 }
 
@@ -63,6 +64,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   onNavigateProperties,
   onLogout,
   onDeleteLead,
+  onPurgeDemoProperties,
   initialTab = 'listings'
 }) => {
   const [activeTab, setActiveTab] = useState<UserDashboardTab>(initialTab);
@@ -478,6 +480,43 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
               </button>
             </div>
 
+            {/* Admin Notice Banner for Sample/Demo Listings */}
+            {isAdmin(user) && userProperties.some(p => /^prop-[1-8]$/.test(p.id)) && (
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-amber-900 flex items-center gap-2">
+                      <span>Default Sample Properties Active</span>
+                      <span className="px-2 py-0.5 rounded-full text-[11px] bg-amber-200 text-amber-900 font-semibold">
+                        {userProperties.filter(p => /^prop-[1-8]$/.test(p.id)).length} Template Listings
+                      </span>
+                    </h4>
+                    <p className="text-xs text-amber-700 mt-1 leading-relaxed">
+                      These are the default sample/template properties created during website design. You can delete them one by one or click <strong>Purge All Sample Listings</strong> so that <em>only</em> your real uploaded properties appear on the website.
+                    </p>
+                  </div>
+                </div>
+                {onPurgeDemoProperties && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const count = userProperties.filter(p => /^prop-[1-8]$/.test(p.id)).length;
+                      if (window.confirm(`Are you sure you want to permanently remove all ${count} sample demo listings? Only your real uploaded properties will remain.`)) {
+                        onPurgeDemoProperties();
+                      }
+                    }}
+                    className="shrink-0 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow transition-all flex items-center justify-center gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Purge All Sample Listings</span>
+                  </button>
+                )}
+              </div>
+            )}
+
             {userProperties.length === 0 ? (
               <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center space-y-4 shadow-sm">
                 <div className="w-16 h-16 rounded-full bg-gray-100 text-[#0F382C] flex items-center justify-center mx-auto">
@@ -501,6 +540,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {userProperties.map((prop) => {
                   const isSoldOrRented = prop.status === 'Sold' || prop.status === 'Rented';
+                  const isDemoListing = /^prop-[1-8]$/.test(prop.id);
                   return (
                     <div
                       key={prop.id}
@@ -516,6 +556,16 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                         
                         {/* Status Banner */}
                         <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5 items-start">
+                          {isDemoListing ? (
+                            <span className="px-2.5 py-0.5 rounded-md bg-stone-900/85 text-amber-300 text-[10px] font-bold uppercase tracking-wider shadow-md border border-amber-400/30">
+                              Template Sample Listing
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-0.5 rounded-md bg-emerald-950/85 text-emerald-300 text-[10px] font-bold uppercase tracking-wider shadow-md border border-emerald-400/30">
+                              Uploaded Property
+                            </span>
+                          )}
+
                           {isSoldOrRented ? (
                             <span className="px-3 py-1 rounded-md bg-amber-600 text-white text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-1">
                               <CheckCircle2 className="w-3.5 h-3.5" />

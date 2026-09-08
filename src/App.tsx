@@ -415,6 +415,21 @@ export default function App() {
     await deleteFirestoreProperty(propertyId);
   };
 
+  const handlePurgeDemoProperties = async () => {
+    const demoIds = ['prop-1', 'prop-2', 'prop-3', 'prop-4', 'prop-5', 'prop-6', 'prop-7', 'prop-8'];
+    demoIds.forEach(id => markPropertyAsDeletedLocally(id));
+
+    setProperties(prev => {
+      const nextList = prev.filter(p => !demoIds.includes(p.id));
+      setPropertiesCache(nextList);
+      return nextList;
+    });
+
+    for (const id of demoIds) {
+      await deleteFirestoreProperty(id);
+    }
+  };
+
   const handleTogglePropertyStatus = async (propertyId: string) => {
     const prop = properties.find(p => p.id === propertyId);
     if (!prop) return;
@@ -649,6 +664,7 @@ export default function App() {
             onNavigateProperties={() => navigateTo('properties')}
             onLogout={handleLogout}
             onDeleteLead={handleDeleteLead}
+            onPurgeDemoProperties={handlePurgeDemoProperties}
           />
         )}
 
