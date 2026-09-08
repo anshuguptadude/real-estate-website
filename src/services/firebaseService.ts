@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { 
-  getFirestore, 
+  initializeFirestore, 
   doc, 
   setDoc, 
   getDoc, 
@@ -17,7 +17,9 @@ import { LeadSubmission } from '../utils/security';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = initializeFirestore(app, {
+  ignoreUndefinedProperties: true
+});
 
 // PROPERTIES REAL-TIME SYNC & FETCH
 export const subscribeFirestoreProperties = (callback: (properties: Property[]) => void) => {
@@ -28,7 +30,7 @@ export const subscribeFirestoreProperties = (callback: (properties: Property[]) 
         ...p,
         status: p.status || (idx === 3 ? 'Sold' : 'published'),
         isUserListing: idx === 0 || idx === 2,
-        ownerId: (idx === 0 || idx === 2) ? 'RAE-OWNER-01' : undefined,
+        ownerId: (idx === 0 || idx === 2) ? 'RAE-OWNER-01' : 'RAE-PARTNER-02',
         ownerName: (idx === 0 || idx === 2) ? 'Shrey Gupta' : p.agent?.name || 'Managing Partner'
       }));
       for (const prop of seeded) {
@@ -54,7 +56,7 @@ export const fetchFirestoreProperties = async (): Promise<Property[]> => {
         ...p,
         status: p.status || (idx === 3 ? 'Sold' : 'published'),
         isUserListing: idx === 0 || idx === 2,
-        ownerId: (idx === 0 || idx === 2) ? 'RAE-OWNER-01' : undefined,
+        ownerId: (idx === 0 || idx === 2) ? 'RAE-OWNER-01' : 'RAE-PARTNER-02',
         ownerName: (idx === 0 || idx === 2) ? 'Shrey Gupta' : p.agent?.name || 'Managing Partner'
       }));
       for (const prop of seeded) {

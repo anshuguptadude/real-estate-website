@@ -286,7 +286,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       verified: isLegallyVerified,
       verificationStatus: isUserAdmin ? 'Verified' : resolvedVerificationStatus,
       verifiedBy: resolvedAuthorityName,
-      verificationNumber: verificationDocNumber.trim() || undefined,
+      verificationNumber: verificationDocNumber.trim() || "",
       status: initialStatus,
       isUserListing: true,
       ownerId: user?.id || 'RAE-OWNER-01',
