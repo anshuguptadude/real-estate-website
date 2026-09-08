@@ -4,7 +4,6 @@ import { Landmark, MapPin, Phone, Mail } from 'lucide-react';
 
 interface FooterProps {
   onNavigate: (screen: ActiveScreen) => void;
-  onOpenPostProperty: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {

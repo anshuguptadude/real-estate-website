@@ -1,7 +1,6 @@
 import React from 'react';
-import { Neighborhood } from '../types';
 import { NEIGHBORHOODS_DATA } from '../data/mockData';
-import { MapPin, TrendingUp, ArrowRight, Building, Sparkles } from 'lucide-react';
+import { MapPin, TrendingUp, ArrowRight } from 'lucide-react';
 
 interface NeighborhoodExplorerProps {
   onSelectLocality: (locality: string) => void;

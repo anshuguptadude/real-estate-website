@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { MapPin, Phone, Mail, MessageSquare, Clock, Send, CheckCircle2, Landmark, Compass } from 'lucide-react';
+import { saveFirestoreLead } from '../services/firebaseService';
+import { LeadSubmission } from '../utils/security';
 
 export const ContactScreen: React.FC = () => {
   const [name, setName] = useState('');
@@ -9,8 +11,22 @@ export const ContactScreen: React.FC = () => {
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name || !phone || !email) return;
+
+    const contactLead: LeadSubmission = {
+      id: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
+      propertyId: 'contact-desk',
+      propertyTitle: service ? `Concierge: ${service}` : 'Concierge Desk Inquiry',
+      buyerName: name.trim(),
+      phone: phone.trim(),
+      email: email.trim().toLowerCase(),
+      preferredTime: message ? `Notes: ${message.slice(0, 80)}` : 'General Contact Desk Form',
+      timestamp: new Date().toLocaleString()
+    };
+
+    await saveFirestoreLead(contactLead);
     setSent(true);
     setTimeout(() => {
       setSent(false);

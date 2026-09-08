@@ -2,18 +2,22 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ActiveScreen, Property, Project, FilterState, PropertyType, ListingType, UserProfile } from './types';
 import { isAdmin, getMaskedProperty, LeadSubmission } from './utils/security';
 import { 
-  fetchFirestoreProperties, 
   subscribeFirestoreProperties,
   saveFirestoreProperty, 
   deleteFirestoreProperty, 
-  fetchFirestoreProjects, 
   subscribeFirestoreProjects,
   saveFirestoreProject, 
   deleteFirestoreProject, 
-  fetchFirestoreLeads, 
-  saveFirestoreLead, 
-  deleteFirestoreLead 
+  subscribeFirestoreLeads,
+  saveFirestoreLead,
+  deleteFirestoreLead,
+  saveFirestoreAccount,
+  getDeletedPropertyIds,
+  markPropertyAsDeletedLocally,
+  getPropertiesCache,
+  setPropertiesCache
 } from './services/firebaseService';
+import { PROPERTIES_DATA } from './data/mockData';
 import { LeadInquiryModal } from './components/LeadInquiryModal';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
@@ -51,8 +55,22 @@ export default function App() {
     return null;
   });
 
-  // Global Properties State (fetched directly from Firebase Firestore via real-time onSnapshot)
-  const [properties, setProperties] = useState<Property[]>([]);
+  // Global Properties State (persisted locally and synced with Firebase Firestore)
+  const [properties, setProperties] = useState<Property[]>(() => {
+    const deletedIds = getDeletedPropertyIds();
+    const cached = getPropertiesCache();
+    if (cached && cached.length > 0) {
+      return cached.filter(p => !p.isDeleted && !deletedIds.includes(p.id));
+    }
+    return (PROPERTIES_DATA as Property[])
+      .filter(p => !deletedIds.includes(p.id))
+      .map((p, idx) => ({
+        ...p,
+        status: p.status || (idx === 3 ? 'Sold' : 'published'),
+        isApproved: true,
+        isDeleted: false
+      }));
+  });
 
   // Sync user state to localStorage
   useEffect(() => {
@@ -67,23 +85,49 @@ export default function App() {
     }
   }, [user]);
 
-  // Subscribe to real-time Firestore updates for properties and projects across all devices globally
+  // Auto-migrate any local browser accounts to Cloud Firestore so they are accessible across all browsers/devices
+  useEffect(() => {
+    const migrateLocalAccountsToCloud = async () => {
+      try {
+        const stored = localStorage.getItem('royal_agra_accounts_v1');
+        if (stored) {
+          const accounts = JSON.parse(stored);
+          if (Array.isArray(accounts)) {
+            for (const acc of accounts) {
+              await saveFirestoreAccount(acc);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Auto-sync local accounts error:', err);
+      }
+    };
+    migrateLocalAccountsToCloud();
+  }, []);
+
+  // Subscribe to real-time Firestore updates for properties, projects, and leads across all devices globally
   useEffect(() => {
     const unsubscribeProps = subscribeFirestoreProperties(fetched => {
-      if (fetched && fetched.length > 0) setProperties(fetched);
+      if (fetched && fetched.length > 0) {
+        const deletedIds = getDeletedPropertyIds();
+        const valid = fetched.filter(p => !p.isDeleted && !deletedIds.includes(p.id));
+        setProperties(valid);
+        setPropertiesCache(valid);
+      }
     });
 
     const unsubscribeProjects = subscribeFirestoreProjects(fetched => {
       if (fetched && fetched.length > 0) setProjectsList(fetched);
     });
 
-    fetchFirestoreLeads().then(fetched => {
+    const unsubscribeLeads = subscribeFirestoreLeads(fetched => {
       if (fetched && fetched.length > 0) setLeads(fetched);
     });
 
     return () => {
       unsubscribeProps();
       unsubscribeProjects();
+      unsubscribeLeads();
     };
   }, []);
 
@@ -150,12 +194,14 @@ export default function App() {
     setLeadModalOpen(true);
   };
 
-  const handleLeadSubmitted = (newLead: LeadSubmission) => {
+  const handleLeadSubmitted = async (newLead: LeadSubmission) => {
     setLeads(prev => [newLead, ...prev]);
+    await saveFirestoreLead(newLead);
   };
 
-  const handleDeleteLead = (leadId: string) => {
+  const handleDeleteLead = async (leadId: string) => {
     setLeads(prev => prev.filter(l => l.id !== leadId));
+    await deleteFirestoreLead(leadId);
   };
 
   // Projects State (fetched directly from Firebase Firestore via real-time onSnapshot)
@@ -315,24 +361,58 @@ export default function App() {
   };
 
   // Property Management Handlers
-  const handlePropertyCreated = async (newProp: Property) => {
-    await saveFirestoreProperty(newProp);
+  const handlePropertyCreated = async (newProp: Property): Promise<boolean> => {
+    const propToSave: Property = {
+      ...newProp,
+      isDeleted: false,
+      isApproved: isAdmin(user) || newProp.status === 'published'
+    };
+    setProperties(prev => {
+      const exists = prev.some(p => p.id === propToSave.id);
+      const updated = exists ? prev.map(p => p.id === propToSave.id ? propToSave : p) : [propToSave, ...prev];
+      setPropertiesCache(updated);
+      return updated;
+    });
+    const success = await saveFirestoreProperty(propToSave);
+    return success;
   };
 
   const handleSavePropertyEdit = async (updatedProperty: Property) => {
-    await saveFirestoreProperty(updatedProperty);
-    if (selectedProperty && selectedProperty.id === updatedProperty.id) {
-      setSelectedProperty(updatedProperty);
+    const cleanUpdated: Property = {
+      ...updatedProperty,
+      isDeleted: false
+    };
+    setProperties(prev => {
+      const nextList = prev.map(p => p.id === cleanUpdated.id ? cleanUpdated : p);
+      setPropertiesCache(nextList);
+      return nextList;
+    });
+    if (selectedProperty && selectedProperty.id === cleanUpdated.id) {
+      setSelectedProperty(cleanUpdated);
     }
+    await saveFirestoreProperty(cleanUpdated);
   };
 
   const handleDeleteProperty = async (propertyId: string) => {
-    await deleteFirestoreProperty(propertyId);
+    // 1. Mark in persistent storage so page reloads or seed arrays never bring it back
+    markPropertyAsDeletedLocally(propertyId);
+
+    // 2. Remove immediately from local state and update local cache
+    setProperties(prev => {
+      const nextList = prev.filter(p => p.id !== propertyId);
+      setPropertiesCache(nextList);
+      return nextList;
+    });
+
+    // 3. Remove from favorites, compare list, and active modal
     setSavedPropertyIds(prev => prev.filter(id => id !== propertyId));
     setCompareList(prev => prev.filter(p => p.id !== propertyId));
     if (selectedProperty && selectedProperty.id === propertyId) {
       setSelectedProperty(null);
     }
+
+    // 4. Trigger persistent soft-delete & hard-delete in Firestore
+    await deleteFirestoreProperty(propertyId);
   };
 
   const handleTogglePropertyStatus = async (propertyId: string) => {
@@ -342,7 +422,12 @@ export default function App() {
     const nextStatus = current === 'Active' 
       ? (prop.listingType === 'Rent' ? 'Rented' : 'Sold')
       : 'Active';
-    const updated = { ...prop, status: nextStatus };
+    const updated: Property = { ...prop, status: nextStatus, isApproved: true };
+    setProperties(prev => {
+      const nextList = prev.map(p => p.id === propertyId ? updated : p);
+      setPropertiesCache(nextList);
+      return nextList;
+    });
     await saveFirestoreProperty(updated);
   };
 
@@ -367,7 +452,7 @@ export default function App() {
     );
   };
 
-  const handleInquireContact = (property: Property) => {
+  const handleInquireContact = async (property: Property) => {
     const newLead: LeadSubmission = {
       id: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
       propertyId: property.id,
@@ -379,6 +464,7 @@ export default function App() {
       timestamp: new Date().toLocaleString()
     };
     setLeads(prev => [newLead, ...prev]);
+    await saveFirestoreLead(newLead);
   };
 
   const handleToggleCompare = (prop: Property) => {
@@ -406,23 +492,59 @@ export default function App() {
   const handleApproveProperty = async (propertyId: string) => {
     const prop = properties.find(p => p.id === propertyId);
     if (!prop) return;
-    const updated = { ...prop, status: 'published' as const };
+    const updated: Property = { 
+      ...prop, 
+      status: 'published',
+      isApproved: true,
+      verificationStatus: 'Verified'
+    };
+    // 1. Immediately update React state and persistent cache
+    setProperties(prev => {
+      const nextList = prev.map(p => p.id === propertyId ? updated : p);
+      setPropertiesCache(nextList);
+      return nextList;
+    });
+    if (selectedProperty && selectedProperty.id === propertyId) {
+      setSelectedProperty(updated);
+    }
+    // 2. Persist to Firestore database
     await saveFirestoreProperty(updated);
   };
 
   const handleRejectProperty = async (propertyId: string) => {
     const prop = properties.find(p => p.id === propertyId);
     if (!prop) return;
-    const updated = { ...prop, status: 'rejected' as const };
+    const updated: Property = { 
+      ...prop, 
+      status: 'rejected',
+      isApproved: false
+    };
+    setProperties(prev => {
+      const nextList = prev.map(p => p.id === propertyId ? updated : p);
+      setPropertiesCache(nextList);
+      return nextList;
+    });
+    if (selectedProperty && selectedProperty.id === propertyId) {
+      setSelectedProperty(updated);
+    }
     await saveFirestoreProperty(updated);
   };
 
-  const publicProperties = properties.filter(p => 
-    (p.status === 'published' || p.status === 'Active' || p.status === 'Sold' || p.status === 'Rented' || !p.status) && 
-    p.status !== 'pending_verification' && 
-    p.status !== 'Pending Approval' && 
-    p.status !== 'rejected'
-  );
+  const publicProperties = properties.filter(p => {
+    if (p.isDeleted) return false;
+    const deletedIds = getDeletedPropertyIds();
+    if (deletedIds.includes(p.id)) return false;
+
+    // Admin can see all non-deleted properties
+    if (isAdmin(user)) return true;
+
+    // For public visitors on browse/buy/rent pages:
+    // Only show published / approved / active listings
+    const isApprovedOrPublished = p.status === 'published' || p.status === 'Active' || p.isApproved === true || p.status === 'Sold' || p.status === 'Rented';
+    const isPendingOrRejected = p.status === 'pending_verification' || p.status === 'Pending Approval' || p.status === 'rejected';
+
+    return isApprovedOrPublished && !isPendingOrRejected;
+  });
   const displayedProperties = publicProperties.map(p => getMaskedProperty(p, user));
   const savedProperties = displayedProperties.filter(p => savedPropertyIds.includes(p.id));
 
@@ -513,7 +635,10 @@ export default function App() {
             savedProperties={savedProperties}
             leads={leads}
             allProperties={properties}
-            onUpdateProfile={(updated) => setUser(updated)}
+            onUpdateProfile={async (updated) => {
+              setUser(updated);
+              await saveFirestoreAccount(updated);
+            }}
             onEditProperty={(prop) => setEditingProperty(prop)}
             onDeleteProperty={handleDeleteProperty}
             onTogglePropertyStatus={handleTogglePropertyStatus}

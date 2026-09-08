@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ActiveScreen, UserProfile } from '../types';
-import { Landmark, Menu, X, Building2, User, LogOut, LayoutDashboard, ChevronDown, PlusCircle } from 'lucide-react';
+import { Landmark, Menu, X, Building2, User, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
 
 interface NavbarProps {
   activeScreen: ActiveScreen;
@@ -9,8 +9,6 @@ interface NavbarProps {
   onOpenPostProperty: () => void;
   user: UserProfile | null;
   onLogout: () => void;
-  savedCount?: number;
-  onOpenSaved?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({

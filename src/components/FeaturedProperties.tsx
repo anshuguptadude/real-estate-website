@@ -48,9 +48,10 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
     }, 240);
   };
 
-  const filteredProperties = selectedFilter === 'All'
+  const filteredProperties = (selectedFilter === 'All'
     ? properties
-    : properties.filter(p => p.propertyType === selectedFilter);
+    : properties.filter(p => p.propertyType === selectedFilter)
+  ).filter(p => !p.isDeleted);
 
   return (
     <section className="py-16 sm:py-24 bg-[#FAF8F5]">

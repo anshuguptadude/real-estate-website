@@ -1032,7 +1032,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                       <h4 className="text-sm font-serif-luxury font-bold text-[#0F382C] line-clamp-1">{prop.title}</h4>
                       <p className="text-xs text-gray-500 flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-[#0F382C]" />
-                        <span>{prop.location}</span>
+                        <span>{prop.locality ? (prop.locality.toLowerCase().includes('agra') ? prop.locality : `${prop.locality}, Agra`) : prop.location}</span>
                       </p>
                       <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
                         <span className="text-xs text-gray-600 font-mono">{prop.superAreaSqFt} sq.ft</span>

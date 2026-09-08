@@ -50,6 +50,8 @@ export interface Property {
   powerBackup: boolean;
   coordinates: { lat: number; lng: number };
   status?: 'Active' | 'Sold' | 'Rented' | 'pending_verification' | 'published' | 'rejected';
+  isApproved?: boolean;
+  isDeleted?: boolean;
   isUserListing?: boolean;
   ownerId?: string;
   ownerName?: string;

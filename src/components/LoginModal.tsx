@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { ADMIN_CREDENTIALS } from '../utils/security';
+import { saveFirestoreAccount, fetchFirestoreAccounts, getFirestoreAccount } from '../services/firebaseService';
 import { 
   X, 
   Landmark, 
@@ -84,7 +85,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
     const identifier = loginIdentifier.trim().toLowerCase();
@@ -117,7 +118,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       return;
     }
 
-    // Retrieve saved accounts from localStorage
+    // Retrieve saved accounts from localStorage first for fast check
     let savedAccounts: any[] = [];
     try {
       const stored = localStorage.getItem('royal_agra_accounts_v1');
@@ -127,9 +128,35 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
 
     // Find account by email or phone
-    const matchedAccount = savedAccounts.find(
+    let matchedAccount = savedAccounts.find(
       (acc: any) => (acc.email && acc.email.toLowerCase() === identifier) || acc.phone === identifier
     );
+
+    // If not found locally, fetch account from Cloud Firestore for cross-platform login
+    if (!matchedAccount) {
+      try {
+        const directAccount = await getFirestoreAccount(identifier);
+        if (directAccount) {
+          matchedAccount = directAccount;
+          if (!savedAccounts.some(sa => sa.id === directAccount.id || sa.email === directAccount.email)) {
+            savedAccounts.push(directAccount);
+            localStorage.setItem('royal_agra_accounts_v1', JSON.stringify(savedAccounts));
+          }
+        } else {
+          const firestoreAccounts = await fetchFirestoreAccounts();
+          if (firestoreAccounts && firestoreAccounts.length > 0) {
+            // Merge into local list
+            savedAccounts = [...savedAccounts, ...firestoreAccounts.filter(fa => !savedAccounts.some(sa => sa.id === fa.id || sa.email === fa.email))];
+            localStorage.setItem('royal_agra_accounts_v1', JSON.stringify(savedAccounts));
+            matchedAccount = savedAccounts.find(
+              (acc: any) => (acc.email && acc.email.toLowerCase() === identifier) || acc.phone === identifier
+            );
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching accounts from cloud:", err);
+      }
+    }
 
     if (matchedAccount) {
       if (matchedAccount.password === enteredPassword) {
@@ -172,7 +199,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     setAuthError('Account not found with this email/mobile. Please sign up to create a new account.');
   };
 
-  const handleSignupSubmit = (e: React.FormEvent) => {
+  const handleSignupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
 
@@ -197,7 +224,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       savedAccounts = [];
     }
 
-    // Check if account already exists
+    // Check if account already exists locally or in Firestore
     const exists = savedAccounts.some((acc: any) => acc.email && acc.email.toLowerCase() === emailFormatted);
     if (exists) {
       setAuthError('An account with this email already exists. Please log in.');
@@ -230,6 +257,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       // ignore
     }
 
+    // Save to Cloud Firestore so user can log in on any device/browser
+    await saveFirestoreAccount(newUserAccount);
+
     const newUserProfile: UserProfile = {
       id: newUserAccount.id,
       name: newUserAccount.name,
@@ -250,7 +280,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     onClose();
   };
 
-  const handleForgotSubmit = (e: React.FormEvent) => {
+  const handleForgotSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
 
@@ -263,7 +293,19 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
 
     const emailF = forgotEmail.trim().toLowerCase();
-    const account = savedAccounts.find((acc: any) => acc.email && acc.email.toLowerCase() === emailF);
+    let account = savedAccounts.find((acc: any) => acc.email && acc.email.toLowerCase() === emailF);
+
+    if (!account) {
+      // Check firestore
+      try {
+        const firestoreAccounts = await fetchFirestoreAccounts();
+        account = firestoreAccounts.find((acc: any) => acc.email && acc.email.toLowerCase() === emailF);
+        if (account) {
+          savedAccounts.push(account);
+          localStorage.setItem('royal_agra_accounts_v1', JSON.stringify(savedAccounts));
+        }
+      } catch {}
+    }
 
     if (!account) {
       setAuthError('No account found with this email address.');
@@ -288,6 +330,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       try {
         localStorage.setItem('royal_agra_accounts_v1', JSON.stringify(savedAccounts));
       } catch {}
+      await saveFirestoreAccount(account);
       setSuccessMsg('Password reset successfully! You can now log in.');
       setTimeout(() => {
         setAuthMode('login');

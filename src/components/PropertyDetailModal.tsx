@@ -65,17 +65,12 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
 
   if (!property) return null;
 
-  const canSeeExactAddress = Boolean(
-    isAdmin(user) || 
-    (user && property && (
-      property.ownerId === user.id ||
-      (property.isUserListing && (property.ownerName === user.name || property.ownerContact === user.phone))
-    ))
-  );
-
-  const displayAddress = canSeeExactAddress 
+  const isUserAdmin = isAdmin(user);
+  const displayAddress = isUserAdmin && property.address 
     ? property.address 
-    : (property.locality ? `${property.locality}, Agra` : `${property.location}`);
+    : (property.locality 
+        ? (property.locality.toLowerCase().includes('agra') ? property.locality : `${property.locality}, Agra`)
+        : (property.location || 'Agra'));
 
   const handleCopyLink = () => {
     const shareUrl = `${window.location.origin}?property=${property.id}`;
@@ -204,6 +199,11 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
                   <MapPin className="w-4 h-4 text-[#0F382C]" />
                   <span>{displayAddress}</span>
+                  {isUserAdmin && property.address && (
+                    <span className="ml-1 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
+                      Exact Address (Admin View)
+                    </span>
+                  )}
                 </div>
 
                 {/* Verification Authority Badge */}

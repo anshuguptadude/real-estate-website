@@ -4,14 +4,12 @@ import {
   Home, 
   Building, 
   Eye, 
-  BookOpen, 
   PlusCircle, 
   Layers, 
   Landmark, 
   PhoneCall, 
   SlidersHorizontal,
   ChevronUp,
-  ChevronDown,
   X,
   Compass
 } from 'lucide-react';

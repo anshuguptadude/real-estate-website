@@ -79,6 +79,14 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
   // Filtered properties computation
   const filteredProperties = useMemo(() => {
     return properties.filter((item) => {
+      // 0. Deletion & Live Status Guard
+      if (item.isDeleted) return false;
+      if (!isAdminUser) {
+        const isLive = item.status === 'published' || item.status === 'Active' || item.isApproved === true || item.status === 'Sold' || item.status === 'Rented';
+        const isPendingOrRejected = item.status === 'pending_verification' || item.status === 'Pending Approval' || item.status === 'rejected';
+        if (!isLive || isPendingOrRejected) return false;
+      }
+
       // 1. Search Query
       if (filterState.searchQuery) {
         const query = filterState.searchQuery.toLowerCase();

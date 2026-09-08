@@ -37,7 +37,54 @@ export const ProjectsScreen: React.FC<ProjectsScreenProps> = ({
 
   const handleDownloadBrochure = (projectName: string) => {
     setDownloadSuccess(projectName);
-    setTimeout(() => setDownloadSuccess(null), 3000);
+    const proj = projects.find(p => p.name === projectName);
+    if (proj) {
+      const brochureContent = `=====================================================
+ROYAL AGRA ESTATE • EXCLUSIVE PROJECT E-BROCHURE
+=====================================================
+
+Project Name:       ${proj.name}
+Developer:          ${proj.developer}
+Location:           ${proj.locality}
+Starting Price:     ${proj.priceStarting}
+Total Units:        ${proj.units}
+Construction Status:${proj.status}
+Possession Date:    ${proj.possessionDate}
+Authority Approval: Agra Development Authority (ADA) / UP RERA
+
+-----------------------------------------------------
+PROJECT OVERVIEW & ARCHITECTURAL HIGHLIGHTS
+-----------------------------------------------------
+${proj.description}
+
+AMENITIES & SPECIFICATIONS:
+• Gated Multi-Tier Security & Concierge Front Desk
+• Luxury Clubhouse, Fitness Gym & Swimming Pool
+• 100% DG Power Redundancy & High-Speed Elevators
+• Reserved Underground Covered Parking with EV Stations
+• Manicured Landscaping, Green Walkways & Kids Arena
+
+-----------------------------------------------------
+FOR CONFIDENTIAL INQUIRIES & PRIVATE SITE INSPECTIONS
+-----------------------------------------------------
+Royal Agra Estate Advisory Desk
+Shrey Gupta:           +91 91490 79913 | shrey@royalagraestate.in
+Abhishek Singh Jadon:  +91 95571 38449 | abhishek@royalagraestate.in
+Corporate Office:      Fatehabad Road Corridor, Agra, Uttar Pradesh
+Official Website:      https://real-estate-website-pi-azure.vercel.app/
+=====================================================`;
+
+      const blob = new Blob([brochureContent], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${proj.name.replace(/[^a-zA-Z0-9]/g, '_')}_Brochure.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+    setTimeout(() => setDownloadSuccess(null), 3500);
   };
 
   const handleOpenCreate = () => {

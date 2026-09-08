@@ -21,13 +21,15 @@ import {
   Play,
   Film,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Loader2,
+  PlusCircle
 } from 'lucide-react';
 
 interface PostPropertyScreenProps {
   onSuccessNavigate: () => void;
   user?: UserProfile | null;
-  onPropertyCreated?: (property: Property) => void;
+  onPropertyCreated?: (property: Property) => Promise<boolean> | void;
   onNavigateDashboard?: () => void;
 }
 
@@ -86,6 +88,41 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
   const [submitted, setSubmitted] = useState(false);
   const [createdPropertyRef, setCreatedPropertyRef] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string>('');
+  const [stepErrors, setStepErrors] = useState<{ [key: string]: string }>({});
+
+  const resetForm = () => {
+    setStep(1);
+    setListingIntent('Sale');
+    setPropertyType('Luxury Villa');
+    setCustomPropertyType('');
+    setIsOtherPropertyType(false);
+    setLocality('Fatehabad Road');
+    setCustomLocality('');
+    setIsOtherLocality(false);
+    setProjectTitle('');
+    setAddress('');
+    setSuperArea('3500');
+    setAreaUnit('Sq.Ft');
+    setBedrooms('4');
+    setBathrooms('4');
+    setAskingPrice('28500000');
+    setFurnishing('Fully Furnished');
+    setPossession('Ready to Move');
+    setSelectedAmenities(['Swimming Pool', '24/7 Security', 'Private Garden']);
+    setUploadedMediaList([]);
+    setSelectedCoverIndex(0);
+    setIsVerified('yes');
+    setVerifiedByAuthority('Agra Development Authority (ADA)');
+    setCustomAuthority('');
+    setVerificationDocNumber('');
+    setTitleType('Freehold Clear Title');
+    setSubmitted(false);
+    setCreatedPropertyRef('');
+    setSubmitError('');
+    setStepErrors({});
+  };
 
   useEffect(() => {
     if (user) {
@@ -140,41 +177,124 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     }
   };
 
-  const handleProcessFiles = (files: FileList | File[]) => {
-    setMediaError('');
-    const fileArray = Array.from(files);
-    
-    fileArray.forEach((file) => {
-      const validImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-      const validVideoTypes = ['video/mp4', 'video/quicktime', 'video/mov'];
-      
-      const isImage = validImageTypes.includes(file.type) || file.type.startsWith('image/');
-      const isVideo = validVideoTypes.includes(file.type) || file.type.startsWith('video/') || file.name.toLowerCase().endsWith('.mov') || file.name.toLowerCase().endsWith('.mp4');
-
-      if (!isImage && !isVideo) {
-        setMediaError('Some files were skipped due to unsupported format. Please upload JPEG, PNG, WEBP, MP4, or MOV files.');
-        return;
-      }
-
-      // No file size limit! Any size picture or video is allowed.
-      const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
-      
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onload = () => {
-        if (reader.result) {
-          setUploadedMediaList((prev) => [
-            ...prev,
-            {
-              url: reader.result as string,
-              type: isVideo ? 'video' : 'image',
-              name: file.name,
-              size: `${sizeInMB} MB`
+      reader.onload = (readerEvent) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDimension = 1280;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            } else {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
             }
-          ]);
-        }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            // Compress to JPEG with 0.75 quality (lightweight yet clear)
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+            resolve(compressedDataUrl);
+          } else {
+            resolve(readerEvent.target?.result as string);
+          }
+        };
+        img.onerror = () => {
+          resolve(readerEvent.target?.result as string);
+        };
+        img.src = readerEvent.target?.result as string;
       };
       reader.readAsDataURL(file);
     });
+  };
+
+  const handleProcessFiles = async (files: FileList | File[]) => {
+    setMediaError('');
+    const fileArray = Array.from(files);
+
+    for (const file of fileArray) {
+      const validImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+      const isImage = validImageTypes.includes(file.type) || file.type.startsWith('image/');
+
+      if (!isImage) {
+        setMediaError('Only photo uploads (JPEG, PNG, WEBP) are supported for direct listing display.');
+        continue;
+      }
+
+      try {
+        const compressedUrl = await compressImage(file);
+        const approxSizeInKB = Math.round((compressedUrl.length * 3) / 4 / 1024);
+        setUploadedMediaList((prev) => [
+          ...prev,
+          {
+            url: compressedUrl,
+            type: 'image',
+            name: file.name,
+            size: `${approxSizeInKB} KB (Optimized)`
+          }
+        ]);
+      } catch (err) {
+        console.error('Error processing image:', err);
+      }
+    }
+  };
+
+  const validateStep1 = (): boolean => {
+    const errors: { [key: string]: string } = {};
+    if (isOtherPropertyType && !customPropertyType.trim()) {
+      errors.customPropertyType = 'Please enter a custom property typology';
+    }
+    if (isOtherLocality && !customLocality.trim()) {
+      errors.customLocality = 'Please enter your custom Agra locality';
+    }
+    if (!projectTitle.trim()) {
+      errors.projectTitle = 'Building or project name is required';
+    }
+    if (!address.trim()) {
+      errors.address = 'Full address or landmarks in Agra are required';
+    }
+
+    setStepErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateStep2 = (): boolean => {
+    const errors: { [key: string]: string } = {};
+    const rawArea = Number(superArea);
+    if (!rawArea || rawArea <= 0) {
+      errors.superArea = 'Please specify a valid super area';
+    }
+    const rawPrice = Number(askingPrice.replace(/[^0-9]/g, ''));
+    if (!rawPrice || rawPrice <= 0) {
+      errors.askingPrice = 'Please specify expected price or monthly rent';
+    }
+
+    setStepErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateStep4 = (): boolean => {
+    const errors: { [key: string]: string } = {};
+    if (!ownerName.trim()) {
+      errors.ownerName = 'Owner / developer name is required';
+    }
+    if (!ownerPhone.trim() || ownerPhone.replace(/[^0-9]/g, '').length < 8) {
+      errors.ownerPhone = 'Please provide a valid contact phone number';
+    }
+
+    setStepErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,8 +334,24 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     return `₹${(amt / 100000).toFixed(2)} Lacs`;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateStep1()) {
+      setStep(1);
+      return;
+    }
+    if (!validateStep2()) {
+      setStep(2);
+      return;
+    }
+    if (!validateStep4()) {
+      setStep(4);
+      return;
+    }
+
+    setSubmitError('');
+    setIsSubmitting(true);
+
     const finalLocality = isOtherLocality ? (customLocality.trim() || 'Custom Locality') : locality;
     const numPrice = Number(askingPrice.replace(/[^0-9]/g, '')) || 25000000;
     const rawArea = Number(superArea) || 3000;
@@ -271,7 +407,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       pricePerSqFt: Math.round(numPrice / numSuperArea),
       location: `${finalLocality}, Agra`,
       locality: finalLocality,
-      address: address.trim() || `${finalLocality}, Agra, Uttar Pradesh`,
+      address: `${finalLocality}, Agra`,
       bedrooms: Number(bedrooms) || 4,
       bathrooms: Number(bathrooms) || 4,
       balconies: 2,
@@ -290,8 +426,8 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       status: initialStatus,
       isUserListing: true,
       ownerId: user?.id || 'RAE-OWNER-01',
-      ownerName: ownerName || user?.name || 'Property Owner',
-      ownerContact: ownerPhone || user?.phone || '+91 91490 79913',
+      ownerName: ownerName.trim() || user?.name || 'Property Owner',
+      ownerContact: ownerPhone.trim() || user?.phone || '+91 91490 79913',
       images: finalImages,
       coverImage: finalCover,
       description: `Spectacular ${propertyType} situated in the prestigious enclave of ${finalLocality}, Agra. Designed for distinguished living with spacious layouts, high ceilings, premium fittings, and comprehensive security infrastructure.`,
@@ -322,10 +458,22 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       coordinates: { lat: 27.1767, lng: 78.0081 }
     };
 
-    if (onPropertyCreated) {
-      onPropertyCreated(newProperty);
+    try {
+      if (onPropertyCreated) {
+        const result = await onPropertyCreated(newProperty);
+        if (result === false) {
+          setSubmitError('Unable to save property to database. Please check your internet connection or try smaller images.');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+      setIsSubmitting(false);
+      setSubmitted(true);
+    } catch (err: any) {
+      console.error('Submission error:', err);
+      setSubmitError(err?.message || 'An unexpected error occurred while publishing. Please try again.');
+      setIsSubmitting(false);
     }
-    setSubmitted(true);
   };
 
   return (
@@ -418,11 +566,20 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                <button
+                  type="button"
+                  id="post-another-property-btn"
+                  onClick={resetForm}
+                  className="w-full sm:w-auto bg-[#0F382C] text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#164E3D] flex items-center justify-center gap-2 shadow-md transition-all"
+                >
+                  <PlusCircle className="w-4 h-4 text-[#E4D5B7]" />
+                  <span>Post Another Property</span>
+                </button>
                 {onNavigateDashboard && (
                   <button
                     type="button"
                     onClick={onNavigateDashboard}
-                    className="w-full sm:w-auto bg-[#0F382C] text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#164E3D] flex items-center justify-center gap-2 shadow-md"
+                    className="w-full sm:w-auto bg-white border border-[#0F382C]/30 text-[#0F382C] hover:bg-gray-50 px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm"
                   >
                     <LayoutDashboard className="w-4 h-4" />
                     <span>Go to My Dashboard</span>
@@ -573,35 +730,63 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
                   {/* Property / Project Name */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-gray-700 uppercase">Building / House / Project Name</label>
+                    <label className="block text-xs font-bold text-gray-700 uppercase">Building / House / Project Name *</label>
                     <input
                       type="text"
-                      required
                       placeholder="e.g. The Taj Sovereign Villa or Royal Palms"
                       value={projectTitle}
-                      onChange={(e) => setProjectTitle(e.target.value)}
-                      className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
+                      onChange={(e) => {
+                        setProjectTitle(e.target.value);
+                        if (stepErrors.projectTitle) setStepErrors(prev => ({ ...prev, projectTitle: '' }));
+                      }}
+                      className={`w-full p-3 text-xs sm:text-sm bg-gray-50 border rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C] ${
+                        stepErrors.projectTitle ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-200'
+                      }`}
                     />
+                    {stepErrors.projectTitle && (
+                      <p className="text-[11px] text-red-600 font-semibold flex items-center gap-1">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        <span>{stepErrors.projectTitle}</span>
+                      </p>
+                    )}
                   </div>
 
                   {/* Detailed Address */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-gray-700 uppercase">Full Address & Landmarks in Agra</label>
+                    <label className="block text-xs font-bold text-gray-700 uppercase">Full Address & Landmarks in Agra *</label>
                     <textarea
                       rows={2}
-                      required
                       placeholder="e.g. Plot 14, Royal Enclave, Near ITC Mughal, Fatehabad Road, Agra"
                       value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
+                      onChange={(e) => {
+                        setAddress(e.target.value);
+                        if (stepErrors.address) setStepErrors(prev => ({ ...prev, address: '' }));
+                      }}
+                      className={`w-full p-3 text-xs sm:text-sm bg-gray-50 border rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C] ${
+                        stepErrors.address ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-200'
+                      }`}
                     />
+                    {stepErrors.address && (
+                      <p className="text-[11px] text-red-600 font-semibold flex items-center gap-1">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        <span>{stepErrors.address}</span>
+                      </p>
+                    )}
+                    <p className="text-[11px] text-gray-500">
+                      🔒 <span className="font-semibold">Privacy Protected:</span> Only the property's locality ({locality || 'Agra'}) is shown publicly on the website. Full house/plot addresses are never revealed to buyers.
+                    </p>
                   </div>
 
                   <div className="flex justify-end pt-4">
                     <button
                       type="button"
-                      onClick={() => setStep(2)}
-                      className="bg-[#0F382C] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-[#164E3D]"
+                      id="step1-continue-btn"
+                      onClick={() => {
+                        if (validateStep1()) {
+                          setStep(2);
+                        }
+                      }}
+                      className="bg-[#0F382C] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-[#164E3D] transition-all"
                     >
                       <span>Continue to Specifications</span>
                       <ArrowRight className="w-4 h-4" />
@@ -646,16 +831,26 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       <div className="relative">
                         <input
                           type="number"
-                          required
                           value={superArea}
-                          onChange={(e) => setSuperArea(e.target.value)}
+                          onChange={(e) => {
+                            setSuperArea(e.target.value);
+                            if (stepErrors.superArea) setStepErrors(prev => ({ ...prev, superArea: '' }));
+                          }}
                           placeholder="e.g. 3500"
-                          className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
+                          className={`w-full p-3 text-xs sm:text-sm bg-gray-50 border rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C] ${
+                            stepErrors.superArea ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-200'
+                          }`}
                         />
                         <span className="absolute right-3 top-3 text-xs text-gray-400 font-semibold pointer-events-none">
                           {areaUnit}
                         </span>
                       </div>
+                      {stepErrors.superArea && (
+                        <p className="text-[11px] text-red-600 font-semibold flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          <span>{stepErrors.superArea}</span>
+                        </p>
+                      )}
                     </div>
 
                     {/* Bedrooms (BHK) */}
@@ -688,7 +883,20 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         <option value="3">3 Bathrooms</option>
                         <option value="4">4 Bathrooms</option>
                         <option value="5">5+ Bathrooms</option>
-                        <option value="0">Not Applicable</option>
+                      </select>
+                    </div>
+
+                    {/* Possession Status */}
+                    <div className="space-y-2">
+                      <label className="block text-xs font-bold text-gray-700 uppercase">Possession Status</label>
+                      <select
+                        value={possession}
+                        onChange={(e) => setPossession(e.target.value)}
+                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white"
+                      >
+                        <option value="Ready to Move">Ready to Move</option>
+                        <option value="Under Construction">Under Construction</option>
+                        <option value="Newly Launched">Newly Launched</option>
                       </select>
                     </div>
 
@@ -710,19 +918,27 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     {/* Asking Price with Comma Format & Word Breakdown */}
                     <div className="space-y-2 sm:col-span-2">
                       <label className="block text-xs font-bold text-gray-700 uppercase">
-                        {listingIntent === 'Sale' ? 'Expected Sale Price (₹ INR)' : 'Expected Monthly Rent (₹ INR)'}
+                        {listingIntent === 'Sale' ? 'Expected Sale Price (₹ INR) *' : 'Expected Monthly Rent (₹ INR) *'}
                       </label>
                       <input
                         type="text"
-                        required
                         value={askingPrice}
                         onChange={(e) => {
                           const raw = e.target.value.replace(/[^0-9]/g, '');
                           setAskingPrice(raw);
+                          if (stepErrors.askingPrice) setStepErrors(prev => ({ ...prev, askingPrice: '' }));
                         }}
                         placeholder="e.g. 28500000"
-                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-mono focus:bg-white focus:border-[#0F382C]"
+                        className={`w-full p-3 text-xs sm:text-sm bg-gray-50 border rounded-lg text-gray-800 font-mono focus:bg-white focus:border-[#0F382C] ${
+                          stepErrors.askingPrice ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-200'
+                        }`}
                       />
+                      {stepErrors.askingPrice && (
+                        <p className="text-[11px] text-red-600 font-semibold flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          <span>{stepErrors.askingPrice}</span>
+                        </p>
+                      )}
 
                       {askingPrice && Number(askingPrice) > 0 && (
                         <div className="p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl text-xs space-y-1">
@@ -749,8 +965,13 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     </button>
                     <button
                       type="button"
-                      onClick={() => setStep(3)}
-                      className="bg-[#0F382C] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-[#164E3D]"
+                      id="step2-continue-btn"
+                      onClick={() => {
+                        if (validateStep2()) {
+                          setStep(3);
+                        }
+                      }}
+                      className="bg-[#0F382C] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-[#164E3D] transition-all"
                     >
                       <span>Continue to Amenities & Media</span>
                       <ArrowRight className="w-4 h-4" />
@@ -1127,33 +1348,61 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">Owner Name</label>
+                        <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">Owner Name *</label>
                         <input
                           type="text"
-                          required
                           value={ownerName}
-                          onChange={(e) => setOwnerName(e.target.value)}
-                          className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg"
+                          onChange={(e) => {
+                            setOwnerName(e.target.value);
+                            if (stepErrors.ownerName) setStepErrors(prev => ({ ...prev, ownerName: '' }));
+                          }}
+                          className={`w-full p-2.5 text-xs bg-white border rounded-lg ${
+                            stepErrors.ownerName ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-300'
+                          }`}
                         />
+                        {stepErrors.ownerName && (
+                          <p className="text-[11px] text-red-600 font-semibold flex items-center gap-1 mt-1">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            <span>{stepErrors.ownerName}</span>
+                          </p>
+                        )}
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">Owner Contact Phone</label>
+                        <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">Owner Contact Phone *</label>
                         <input
                           type="tel"
-                          required
                           value={ownerPhone}
-                          onChange={(e) => setOwnerPhone(e.target.value)}
-                          className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg"
+                          onChange={(e) => {
+                            setOwnerPhone(e.target.value);
+                            if (stepErrors.ownerPhone) setStepErrors(prev => ({ ...prev, ownerPhone: '' }));
+                          }}
+                          className={`w-full p-2.5 text-xs bg-white border rounded-lg ${
+                            stepErrors.ownerPhone ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-300'
+                          }`}
                         />
+                        {stepErrors.ownerPhone && (
+                          <p className="text-[11px] text-red-600 font-semibold flex items-center gap-1 mt-1">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            <span>{stepErrors.ownerPhone}</span>
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
+
+                  {submitError && (
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-xs text-red-800 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                      <span>{submitError}</span>
+                    </div>
+                  )}
 
                   <div className="flex justify-between pt-4">
                     <button
                       type="button"
                       onClick={() => setStep(3)}
-                      className="text-xs font-bold text-gray-600 px-4 py-2 hover:text-[#0F382C] flex items-center gap-1.5"
+                      disabled={isSubmitting}
+                      className="text-xs font-bold text-gray-600 px-4 py-2 hover:text-[#0F382C] flex items-center gap-1.5 disabled:opacity-50"
                     >
                       <ArrowLeft className="w-4 h-4" />
                       <span>Back</span>
@@ -1162,10 +1411,20 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     <button
                       type="submit"
                       id="submit-property-listing-btn"
-                      className="bg-[#0F382C] hover:bg-[#164E3D] text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+                      disabled={isSubmitting}
+                      className="bg-[#0F382C] hover:bg-[#164E3D] text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg hover:shadow-xl transition-all flex items-center gap-2 disabled:opacity-75 cursor-pointer disabled:cursor-not-allowed"
                     >
-                      <span>Publish Property Listing</span>
-                      <Sparkles className="w-4 h-4 text-[#E4D5B7]" />
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 text-[#E4D5B7] animate-spin" />
+                          <span>Publishing to Royal Agra...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Publish Property Listing</span>
+                          <Sparkles className="w-4 h-4 text-[#E4D5B7]" />
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>

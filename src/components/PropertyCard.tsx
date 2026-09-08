@@ -117,7 +117,16 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           {/* Location Line */}
           <div className="flex items-center gap-1 text-xs text-gray-500 font-medium mb-1.5">
             <MapPin className="w-3.5 h-3.5 text-[#0F382C] shrink-0" />
-            <span className="truncate">{property.location}</span>
+            <span className="truncate" title={isAdminUser && property.address ? property.address : undefined}>
+              {isAdminUser && property.address
+                ? property.address
+                : (property.locality ? (property.locality.toLowerCase().includes('agra') ? property.locality : `${property.locality}, Agra`) : property.location)}
+            </span>
+            {isAdminUser && property.address && (
+              <span className="ml-auto text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 shrink-0">
+                Admin Address View
+              </span>
+            )}
           </div>
 
           {/* Property Title */}

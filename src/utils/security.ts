@@ -46,10 +46,17 @@ export const getMaskedProperty = (property: Property, user: UserProfile | null):
   if (isAdmin(user)) {
     return property;
   }
-  // For non-admin (buyer / guest view), mask sensitive details
+  
+  // For non-admin (buyer / guest view), mask sensitive details:
+  // Show only the general locality, hide exact street address & coordinates
+  const generalLocality = property.locality 
+    ? (property.locality.toLowerCase().includes('agra') ? property.locality : `${property.locality}, Agra`)
+    : (property.location || 'Agra');
+
   return {
     ...property,
-    address: `${property.locality}, Agra`,
+    address: generalLocality,
+    coordinates: { lat: 27.1767, lng: 78.0081 },
     ownerContact: undefined,
     agent: {
       name: 'Royal Agra Estate Concierge',

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Property, PropertyType } from '../types';
 import { AGRA_LOCALITIES, PROPERTY_TYPES } from '../data/mockData';
-import { X, Building2, Image as ImageIcon, Sparkles, Check, IndianRupee, Save } from 'lucide-react';
+import { X, Building2, Image as ImageIcon, IndianRupee, Save, Trash2, Plus, Upload, Star, Loader2, Check } from 'lucide-react';
 
 interface EditPropertyModalProps {
   property: Property | null;
@@ -28,6 +28,14 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
   const [furnishing, setFurnishing] = useState(property?.furnishing || 'Fully Furnished');
   const [possession, setPossession] = useState(property?.possession || 'Ready to Move');
   const [coverImage, setCoverImage] = useState(property?.coverImage || '');
+  const [images, setImages] = useState<string[]>(
+    property?.images && property.images.length > 0 
+      ? property.images 
+      : (property?.coverImage ? [property.coverImage] : [])
+  );
+  const [isUploading, setIsUploading] = useState(false);
+  const [imageError, setImageError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<Property['status']>(property?.status || 'Active');
   const [verified, setVerified] = useState<boolean>(property?.verified ?? true);
   const [verifiedBy, setVerifiedBy] = useState<string>(property?.verifiedBy || 'Agra Development Authority (ADA)');
@@ -46,11 +54,16 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
       setBathrooms(property.bathrooms);
       setFurnishing(property.furnishing);
       setPossession(property.possession);
-      setCoverImage(property.coverImage);
+      const initialImages = property.images && property.images.length > 0
+        ? property.images
+        : (property.coverImage ? [property.coverImage] : []);
+      setImages(initialImages);
+      setCoverImage(property.coverImage || initialImages[0] || '');
       setStatus(property.status || 'Active');
       setVerified(property.verified ?? true);
       setVerifiedBy(property.verifiedBy || 'Agra Development Authority (ADA)');
       setVerificationNumber(property.verificationNumber || '');
+      setImageError('');
     }
   }, [property]);
 
@@ -65,12 +78,109 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
     return `₹${(amt / 100000).toFixed(2)} Lacs`;
   };
 
-  const handleImagePreset = (url: string) => {
-    setCoverImage(url);
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (readerEvent) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDimension = 1280;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            } else {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+            resolve(compressedDataUrl);
+          } else {
+            resolve(readerEvent.target?.result as string);
+          }
+        };
+        img.onerror = () => {
+          resolve(readerEvent.target?.result as string);
+        };
+        img.src = readerEvent.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleAddPictures = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImageError('');
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      const newImages: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith('image/')) {
+          setImageError('Only image files (JPEG, PNG, WebP) are allowed.');
+          continue;
+        }
+        const compressed = await compressImage(file);
+        newImages.push(compressed);
+      }
+
+      if (newImages.length > 0) {
+        setImages((prev) => {
+          const updated = [...prev, ...newImages];
+          if (!coverImage && updated.length > 0) {
+            setCoverImage(updated[0]);
+          }
+          return updated;
+        });
+      }
+    } catch (err) {
+      console.error('Failed to process image uploads:', err);
+      setImageError('Failed to process one or more images. Please try again.');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDeleteImage = (indexToDelete: number) => {
+    setImageError('');
+    if (images.length <= 1) {
+      setImageError('A property must have at least one photo. Upload a replacement before deleting this one.');
+      return;
+    }
+    const targetUrl = images[indexToDelete];
+    const updated = images.filter((_, idx) => idx !== indexToDelete);
+    setImages(updated);
+
+    if (coverImage === targetUrl) {
+      setCoverImage(updated[0] || '');
+    }
+  };
+
+  const handleSetCoverImage = (imgUrl: string) => {
+    setCoverImage(imgUrl);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const finalCover = coverImage || images[0] || property.coverImage || '';
+    const finalImages = images.length > 0 ? images : (finalCover ? [finalCover] : []);
+
     const updated: Property = {
       ...property,
       title,
@@ -81,14 +191,17 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
       propertyType,
       locality,
       location: `${locality}, Agra`,
-      address,
+      address: address.trim() || property.address || `${locality}, Agra`,
       superAreaSqFt,
       bedrooms,
       bathrooms,
       furnishing,
       possession,
-      coverImage,
+      coverImage: finalCover,
+      images: finalImages,
       status,
+      isApproved: status === 'published' || status === 'Active' || Boolean(property.isApproved),
+      isDeleted: false,
       verified,
       verificationStatus: verified ? 'Verified' : 'Not Verified',
       verifiedBy: verified ? verifiedBy : 'Not Verified / Independent Private Registry',
@@ -97,13 +210,6 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
     onSave(updated);
     onClose();
   };
-
-  const sampleImages = [
-    'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80'
-  ];
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
@@ -254,6 +360,24 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
             </div>
           </div>
 
+          {/* Complete Exact Address (Admin Editable) */}
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center justify-between">
+              <span>Complete Exact Address / House No. & Plot *</span>
+              <span className="text-[10px] text-amber-700 font-semibold">
+                🔒 Confidential: Visible only to Admins
+              </span>
+            </label>
+            <textarea
+              rows={2}
+              required
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="e.g. Plot 18, Royal Enclave, Near Hotel ITC Mughal, Fatehabad Road, Agra"
+              className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+            />
+          </div>
+
           {/* Bedrooms, Bathrooms, Furnishing */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
@@ -361,47 +485,150 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
             )}
           </div>
 
-          {/* Cover Image URL / Re-upload */}
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-              Cover Image URL
-            </label>
-            <div className="flex gap-2">
+          {/* Property Photos Management */}
+          <div className="space-y-3 bg-gray-50/80 p-4 sm:p-5 rounded-xl border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <ImageIcon className="w-4 h-4 text-[#0F382C]" />
+                  <span>Property Photo Gallery ({images.length})</span>
+                </label>
+                <p className="text-[11px] text-gray-500 mt-0.5">
+                  Click any thumbnail to set it as the active cover photo. Upload or delete photos below.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#0F382C] hover:bg-[#164E3D] text-white text-xs font-bold rounded-lg transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Upload Image / Add Photo</span>
+                  </>
+                )}
+              </button>
               <input
-                type="url"
-                required
-                value={coverImage}
-                onChange={(e) => setCoverImage(e.target.value)}
-                placeholder="https://images.unsplash.com/..."
-                className="flex-1 p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white"
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={handleAddPictures}
               />
             </div>
 
-            {/* Quick Image Preview & Presets */}
-            <div className="mt-3 flex items-center gap-3 overflow-x-auto py-1">
-              <span className="text-[11px] text-gray-500 font-semibold uppercase shrink-0">Sample Presets:</span>
-              {sampleImages.map((img, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleImagePreset(img)}
-                  className={`w-14 h-10 rounded-lg overflow-hidden border-2 shrink-0 transition-all ${
-                    coverImage === img ? 'border-[#0F382C] scale-105 shadow-sm' : 'border-gray-200 opacity-70 hover:opacity-100'
-                  }`}
-                >
-                  <img src={img} alt="Preset" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
+            {imageError && (
+              <div className="p-2.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg">
+                {imageError}
+              </div>
+            )}
 
-            {coverImage && (
-              <div className="mt-3 w-full h-36 rounded-xl overflow-hidden border border-gray-200 relative">
-                <img src={coverImage} alt="Current Preview" className="w-full h-full object-cover" />
-                <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded backdrop-blur-xs">
-                  Active Photo Preview
+            {/* Image Grid - Showing ONLY photos for this specific property */}
+            {images.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
+                {images.map((img, idx) => {
+                  const isCover = coverImage === img || (!coverImage && idx === 0);
+                  return (
+                    <div
+                      key={idx}
+                      onClick={() => handleSetCoverImage(img)}
+                      className={`group relative rounded-xl overflow-hidden border-2 bg-gray-100 aspect-[4/3] flex flex-col justify-between transition-all cursor-pointer ${
+                        isCover 
+                          ? 'border-emerald-600 ring-3 ring-emerald-500/30 shadow-md scale-[1.02]' 
+                          : 'border-gray-200 hover:border-gray-400 hover:shadow-xs'
+                      }`}
+                      title={isCover ? 'Currently active cover photo' : 'Click to set this photo as cover'}
+                    >
+                      <img
+                        src={img}
+                        alt={`Photo ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      {/* Hover Overlay */}
+                      <div className={`absolute inset-0 bg-black/30 transition-opacity pointer-events-none ${isCover ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}`} />
+
+                      {/* Top Badges & Controls */}
+                      <div className="absolute top-1.5 left-1.5 right-1.5 flex items-center justify-between z-10">
+                        {isCover ? (
+                          <span className="inline-flex items-center gap-1 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-xs">
+                            <Star className="w-3 h-3 fill-current" />
+                            <span>★ Active Cover</span>
+                          </span>
+                        ) : (
+                          <span className="bg-black/60 group-hover:bg-emerald-700 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded backdrop-blur-xs transition-colors opacity-0 group-hover:opacity-100">
+                            Click to set cover
+                          </span>
+                        )}
+
+                        {/* Delete / Trash Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteImage(idx);
+                          }}
+                          className="w-6 h-6 rounded-full bg-red-600/90 hover:bg-red-600 text-white flex items-center justify-center transition-all shadow-xs cursor-pointer hover:scale-110 ml-auto"
+                          title="Delete photo from property"
+                          aria-label="Delete photo"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      {/* Bottom Photo Index tag */}
+                      <div className="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded font-mono backdrop-blur-xs">
+                        #{idx + 1}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-[#0F382C] transition-colors cursor-pointer bg-white"
+              >
+                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-xs font-semibold text-gray-700">No photos remaining</p>
+                <p className="text-[11px] text-gray-500 mt-1">Click to upload photos from your device</p>
+              </div>
+            )}
+
+            {/* Active Photo Preview Area (Updating dynamically based on selections) */}
+            {(coverImage || images[0] || property.coverImage) && (
+              <div className="mt-4 pt-3 border-t border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-gray-700 uppercase flex items-center gap-1.5">
+                    <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                    <span>Active Photo Preview (Primary Cover)</span>
+                  </span>
+                  <span className="text-[10px] text-emerald-700 font-semibold">
+                    ✓ Selected Cover Photo
+                  </span>
+                </div>
+                <div className="relative h-44 sm:h-56 w-full rounded-xl overflow-hidden border-2 border-emerald-600/50 shadow-md bg-gray-900 group">
+                  <img
+                    src={coverImage || images[0] || property.coverImage}
+                    alt="Active Cover Preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute bottom-3 left-3 bg-black/75 backdrop-blur-xs text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-2 font-medium border border-white/10">
+                    <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                    <span>Active Cover Preview: This image will display as the main cover on search cards and public listings.</span>
+                  </div>
                 </div>
               </div>
             )}
+
           </div>
 
           {/* Actions */}

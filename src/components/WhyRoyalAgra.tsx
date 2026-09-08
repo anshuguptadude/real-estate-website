@@ -67,6 +67,18 @@ export const WhyRoyalAgra: React.FC<WhyRoyalAgraProps> = ({ onContactAdvisory })
           })}
         </div>
 
+        {/* CTA Button */}
+        <div className="mt-12 text-center">
+          <button
+            type="button"
+            onClick={onContactAdvisory}
+            className="inline-flex items-center gap-2 bg-[#C5A869] hover:bg-[#b09355] text-[#0F382C] px-8 py-3.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest shadow-lg hover:shadow-xl transition-all cursor-pointer"
+          >
+            <span>Schedule Private Advisory Consultation</span>
+            <span>→</span>
+          </button>
+        </div>
+
       </div>
     </section>
   );
