@@ -59,73 +59,28 @@ export const markPropertyAsDeletedLocally = (id: string) => {
 
 export const getPropertiesCache = (): Property[] => {
   try {
-    const stored = localStorage.getItem('royal_agra_properties_cache_v2');
-    return stored ? JSON.parse(stored) : [];
+    const stored = localStorage.getItem('royal_agra_properties_v3');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    return [];
   } catch {
     return [];
   }
-};
-
-// DEDICATED PERSISTENT USER LISTINGS STORE
-// Guarantees any property created/posted by the user is preserved across refreshes and logouts
-export const getUserPropertiesStore = (): Property[] => {
-  try {
-    const stored = localStorage.getItem('royal_agra_user_listings_v1');
-    const deletedIds = getDeletedPropertyIds();
-    const list: Property[] = stored ? JSON.parse(stored) : [];
-    return list.filter(p => p && !p.isDeleted && !deletedIds.includes(p.id));
-  } catch {
-    return [];
-  }
-};
-
-export const saveUserPropertyLocally = (property: Property) => {
-  try {
-    const existing = getUserPropertiesStore();
-    const exists = existing.some(p => p.id === property.id);
-    const updated = exists 
-      ? existing.map(p => p.id === property.id ? property : p)
-      : [property, ...existing];
-    localStorage.setItem('royal_agra_user_listings_v1', JSON.stringify(updated));
-  } catch (e) {
-    console.error("Error saving user property locally:", e);
-  }
-};
-
-export const removeUserPropertyLocally = (propertyId: string) => {
-  try {
-    const existing = getUserPropertiesStore();
-    const updated = existing.filter(p => p.id !== propertyId);
-    localStorage.setItem('royal_agra_user_listings_v1', JSON.stringify(updated));
-  } catch (e) {
-    // ignore
-  }
-};
-
-// Merges any list of properties with the user's permanent local listings
-export const mergeWithUserListings = (list: Property[]): Property[] => {
-  const deletedIds = getDeletedPropertyIds();
-  const userListings = getUserPropertiesStore().filter(p => !p.isDeleted && !deletedIds.includes(p.id));
-  const baseList = list.filter(p => p && !p.isDeleted && !deletedIds.includes(p.id));
-
-  // Map by id: user listings take precedence if newer, otherwise append user listings
-  const map = new Map<string, Property>();
-  baseList.forEach(p => map.set(p.id, p));
-  userListings.forEach(p => map.set(p.id, p));
-
-  return Array.from(map.values());
 };
 
 export const setPropertiesCache = (properties: Property[]) => {
   try {
-    const deletedIds = getDeletedPropertyIds();
-    // Always ensure user listings are merged into cache
-    const merged = mergeWithUserListings(properties);
-    const cleanList = merged.filter(p => !p.isDeleted && !deletedIds.includes(p.id));
-    localStorage.setItem('royal_agra_properties_cache_v2', JSON.stringify(cleanList));
+    const cleanList = properties.filter(p => p && !p.isDeleted);
+    localStorage.setItem('royal_agra_properties_v3', JSON.stringify(cleanList));
   } catch (e) {
     // ignore
   }
+};
+
+// Merges fallback or user listings cleanly
+export const mergeWithUserListings = (list: Property[]): Property[] => {
+  return list.filter(p => p && !p.isDeleted);
 };
 
 // PROPERTIES REAL-TIME SYNC & FETCH
@@ -245,21 +200,7 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
     isUserListing: true
   };
 
-  // Remove from deleted list if previously deleted locally
-  try {
-    const deleted = getDeletedPropertyIds();
-    if (deleted.includes(cleanProperty.id)) {
-      const filtered = deleted.filter(id => id !== cleanProperty.id);
-      localStorage.setItem('royal_agra_deleted_property_ids_v2', JSON.stringify(filtered));
-    }
-  } catch (err) {
-    // ignore
-  }
-
-  // 1. Immediately persist in local user listings store
-  saveUserPropertyLocally(cleanProperty);
-
-  // 2. Update memory cache
+  // Update memory/local cache
   const current = getPropertiesCache();
   const exists = current.some(p => p.id === cleanProperty.id);
   const updated = exists 
@@ -268,7 +209,7 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
   setPropertiesCache(updated);
 
   try {
-    // 3. Persist to Cloud Firestore so all other browsers/devices receive it instantly
+    // Persist to Cloud Firestore so all other browsers/devices receive it instantly
     await setDoc(doc(db, 'properties', cleanProperty.id), cleanProperty);
     return true;
   } catch (error) {
@@ -278,21 +219,15 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
 };
 
 export const deleteFirestoreProperty = async (propertyId: string): Promise<boolean> => {
-  // 1. Mark in persistent deleted list
-  markPropertyAsDeletedLocally(propertyId);
-
-  // 2. Remove from local user listings store
-  removeUserPropertyLocally(propertyId);
-
-  // 3. Remove from cache
+  // 1. Remove from local cache
   const cached = getPropertiesCache();
   const filtered = cached.filter(p => p.id !== propertyId);
   setPropertiesCache(filtered);
 
   try {
-    // 4. Soft-delete flag in Firestore so all other browsers receive an onSnapshot event with isDeleted: true
+    // 2. Soft-delete flag in Firestore so all other browsers receive an onSnapshot event with isDeleted: true
     await setDoc(doc(db, 'properties', propertyId), { isDeleted: true, status: 'rejected' }, { merge: true });
-    // 5. Hard delete document from collection
+    // 3. Hard delete document from collection
     await deleteDoc(doc(db, 'properties', propertyId));
     return true;
   } catch (error) {

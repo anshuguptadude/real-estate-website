@@ -59,20 +59,11 @@ export default function App() {
 
   // Global Properties State (persisted locally and synced with Firebase Firestore)
   const [properties, setProperties] = useState<Property[]>(() => {
-    const deletedIds = getDeletedPropertyIds();
     const cached = getPropertiesCache();
     if (cached && cached.length > 0) {
-      return mergeWithUserListings(cached.filter(p => !p.isDeleted && !deletedIds.includes(p.id)));
+      return cached.filter(p => !p.isDeleted);
     }
-    const defaultList = (PROPERTIES_DATA as Property[])
-      .filter(p => !deletedIds.includes(p.id))
-      .map((p, idx) => ({
-        ...p,
-        status: p.status || (idx === 3 ? 'Sold' : 'published'),
-        isApproved: true,
-        isDeleted: false
-      }));
-    return mergeWithUserListings(defaultList);
+    return PROPERTIES_DATA;
   });
 
   // Sync user state to localStorage
