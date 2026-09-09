@@ -82,9 +82,9 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
       // 0. Deletion & Live Status Guard
       if (item.isDeleted) return false;
       if (!isAdminUser) {
-        const isLive = item.status === 'published' || item.status === 'Active' || item.isApproved === true || item.status === 'Sold' || item.status === 'Rented';
-        const isPendingOrRejected = item.status === 'pending_verification' || item.status === 'Pending Approval' || item.status === 'rejected';
-        if (!isLive || isPendingOrRejected) return false;
+        const isLive = item.status === 'published' || item.status === 'Active' || item.isApproved === true || item.status === 'Sold' || item.status === 'Rented' || item.isUserListing || !item.status;
+        const isExplicitlyRejected = item.status === 'rejected';
+        if (!isLive || isExplicitlyRejected) return false;
       }
 
       // 1. Search Query
@@ -99,7 +99,7 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
 
       // 2. Listing Type
       if (filterState.listingType === 'Rent' && item.listingType !== 'Rent') return false;
-      if (filterState.listingType === 'Buy' && item.listingType !== 'Sale') return false;
+      if (filterState.listingType === 'Buy' && item.listingType !== 'Sale' && item.listingType !== 'Buy') return false;
       if (filterState.listingType === 'Commercial' && item.propertyType !== 'Commercial / Retail') return false;
       if (filterState.listingType === 'Plots' && item.propertyType !== 'Gated Township Plot') return false;
 

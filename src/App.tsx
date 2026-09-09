@@ -365,7 +365,9 @@ export default function App() {
     const propToSave: Property = {
       ...newProp,
       isDeleted: false,
-      isApproved: isAdmin(user) || newProp.status === 'published'
+      status: 'published',
+      isApproved: true,
+      isUserListing: true
     };
     setProperties(prev => {
       const exists = prev.some(p => p.id === propToSave.id);
@@ -555,10 +557,10 @@ export default function App() {
 
     // For public visitors on browse/buy/rent pages:
     // Only show published / approved / active listings
-    const isApprovedOrPublished = p.status === 'published' || p.status === 'Active' || p.isApproved === true || p.status === 'Sold' || p.status === 'Rented';
-    const isPendingOrRejected = p.status === 'pending_verification' || p.status === 'Pending Approval' || p.status === 'rejected';
+    const isApprovedOrPublished = p.status === 'published' || p.status === 'Active' || p.isApproved === true || p.status === 'Sold' || p.status === 'Rented' || p.isUserListing || !p.status;
+    const isExplicitlyRejected = p.status === 'rejected';
 
-    return isApprovedOrPublished && !isPendingOrRejected;
+    return isApprovedOrPublished && !isExplicitlyRejected;
   });
   const displayedProperties = publicProperties.map(p => getMaskedProperty(p, user));
   const savedProperties = displayedProperties.filter(p => savedPropertyIds.includes(p.id));
