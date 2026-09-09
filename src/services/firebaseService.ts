@@ -17,9 +17,10 @@ import { LeadSubmission } from '../utils/security';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
+const databaseId = (firebaseConfig as any).databaseId || '(default)';
 const db = initializeFirestore(app, {
   ignoreUndefinedProperties: true
-});
+}, databaseId);
 
 // LOCALSTORAGE HELPERS FOR DELETED ITEMS & PERSISTENCE CACHE
 export const getDeletedPropertyIds = (): string[] => {
