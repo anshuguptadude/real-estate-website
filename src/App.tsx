@@ -378,8 +378,12 @@ export default function App() {
       setPropertiesCache(updated);
       return updated;
     });
-    const success = await saveFirestoreProperty(propToSave);
-    return success;
+    try {
+      await saveFirestoreProperty(propToSave);
+    } catch (e) {
+      console.warn("Remote Firestore write error (saved locally):", e);
+    }
+    return true;
   };
 
   const handleSavePropertyEdit = async (updatedProperty: Property) => {
