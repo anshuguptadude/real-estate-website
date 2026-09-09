@@ -153,9 +153,9 @@ export default function App() {
   const [savedPropertyIds, setSavedPropertyIds] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem('royal_agra_saved_v2');
-      return stored ? JSON.parse(stored) : ['prop-1', 'prop-2'];
+      return stored ? JSON.parse(stored) : ['prop-harish-nagar-89'];
     } catch {
-      return ['prop-1', 'prop-2'];
+      return ['prop-harish-nagar-89'];
     }
   });
 
