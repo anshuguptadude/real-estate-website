@@ -13,7 +13,29 @@
     <meta property="og:description" content="Discover Agra's most exclusive luxury residences." />
   </head>
   <body class="bg-[#F8F9FA] text-[#1A2E26] font-sans antialiased selection:bg-[#0F382C] selection:text-white">
-    <div id="root"></div>
+    <div id="root">
+      <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #FAF8F5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background-color: #0F382C; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; box-shadow: 0 10px 25px rgba(15, 56, 44, 0.15);">
+          <span style="font-size: 24px; color: #C5A869;">🏛️</span>
+        </div>
+        <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; color: #0F382C; margin-bottom: 6px; letter-spacing: 0.05em;">
+          ROYAL AGRA ESTATE
+        </div>
+        <div style="font-size: 11px; font-weight: 600; color: #C5A869; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 24px;">
+          Exclusive Luxury Residences
+        </div>
+        <div style="width: 140px; height: 3px; background: rgba(15, 56, 44, 0.1); border-radius: 99px; overflow: hidden; position: relative;">
+          <div style="position: absolute; top: 0; left: 0; bottom: 0; width: 40%; background: #0F382C; border-radius: 99px; animation: preloaderAnim 1.2s infinite ease-in-out;"></div>
+        </div>
+        <style>
+          @keyframes preloaderAnim {
+            0% { left: -40%; width: 40%; }
+            50% { left: 40%; width: 60%; }
+            100% { left: 100%; width: 40%; }
+          }
+        </style>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
