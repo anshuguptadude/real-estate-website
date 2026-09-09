@@ -14,6 +14,7 @@ import {
   saveFirestoreAccount,
   getDeletedPropertyIds,
   markPropertyAsDeletedLocally,
+  clearDeletedPropertyIdsLocally,
   getPropertiesCache,
   setPropertiesCache,
   mergeWithUserListings
@@ -439,6 +440,24 @@ export default function App() {
     }
   };
 
+  const handleRestoreDefaultProperties = async () => {
+    clearDeletedPropertyIdsLocally();
+    const seeded = (PROPERTIES_DATA as Property[]).map((p, idx) => ({
+      ...p,
+      status: p.status || (idx === 3 ? 'Sold' : 'published'),
+      isApproved: true,
+      isDeleted: false,
+      isUserListing: idx === 0 || idx === 2,
+      ownerId: (idx === 0 || idx === 2) ? 'RAE-OWNER-01' : 'RAE-PARTNER-02',
+      ownerName: (idx === 0 || idx === 2) ? 'Shrey Gupta' : p.agent?.name || 'Managing Partner'
+    }));
+    setProperties(seeded);
+    setPropertiesCache(seeded);
+    for (const prop of seeded) {
+      await saveFirestoreProperty(prop);
+    }
+  };
+
   const handleTogglePropertyStatus = async (propertyId: string) => {
     const prop = properties.find(p => p.id === propertyId);
     if (!prop) return;
@@ -674,6 +693,7 @@ export default function App() {
             onLogout={handleLogout}
             onDeleteLead={handleDeleteLead}
             onPurgeDemoProperties={handlePurgeDemoProperties}
+            onRestoreDefaultProperties={handleRestoreDefaultProperties}
           />
         )}
 

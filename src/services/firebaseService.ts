@@ -32,6 +32,15 @@ export const getDeletedPropertyIds = (): string[] => {
   }
 };
 
+export const clearDeletedPropertyIdsLocally = () => {
+  try {
+    localStorage.removeItem('royal_agra_deleted_property_ids_v2');
+    localStorage.removeItem('royal_agra_properties_cache_v2');
+  } catch (err) {
+    console.error("Error clearing deleted IDs:", err);
+  }
+};
+
 export const markPropertyAsDeletedLocally = (id: string) => {
   try {
     const deleted = getDeletedPropertyIds();

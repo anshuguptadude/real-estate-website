@@ -44,6 +44,7 @@ interface UserDashboardScreenProps {
   onLogout: () => void;
   onDeleteLead?: (leadId: string) => void;
   onPurgeDemoProperties?: () => void;
+  onRestoreDefaultProperties?: () => void;
   initialTab?: UserDashboardTab;
 }
 
@@ -65,6 +66,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   onLogout,
   onDeleteLead,
   onPurgeDemoProperties,
+  onRestoreDefaultProperties,
   initialTab = 'listings'
 }) => {
   const [activeTab, setActiveTab] = useState<UserDashboardTab>(initialTab);
@@ -528,13 +530,29 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                 <p className="text-xs text-gray-500 max-w-md mx-auto">
                   List your luxury villa, penthouse, apartment, or commercial plot to connect directly with verified buyers in Agra.
                 </p>
-                <button
-                  type="button"
-                  onClick={onNavigatePostProperty}
-                  className="bg-[#0F382C] text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#164E3D]"
-                >
-                  Create Your First Listing
-                </button>
+                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={onNavigatePostProperty}
+                    className="bg-[#0F382C] text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#164E3D] transition-all"
+                  >
+                    Create Your First Listing
+                  </button>
+                  {isAdmin(user) && onRestoreDefaultProperties && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm('Restore the default 8 curated sample luxury properties for Agra?')) {
+                          onRestoreDefaultProperties();
+                        }
+                      }}
+                      className="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2"
+                    >
+                      <Sparkles className="w-4 h-4 text-amber-800" />
+                      <span>Restore 8 Sample Properties</span>
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
