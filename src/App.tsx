@@ -15,7 +15,8 @@ import {
   getDeletedPropertyIds,
   markPropertyAsDeletedLocally,
   getPropertiesCache,
-  setPropertiesCache
+  setPropertiesCache,
+  mergeWithUserListings
 } from './services/firebaseService';
 import { PROPERTIES_DATA } from './data/mockData';
 import { LeadInquiryModal } from './components/LeadInquiryModal';
@@ -60,9 +61,9 @@ export default function App() {
     const deletedIds = getDeletedPropertyIds();
     const cached = getPropertiesCache();
     if (cached && cached.length > 0) {
-      return cached.filter(p => !p.isDeleted && !deletedIds.includes(p.id));
+      return mergeWithUserListings(cached.filter(p => !p.isDeleted && !deletedIds.includes(p.id)));
     }
-    return (PROPERTIES_DATA as Property[])
+    const defaultList = (PROPERTIES_DATA as Property[])
       .filter(p => !deletedIds.includes(p.id))
       .map((p, idx) => ({
         ...p,
@@ -70,6 +71,7 @@ export default function App() {
         isApproved: true,
         isDeleted: false
       }));
+    return mergeWithUserListings(defaultList);
   });
 
   // Sync user state to localStorage
@@ -111,8 +113,9 @@ export default function App() {
       if (fetched && fetched.length > 0) {
         const deletedIds = getDeletedPropertyIds();
         const valid = fetched.filter(p => !p.isDeleted && !deletedIds.includes(p.id));
-        setProperties(valid);
-        setPropertiesCache(valid);
+        const merged = mergeWithUserListings(valid);
+        setProperties(merged);
+        setPropertiesCache(merged);
       }
     });
 

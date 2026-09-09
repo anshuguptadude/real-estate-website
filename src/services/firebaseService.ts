@@ -56,10 +56,62 @@ export const getPropertiesCache = (): Property[] => {
   }
 };
 
+// DEDICATED PERSISTENT USER LISTINGS STORE
+// Guarantees any property created/posted by the user is preserved across refreshes and logouts
+export const getUserPropertiesStore = (): Property[] => {
+  try {
+    const stored = localStorage.getItem('royal_agra_user_listings_v1');
+    const deletedIds = getDeletedPropertyIds();
+    const list: Property[] = stored ? JSON.parse(stored) : [];
+    return list.filter(p => p && !p.isDeleted && !deletedIds.includes(p.id));
+  } catch {
+    return [];
+  }
+};
+
+export const saveUserPropertyLocally = (property: Property) => {
+  try {
+    const existing = getUserPropertiesStore();
+    const exists = existing.some(p => p.id === property.id);
+    const updated = exists 
+      ? existing.map(p => p.id === property.id ? property : p)
+      : [property, ...existing];
+    localStorage.setItem('royal_agra_user_listings_v1', JSON.stringify(updated));
+  } catch (e) {
+    console.error("Error saving user property locally:", e);
+  }
+};
+
+export const removeUserPropertyLocally = (propertyId: string) => {
+  try {
+    const existing = getUserPropertiesStore();
+    const updated = existing.filter(p => p.id !== propertyId);
+    localStorage.setItem('royal_agra_user_listings_v1', JSON.stringify(updated));
+  } catch (e) {
+    // ignore
+  }
+};
+
+// Merges any list of properties with the user's permanent local listings
+export const mergeWithUserListings = (list: Property[]): Property[] => {
+  const deletedIds = getDeletedPropertyIds();
+  const userListings = getUserPropertiesStore().filter(p => !p.isDeleted && !deletedIds.includes(p.id));
+  const baseList = list.filter(p => p && !p.isDeleted && !deletedIds.includes(p.id));
+
+  // Map by id: user listings take precedence if newer, otherwise append user listings
+  const map = new Map<string, Property>();
+  baseList.forEach(p => map.set(p.id, p));
+  userListings.forEach(p => map.set(p.id, p));
+
+  return Array.from(map.values());
+};
+
 export const setPropertiesCache = (properties: Property[]) => {
   try {
     const deletedIds = getDeletedPropertyIds();
-    const cleanList = properties.filter(p => !p.isDeleted && !deletedIds.includes(p.id));
+    // Always ensure user listings are merged into cache
+    const merged = mergeWithUserListings(properties);
+    const cleanList = merged.filter(p => !p.isDeleted && !deletedIds.includes(p.id));
     localStorage.setItem('royal_agra_properties_cache_v2', JSON.stringify(cleanList));
   } catch (e) {
     // ignore
@@ -92,21 +144,24 @@ export const subscribeFirestoreProperties = (callback: (properties: Property[]) 
           // ignore seeding write error
         }
       }
-      setPropertiesCache(seeded);
-      callback(seeded);
+      const mergedSeeded = mergeWithUserListings(seeded);
+      setPropertiesCache(mergedSeeded);
+      callback(mergedSeeded);
     } else {
       const props = snapshot.docs
         .map(doc => doc.data() as Property)
         .filter(p => p && !p.isDeleted && !deletedIds.includes(p.id));
-      setPropertiesCache(props);
-      callback(props);
+      const merged = mergeWithUserListings(props);
+      setPropertiesCache(merged);
+      callback(merged);
     }
   }, (error) => {
     console.error("Error in properties real-time listener, falling back to cache:", error);
     const deletedIds = getDeletedPropertyIds();
     const cached = getPropertiesCache();
     if (cached && cached.length > 0) {
-      callback(cached.filter(p => !p.isDeleted && !deletedIds.includes(p.id)));
+      const merged = mergeWithUserListings(cached.filter(p => !p.isDeleted && !deletedIds.includes(p.id)));
+      callback(merged);
     } else {
       const fallback = PROPERTIES_DATA
         .filter(p => !deletedIds.includes(p.id))
@@ -116,8 +171,9 @@ export const subscribeFirestoreProperties = (callback: (properties: Property[]) 
           isApproved: true,
           isDeleted: false
         }));
-      setPropertiesCache(fallback);
-      callback(fallback);
+      const merged = mergeWithUserListings(fallback);
+      setPropertiesCache(merged);
+      callback(merged);
     }
   });
 
@@ -151,45 +207,44 @@ export const fetchFirestoreProperties = async (): Promise<Property[]> => {
     const list = querySnapshot.docs
       .map(doc => doc.data() as Property)
       .filter(p => p && !p.isDeleted && !deletedIds.includes(p.id));
-    setPropertiesCache(list);
-    return list;
+    const merged = mergeWithUserListings(list);
+    setPropertiesCache(merged);
+    return merged;
   } catch (error) {
     console.error("Error fetching properties from Firestore:", error);
     const cached = getPropertiesCache();
     if (cached && cached.length > 0) {
-      return cached.filter(p => !p.isDeleted && !deletedIds.includes(p.id));
+      return mergeWithUserListings(cached.filter(p => !p.isDeleted && !deletedIds.includes(p.id)));
     }
-    return (PROPERTIES_DATA as Property[]).filter(p => !deletedIds.includes(p.id));
+    return mergeWithUserListings((PROPERTIES_DATA as Property[]).filter(p => !deletedIds.includes(p.id)));
   }
 };
 
 export const saveFirestoreProperty = async (property: Property): Promise<boolean> => {
-  try {
-    // Ensure isDeleted is false when saving/updating
-    const cleanProperty: Property = {
-      ...property,
-      isDeleted: false
-    };
-    await setDoc(doc(db, 'properties', cleanProperty.id), cleanProperty);
-    
-    // Update local cache
-    const current = getPropertiesCache();
-    const exists = current.some(p => p.id === cleanProperty.id);
-    const updated = exists 
-      ? current.map(p => p.id === cleanProperty.id ? cleanProperty : p)
-      : [cleanProperty, ...current];
-    setPropertiesCache(updated);
+  // Ensure isDeleted is false when saving/updating
+  const cleanProperty: Property = {
+    ...property,
+    isDeleted: false,
+    isUserListing: true
+  };
 
+  // 1. Immediately persist in dedicated local user listings store
+  saveUserPropertyLocally(cleanProperty);
+
+  // 2. Update memory cache
+  const current = getPropertiesCache();
+  const exists = current.some(p => p.id === cleanProperty.id);
+  const updated = exists 
+    ? current.map(p => p.id === cleanProperty.id ? cleanProperty : p)
+    : [cleanProperty, ...current];
+  setPropertiesCache(updated);
+
+  try {
+    // 3. Persist to Cloud Firestore
+    await setDoc(doc(db, 'properties', cleanProperty.id), cleanProperty);
     return true;
   } catch (error) {
     console.error("Error saving property to Firestore:", error);
-    // Even if remote write fails, update local cache
-    const current = getPropertiesCache();
-    const exists = current.some(p => p.id === property.id);
-    const updated = exists 
-      ? current.map(p => p.id === property.id ? property : p)
-      : [property, ...current];
-    setPropertiesCache(updated);
     return false;
   }
 };
@@ -198,10 +253,18 @@ export const deleteFirestoreProperty = async (propertyId: string): Promise<boole
   // 1. Immediately record in persistent deleted list
   markPropertyAsDeletedLocally(propertyId);
 
+  // 2. Remove from dedicated user listings store
+  removeUserPropertyLocally(propertyId);
+
+  // 3. Remove from cache
+  const cached = getPropertiesCache();
+  const filtered = cached.filter(p => p.id !== propertyId);
+  setPropertiesCache(filtered);
+
   try {
-    // 2. Soft-delete flag in Firestore (so any lingering listeners exclude it immediately)
+    // 4. Soft-delete flag in Firestore (so any lingering listeners exclude it immediately)
     await setDoc(doc(db, 'properties', propertyId), { isDeleted: true, status: 'rejected' }, { merge: true });
-    // 3. Also delete the document
+    // 5. Also delete the document
     await deleteDoc(doc(db, 'properties', propertyId));
     return true;
   } catch (error) {
