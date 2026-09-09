@@ -501,21 +501,37 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                     </p>
                   </div>
                 </div>
-                {onPurgeDemoProperties && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const count = userProperties.filter(p => /^prop-[1-8]$/.test(p.id)).length;
-                      if (window.confirm(`Are you sure you want to permanently remove all ${count} sample demo listings? Only your real uploaded properties will remain.`)) {
-                        onPurgeDemoProperties();
-                      }
-                    }}
-                    className="shrink-0 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow transition-all flex items-center justify-center gap-2"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    <span>Purge All Sample Listings</span>
-                  </button>
-                )}
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  {onRestoreDefaultProperties && userProperties.filter(p => /^prop-[1-8]$/.test(p.id)).length < 8 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm('Restore any missing default sample luxury properties?')) {
+                          onRestoreDefaultProperties();
+                        }
+                      }}
+                      className="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-amber-800" />
+                      <span>Restore Samples</span>
+                    </button>
+                  )}
+                  {onPurgeDemoProperties && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const count = userProperties.filter(p => /^prop-[1-8]$/.test(p.id)).length;
+                        if (window.confirm(`Are you sure you want to permanently remove all ${count} sample demo listings? Only your real uploaded properties will remain.`)) {
+                          onPurgeDemoProperties();
+                        }
+                      }}
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow transition-all flex items-center justify-center gap-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Purge All Sample Listings</span>
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 

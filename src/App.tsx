@@ -112,11 +112,9 @@ export default function App() {
   useEffect(() => {
     const unsubscribeProps = subscribeFirestoreProperties(fetched => {
       if (fetched && fetched.length > 0) {
-        const deletedIds = getDeletedPropertyIds();
-        const valid = fetched.filter(p => !p.isDeleted && !deletedIds.includes(p.id));
-        const merged = mergeWithUserListings(valid);
-        setProperties(merged);
-        setPropertiesCache(merged);
+        const active = fetched.filter(p => !p.isDeleted);
+        setProperties(active);
+        setPropertiesCache(active);
       }
     });
 
@@ -574,9 +572,7 @@ export default function App() {
   };
 
   const publicProperties = properties.filter(p => {
-    if (p.isDeleted) return false;
-    const deletedIds = getDeletedPropertyIds();
-    if (deletedIds.includes(p.id)) return false;
+    if (!p || p.isDeleted) return false;
 
     // Admin can see all non-deleted properties
     if (isAdmin(user)) return true;
