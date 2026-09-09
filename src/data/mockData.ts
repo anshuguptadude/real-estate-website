@@ -52,7 +52,7 @@ export const PROPERTIES_DATA: Property[] = [
     verificationStatus: 'Verified',
     verifiedBy: 'Independent Registry Verified',
     verificationNumber: '',
-    status: 'published',
+    status: 'Active',
     isApproved: true,
     isUserListing: true,
     ownerId: 'shrey123@gmail.com',

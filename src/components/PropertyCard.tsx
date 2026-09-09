@@ -44,18 +44,18 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 
         {/* Top-Left: Price Tag Badge + Optional Exclusive tags + Status */}
         <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5 pointer-events-none z-10">
-          {property.status && property.status !== 'Active' ? (
-            <div className={`px-3 py-1 rounded-md shadow-md text-xs font-bold uppercase tracking-wider flex items-center gap-1 ${
+          {/* Main Price Tag Badge */}
+          <div className="bg-white text-[#0F382C] px-3.5 py-1.5 rounded-lg shadow-lg border border-gray-100 flex items-center gap-1">
+            <span className="text-sm sm:text-base font-sans font-black tracking-normal text-[#0F382C]">
+              {property.priceDisplay}
+            </span>
+          </div>
+
+          {property.status && property.status !== 'Active' && property.status.toLowerCase() !== 'published' && (
+            <div className={`px-2.5 py-0.5 rounded-md shadow-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
               property.status === 'Pending Approval' ? 'bg-amber-700 text-white' : 'bg-amber-600 text-white'
             }`}>
               <span>{property.status}</span>
-            </div>
-          ) : (
-            /* Main Price Tag Badge */
-            <div className="bg-white text-[#0F382C] px-3.5 py-1.5 rounded-lg shadow-lg border border-gray-100 flex items-center gap-1">
-              <span className="text-sm sm:text-base font-sans font-black tracking-normal text-[#0F382C]">
-                {property.priceDisplay}
-              </span>
             </div>
           )}
 
