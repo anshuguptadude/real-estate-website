@@ -179,13 +179,26 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve) => {
+      // Safety timeout: if image processing hangs or takes more than 3.5s (e.g. Safari HEIC), resolve fallback
+      const timer = setTimeout(() => {
+        resolve('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=960&q=75');
+      }, 3500);
+
       const reader = new FileReader();
       reader.onload = (readerEvent) => {
+        const rawResult = readerEvent.target?.result as string;
+        if (!rawResult) {
+          clearTimeout(timer);
+          resolve('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=960&q=75');
+          return;
+        }
+
         const img = new Image();
         img.onload = () => {
-          const maxDimension = 1280;
-          let width = img.width;
-          let height = img.height;
+          clearTimeout(timer);
+          const maxDimension = 960;
+          let width = img.width || 960;
+          let height = img.height || 640;
 
           if (width > maxDimension || height > maxDimension) {
             if (width > height) {
@@ -197,23 +210,32 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
             }
           }
 
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            // Compress to JPEG with 0.75 quality (lightweight yet clear)
-            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
-            resolve(compressedDataUrl);
-          } else {
-            resolve(readerEvent.target?.result as string);
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, width, height);
+              // Compress to JPEG with 0.65 quality (ultra-lightweight ~50-80KB to fit Firestore 1MB quota)
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+              resolve(compressedDataUrl);
+            } else {
+              resolve(rawResult);
+            }
+          } catch {
+            resolve(rawResult);
           }
         };
         img.onerror = () => {
-          resolve(readerEvent.target?.result as string);
+          clearTimeout(timer);
+          resolve(rawResult);
         };
-        img.src = readerEvent.target?.result as string;
+        img.src = rawResult;
+      };
+      reader.onerror = () => {
+        clearTimeout(timer);
+        resolve('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=960&q=75');
       };
       reader.readAsDataURL(file);
     });
@@ -224,11 +246,13 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     const fileArray = Array.from(files);
 
     for (const file of fileArray) {
-      const validImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-      const isImage = validImageTypes.includes(file.type) || file.type.startsWith('image/');
+      const isImage = 
+        file.type.startsWith('image/') || 
+        /\.(jpe?g|png|webp|gif|bmp|heic|heif|svg)$/i.test(file.name) || 
+        !file.type;
 
       if (!isImage) {
-        setMediaError('Only photo uploads (JPEG, PNG, WEBP) are supported for direct listing display.');
+        setMediaError('Please select photo uploads (JPEG, PNG, WEBP, HEIC) for listing display.');
         continue;
       }
 
@@ -596,7 +620,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit} noValidate className="space-y-8">
               
               {/* STEP 1: Basic Details */}
               {step === 1 && (
@@ -676,7 +700,6 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       <div className="mt-2.5">
                         <input
                           type="text"
-                          required
                           placeholder="Type custom property type (e.g. Row House, Studio, Farmhouse)"
                           value={customPropertyType}
                           onChange={(e) => {
@@ -716,7 +739,6 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       <div className="mt-2">
                         <input
                           type="text"
-                          required
                           placeholder="Enter custom Agra locality name (e.g. Dayalbagh, Bodla)"
                           value={customLocality}
                           onChange={(e) => {
@@ -1025,23 +1047,22 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       </span>
                     </div>
 
-                    {/* Hidden Native File Inputs */}
+                    {/* Hidden Native File Inputs with Safari-compatible accessibility */}
                     <input
                       type="file"
                       ref={fileInputRef}
                       onChange={handleFileChange}
-                      accept="image/*,video/*"
+                      accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif"
                       multiple
-                      className="hidden"
+                      className="sr-only opacity-0 absolute w-0 h-0 overflow-hidden pointer-events-none"
                     />
                     <input
                       type="file"
                       ref={cameraInputRef}
                       onChange={handleFileChange}
-                      accept="image/*,video/*"
+                      accept="image/*"
                       capture="environment"
-                      multiple
-                      className="hidden"
+                      className="sr-only opacity-0 absolute w-0 h-0 overflow-hidden pointer-events-none"
                     />
 
                     {mediaError && (

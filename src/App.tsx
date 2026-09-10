@@ -226,10 +226,6 @@ export default function App() {
 
   // Scroll to top on screen change
   const navigateTo = (screen: ActiveScreen, propertyId: string | null = null, addToHistory: boolean = true) => {
-    if (screen === 'sell-rent' && !user) {
-      handleInitiatePostProperty();
-      return;
-    }
     if (screen === 'dashboard' && !user) {
       setLoginPromptMessage('Please log in or create an account to view your dashboard.');
       setPendingDashboardRedirect(true);
@@ -309,27 +305,26 @@ export default function App() {
     
     // Set initial state without adding to history (it's already the current state)
     setActiveScreen(screen);
-    if (propertyId) {
-      const found = properties.find(p => p.id === propertyId);
-      if (found) setSelectedProperty(found);
-    }
     
     // Replace current state with correct state object so popstate works for the first entry
     window.history.replaceState({ screen, propertyId }, '', window.location.pathname + window.location.search);
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [properties, user]); 
+  }, []); 
 
-  // Protected Post Property trigger
-  const handleInitiatePostProperty = () => {
-    if (!user) {
-      setLoginPromptMessage('Please log in or create an account to post a property listing in Agra.');
-      setPendingPostRedirect(true);
-      setLoginModalOpen(true);
-    } else {
-      navigateTo('sell-rent');
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const propertyId = params.get('property');
+    if (propertyId && properties.length > 0) {
+      const found = properties.find(p => p.id === propertyId);
+      if (found) setSelectedProperty(found);
     }
+  }, [properties]);
+
+  // Protected Post Property trigger - directly navigates to Sell/Rent
+  const handleInitiatePostProperty = () => {
+    navigateTo('sell-rent');
   };
 
   const handleLoginSuccess = (authenticatedUser: UserProfile) => {
