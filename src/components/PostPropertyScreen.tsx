@@ -56,7 +56,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const [askingPrice, setAskingPrice] = useState<string>('28500000');
   const [furnishing, setFurnishing] = useState('Fully Furnished');
   const [possession, setPossession] = useState('Ready to Move');
-  const [ownerName, setOwnerName] = useState(user?.name || '');
+  const [ownerName, setOwnerName] = useState(user?.name || 'Shrey Gupta');
   const [ownerPhone, setOwnerPhone] = useState(user?.phone || '+91 91490 79913');
   const [ownerEmail, setOwnerEmail] = useState(user?.email || 'shrey@royalagraestate.in');
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([
@@ -1374,6 +1374,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">Owner Name *</label>
                         <input
                           type="text"
+                          id="owner-name-input"
                           value={ownerName}
                           onChange={(e) => {
                             setOwnerName(e.target.value);
@@ -1394,6 +1395,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">Owner Contact Phone *</label>
                         <input
                           type="tel"
+                          id="owner-phone-input"
                           value={ownerPhone}
                           onChange={(e) => {
                             setOwnerPhone(e.target.value);
