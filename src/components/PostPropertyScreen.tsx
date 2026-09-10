@@ -401,7 +401,8 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     }
 
     const isUserAdmin = isAdmin(user);
-    const initialStatus = 'published';
+    const initialStatus = isUserAdmin ? 'published' : 'Pending Approval';
+    const isApproved = isUserAdmin ? true : false;
 
     const uploadedUrls = uploadedMediaList.map(m => m.url);
     const coverIdx = selectedCoverIndex >= 0 && selectedCoverIndex < uploadedUrls.length ? selectedCoverIndex : 0;
@@ -447,8 +448,8 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       verificationStatus: isUserAdmin ? 'Verified' : resolvedVerificationStatus,
       verifiedBy: resolvedAuthorityName,
       verificationNumber: verificationDocNumber.trim() || "",
-      status: 'published',
-      isApproved: true,
+      status: initialStatus,
+      isApproved: isApproved,
       isUserListing: true,
       ownerId: user?.id || 'RAE-OWNER-01',
       ownerName: ownerName.trim() || user?.name || 'Property Owner',

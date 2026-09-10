@@ -350,11 +350,12 @@ export default function App() {
 
   // Property Management Handlers
   const handlePropertyCreated = async (newProp: Property): Promise<boolean> => {
+    const isUserAdmin = isAdmin(user);
     const propToSave: Property = {
       ...newProp,
       isDeleted: false,
-      status: 'published',
-      isApproved: true,
+      status: isUserAdmin ? 'published' : (newProp.status || 'Pending Approval'),
+      isApproved: isUserAdmin ? true : (newProp.isApproved ?? false),
       isUserListing: true
     };
     setProperties(prev => {
@@ -565,17 +566,17 @@ export default function App() {
 
     // For public visitors on browse/buy/rent pages:
     // Only show published / approved / active listings
-    const isApprovedOrPublished = p.status === 'published' || p.status === 'Active' || p.isApproved === true || p.status === 'Sold' || p.status === 'Rented' || p.isUserListing || !p.status;
-    const isExplicitlyRejected = p.status === 'rejected';
+    const isApprovedOrPublished = p.isApproved === true || p.status === 'published' || p.status === 'Active' || p.status === 'Sold' || p.status === 'Rented';
+    const isPendingOrRejected = p.status === 'Pending Approval' || p.status === 'pending_verification' || p.status === 'rejected' || p.isApproved === false;
 
-    return isApprovedOrPublished && !isExplicitlyRejected;
+    return isApprovedOrPublished && !isPendingOrRejected;
   });
   const displayedProperties = publicProperties.map(p => getMaskedProperty(p, user));
   const savedProperties = displayedProperties.filter(p => savedPropertyIds.includes(p.id));
 
   // Properties belonging to current user or all properties if admin
   const userProperties = isAdmin(user) ? properties : properties.filter(p => 
-    p.isUserListing || (user && p.ownerId === user.id) || (user && user.role === 'owner' && (p.isUserListing || p.id === 'prop-1' || p.id === 'prop-3'))
+    p.isUserListing && ((user && (p.ownerId === user.id || p.ownerEmail === user.email || p.ownerContact === user.phone)) || (user && user.role === 'owner'))
   );
 
   return (

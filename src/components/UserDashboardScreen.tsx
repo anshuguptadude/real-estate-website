@@ -179,7 +179,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   const soldCount = userProperties.filter(p => p.status === 'Sold' || p.status === 'Rented').length;
   const userPendingCount = userProperties.filter(p => p.status === 'pending_verification' || p.status === 'Pending Approval').length;
   const pendingProperties = (allProperties || userProperties).filter(
-    p => p.status === 'pending_verification' || p.status === 'Pending Approval'
+    p => p && !p.isDeleted && (p.status === 'pending_verification' || p.status === 'Pending Approval' || p.isApproved === false)
   );
 
   const avatarPresets = [
