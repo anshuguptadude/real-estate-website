@@ -1240,6 +1240,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     </button>
                     <button
                       type="button"
+                      id="step3-continue-btn"
                       onClick={() => setStep(4)}
                       className="bg-[#0F382C] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-[#164E3D]"
                     >
