@@ -54,8 +54,10 @@ export interface Property {
   isDeleted?: boolean;
   isUserListing?: boolean;
   ownerId?: string;
+  userId?: string;
   ownerName?: string;
   ownerContact?: string;
+  ownerEmail?: string;
 }
 
 export interface UserProfile {

@@ -605,9 +605,9 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                               <CheckCircle2 className="w-3.5 h-3.5" />
                               {prop.status === 'Sold' ? 'SOLD OUT' : 'RENTED OUT'}
                             </span>
-                          ) : prop.status === 'pending_verification' || prop.status === 'Pending Approval' ? (
+                          ) : prop.status === 'pending_verification' || prop.status === 'Pending Approval' || prop.isApproved === false ? (
                             <span className="px-3 py-1 rounded-md bg-amber-600 text-white text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-1">
-                              <span>⏳ UNDER REVIEW</span>
+                              <span>⏳ UNDER REVIEW / PENDING APPROVAL</span>
                             </span>
                           ) : prop.status === 'rejected' ? (
                             <span className="px-3 py-1 rounded-md bg-rose-600 text-white text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-1">

@@ -56,9 +56,9 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const [askingPrice, setAskingPrice] = useState<string>('28500000');
   const [furnishing, setFurnishing] = useState('Fully Furnished');
   const [possession, setPossession] = useState('Ready to Move');
-  const [ownerName, setOwnerName] = useState(user?.name || 'Shrey Gupta');
-  const [ownerPhone, setOwnerPhone] = useState(user?.phone || '+91 91490 79913');
-  const [ownerEmail, setOwnerEmail] = useState(user?.email || 'shrey@royalagraestate.in');
+  const [ownerName, setOwnerName] = useState(user?.name || '');
+  const [ownerPhone, setOwnerPhone] = useState(user?.phone || '');
+  const [ownerEmail, setOwnerEmail] = useState(user?.email || '');
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([
     'Swimming Pool',
     '24/7 Security',
@@ -126,9 +126,9 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
   useEffect(() => {
     if (user) {
-      if (user.name && !ownerName) setOwnerName(user.name);
-      if (user.phone && !ownerPhone) setOwnerPhone(user.phone);
-      if (user.email && !ownerEmail) setOwnerEmail(user.email);
+      if (user.name) setOwnerName(user.name);
+      if (user.phone) setOwnerPhone(user.phone);
+      if (user.email) setOwnerEmail(user.email);
     }
   }, [user]);
 
@@ -451,9 +451,11 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       status: initialStatus,
       isApproved: isApproved,
       isUserListing: true,
-      ownerId: user?.id || 'RAE-OWNER-01',
+      ownerId: user?.id || (ownerEmail.trim() ? `user-${ownerEmail.trim().toLowerCase().replace(/[^a-z0-9]/g, '')}` : `user-${Date.now()}`),
+      userId: user?.id || (ownerEmail.trim() ? `user-${ownerEmail.trim().toLowerCase().replace(/[^a-z0-9]/g, '')}` : `user-${Date.now()}`),
       ownerName: ownerName.trim() || user?.name || 'Property Owner',
-      ownerContact: ownerPhone.trim() || user?.phone || '+91 91490 79913',
+      ownerContact: ownerPhone.trim() || user?.phone || '',
+      ownerEmail: (ownerEmail.trim() || user?.email || '').toLowerCase().trim(),
       images: finalImages,
       coverImage: finalCover,
       description: `Spectacular ${propertyType} situated in the prestigious enclave of ${finalLocality}, Agra. Designed for distinguished living with spacious layouts, high ceilings, premium fittings, and comprehensive security infrastructure.`,

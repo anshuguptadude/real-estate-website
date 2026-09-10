@@ -575,9 +575,25 @@ export default function App() {
   const savedProperties = displayedProperties.filter(p => savedPropertyIds.includes(p.id));
 
   // Properties belonging to current user or all properties if admin
-  const userProperties = isAdmin(user) ? properties : properties.filter(p => 
-    p.isUserListing && ((user && (p.ownerId === user.id || p.ownerEmail === user.email || p.ownerContact === user.phone)) || (user && user.role === 'owner'))
-  );
+  const userProperties = isAdmin(user)
+    ? properties.filter(p => !p.isDeleted)
+    : properties.filter(p => {
+        if (!p || p.isDeleted || !user) return false;
+        const uId = user.id?.trim();
+        const uEmail = user.email?.trim().toLowerCase();
+        const uPhone = user.phone ? user.phone.replace(/[^0-9]/g, '') : '';
+
+        const pOwnerId = p.ownerId?.trim();
+        const pUserId = p.userId?.trim();
+        const pEmail = p.ownerEmail?.trim().toLowerCase();
+        const pPhone = p.ownerContact ? p.ownerContact.replace(/[^0-9]/g, '') : '';
+
+        const matchId = Boolean(uId && (pOwnerId === uId || pUserId === uId));
+        const matchEmail = Boolean(uEmail && pEmail && pEmail === uEmail);
+        const matchPhone = Boolean(uPhone && pPhone && (pPhone === uPhone || pPhone.endsWith(uPhone) || uPhone.endsWith(pPhone)));
+
+        return matchId || matchEmail || matchPhone;
+      });
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-[#1A2E26] selection:bg-[#0F382C] selection:text-white">
