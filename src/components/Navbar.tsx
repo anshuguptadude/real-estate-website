@@ -48,9 +48,15 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center justify-between h-20">
           
           {/* LEFT: Logo Icon + ONLY "Royal Agra Estate" */}
-          <button
+          <a
+            href="?screen=home"
             id="brand-logo-btn"
-            onClick={() => onNavigate('home')}
+            onClick={(e) => {
+              if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+                e.preventDefault();
+                onNavigate('home');
+              }
+            }}
             className="flex items-center gap-3 text-left group focus:outline-none"
           >
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#E4D5B7] via-[#C5A869] to-[#8C6D32] p-[1.5px] shadow-sm flex items-center justify-center">
@@ -61,17 +67,23 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="text-xl sm:text-2xl tracking-wide font-brand-title font-semibold text-white group-hover:text-[#E4D5B7] transition-colors leading-none">
               Royal Agra Estate
             </span>
-          </button>
+          </a>
 
           {/* MIDDLE: Standard navigation links */}
           <nav className="hidden lg:flex items-center space-x-1 xl:space-x-3">
             {navLinks.map((link) => {
               const isActive = activeScreen === link.screen;
               return (
-                <button
+                <a
                   key={link.screen}
+                  href={`?screen=${link.screen}`}
                   id={`nav-link-${link.screen}`}
-                  onClick={() => onNavigate(link.screen)}
+                  onClick={(e) => {
+                    if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+                      e.preventDefault();
+                      onNavigate(link.screen);
+                    }
+                  }}
                   className="relative px-3.5 py-2.5 text-sm xl:text-base font-medium tracking-normal transition-colors group focus:outline-none"
                 >
                   <span className={isActive ? 'text-white font-bold' : 'text-white/80 group-hover:text-white'}>
@@ -82,15 +94,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {isActive && (
                     <span className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-white rounded-full shadow-xs" />
                   )}
-                </button>
+                </a>
               );
             })}
 
             {/* If logged in, also show direct 'My Dashboard' link in main nav if active */}
             {user && (
-              <button
+              <a
+                href="?screen=dashboard"
                 id="nav-link-dashboard"
-                onClick={() => onNavigate('dashboard')}
+                onClick={(e) => {
+                  if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+                    e.preventDefault();
+                    onNavigate('dashboard');
+                  }
+                }}
                 className="relative px-3.5 py-2.5 text-sm xl:text-base font-medium tracking-normal transition-colors group focus:outline-none text-[#E4D5B7] hover:text-white"
               >
                 <span className={activeScreen === 'dashboard' ? 'text-white font-bold' : 'text-[#E4D5B7] font-semibold'}>
@@ -99,7 +117,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {activeScreen === 'dashboard' && (
                   <span className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-white rounded-full shadow-xs" />
                 )}
-              </button>
+              </a>
             )}
           </nav>
 
@@ -215,13 +233,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
 
             {/* White pill button reading "POST PROPERTY" */}
-            <button
+            <a
+              href="?screen=sell-rent"
               id="nav-post-property-btn"
-              onClick={onOpenPostProperty}
-              className="bg-white text-[#0F382C] hover:bg-[#FAF8F5] px-5 py-2.5 rounded-full font-bold text-xs tracking-wider uppercase shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] focus:outline-none"
+              onClick={(e) => {
+                if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+                  e.preventDefault();
+                  onOpenPostProperty();
+                }
+              }}
+              className="bg-white text-[#0F382C] hover:bg-[#FAF8F5] px-5 py-2.5 rounded-full font-bold text-xs tracking-wider uppercase shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] focus:outline-none inline-block text-center"
             >
               POST PROPERTY
-            </button>
+            </a>
           </div>
 
           {/* Mobile menu trigger */}
@@ -259,28 +283,35 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  onNavigate('dashboard');
-                  setMobileMenuOpen(false);
+              <a
+                href="?screen=dashboard"
+                onClick={(e) => {
+                  if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+                    e.preventDefault();
+                    onNavigate('dashboard');
+                    setMobileMenuOpen(false);
+                  }
                 }}
                 className="bg-[#164E3D] text-[#E4D5B7] hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold"
               >
                 Dashboard
-              </button>
+              </a>
             </div>
           )}
 
           {navLinks.map((link) => {
             const isActive = activeScreen === link.screen;
             return (
-              <button
+              <a
                 key={link.screen}
+                href={`?screen=${link.screen}`}
                 id={`mobile-nav-${link.screen}`}
-                onClick={() => {
-                  onNavigate(link.screen);
-                  setMobileMenuOpen(false);
+                onClick={(e) => {
+                  if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+                    e.preventDefault();
+                    onNavigate(link.screen);
+                    setMobileMenuOpen(false);
+                  }
                 }}
                 className={`w-full text-left px-4 py-3 rounded-lg text-base font-medium flex items-center justify-between ${
                   isActive ? 'bg-[#0F382C] text-white font-bold border-l-4 border-white shadow-xs' : 'text-white/80 hover:bg-[#0F382C]/50 hover:text-white'
@@ -288,16 +319,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <span>{link.label}</span>
                 {isActive && <div className="w-2 h-2 rounded-full bg-white" />}
-              </button>
+              </a>
             );
           })}
 
           {user && (
-            <button
+            <a
+              href="?screen=dashboard"
               id="mobile-nav-dashboard"
-              onClick={() => {
-                onNavigate('dashboard');
-                setMobileMenuOpen(false);
+              onClick={(e) => {
+                if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+                  e.preventDefault();
+                  onNavigate('dashboard');
+                  setMobileMenuOpen(false);
+                }
               }}
               className={`w-full text-left px-4 py-3 rounded-lg text-base font-medium flex items-center justify-between ${
                 activeScreen === 'dashboard' ? 'bg-[#0F382C] text-white font-bold border-l-4 border-white shadow-xs' : 'text-[#E4D5B7] hover:bg-[#0F382C]/50'
@@ -305,7 +340,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <span>My Dashboard</span>
               <LayoutDashboard className="w-4 h-4 text-[#E4D5B7]" />
-            </button>
+            </a>
           )}
 
           <div className="pt-4 border-t border-[#164E3D] flex flex-col gap-3">
@@ -334,16 +369,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            <button
+            <a
+              href="?screen=sell-rent"
               id="mobile-post-btn"
-              onClick={() => {
-                onOpenPostProperty();
-                setMobileMenuOpen(false);
+              onClick={(e) => {
+                if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+                  e.preventDefault();
+                  onOpenPostProperty();
+                  setMobileMenuOpen(false);
+                }
               }}
-              className="w-full bg-white text-[#0F382C] py-3 rounded-full font-bold text-xs tracking-wider uppercase shadow-md text-center"
+              className="w-full bg-white text-[#0F382C] py-3 rounded-full font-bold text-xs tracking-wider uppercase shadow-md text-center block"
             >
               POST PROPERTY
-            </button>
+            </a>
           </div>
         </div>
       )}

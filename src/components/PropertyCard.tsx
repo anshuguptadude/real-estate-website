@@ -31,7 +31,16 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     <div className="bg-white rounded-xl overflow-hidden border border-gray-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group h-full">
       
       {/* Media & Badges Container */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-gray-100 cursor-pointer" onClick={() => onSelect(property)}>
+      <a
+        href={`?property=${property.id}`}
+        onClick={(e) => {
+          if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+            e.preventDefault();
+            onSelect(property);
+          }
+        }}
+        className="relative aspect-[16/10] overflow-hidden bg-gray-100 cursor-pointer block"
+      >
         <img
           src={property.coverImage}
           alt={property.title}
@@ -108,7 +117,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             ₹{property.pricePerSqFt.toLocaleString('en-IN')}/sq.ft
           </span>
         </div>
-      </div>
+      </a>
 
       {/* Body Content */}
       <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
@@ -132,10 +141,19 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           {/* Property Title */}
           <h3
             id={`prop-title-${property.id}`}
-            onClick={() => onSelect(property)}
             className="text-base sm:text-lg font-serif-luxury font-bold text-[#0F382C] hover:text-[#164E3D] cursor-pointer line-clamp-1 transition-colors"
           >
-            {property.title}
+            <a
+              href={`?property=${property.id}`}
+              onClick={(e) => {
+                if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+                  e.preventDefault();
+                  onSelect(property);
+                }
+              }}
+            >
+              {property.title}
+            </a>
           </h3>
 
           {/* Subtitle / Tagline */}
@@ -251,15 +269,20 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
                 <span>Book Tour</span>
               </button>
 
-              <button
-                type="button"
+              <a
+                href={`?property=${property.id}`}
                 id={`view-details-btn-${property.id}`}
-                onClick={() => onSelect(property)}
+                onClick={(e) => {
+                  if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+                    e.preventDefault();
+                    onSelect(property);
+                  }
+                }}
                 className="text-xs font-semibold bg-[#0F382C] hover:bg-[#164E3D] text-white px-3.5 py-1.5 rounded shadow-xs hover:shadow-sm transition-all flex items-center gap-1"
               >
                 <span>View</span>
                 <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              </a>
             </div>
           </div>
         </div>

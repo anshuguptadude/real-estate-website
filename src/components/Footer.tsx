@@ -40,14 +40,20 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* Essential Navigation Links */}
           <div className="flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm font-medium text-gray-300">
             {navLinks.map((link) => (
-              <button
+              <a
                 key={link.screen}
+                href={`?screen=${link.screen}`}
                 id={`footer-link-${link.screen}`}
-                onClick={() => onNavigate(link.screen)}
+                onClick={(e) => {
+                  if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+                    e.preventDefault();
+                    onNavigate(link.screen);
+                  }
+                }}
                 className="hover:text-white transition-colors hover:underline underline-offset-4"
               >
                 {link.label}
-              </button>
+              </a>
             ))}
           </div>
 
