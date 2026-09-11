@@ -65,9 +65,9 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     'Private Garden'
   ]);
 
-  // Media Upload States (Supports up to 10 High-Quality Photos, up to 10 MB each)
+  // Media Upload States (Supports up to 10 High-Quality Photos, up to 25 MB each)
   const MAX_PHOTOS = 10;
-  const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB per file
+  const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB per file
 
   // Auto-sync owner info when user prop is available or updates
   useEffect(() => {
@@ -210,7 +210,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         resolve(createFallbackPlaceholder());
       }, 10000);
 
-      // Use Object URL for maximum performance with large 8-10MB DSLR camera files
+      // Use Object URL for maximum performance with large DSLR / camera files up to 25MB
       const blobUrl = URL.createObjectURL(file);
       const img = new Image();
 
@@ -304,7 +304,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       }
 
       if (file.size > MAX_FILE_SIZE_BYTES) {
-        setMediaError(`"${file.name}" exceeds the maximum 10 MB file size limit.`);
+        setMediaError(`"${file.name}" exceeds the maximum 25 MB file size limit.`);
         continue;
       }
 
@@ -1129,7 +1129,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         Property Photos & Gallery ({uploadedMediaList.length}/{MAX_PHOTOS} Uploaded)
                       </label>
                       <span className="text-[11px] text-emerald-800 font-semibold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                        HD Quality • Max 10 Photos • Up to 10 MB each
+                        HD Quality • Max 10 Photos • Up to 25 MB each
                       </span>
                     </div>
 
@@ -1310,7 +1310,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                           Drag & drop property photos here (Up to 10 photos)
                         </h4>
                         <p className="text-xs text-gray-500 mt-1 mb-6 max-w-sm mx-auto">
-                          Upload high-resolution camera photos (JPEG, PNG, WEBP, HEIC) up to 10 MB each. Automatic HD optimization ensures ultra-fast page speed for buyers.
+                          Upload high-resolution camera photos (JPEG, PNG, WEBP, HEIC) up to 25 MB each. Automatic HD optimization ensures ultra-fast page speed for buyers.
                         </p>
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -1321,7 +1321,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                             className="w-full sm:w-auto px-5 py-2.5 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                           >
                             <Upload className="w-4 h-4 text-[#E4D5B7]" />
-                            <span>Select Photos (Max 10, Up to 10 MB)</span>
+                            <span>Select Photos (Max 10, Up to 25 MB)</span>
                           </button>
 
                           <button

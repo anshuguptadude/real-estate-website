@@ -79,7 +79,7 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
   };
 
   const MAX_PHOTOS = 10;
-  const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB per file
+  const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB per file
 
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve) => {
@@ -187,7 +187,7 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
         continue;
       }
       if (file.size > MAX_FILE_SIZE_BYTES) {
-        setImageError(`"${file.name}" exceeds the maximum 10 MB limit.`);
+        setImageError(`"${file.name}" exceeds the maximum 25 MB limit.`);
         continue;
       }
       validFiles.push(file);
@@ -565,7 +565,7 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
                   <span>Property Photo Gallery ({images.length}/{MAX_PHOTOS})</span>
                 </label>
                 <p className="text-[11px] text-gray-500 mt-0.5">
-                  HD Quality • Max 10 Photos, up to 10 MB each. Click any thumbnail to set it as cover.
+                  HD Quality • Max 10 Photos, up to 25 MB each. Click any thumbnail to set it as cover.
                 </p>
               </div>
               {images.length < MAX_PHOTOS && (
