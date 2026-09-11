@@ -69,6 +69,15 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const MAX_PHOTOS = 10;
   const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB per file
 
+  // Auto-sync owner info when user prop is available or updates
+  useEffect(() => {
+    if (user) {
+      if (!ownerName && user.name) setOwnerName(user.name);
+      if (!ownerPhone && user.phone) setOwnerPhone(user.phone);
+      if (!ownerEmail && user.email) setOwnerEmail(user.email);
+    }
+  }, [user]);
+
   const [uploadedMediaList, setUploadedMediaList] = useState<{
     url: string;
     type: 'image' | 'video';
@@ -129,14 +138,6 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     setStepErrors({});
   };
 
-  useEffect(() => {
-    if (user) {
-      if (user.name) setOwnerName(user.name);
-      if (user.phone) setOwnerPhone(user.phone);
-      if (user.email) setOwnerEmail(user.email);
-    }
-  }, [user]);
-
   const amenityOptions = [
     'Swimming Pool',
     'Private Garden',
@@ -184,68 +185,97 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve) => {
-      // Safety timeout: if image processing hangs (e.g. Safari HEIC), resolve fallback
-      const timer = setTimeout(() => {
-        resolve('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=75');
-      }, 5000);
-
-      const reader = new FileReader();
-      reader.onload = (readerEvent) => {
-        const rawResult = readerEvent.target?.result as string;
-        if (!rawResult) {
-          clearTimeout(timer);
-          resolve('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=75');
-          return;
-        }
-
-        const img = new Image();
-        img.onload = () => {
-          clearTimeout(timer);
-          // Crisp Full HD dimension (1400px)
-          const maxDimension = 1400;
-          let width = img.width || 1400;
-          let height = img.height || 900;
-
-          if (width > maxDimension || height > maxDimension) {
-            if (width > height) {
-              height = Math.round((height * maxDimension) / width);
-              width = maxDimension;
-            } else {
-              width = Math.round((width * maxDimension) / height);
-              height = maxDimension;
-            }
+      // Create a clean lightweight fallback in case the raw file is corrupt or unsupported
+      const createFallbackPlaceholder = () => {
+        try {
+          const fbCanvas = document.createElement('canvas');
+          fbCanvas.width = 800;
+          fbCanvas.height = 533;
+          const fbCtx = fbCanvas.getContext('2d');
+          if (fbCtx) {
+            fbCtx.fillStyle = '#0F382C';
+            fbCtx.fillRect(0, 0, 800, 533);
+            fbCtx.fillStyle = '#C5A880';
+            fbCtx.font = 'bold 28px sans-serif';
+            fbCtx.textAlign = 'center';
+            fbCtx.fillText('Royal Agra Estate — Verified Photo', 400, 270);
+            return fbCanvas.toDataURL('image/jpeg', 0.60);
           }
+        } catch {}
+        return 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=70';
+      };
 
-          try {
+      // Safety timeout
+      const timer = setTimeout(() => {
+        resolve(createFallbackPlaceholder());
+      }, 10000);
+
+      // Use Object URL for maximum performance with large 8-10MB DSLR camera files
+      const blobUrl = URL.createObjectURL(file);
+      const img = new Image();
+
+      img.onload = () => {
+        clearTimeout(timer);
+        URL.revokeObjectURL(blobUrl);
+
+        try {
+          // Multi-stage compression algorithm to ensure each image is ~35-48 KB
+          // 10 photos x 45 KB = ~450 KB total document payload (strictly within 1 MB Firestore limit)
+          const runCanvasCompression = (maxDim: number, quality: number): string => {
+            let width = img.naturalWidth || img.width || 1200;
+            let height = img.naturalHeight || img.height || 800;
+
+            if (width > maxDim || height > maxDim) {
+              if (width > height) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              } else {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+
             const canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d');
-            if (ctx) {
-              ctx.imageSmoothingEnabled = true;
-              ctx.imageSmoothingQuality = 'high';
-              ctx.drawImage(img, 0, 0, width, height);
-              // High Quality JPEG with 0.70 compression (~50-65KB per HD image, 10 images = ~550KB, fits within 1MB Firestore limit)
-              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.70);
-              resolve(compressedDataUrl);
-            } else {
-              resolve(rawResult);
-            }
-          } catch {
-            resolve(rawResult);
+            if (!ctx) return createFallbackPlaceholder();
+
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, width, height);
+
+            return canvas.toDataURL('image/jpeg', quality);
+          };
+
+          // Pass 1: 1200px @ 0.65
+          let resultDataUrl = runCanvasCompression(1200, 0.65);
+
+          // Pass 2: If result string > 68,000 chars (~50 KB), re-compress at 900px @ 0.52
+          if (resultDataUrl.length > 68000) {
+            resultDataUrl = runCanvasCompression(900, 0.52);
           }
-        };
-        img.onerror = () => {
-          clearTimeout(timer);
-          resolve(rawResult);
-        };
-        img.src = rawResult;
+
+          // Pass 3: If still > 68,000 chars, compress at 720px @ 0.45
+          if (resultDataUrl.length > 68000) {
+            resultDataUrl = runCanvasCompression(720, 0.45);
+          }
+
+          resolve(resultDataUrl);
+        } catch (err) {
+          console.error("Canvas compression error:", err);
+          resolve(createFallbackPlaceholder());
+        }
       };
-      reader.onerror = () => {
+
+      img.onerror = () => {
         clearTimeout(timer);
-        resolve('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=75');
+        URL.revokeObjectURL(blobUrl);
+        console.warn("Image decode error on file:", file.name);
+        resolve(createFallbackPlaceholder());
       };
-      reader.readAsDataURL(file);
+
+      img.src = blobUrl;
     });
   };
 
@@ -463,6 +493,11 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       ];
     }
 
+    const resolvedOwnerEmail = (ownerEmail.trim() || user?.email || '').toLowerCase().trim();
+    const resolvedOwnerPhone = (ownerPhone.trim() || user?.phone || '').trim();
+    const resolvedOwnerName = ownerName.trim() || user?.name || 'Property Owner';
+    const resolvedUserId = user?.id || (resolvedOwnerEmail ? `user-${resolvedOwnerEmail.replace(/[^a-z0-9]/g, '')}` : `user-${Date.now()}`);
+
     const newProperty: Property = {
       id: generatedId,
       title: projectTitle.trim() || `Luxury ${propertyType} in ${finalLocality}`,
@@ -493,11 +528,17 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       status: initialStatus,
       isApproved: isApproved,
       isUserListing: true,
-      ownerId: user?.id || (ownerEmail.trim() ? `user-${ownerEmail.trim().toLowerCase().replace(/[^a-z0-9]/g, '')}` : `user-${Date.now()}`),
-      userId: user?.id || (ownerEmail.trim() ? `user-${ownerEmail.trim().toLowerCase().replace(/[^a-z0-9]/g, '')}` : `user-${Date.now()}`),
-      ownerName: ownerName.trim() || user?.name || 'Property Owner',
-      ownerContact: ownerPhone.trim() || user?.phone || '',
-      ownerEmail: (ownerEmail.trim() || user?.email || '').toLowerCase().trim(),
+      ownerId: resolvedUserId,
+      userId: resolvedUserId,
+      ownerName: resolvedOwnerName,
+      ownerContact: resolvedOwnerPhone,
+      ownerEmail: resolvedOwnerEmail,
+      postedBy: {
+        id: resolvedUserId,
+        name: resolvedOwnerName,
+        email: resolvedOwnerEmail,
+        role: user?.role || 'Owner'
+      },
       images: finalImages,
       coverImage: finalCover,
       description: `Spectacular ${propertyType} situated in the prestigious enclave of ${finalLocality}, Agra. Designed for distinguished living with spacious layouts, high ceilings, premium fittings, and comprehensive security infrastructure.`,
@@ -1437,7 +1478,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       Confidential Owner / Developer Contact
                     </label>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div>
                         <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">Owner Name *</label>
                         <input
@@ -1479,6 +1520,17 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                             <span>{stepErrors.ownerPhone}</span>
                           </p>
                         )}
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">Owner Email Address</label>
+                        <input
+                          type="email"
+                          id="owner-email-input"
+                          value={ownerEmail}
+                          onChange={(e) => setOwnerEmail(e.target.value)}
+                          placeholder="e.g. owner@gmail.com"
+                          className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-800"
+                        />
                       </div>
                     </div>
                   </div>

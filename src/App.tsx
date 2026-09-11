@@ -365,11 +365,12 @@ export default function App() {
       return updated;
     });
     try {
-      await saveFirestoreProperty(propToSave);
+      const success = await saveFirestoreProperty(propToSave);
+      return success;
     } catch (e) {
       console.warn("Remote Firestore write error (saved locally):", e);
+      return true;
     }
-    return true;
   };
 
   const handleSavePropertyEdit = async (updatedProperty: Property) => {
@@ -582,17 +583,33 @@ export default function App() {
         const uId = user.id?.trim();
         const uEmail = user.email?.trim().toLowerCase();
         const uPhone = user.phone ? user.phone.replace(/[^0-9]/g, '') : '';
+        const uName = user.name?.trim().toLowerCase();
 
         const pOwnerId = p.ownerId?.trim();
         const pUserId = p.userId?.trim();
+        const pPostedById = p.postedBy?.id?.trim();
         const pEmail = p.ownerEmail?.trim().toLowerCase();
+        const pPostedByEmail = p.postedBy?.email?.trim().toLowerCase();
         const pPhone = p.ownerContact ? p.ownerContact.replace(/[^0-9]/g, '') : '';
+        const pOwnerName = p.ownerName?.trim().toLowerCase();
+        const pPostedByName = p.postedBy?.name?.trim().toLowerCase();
 
-        const matchId = Boolean(uId && (pOwnerId === uId || pUserId === uId));
-        const matchEmail = Boolean(uEmail && pEmail && pEmail === uEmail);
-        const matchPhone = Boolean(uPhone && pPhone && (pPhone === uPhone || pPhone.endsWith(uPhone) || uPhone.endsWith(pPhone)));
+        const matchId = Boolean(uId && (pOwnerId === uId || pUserId === uId || pPostedById === uId));
+        const matchEmail = Boolean(
+          (uEmail && pEmail && pEmail === uEmail) || 
+          (uEmail && pPostedByEmail && pPostedByEmail === uEmail)
+        );
+        const matchPhone = Boolean(
+          uPhone && pPhone && 
+          (pPhone === uPhone || pPhone.endsWith(uPhone) || uPhone.endsWith(pPhone))
+        );
+        const matchName = Boolean(
+          uName && pOwnerName && uName === pOwnerName && uName.length > 2
+        ) || Boolean(
+          uName && pPostedByName && uName === pPostedByName && uName.length > 2
+        );
 
-        return matchId || matchEmail || matchPhone;
+        return matchId || matchEmail || matchPhone || matchName;
       });
 
   return (

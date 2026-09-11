@@ -209,8 +209,13 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
   setPropertiesCache(updated);
 
   try {
+    const payloadStr = JSON.stringify(cleanProperty);
+    const payloadSizeKb = Math.round(payloadStr.length / 1024);
+    console.log(`Saving property ${cleanProperty.id} to Firestore (Payload: ${payloadSizeKb} KB)...`);
+
     // Persist to Cloud Firestore so all other browsers/devices receive it instantly
     await setDoc(doc(db, 'properties', cleanProperty.id), cleanProperty);
+    console.log(`Successfully persisted ${cleanProperty.id} to Firestore.`);
     return true;
   } catch (error) {
     console.error("Error saving property to Firestore:", error);
