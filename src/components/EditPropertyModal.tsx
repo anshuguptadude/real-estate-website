@@ -656,9 +656,14 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
                         </button>
                       </div>
 
-                      {/* Bottom Photo Index tag */}
-                      <div className="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded font-mono backdrop-blur-xs">
-                        #{idx + 1}
+                      {/* Bottom Photo Index and HD tag */}
+                      <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between pointer-events-none">
+                        <span className="bg-black/70 text-white text-[9px] px-1.5 py-0.5 rounded font-mono backdrop-blur-xs">
+                          #{idx + 1}
+                        </span>
+                        <span className="bg-black/70 text-amber-300 text-[9px] font-bold px-1.5 py-0.5 rounded border border-amber-300/30 backdrop-blur-xs">
+                          HD Photo
+                        </span>
                       </div>
                     </div>
                   );

@@ -325,14 +325,16 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
       for (let i = 0; i < validFiles.length; i++) {
         const file = validFiles[i];
-        setProcessingProgress(`Optimizing photo ${i + 1} of ${validFiles.length} (HD Quality)...`);
+        const rawSizeMb = (file.size / (1024 * 1024)).toFixed(1);
+        const rawSizeStr = file.size >= 1024 * 1024 ? `${rawSizeMb} MB` : `${Math.round(file.size / 1024)} KB`;
+        setProcessingProgress(`Optimizing photo ${i + 1} of ${validFiles.length} (${rawSizeStr} HD)...`);
         const compressedUrl = await compressImage(file);
         const approxSizeInKB = Math.round((compressedUrl.length * 3) / 4 / 1024);
         newMediaItems.push({
           url: compressedUrl,
           type: 'image',
           name: file.name,
-          size: `${approxSizeInKB} KB (HD)`
+          size: `${rawSizeStr} raw • ${approxSizeInKB} KB HD`
         });
       }
 
@@ -1251,8 +1253,11 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
 
-                                <div className="absolute bottom-2 left-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[10px] px-2 py-0.5 rounded truncate pointer-events-none">
-                                  {item.name} ({item.size})
+                                <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between gap-1 bg-black/80 backdrop-blur-xs text-white text-[10px] px-2 py-1 rounded-md pointer-events-none shadow-sm z-10 border border-white/10">
+                                  <span className="truncate max-w-[50%] text-gray-200 font-medium">{item.name}</span>
+                                  <span className="font-bold text-amber-300 bg-black/60 px-1.5 py-0.5 rounded border border-amber-300/40 shrink-0 text-[10px]">
+                                    {item.size}
+                                  </span>
                                 </div>
                               </div>
                             );
@@ -1261,9 +1266,14 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
                         {/* Additional Action Buttons */}
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
-                          <span className="text-xs text-gray-600 font-medium">
-                            {uploadedMediaList.length} of {MAX_PHOTOS} photo(s) selected for HD property portfolio.
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-700 font-bold">
+                              {uploadedMediaList.length} of {MAX_PHOTOS} photo(s) selected
+                            </span>
+                            <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-full border border-emerald-300">
+                              HD Portfolio Ready
+                            </span>
+                          </div>
 
                           <div className="flex items-center gap-2 w-full sm:w-auto">
                             {uploadedMediaList.length < MAX_PHOTOS && (
