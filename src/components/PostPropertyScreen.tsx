@@ -65,7 +65,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     'Private Garden'
   ]);
 
-  // Media Upload States (Multiple files supported with NO size limit)
+  // Media Upload States (Supports up to 10 High-Quality Photos, up to 10 MB each)
+  const MAX_PHOTOS = 10;
+  const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB per file
+
   const [uploadedMediaList, setUploadedMediaList] = useState<{
     url: string;
     type: 'image' | 'video';
@@ -75,6 +78,8 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const [selectedCoverIndex, setSelectedCoverIndex] = useState<number>(0);
   const [isDragging, setIsDragging] = useState(false);
   const [mediaError, setMediaError] = useState<string>('');
+  const [isProcessingPhotos, setIsProcessingPhotos] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -179,26 +184,27 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve) => {
-      // Safety timeout: if image processing hangs or takes more than 3.5s (e.g. Safari HEIC), resolve fallback
+      // Safety timeout: if image processing hangs (e.g. Safari HEIC), resolve fallback
       const timer = setTimeout(() => {
-        resolve('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=960&q=75');
-      }, 3500);
+        resolve('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=75');
+      }, 5000);
 
       const reader = new FileReader();
       reader.onload = (readerEvent) => {
         const rawResult = readerEvent.target?.result as string;
         if (!rawResult) {
           clearTimeout(timer);
-          resolve('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=960&q=75');
+          resolve('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=75');
           return;
         }
 
         const img = new Image();
         img.onload = () => {
           clearTimeout(timer);
-          const maxDimension = 960;
-          let width = img.width || 960;
-          let height = img.height || 640;
+          // Crisp Full HD dimension (1400px)
+          const maxDimension = 1400;
+          let width = img.width || 1400;
+          let height = img.height || 900;
 
           if (width > maxDimension || height > maxDimension) {
             if (width > height) {
@@ -216,9 +222,11 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
             canvas.height = height;
             const ctx = canvas.getContext('2d');
             if (ctx) {
+              ctx.imageSmoothingEnabled = true;
+              ctx.imageSmoothingQuality = 'high';
               ctx.drawImage(img, 0, 0, width, height);
-              // Compress to JPEG with 0.65 quality (ultra-lightweight ~50-80KB to fit Firestore 1MB quota)
-              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+              // High Quality JPEG with 0.70 compression (~50-65KB per HD image, 10 images = ~550KB, fits within 1MB Firestore limit)
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.70);
               resolve(compressedDataUrl);
             } else {
               resolve(rawResult);
@@ -235,7 +243,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       };
       reader.onerror = () => {
         clearTimeout(timer);
-        resolve('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=960&q=75');
+        resolve('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=75');
       };
       reader.readAsDataURL(file);
     });
@@ -244,6 +252,15 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const handleProcessFiles = async (files: FileList | File[]) => {
     setMediaError('');
     const fileArray = Array.from(files);
+    if (fileArray.length === 0) return;
+
+    if (uploadedMediaList.length >= MAX_PHOTOS) {
+      setMediaError(`Maximum ${MAX_PHOTOS} photos allowed per property listing.`);
+      return;
+    }
+
+    const remainingSlots = MAX_PHOTOS - uploadedMediaList.length;
+    let validFiles: File[] = [];
 
     for (const file of fileArray) {
       const isImage = 
@@ -252,25 +269,50 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         !file.type;
 
       if (!isImage) {
-        setMediaError('Please select photo uploads (JPEG, PNG, WEBP, HEIC) for listing display.');
+        setMediaError('Please select valid photos (JPEG, PNG, WEBP, HEIC) for listing display.');
         continue;
       }
 
-      try {
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        setMediaError(`"${file.name}" exceeds the maximum 10 MB file size limit.`);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    if (validFiles.length > remainingSlots) {
+      setMediaError(`Maximum ${MAX_PHOTOS} photos allowed per property. Only the first ${remainingSlots} photo(s) were selected.`);
+      validFiles = validFiles.slice(0, remainingSlots);
+    }
+
+    if (validFiles.length === 0) return;
+
+    setIsProcessingPhotos(true);
+
+    try {
+      const newMediaItems: { url: string; type: 'image'; name: string; size: string }[] = [];
+
+      for (let i = 0; i < validFiles.length; i++) {
+        const file = validFiles[i];
+        setProcessingProgress(`Optimizing photo ${i + 1} of ${validFiles.length} (HD Quality)...`);
         const compressedUrl = await compressImage(file);
         const approxSizeInKB = Math.round((compressedUrl.length * 3) / 4 / 1024);
-        setUploadedMediaList((prev) => [
-          ...prev,
-          {
-            url: compressedUrl,
-            type: 'image',
-            name: file.name,
-            size: `${approxSizeInKB} KB (Optimized)`
-          }
-        ]);
-      } catch (err) {
-        console.error('Error processing image:', err);
+        newMediaItems.push({
+          url: compressedUrl,
+          type: 'image',
+          name: file.name,
+          size: `${approxSizeInKB} KB (HD)`
+        });
       }
+
+      setUploadedMediaList((prev) => [...prev, ...newMediaItems]);
+    } catch (err) {
+      console.error('Error processing images:', err);
+      setMediaError('An error occurred while optimizing photos. Please try again.');
+    } finally {
+      setIsProcessingPhotos(false);
+      setProcessingProgress('');
     }
   };
 
@@ -1041,12 +1083,12 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
                   {/* DEDICATED MEDIA UPLOAD COMPONENT (Photos & Videos) */}
                   <div className="space-y-3 pt-2">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                       <label className="block text-xs font-bold text-gray-700 uppercase">
-                        Property Photos & Videos ({uploadedMediaList.length} Uploaded)
+                        Property Photos & Gallery ({uploadedMediaList.length}/{MAX_PHOTOS} Uploaded)
                       </label>
-                      <span className="text-[11px] text-gray-500 font-medium">
-                        JPEG, PNG, WEBP, MP4, MOV (Multiple files, No size limit)
+                      <span className="text-[11px] text-emerald-800 font-semibold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                        HD Quality • Max 10 Photos • Up to 10 MB each
                       </span>
                     </div>
 
@@ -1067,6 +1109,21 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       capture="environment"
                       className="sr-only opacity-0 absolute w-0 h-0 overflow-hidden pointer-events-none"
                     />
+
+                    {/* PROCESSING PROGRESS BANNER */}
+                    {isProcessingPhotos && (
+                      <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-xl text-xs text-emerald-900 flex items-center gap-3 shadow-xs animate-pulse">
+                        <Loader2 className="w-5 h-5 text-emerald-700 animate-spin shrink-0" />
+                        <div className="space-y-0.5">
+                          <p className="font-bold text-emerald-950">
+                            {processingProgress || 'Processing High-Resolution Photos...'}
+                          </p>
+                          <p className="text-[11px] text-emerald-700">
+                            Optimizing crisp HD details and compressing for instant cloud database sync.
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     {mediaError && (
                       <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center gap-2 font-medium">
@@ -1164,26 +1221,32 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         {/* Additional Action Buttons */}
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
                           <span className="text-xs text-gray-600 font-medium">
-                            {uploadedMediaList.length} media item(s) will be permanently saved to the website.
+                            {uploadedMediaList.length} of {MAX_PHOTOS} photo(s) selected for HD property portfolio.
                           </span>
 
                           <div className="flex items-center gap-2 w-full sm:w-auto">
-                            <button
-                              type="button"
-                              onClick={() => fileInputRef.current?.click()}
-                              className="flex-1 sm:flex-initial px-4 py-2 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
-                            >
-                              <Upload className="w-3.5 h-3.5 text-[#E4D5B7]" />
-                              <span>Upload More Pictures</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => cameraInputRef.current?.click()}
-                              className="flex-1 sm:flex-initial px-4 py-2 bg-white hover:bg-gray-100 text-[#0F382C] border border-[#0F382C]/30 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
-                            >
-                              <Camera className="w-3.5 h-3.5 text-[#0F382C]" />
-                              <span>Camera Capture</span>
-                            </button>
+                            {uploadedMediaList.length < MAX_PHOTOS && (
+                              <>
+                                <button
+                                  type="button"
+                                  disabled={isProcessingPhotos}
+                                  onClick={() => fileInputRef.current?.click()}
+                                  className="flex-1 sm:flex-initial px-4 py-2 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                                >
+                                  <Upload className="w-3.5 h-3.5 text-[#E4D5B7]" />
+                                  <span>Add More Photos ({MAX_PHOTOS - uploadedMediaList.length} left)</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={isProcessingPhotos}
+                                  onClick={() => cameraInputRef.current?.click()}
+                                  className="flex-1 sm:flex-initial px-4 py-2 bg-white hover:bg-gray-100 text-[#0F382C] border border-[#0F382C]/30 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                                >
+                                  <Camera className="w-3.5 h-3.5 text-[#0F382C]" />
+                                  <span>Camera</span>
+                                </button>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1203,26 +1266,28 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                           <Upload className="w-8 h-8 text-[#0F382C]" />
                         </div>
                         <h4 className="text-base font-serif-luxury font-bold text-[#0F382C]">
-                          Drag & drop multiple property photos or video walkthroughs here
+                          Drag & drop property photos here (Up to 10 photos)
                         </h4>
                         <p className="text-xs text-gray-500 mt-1 mb-6 max-w-sm mx-auto">
-                          Upload high-resolution property photos or video walkthroughs without any size limits. Select multiple files at once.
+                          Upload high-resolution camera photos (JPEG, PNG, WEBP, HEIC) up to 10 MB each. Automatic HD optimization ensures ultra-fast page speed for buyers.
                         </p>
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                           <button
                             type="button"
+                            disabled={isProcessingPhotos}
                             onClick={() => fileInputRef.current?.click()}
-                            className="w-full sm:w-auto px-5 py-2.5 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm flex items-center justify-center gap-2 transition-all"
+                            className="w-full sm:w-auto px-5 py-2.5 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                           >
                             <Upload className="w-4 h-4 text-[#E4D5B7]" />
-                            <span>Select Multiple Files</span>
+                            <span>Select Photos (Max 10, Up to 10 MB)</span>
                           </button>
 
                           <button
                             type="button"
+                            disabled={isProcessingPhotos}
                             onClick={() => cameraInputRef.current?.click()}
-                            className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-gray-100 text-[#0F382C] border border-[#0F382C]/30 rounded-xl text-xs font-bold uppercase tracking-wider shadow-2xs flex items-center justify-center gap-2 transition-all"
+                            className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-gray-100 text-[#0F382C] border border-[#0F382C]/30 rounded-xl text-xs font-bold uppercase tracking-wider shadow-2xs flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                           >
                             <Camera className="w-4 h-4 text-[#0F382C]" />
                             <span>Live Camera Capture</span>

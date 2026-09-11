@@ -78,13 +78,16 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
     return `₹${(amt / 100000).toFixed(2)} Lacs`;
   };
 
+  const MAX_PHOTOS = 10;
+  const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB per file
+
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (readerEvent) => {
         const img = new Image();
         img.onload = () => {
-          const maxDimension = 1280;
+          const maxDimension = 1400;
           let width = img.width;
           let height = img.height;
 
@@ -103,8 +106,10 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           canvas.height = height;
           const ctx = canvas.getContext('2d');
           if (ctx) {
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, width, height);
-            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.70);
             resolve(compressedDataUrl);
           } else {
             resolve(readerEvent.target?.result as string);
@@ -124,15 +129,38 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    if (images.length >= MAX_PHOTOS) {
+      setImageError(`Maximum ${MAX_PHOTOS} photos allowed per property. Please delete an existing photo first.`);
+      return;
+    }
+
+    const remainingSlots = MAX_PHOTOS - images.length;
+    let validFiles: File[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file.type.startsWith('image/')) {
+        setImageError('Only photo uploads (JPEG, PNG, WebP, HEIC) are allowed.');
+        continue;
+      }
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        setImageError(`"${file.name}" exceeds the maximum 10 MB limit.`);
+        continue;
+      }
+      validFiles.push(file);
+    }
+
+    if (validFiles.length > remainingSlots) {
+      setImageError(`Maximum ${MAX_PHOTOS} photos allowed. Only the first ${remainingSlots} photo(s) were added.`);
+      validFiles = validFiles.slice(0, remainingSlots);
+    }
+
+    if (validFiles.length === 0) return;
+
     setIsUploading(true);
     try {
       const newImages: string[] = [];
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (!file.type.startsWith('image/')) {
-          setImageError('Only image files (JPEG, PNG, WebP) are allowed.');
-          continue;
-        }
+      for (const file of validFiles) {
         const compressed = await compressImage(file);
         newImages.push(compressed);
       }
@@ -487,34 +515,36 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
 
           {/* Property Photos Management */}
           <div className="space-y-3 bg-gray-50/80 p-4 sm:p-5 rounded-xl border border-gray-200">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <label className="block text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
                   <ImageIcon className="w-4 h-4 text-[#0F382C]" />
-                  <span>Property Photo Gallery ({images.length})</span>
+                  <span>Property Photo Gallery ({images.length}/{MAX_PHOTOS})</span>
                 </label>
                 <p className="text-[11px] text-gray-500 mt-0.5">
-                  Click any thumbnail to set it as the active cover photo. Upload or delete photos below.
+                  HD Quality • Max 10 Photos, up to 10 MB each. Click any thumbnail to set it as cover.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#0F382C] hover:bg-[#164E3D] text-white text-xs font-bold rounded-lg transition-colors shadow-xs cursor-pointer disabled:opacity-50"
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Processing...</span>
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Upload Image / Add Photo</span>
-                  </>
-                )}
-              </button>
+              {images.length < MAX_PHOTOS && (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#0F382C] hover:bg-[#164E3D] text-white text-xs font-bold rounded-lg transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Optimizing HD Photo...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Photo ({MAX_PHOTOS - images.length} left)</span>
+                    </>
+                  )}
+                </button>
+              )}
               <input
                 ref={fileInputRef}
                 type="file"
