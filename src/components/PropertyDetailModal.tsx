@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Property, UserProfile } from '../types';
-import { isAdmin } from '../utils/security';
+import { isAdmin, isPropertyOwnerOrAdmin } from '../utils/security';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapComponent } from './MapComponent';
 import {
@@ -66,7 +66,8 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   if (!property) return null;
 
   const isUserAdmin = isAdmin(user);
-  const displayAddress = isUserAdmin && property.address 
+  const isOwnerOrAdmin = isPropertyOwnerOrAdmin(property, user);
+  const displayAddress = isOwnerOrAdmin && property.address 
     ? property.address 
     : (property.locality 
         ? (property.locality.toLowerCase().includes('agra') ? property.locality : `${property.locality}, Agra`)
@@ -347,12 +348,60 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 </div>
               </div>
 
-              {/* Map */}
-              <div>
-                <h4 className="text-sm font-bold text-[#0F382C] uppercase tracking-wider mb-3">
-                  Property Location
-                </h4>
-                <MapComponent lat={property.coordinates.lat} lng={property.coordinates.lng} />
+              {/* Map - Restricted to Property Uploader and Admin Accounts Only */}
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <h4 className="text-sm font-bold text-[#0F382C] uppercase tracking-wider flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4 text-[#0F382C]" />
+                    <span>Property Location</span>
+                  </h4>
+                  {isOwnerOrAdmin ? (
+                    <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 w-fit">
+                      <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                      <span>{isUserAdmin ? 'Admin Full Access' : 'Verified Owner View'} • Exact GPS Map</span>
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold text-gray-600 bg-gray-100 border border-gray-300 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 w-fit">
+                      <span>🔒 Protected For Seller Privacy</span>
+                    </span>
+                  )}
+                </div>
+
+                {isOwnerOrAdmin ? (
+                  <div>
+                    <MapComponent lat={property.coordinates.lat} lng={property.coordinates.lng} />
+                    <p className="text-[11px] text-gray-500 mt-2 flex items-center gap-1">
+                      <span className="font-semibold text-emerald-800">Exact GPS Coordinates:</span> {property.coordinates.lat.toFixed(4)}°N, {property.coordinates.lng.toFixed(4)}°E (Visible exclusively to you as owner/admin)
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-5 bg-gradient-to-br from-gray-50 to-gray-100/80 border border-gray-200/90 rounded-xl text-center space-y-3 shadow-2xs">
+                    <div className="w-11 h-11 rounded-full bg-[#0F382C]/10 text-[#0F382C] flex items-center justify-center mx-auto shadow-2xs">
+                      <MapPin className="w-5 h-5 text-[#0F382C]" />
+                    </div>
+                    <div className="space-y-1 max-w-md mx-auto">
+                      <h5 className="text-xs font-bold text-gray-900 uppercase tracking-wide">
+                        Exact Google Map Location Protected For Seller Privacy
+                      </h5>
+                      <p className="text-xs text-gray-600 leading-relaxed">
+                        Locality: <strong className="text-gray-900 font-semibold">{displayAddress}</strong>. To protect seller privacy and prevent unscheduled visits, live Google Map GPS pin & exact street navigation are visible only to the property uploader and platform administrators. Verified buyers receive exact site directions upon scheduling a private tour.
+                      </p>
+                    </div>
+                    <div className="pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const formEl = document.querySelector('form');
+                          if (formEl) formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0F382C] hover:bg-[#164E3D] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer"
+                      >
+                        <span>Schedule Site Tour for Exact Directions</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
             </div>

@@ -42,12 +42,50 @@ export const isAdmin = (user: UserProfile | null): boolean => {
   );
 };
 
+export const isPropertyOwner = (property: Property | null, user: UserProfile | null): boolean => {
+  if (!property || !user) return false;
+  if (isAdmin(user)) return true;
+
+  const uId = user.id?.trim();
+  const uEmail = user.email?.trim().toLowerCase();
+  const uPhone = user.phone ? user.phone.replace(/[^0-9]/g, '') : '';
+  const uName = user.name?.trim().toLowerCase();
+
+  const pOwnerId = property.ownerId?.trim();
+  const pUserId = property.userId?.trim();
+  const pPostedById = property.postedBy?.id?.trim();
+  const pEmail = property.ownerEmail?.trim().toLowerCase();
+  const pPostedByEmail = property.postedBy?.email?.trim().toLowerCase();
+  const pPhone = property.ownerContact ? property.ownerContact.replace(/[^0-9]/g, '') : '';
+  const pOwnerName = property.ownerName?.trim().toLowerCase();
+  const pPostedByName = property.postedBy?.name?.trim().toLowerCase();
+
+  const matchId = Boolean(uId && (pOwnerId === uId || pUserId === uId || pPostedById === uId));
+  const matchEmail = Boolean(
+    (uEmail && pEmail && pEmail === uEmail) || 
+    (uEmail && pPostedByEmail && pPostedByEmail === uEmail)
+  );
+  const matchPhone = Boolean(
+    uPhone && pPhone && 
+    (pPhone === uPhone || pPhone.endsWith(uPhone) || uPhone.endsWith(pPhone))
+  );
+  const matchName = Boolean(
+    uName && ((pOwnerName && pOwnerName === uName) || (pPostedByName && pPostedByName === uName))
+  );
+
+  return matchId || matchEmail || matchPhone || matchName;
+};
+
+export const isPropertyOwnerOrAdmin = (property: Property | null, user: UserProfile | null): boolean => {
+  return isAdmin(user) || isPropertyOwner(property, user);
+};
+
 export const getMaskedProperty = (property: Property, user: UserProfile | null): Property => {
-  if (isAdmin(user)) {
+  if (isPropertyOwnerOrAdmin(property, user)) {
     return property;
   }
   
-  // For non-admin (buyer / guest view), mask sensitive details:
+  // For non-owner & non-admin (buyer / guest view), mask sensitive details:
   // Show only the general locality, hide exact street address & coordinates
   const generalLocality = property.locality 
     ? (property.locality.toLowerCase().includes('agra') ? property.locality : `${property.locality}, Agra`)
