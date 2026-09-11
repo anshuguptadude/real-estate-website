@@ -5,6 +5,8 @@ import { Search, MapPin, Home, IndianRupee, Sparkles, ChevronDown } from 'lucide
 
 interface HeroSectionProps {
   onSearch: (filters: Partial<FilterState>) => void;
+  onSelectLocality?: (localityName: string) => void;
+  onExploreProjects?: () => void;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({

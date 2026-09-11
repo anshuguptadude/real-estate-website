@@ -9,6 +9,8 @@ interface NavbarProps {
   onOpenPostProperty: () => void;
   user: UserProfile | null;
   onLogout: () => void;
+  savedCount?: number;
+  onOpenSaved?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({

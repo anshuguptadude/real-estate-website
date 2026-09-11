@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Property, PropertyType } from '../types';
 import { AGRA_LOCALITIES, PROPERTY_TYPES } from '../data/mockData';
-import { LocationPickerMap } from './LocationPickerMap';
 import { X, Building2, Image as ImageIcon, IndianRupee, Save, Trash2, Plus, Upload, Star, Loader2, Check } from 'lucide-react';
 
 interface EditPropertyModalProps {
@@ -41,9 +40,6 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
   const [verified, setVerified] = useState<boolean>(property?.verified ?? true);
   const [verifiedBy, setVerifiedBy] = useState<string>(property?.verifiedBy || 'Agra Development Authority (ADA)');
   const [verificationNumber, setVerificationNumber] = useState<string>(property?.verificationNumber || '');
-  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }>(
-    property?.coordinates || { lat: 27.1585, lng: 78.0494 }
-  );
 
   useEffect(() => {
     if (property) {
@@ -58,7 +54,6 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
       setBathrooms(property.bathrooms);
       setFurnishing(property.furnishing);
       setPossession(property.possession);
-      setCoordinates(property.coordinates || { lat: 27.1585, lng: 78.0494 });
       const initialImages = property.images && property.images.length > 0
         ? property.images
         : (property.coverImage ? [property.coverImage] : []);
@@ -281,8 +276,7 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
       verified,
       verificationStatus: verified ? 'Verified' : 'Not Verified',
       verifiedBy: verified ? verifiedBy : 'Not Verified / Independent Private Registry',
-      verificationNumber: verificationNumber.trim() || undefined,
-      coordinates: coordinates
+      verificationNumber: verificationNumber.trim() || undefined
     };
     onSave(updated);
     onClose();
@@ -454,13 +448,6 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
               className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
             />
           </div>
-
-          {/* Interactive Manual Map Location Picker */}
-          <LocationPickerMap
-            selectedLocality={locality}
-            coordinates={coordinates}
-            onChangeCoordinates={setCoordinates}
-          />
 
           {/* Bedrooms, Bathrooms, Furnishing */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

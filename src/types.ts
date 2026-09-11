@@ -49,7 +49,7 @@ export interface Property {
   gatedSecurity: boolean;
   powerBackup: boolean;
   coordinates: { lat: number; lng: number };
-  status?: 'Active' | 'Sold' | 'Rented' | 'pending_verification' | 'published' | 'rejected';
+  status?: 'Active' | 'Sold' | 'Rented' | 'pending_verification' | 'Pending Approval' | 'published' | 'rejected';
   isApproved?: boolean;
   isDeleted?: boolean;
   isUserListing?: boolean;
@@ -58,6 +58,14 @@ export interface Property {
   ownerName?: string;
   ownerContact?: string;
   ownerEmail?: string;
+  postedBy?: {
+    id?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+    role?: string;
+    avatar?: string;
+  };
 }
 
 export interface UserProfile {

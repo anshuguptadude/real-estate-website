@@ -99,7 +99,7 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
 
       // 2. Listing Type
       if (filterState.listingType === 'Rent' && item.listingType !== 'Rent') return false;
-      if (filterState.listingType === 'Buy' && item.listingType !== 'Sale' && item.listingType !== 'Buy') return false;
+      if (filterState.listingType === 'Buy' && item.listingType !== 'Sale') return false;
       if (filterState.listingType === 'Commercial' && item.propertyType !== 'Commercial / Retail') return false;
       if (filterState.listingType === 'Plots' && item.propertyType !== 'Gated Township Plot') return false;
 

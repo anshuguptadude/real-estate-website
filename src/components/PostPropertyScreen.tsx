@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Property, PropertyType, UserProfile } from '../types';
 import { AGRA_LOCALITIES, PROPERTY_TYPES } from '../data/mockData';
 import { isAdmin } from '../utils/security';
-import { LocationPickerMap, AGRA_LOCALITY_COORDINATES } from './LocationPickerMap';
 import { 
   Building, 
   MapPin, 
@@ -65,10 +64,6 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     '24/7 Security',
     'Private Garden'
   ]);
-  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }>({
-    lat: 27.1585,
-    lng: 78.0494
-  });
 
   // Media Upload States (Supports up to 10 High-Quality Photos, up to 25 MB each)
   const MAX_PHOTOS = 10;
@@ -130,7 +125,6 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     setFurnishing('Fully Furnished');
     setPossession('Ready to Move');
     setSelectedAmenities(['Swimming Pool', '24/7 Security', 'Private Garden']);
-    setCoordinates({ lat: 27.1585, lng: 78.0494 });
     setUploadedMediaList([]);
     setSelectedCoverIndex(0);
     setIsVerified('yes');
@@ -574,7 +568,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       parkingSpots: 3,
       gatedSecurity: true,
       powerBackup: true,
-      coordinates: coordinates
+      coordinates: { lat: 27.1767, lng: 78.0081 }
     };
 
     try {
@@ -893,13 +887,6 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       🔒 <span className="font-semibold">Privacy Protected:</span> Only the property's locality ({locality || 'Agra'}) is shown publicly on the website. Full house/plot addresses are never revealed to buyers.
                     </p>
                   </div>
-
-                  {/* Interactive Manual Map Location Picker */}
-                  <LocationPickerMap
-                    selectedLocality={locality}
-                    coordinates={coordinates}
-                    onChangeCoordinates={setCoordinates}
-                  />
 
                   <div className="flex justify-end pt-4">
                     <button
