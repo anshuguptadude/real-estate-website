@@ -1274,7 +1274,12 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                         <div className="mt-2 text-xs text-gray-600 space-y-0.5">
                           <p><strong>Owner:</strong> {prop.ownerName || 'Property Owner'}</p>
                           <p><strong>Contact:</strong> {prop.ownerContact || 'N/A'}</p>
-                          <p><strong>Locality:</strong> {prop.locality}</p>
+                          <p><strong>Primary Locality:</strong> {prop.locality}</p>
+                          {prop.address && (
+                            <p className="text-amber-900 bg-amber-50/80 p-1.5 rounded border border-amber-200 font-mono text-[11px] mt-1">
+                              <strong>Full Address (Admin View):</strong> {prop.address}
+                            </p>
+                          )}
                         </div>
                       </div>
 

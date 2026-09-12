@@ -63,7 +63,7 @@ export default function App() {
     if (cached && cached.length > 0) {
       return cached.filter(p => !p.isDeleted);
     }
-    return PROPERTIES_DATA;
+    return [];
   });
 
   // Sync user state to localStorage
@@ -144,9 +144,9 @@ export default function App() {
   const [savedPropertyIds, setSavedPropertyIds] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem('royal_agra_saved_v2');
-      return stored ? JSON.parse(stored) : ['prop-harish-nagar-89'];
+      return stored ? JSON.parse(stored) : [];
     } catch {
-      return ['prop-harish-nagar-89'];
+      return [];
     }
   });
 
@@ -560,7 +560,7 @@ export default function App() {
   };
 
   const publicProperties = properties.filter(p => {
-    if (!p || p.isDeleted) return false;
+    if (!p || p.isDeleted || p.id === 'prop-harish-nagar-89' || p.title?.toLowerCase().includes('harish nagar')) return false;
 
     // Admin can see all non-deleted properties
     if (isAdmin(user)) return true;
@@ -577,9 +577,9 @@ export default function App() {
 
   // Properties belonging to current user or all properties if admin
   const userProperties = isAdmin(user)
-    ? properties.filter(p => !p.isDeleted)
+    ? properties.filter(p => !p.isDeleted && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'))
     : properties.filter(p => {
-        if (!p || p.isDeleted || !user) return false;
+        if (!p || p.isDeleted || p.id === 'prop-harish-nagar-89' || p.title?.toLowerCase().includes('harish nagar') || !user) return false;
         const uId = user.id?.trim();
         const uEmail = user.email?.trim().toLowerCase();
         const uPhone = user.phone ? user.phone.replace(/[^0-9]/g, '') : '';

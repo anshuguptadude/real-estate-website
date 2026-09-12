@@ -81,19 +81,19 @@ export const isPropertyOwnerOrAdmin = (property: Property | null, user: UserProf
 };
 
 export const getMaskedProperty = (property: Property, user: UserProfile | null): Property => {
-  if (isPropertyOwnerOrAdmin(property, user)) {
+  if (isAdmin(user)) {
     return property;
   }
   
-  // For non-owner & non-admin (buyer / guest view), mask sensitive details:
-  // Show only the general locality, hide exact street address & coordinates
-  const generalLocality = property.locality 
+  // For non-admin accounts (buyers, guests, and owners on public/catalog views), mask sensitive details:
+  // Show ONLY the primary area locality, hide exact street address & coordinates
+  const primaryLocality = property.locality 
     ? (property.locality.toLowerCase().includes('agra') ? property.locality : `${property.locality}, Agra`)
     : (property.location || 'Agra');
 
   return {
     ...property,
-    address: generalLocality,
+    address: primaryLocality,
     coordinates: { lat: 27.1767, lng: 78.0081 },
     ownerContact: undefined,
     agent: {

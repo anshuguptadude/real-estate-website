@@ -67,7 +67,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
 
   const isUserAdmin = isAdmin(user);
   const isOwnerOrAdmin = isPropertyOwnerOrAdmin(property, user);
-  const displayAddress = isOwnerOrAdmin && property.address 
+  const displayAddress = isUserAdmin && property.address 
     ? property.address 
     : (property.locality 
         ? (property.locality.toLowerCase().includes('agra') ? property.locality : `${property.locality}, Agra`)
@@ -348,17 +348,17 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 </div>
               </div>
 
-              {/* Map - Restricted to Property Uploader and Admin Accounts Only */}
+              {/* Map - Restricted to Admin Account Only */}
               <div className="space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                   <h4 className="text-sm font-bold text-[#0F382C] uppercase tracking-wider flex items-center gap-1.5">
                     <MapPin className="w-4 h-4 text-[#0F382C]" />
                     <span>Property Location</span>
                   </h4>
-                  {isOwnerOrAdmin ? (
+                  {isUserAdmin ? (
                     <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 w-fit">
                       <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                      <span>{isUserAdmin ? 'Admin Full Access' : 'Verified Owner View'} • Exact GPS Map</span>
+                      <span>Admin Full Access • Exact GPS Map & Street View</span>
                     </span>
                   ) : (
                     <span className="text-[10px] font-bold text-gray-600 bg-gray-100 border border-gray-300 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 w-fit">
@@ -367,11 +367,11 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                   )}
                 </div>
 
-                {isOwnerOrAdmin ? (
+                {isUserAdmin ? (
                   <div>
                     <MapComponent lat={property.coordinates.lat} lng={property.coordinates.lng} />
                     <p className="text-[11px] text-gray-500 mt-2 flex items-center gap-1">
-                      <span className="font-semibold text-emerald-800">Exact GPS Coordinates:</span> {property.coordinates.lat.toFixed(4)}°N, {property.coordinates.lng.toFixed(4)}°E (Visible exclusively to you as owner/admin)
+                      <span className="font-semibold text-emerald-800">Exact GPS Coordinates:</span> {property.coordinates.lat.toFixed(4)}°N, {property.coordinates.lng.toFixed(4)}°E (Visible exclusively to Admin account)
                     </p>
                   </div>
                 ) : (
@@ -384,7 +384,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                         Exact Google Map Location Protected For Seller Privacy
                       </h5>
                       <p className="text-xs text-gray-600 leading-relaxed">
-                        Locality: <strong className="text-gray-900 font-semibold">{displayAddress}</strong>. To protect seller privacy and prevent unscheduled visits, live Google Map GPS pin & exact street navigation are visible only to the property uploader and platform administrators. Verified buyers receive exact site directions upon scheduling a private tour.
+                        Primary Area Locality: <strong className="text-gray-900 font-semibold">{displayAddress}</strong>. To protect seller privacy and prevent unscheduled visits, live Google Map GPS pin & full exact street address are visible only to platform administrators. Verified buyers receive exact site directions upon scheduling a private tour.
                       </p>
                     </div>
                     <div className="pt-1">
