@@ -233,6 +233,13 @@ export default function App() {
       return;
     }
 
+    if (screen === 'sell-rent' && !user) {
+      setLoginPromptMessage('Please sign in or create an account to list your property on Royal Agra Estate.');
+      setPendingPostRedirect(true);
+      setLoginModalOpen(true);
+      return;
+    }
+
     // Avoid pushing duplicate states into browser history
     const currentParams = new URLSearchParams(window.location.search);
     const currentScreen = currentParams.get('screen') || 'home';
@@ -322,8 +329,14 @@ export default function App() {
     }
   }, [properties]);
 
-  // Protected Post Property trigger - directly navigates to Sell/Rent
+  // Protected Post Property trigger - directly navigates to Sell/Rent or prompts login
   const handleInitiatePostProperty = () => {
+    if (!user) {
+      setLoginPromptMessage('Please sign in or create an account to list your property on Royal Agra Estate.');
+      setPendingPostRedirect(true);
+      setLoginModalOpen(true);
+      return;
+    }
     navigateTo('sell-rent');
   };
 
@@ -720,6 +733,11 @@ export default function App() {
             onSuccessNavigate={() => navigateTo('home')}
             onPropertyCreated={handlePropertyCreated}
             onNavigateDashboard={() => navigateTo('dashboard')}
+            onOpenLogin={(msg) => {
+              setLoginPromptMessage(msg || 'Please sign in or create an account to list your property on Royal Agra Estate.');
+              setPendingPostRedirect(true);
+              setLoginModalOpen(true);
+            }}
           />
         )}
 

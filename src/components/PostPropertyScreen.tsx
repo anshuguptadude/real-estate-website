@@ -23,7 +23,8 @@ import {
   FileText,
   AlertCircle,
   Loader2,
-  PlusCircle
+  PlusCircle,
+  Lock
 } from 'lucide-react';
 
 interface PostPropertyScreenProps {
@@ -31,13 +32,15 @@ interface PostPropertyScreenProps {
   user?: UserProfile | null;
   onPropertyCreated?: (property: Property) => Promise<boolean> | void;
   onNavigateDashboard?: () => void;
+  onOpenLogin?: (message?: string) => void;
 }
 
 export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   onSuccessNavigate,
   user,
   onPropertyCreated,
-  onNavigateDashboard
+  onNavigateDashboard,
+  onOpenLogin
 }) => {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [listingIntent, setListingIntent] = useState<'Sale' | 'Rent'>('Sale');
@@ -588,6 +591,98 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       setIsSubmitting(false);
     }
   };
+
+  // If user is not authenticated, display luxury barrier screen
+  if (!user) {
+    return (
+      <div className="bg-[#FAF8F5] min-h-screen py-12 sm:py-20 flex items-center justify-center">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 w-full text-center">
+          
+          <div className="bg-white rounded-3xl p-8 sm:p-12 shadow-xl border border-gray-200/90 relative overflow-hidden">
+            {/* Top decorative accent */}
+            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#0F382C] via-[#C5A869] to-[#0F382C]" />
+
+            {/* Shield / Lock Icon */}
+            <div className="w-20 h-20 bg-[#0F382C]/10 text-[#0F382C] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner border border-[#0F382C]/20">
+              <Lock className="w-10 h-10 text-[#0F382C]" />
+            </div>
+
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0F382C]/10 text-[#0F382C] text-xs font-bold uppercase tracking-wider mb-4 border border-[#0F382C]/15">
+              <ShieldCheck className="w-4 h-4 text-[#C5A869]" />
+              <span>Exclusive Owner & Developer Portal</span>
+            </div>
+
+            <h1 className="text-2xl sm:text-3xl font-serif-luxury font-bold text-[#0F382C] mb-3">
+              Sign In Required to List Property
+            </h1>
+
+            <p className="text-sm text-gray-600 max-w-md mx-auto mb-8 leading-relaxed">
+              To ensure 100% verified listings, owner privacy, and direct buyer connections, property posting is reserved exclusively for registered accounts on Royal Agra Estate.
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 max-w-md mx-auto mb-10">
+              <button
+                type="button"
+                id="barrier-login-btn"
+                onClick={() => onOpenLogin?.('Please sign in or create an account to list your property on Royal Agra Estate.')}
+                className="w-full sm:w-auto flex-1 bg-[#0F382C] hover:bg-[#164E3D] text-white px-6 py-3.5 rounded-xl text-xs font-bold tracking-wider uppercase shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Sign In / Create Account</span>
+                <ArrowRight className="w-4 h-4 text-[#E4D5B7]" />
+              </button>
+
+              <button
+                type="button"
+                id="barrier-browse-btn"
+                onClick={onSuccessNavigate}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-xl text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all cursor-pointer"
+              >
+                Browse Properties
+              </button>
+            </div>
+
+            {/* Luxury Platform Highlights */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left pt-6 border-t border-gray-100">
+              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-gray-50/80 border border-gray-100">
+                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-xs font-bold text-gray-800">Direct HNI Buyers</h4>
+                  <p className="text-[11px] text-gray-500">Connect with genuine luxury buyers across UP & Delhi NCR.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-gray-50/80 border border-gray-100">
+                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-xs font-bold text-gray-800">Zero Listing Fees</h4>
+                  <p className="text-[11px] text-gray-500">100% free direct owner listings with 0% platform commission.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-gray-50/80 border border-gray-100">
+                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-xs font-bold text-gray-800">Strict Location Privacy</h4>
+                  <p className="text-[11px] text-gray-500">Public visitors only see primary locality; exact address stays protected.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-gray-50/80 border border-gray-100">
+                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-xs font-bold text-gray-800">Instant Lead Dashboard</h4>
+                  <p className="text-[11px] text-gray-500">Track inquiries, schedule visits, and manage status live.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#FAF8F5] min-h-screen py-10 sm:py-16">
