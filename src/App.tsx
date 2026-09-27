@@ -824,6 +824,38 @@ export default function App() {
         }}
       />
 
+      {/* Floating Compare Bar */}
+      {compareList.length > 0 && (
+        <div className="fixed bottom-6 right-6 z-40 bg-[#0F382C] text-white p-3 sm:px-5 sm:py-3.5 rounded-2xl shadow-2xl border border-[#C5A869]/40 flex items-center gap-3.5">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-[#E4D5B7] text-[#0F382C] text-xs font-bold flex items-center justify-center">
+              {compareList.length}
+            </div>
+            <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline">
+              Estates Selected
+            </span>
+          </div>
+
+          <button
+            type="button"
+            id="open-compare-modal-btn"
+            onClick={() => setCompareModalOpen(true)}
+            className="px-4 py-1.5 bg-[#E4D5B7] hover:bg-[#d8c59f] text-[#0F382C] text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-colors"
+          >
+            Compare Now
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCompareList([])}
+            className="text-gray-300 hover:text-white text-xs p-1"
+            title="Clear compare selection"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Lead Generation & Tour Booking Modal */}
       <LeadInquiryModal
         isOpen={leadModalOpen}
