@@ -505,7 +505,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     const newProperty: Property = {
       id: generatedId,
       title: projectTitle.trim() || `Luxury ${propertyType} in ${finalLocality}`,
-      tagline: `Exclusive ${furnishing} estate (${titleType}) with prime connectivity on ${finalLocality}, Agra.`,
+      tagline: `Exclusive ${furnishing} ${propertyType} with prime connectivity on ${finalLocality}, Agra.`,
       propertyType,
       listingType: listingIntent,
       price: numPrice,
