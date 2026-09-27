@@ -451,8 +451,9 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         : `${verifiedByAuthority} (Under Review)`;
     }
 
-    const initialStatus = 'published';
-    const isApproved = true;
+    const isPosterAdmin = isUserAdmin;
+    const initialStatus = isPosterAdmin ? 'published' : 'pending_verification';
+    const isApproved = isPosterAdmin ? true : false;
 
     const uploadedUrls = uploadedMediaList.map(m => m.url);
     const coverIdx = selectedCoverIndex >= 0 && selectedCoverIndex < uploadedUrls.length ? selectedCoverIndex : 0;
@@ -721,16 +722,25 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                 <CheckCircle className="w-10 h-10" />
               </div>
               <h2 className="text-2xl sm:text-3xl font-serif-luxury font-bold text-[#0F382C]">
-                Property Published Live!
+                {isUserAdmin ? 'Property Published Live!' : 'Property Submitted for Verification!'}
               </h2>
               <p className="text-sm text-gray-600 max-w-lg mx-auto">
-                Thank you, <strong>{ownerName || user?.name || 'Property Owner'}</strong>. Your luxury listing in <strong>{locality}</strong> has been published directly to the live website with reference ID <strong>#{createdPropertyRef || 'RAE-892140'}</strong>.
+                Thank you, <strong>{ownerName || user?.name || 'Property Owner'}</strong>. Your luxury listing in <strong>{locality}</strong> has been {isUserAdmin ? 'published directly to the live website' : 'submitted for admin verification'} with reference ID <strong>#{createdPropertyRef || 'RAE-892140'}</strong>.
               </p>
               
               <div className="bg-emerald-50 rounded-xl p-4 max-w-md mx-auto border border-emerald-200 text-xs text-emerald-900 space-y-1">
                 <p className="font-bold">Next Steps:</p>
-                <p>1. Your listing is live across all public property grids immediately for all buyers.</p>
-                <p>2. You can manage or edit this property at any time from your Dashboard.</p>
+                {isUserAdmin ? (
+                  <>
+                    <p>1. Your listing is live across all public property grids immediately for all buyers.</p>
+                    <p>2. You can manage or edit this property at any time from your Dashboard.</p>
+                  </>
+                ) : (
+                  <>
+                    <p>1. Our verification team will review your property details and contact information shortly.</p>
+                    <p>2. You can track your property's approval status anytime under "My Listed Properties" in your Dashboard.</p>
+                  </>
+                )}
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
