@@ -168,8 +168,10 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
       };
     }
 
+    const sanitizedDoc = JSON.parse(JSON.stringify(docToSave));
+
     // Fire and monitor Firestore write without stalling the UI
-    setDoc(doc(db, 'properties', cleanProperty.id), docToSave)
+    setDoc(doc(db, 'properties', cleanProperty.id), sanitizedDoc)
       .then(() => console.log(`Successfully persisted ${cleanProperty.id} to Firestore.`))
       .catch((err) => console.warn(`Firestore sync note:`, err));
 

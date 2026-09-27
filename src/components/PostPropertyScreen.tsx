@@ -387,10 +387,11 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
   const validateStep4 = (): boolean => {
     const errors: { [key: string]: string } = {};
-    if (!ownerName.trim()) {
+    if (!ownerName.trim() && !user?.name) {
       errors.ownerName = 'Owner / developer name is required';
     }
-    if (!ownerPhone.trim() || ownerPhone.replace(/[^0-9]/g, '').length < 8) {
+    const phoneVal = ownerPhone.trim() || user?.phone || '';
+    if (!phoneVal || phoneVal.replace(/[^0-9]/g, '').length < 8) {
       errors.ownerPhone = 'Please provide a valid contact phone number';
     }
 
