@@ -75,9 +75,9 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   // Auto-sync owner info when user prop is available or updates
   useEffect(() => {
     if (user) {
-      if (!ownerName && user.name) setOwnerName(user.name);
-      if (!ownerPhone && user.phone) setOwnerPhone(user.phone);
-      if (!ownerEmail && user.email) setOwnerEmail(user.email);
+      if (user.name) setOwnerName(prev => prev || user.name);
+      if (user.phone) setOwnerPhone(prev => prev || user.phone);
+      if (user.email) setOwnerEmail(prev => prev || user.email);
     }
   }, [user]);
 
@@ -477,9 +477,8 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         : `${verifiedByAuthority} (Under Review)`;
     }
 
-    const isUserAdmin = isAdmin(user);
-    const initialStatus = isUserAdmin ? 'published' : 'Pending Approval';
-    const isApproved = isUserAdmin ? true : false;
+    const initialStatus = 'published';
+    const isApproved = true;
 
     const uploadedUrls = uploadedMediaList.map(m => m.url);
     const coverIdx = selectedCoverIndex >= 0 && selectedCoverIndex < uploadedUrls.length ? selectedCoverIndex : 0;
@@ -748,29 +747,16 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                 <CheckCircle className="w-10 h-10" />
               </div>
               <h2 className="text-2xl sm:text-3xl font-serif-luxury font-bold text-[#0F382C]">
-                {isAdmin(user) ? 'Property Published Live!' : 'Property Submitted for Admin Approval!'}
+                Property Published Live!
               </h2>
               <p className="text-sm text-gray-600 max-w-lg mx-auto">
-                {isAdmin(user) ? (
-                  <>Your administrator listing in <strong>{locality}</strong> has been published directly to the live website with reference ID <strong>#{createdPropertyRef || 'RAE-892140'}</strong>.</>
-                ) : (
-                  <>Thank you, <strong>{ownerName || 'Property Owner'}</strong>. Your luxury listing in <strong>{locality}</strong> has been submitted with reference ID <strong>#{createdPropertyRef || 'RAE-892140'}</strong>. It will be reviewed by our administrator and published once approved.</>
-                )}
+                Thank you, <strong>{ownerName || user?.name || 'Property Owner'}</strong>. Your luxury listing in <strong>{locality}</strong> has been published directly to the live website with reference ID <strong>#{createdPropertyRef || 'RAE-892140'}</strong>.
               </p>
               
               <div className="bg-emerald-50 rounded-xl p-4 max-w-md mx-auto border border-emerald-200 text-xs text-emerald-900 space-y-1">
                 <p className="font-bold">Next Steps:</p>
-                {isAdmin(user) ? (
-                  <>
-                    <p>1. Your listing is live across all public property grids immediately.</p>
-                    <p>2. You can manage or edit this property at any time from your Admin Dashboard.</p>
-                  </>
-                ) : (
-                  <>
-                    <p>1. Your listing is saved to your dashboard in 'Pending Verification' status.</p>
-                    <p>2. Our admin advisory desk will verify documents and approve the listing to go live.</p>
-                  </>
-                )}
+                <p>1. Your listing is live across all public property grids immediately for all buyers.</p>
+                <p>2. You can manage or edit this property at any time from your Dashboard.</p>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">

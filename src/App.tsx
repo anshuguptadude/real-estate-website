@@ -363,12 +363,11 @@ export default function App() {
 
   // Property Management Handlers
   const handlePropertyCreated = async (newProp: Property): Promise<boolean> => {
-    const isUserAdmin = isAdmin(user);
     const propToSave: Property = {
       ...newProp,
       isDeleted: false,
-      status: isUserAdmin ? 'published' : (newProp.status || 'Pending Approval'),
-      isApproved: isUserAdmin ? true : (newProp.isApproved ?? false),
+      status: 'published',
+      isApproved: true,
       isUserListing: true
     };
     setProperties(prev => {
@@ -579,11 +578,8 @@ export default function App() {
     if (isAdmin(user)) return true;
 
     // For public visitors on browse/buy/rent pages:
-    // Only show published / approved / active listings
-    const isApprovedOrPublished = p.isApproved === true || p.status === 'published' || p.status === 'Active' || p.status === 'Sold' || p.status === 'Rented';
-    const isPendingOrRejected = p.status === 'Pending Approval' || p.status === 'pending_verification' || p.status === 'rejected' || p.isApproved === false;
-
-    return isApprovedOrPublished && !isPendingOrRejected;
+    // Show all active, published, approved properties (exclude rejected)
+    return p.status !== 'rejected';
   });
   const displayedProperties = publicProperties.map(p => getMaskedProperty(p, user));
   const savedProperties = displayedProperties.filter(p => savedPropertyIds.includes(p.id));
