@@ -42,6 +42,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   onNavigateDashboard,
   onOpenLogin
 }) => {
+  const isUserAdmin = isAdmin(user);
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [listingIntent, setListingIntent] = useState<'Sale' | 'Rent'>('Sale');
   const [propertyType, setPropertyType] = useState<string>('Luxury Villa');
