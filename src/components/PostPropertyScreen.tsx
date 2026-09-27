@@ -1618,7 +1618,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     </button>
                     
                     <button
-                      type="submit"
+                      type="button"
                       id="submit-property-listing-btn"
                       disabled={isSubmitting}
                       onClick={handleSubmit}
