@@ -96,9 +96,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       return;
     }
 
-    // Check default admin accounts
+    const cleanIdDigits = identifier.replace(/[^0-9]/g, '');
+
+    // Check default admin accounts (matching email, exact phone, or clean phone digits)
     const foundAdmin = ADMIN_CREDENTIALS.find(
-      adm => (adm.email.toLowerCase() === identifier || adm.phone === identifier) && adm.password === enteredPassword
+      adm => {
+        const admPhoneDigits = adm.phone.replace(/[^0-9]/g, '');
+        const matchEmail = adm.email.toLowerCase() === identifier;
+        const matchPhone = adm.phone === identifier || (cleanIdDigits.length >= 10 && admPhoneDigits.endsWith(cleanIdDigits));
+        return (matchEmail || matchPhone) && adm.password === enteredPassword;
+      }
     );
     if (foundAdmin) {
       const adminUserProfile: UserProfile = {
@@ -129,7 +136,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
     // Find account by email or phone
     let matchedAccount = savedAccounts.find(
-      (acc: any) => (acc.email && acc.email.toLowerCase() === identifier) || acc.phone === identifier
+      (acc: any) => {
+        const accEmail = acc.email?.toLowerCase();
+        const accPhoneDigits = acc.phone ? acc.phone.replace(/[^0-9]/g, '') : '';
+        const matchEmail = accEmail && accEmail === identifier;
+        const matchPhone = acc.phone === identifier || (cleanIdDigits.length >= 10 && accPhoneDigits.endsWith(cleanIdDigits));
+        return matchEmail || matchPhone;
+      }
     );
 
     // If not found locally, fetch account from Cloud Firestore for cross-platform login

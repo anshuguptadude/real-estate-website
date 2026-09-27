@@ -177,9 +177,11 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
 
   const activeCount = userProperties.filter(p => (p.status || 'Active') === 'Active' || p.status === 'published').length;
   const soldCount = userProperties.filter(p => p.status === 'Sold' || p.status === 'Rented').length;
-  const userPendingCount = userProperties.filter(p => p.status === 'pending_verification' || p.status === 'Pending Approval').length;
+  const userPendingCount = userProperties.filter(
+    p => p && !p.isDeleted && p.status !== 'rejected' && (p.status === 'pending_verification' || p.status === 'Pending Approval' || p.isApproved === false)
+  ).length;
   const pendingProperties = (allProperties || userProperties).filter(
-    p => p && !p.isDeleted && (p.status === 'pending_verification' || p.status === 'Pending Approval' || p.isApproved === false)
+    p => p && !p.isDeleted && p.status !== 'rejected' && (p.status === 'pending_verification' || p.status === 'Pending Approval' || p.isApproved === false)
   );
 
   const avatarPresets = [
@@ -605,13 +607,13 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                               <CheckCircle2 className="w-3.5 h-3.5" />
                               {prop.status === 'Sold' ? 'SOLD OUT' : 'RENTED OUT'}
                             </span>
-                          ) : prop.status === 'pending_verification' || prop.status === 'Pending Approval' || prop.isApproved === false ? (
-                            <span className="px-3 py-1 rounded-md bg-amber-600 text-white text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-1">
-                              <span>⏳ UNDER REVIEW / PENDING APPROVAL</span>
-                            </span>
                           ) : prop.status === 'rejected' ? (
                             <span className="px-3 py-1 rounded-md bg-rose-600 text-white text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-1">
                               <span>REJECTED</span>
+                            </span>
+                          ) : prop.status === 'pending_verification' || prop.status === 'Pending Approval' || prop.isApproved === false ? (
+                            <span className="px-3 py-1 rounded-md bg-amber-600 text-white text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-1">
+                              <span>⏳ UNDER REVIEW / PENDING APPROVAL</span>
                             </span>
                           ) : (
                             <span className="px-3 py-1 rounded-md bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-1">

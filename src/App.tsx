@@ -102,7 +102,7 @@ export default function App() {
   // Subscribe to real-time Firestore updates for properties, projects, and leads across all devices globally
   useEffect(() => {
     const unsubscribeProps = subscribeFirestoreProperties(fetched => {
-      if (fetched && fetched.length > 0) {
+      if (fetched) {
         const active = fetched.filter(p => !p.isDeleted);
         setProperties(active);
         setPropertiesCache(active);

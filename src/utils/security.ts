@@ -33,12 +33,15 @@ export const ADMIN_CREDENTIALS = [
 export const isAdmin = (user: UserProfile | null): boolean => {
   if (!user) return false;
   const emailLower = user.email?.toLowerCase().trim();
+  const phoneClean = user.phone ? user.phone.replace(/[^0-9]/g, '') : '';
   return (
     user.role === 'admin' ||
     emailLower === 'shrey123@gmail.com' ||
     emailLower === 'abhi9557138449@gmail.com' ||
     emailLower === 'shrey@royalagraestate.in' ||
-    emailLower === 'abhishek@royalagraestate.in'
+    emailLower === 'abhishek@royalagraestate.in' ||
+    phoneClean.endsWith('9149079913') ||
+    phoneClean.endsWith('9557138449')
   );
 };
 
