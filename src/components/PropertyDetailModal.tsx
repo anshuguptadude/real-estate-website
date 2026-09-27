@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Property, UserProfile } from '../types';
 import { isAdmin, isPropertyOwnerOrAdmin } from '../utils/security';
+import { saveFirestoreLead } from '../services/firebaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapComponent } from './MapComponent';
 import {
@@ -81,8 +82,24 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
     });
   };
 
-  const handleInquirySubmit = (e: React.FormEvent) => {
+  const handleInquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!property) return;
+    try {
+      const newLead = {
+        id: `TOUR-${Math.floor(10000 + Math.random() * 90000)}`,
+        propertyId: property.id,
+        propertyTitle: property.title,
+        buyerName: inquiryName.trim(),
+        phone: inquiryPhone.trim(),
+        email: user?.email || 'direct-visitor@royalagraestate.in',
+        preferredTime: `${inquiryDate} ${chauffeurReq ? '(Chauffeur Included)' : ''}`,
+        timestamp: new Date().toLocaleString()
+      };
+      await saveFirestoreLead(newLead);
+    } catch (err) {
+      console.warn('Could not save tour lead:', err);
+    }
     setInquirySubmitted(true);
     setTimeout(() => {
       setInquirySubmitted(false);
