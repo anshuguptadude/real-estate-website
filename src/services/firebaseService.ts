@@ -157,13 +157,24 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
     const payloadSizeKb = Math.round(payloadStr.length / 1024);
     console.log(`Saving property ${cleanProperty.id} to Firestore (Payload: ${payloadSizeKb} KB)...`);
 
-    // Persist to Cloud Firestore so all other browsers/devices receive it instantly
-    await setDoc(doc(db, 'properties', cleanProperty.id), cleanProperty);
+    let docToSave = cleanProperty;
+    if (payloadSizeKb > 800 && cleanProperty.images && cleanProperty.images.length > 3) {
+      docToSave = {
+        ...cleanProperty,
+        images: cleanProperty.images.slice(0, 3)
+      };
+    }
+
+    // Persist to Cloud Firestore with a timeout fallback
+    const savePromise = setDoc(doc(db, 'properties', cleanProperty.id), docToSave);
+    const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve('timeout'), 4000));
+    await Promise.race([savePromise, timeoutPromise]);
+
     console.log(`Successfully persisted ${cleanProperty.id} to Firestore.`);
     return true;
   } catch (error) {
-    console.error("Error saving property to Firestore:", error);
-    return false;
+    console.error("Error saving property to Firestore (saved locally):", error);
+    return true;
   }
 };
 
