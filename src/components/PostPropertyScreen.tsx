@@ -359,44 +359,16 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     if (isOtherLocality && !customLocality.trim()) {
       errors.customLocality = 'Please enter your custom Agra locality';
     }
-    if (!projectTitle.trim()) {
-      errors.projectTitle = 'Building or project name is required';
-    }
-    if (!address.trim()) {
-      errors.address = 'Full address or landmarks in Agra are required';
-    }
-
     setStepErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const validateStep2 = (): boolean => {
-    const errors: { [key: string]: string } = {};
-    const rawArea = Number(superArea);
-    if (!rawArea || rawArea <= 0) {
-      errors.superArea = 'Please specify a valid super area';
-    }
-    const rawPrice = Number(askingPrice.replace(/[^0-9]/g, ''));
-    if (!rawPrice || rawPrice <= 0) {
-      errors.askingPrice = 'Please specify expected price or monthly rent';
-    }
-
-    setStepErrors(errors);
-    return Object.keys(errors).length === 0;
+    return true;
   };
 
   const validateStep4 = (): boolean => {
-    const errors: { [key: string]: string } = {};
-    if (!ownerName.trim() && !user?.name) {
-      errors.ownerName = 'Owner / developer name is required';
-    }
-    const phoneVal = ownerPhone.trim() || user?.phone || '';
-    if (!phoneVal || phoneVal.replace(/[^0-9]/g, '').length < 8) {
-      errors.ownerPhone = 'Please provide a valid contact phone number';
-    }
-
-    setStepErrors(errors);
-    return Object.keys(errors).length === 0;
+    return true;
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -514,7 +486,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       pricePerSqFt: Math.round(numPrice / numSuperArea),
       location: `${finalLocality}, Agra`,
       locality: finalLocality,
-      address: `${finalLocality}, Agra`,
+      address: address.trim() || `${finalLocality}, Agra`,
       bedrooms: Number(bedrooms) || 4,
       bathrooms: Number(bathrooms) || 4,
       balconies: 2,
