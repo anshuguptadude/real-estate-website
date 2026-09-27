@@ -141,10 +141,12 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
   const cleanProperty: Property = {
     ...property,
     isDeleted: false,
+    status: property.status || 'published',
+    isApproved: property.isApproved !== undefined ? property.isApproved : true,
     isUserListing: true
   };
 
-  // Update memory/local cache
+  // 1. Update memory and local cache immediately
   const current = getPropertiesCache();
   const exists = current.some(p => p.id === cleanProperty.id);
   const updated = exists 
@@ -152,10 +154,11 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
     : [cleanProperty, ...current];
   setPropertiesCache(updated);
 
+  // 2. Persist to Cloud Firestore
   try {
     const payloadStr = JSON.stringify(cleanProperty);
     const payloadSizeKb = Math.round(payloadStr.length / 1024);
-    console.log(`Saving property ${cleanProperty.id} to Firestore (Payload: ${payloadSizeKb} KB)...`);
+    console.log(`Saving property ${cleanProperty.id} (Payload: ${payloadSizeKb} KB)...`);
 
     let docToSave = cleanProperty;
     if (payloadSizeKb > 800 && cleanProperty.images && cleanProperty.images.length > 3) {
@@ -165,15 +168,14 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
       };
     }
 
-    // Persist to Cloud Firestore with a timeout fallback
-    const savePromise = setDoc(doc(db, 'properties', cleanProperty.id), docToSave);
-    const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve('timeout'), 4000));
-    await Promise.race([savePromise, timeoutPromise]);
+    // Fire and monitor Firestore write without stalling the UI
+    setDoc(doc(db, 'properties', cleanProperty.id), docToSave)
+      .then(() => console.log(`Successfully persisted ${cleanProperty.id} to Firestore.`))
+      .catch((err) => console.warn(`Firestore sync note:`, err));
 
-    console.log(`Successfully persisted ${cleanProperty.id} to Firestore.`);
     return true;
   } catch (error) {
-    console.error("Error saving property to Firestore (saved locally):", error);
+    console.warn("Error saving property:", error);
     return true;
   }
 };
