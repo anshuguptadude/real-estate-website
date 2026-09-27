@@ -114,7 +114,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           </div>
 
           <span className="text-[11px] bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded text-gray-200 border border-white/10 font-mono">
-            ₹{property.pricePerSqFt.toLocaleString('en-IN')}/sq.ft
+            ₹{(property.pricePerSqFt ?? Math.round((property.price || 0) / (property.superAreaSqFt || 1)) ?? 0).toLocaleString('en-IN')}/sq.ft
           </span>
         </div>
       </a>
@@ -129,7 +129,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             <span className="truncate" title={isAdminUser && property.address ? property.address : undefined}>
               {isAdminUser && property.address
                 ? property.address
-                : (property.locality ? (property.locality.toLowerCase().includes('agra') ? property.locality : `${property.locality}, Agra`) : property.location)}
+                : (property.locality ? (property.locality.toLowerCase().includes('agra') ? property.locality : `${property.locality}, Agra`) : (property.location || 'Agra'))}
             </span>
             {isAdminUser && property.address && (
               <span className="ml-auto text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 shrink-0">
@@ -152,18 +152,18 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
                 }
               }}
             >
-              {property.title}
+              {property.title || 'Luxury Estate'}
             </a>
           </h3>
 
           {/* Subtitle / Tagline */}
           <p className="text-xs text-gray-600 mt-1 line-clamp-2 leading-relaxed">
-            {property.tagline}
+            {property.tagline || property.description || ''}
           </p>
 
           {/* Key Specs Strip */}
           <div className="grid grid-cols-3 gap-2 py-3 my-3 border-y border-gray-100 text-gray-700">
-            {property.bedrooms > 0 ? (
+            {(property.bedrooms || 0) > 0 ? (
               <div className="flex items-center gap-1.5 text-xs font-medium">
                 <Bed className="w-4 h-4 text-gray-400 shrink-0" />
                 <span>{property.bedrooms} Beds</span>
@@ -175,7 +175,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
               </div>
             )}
 
-            {property.bathrooms > 0 && (
+            {(property.bathrooms || 0) > 0 && (
               <div className="flex items-center gap-1.5 text-xs font-medium">
                 <Bath className="w-4 h-4 text-gray-400 shrink-0" />
                 <span>{property.bathrooms} Baths</span>
@@ -184,7 +184,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 
             <div className="flex items-center gap-1.5 text-xs font-medium">
               <Maximize className="w-4 h-4 text-gray-400 shrink-0" />
-              <span>{property.superAreaSqFt.toLocaleString('en-IN')} sq.ft</span>
+              <span>{(property.superAreaSqFt || 0).toLocaleString('en-IN')} sq.ft</span>
             </div>
           </div>
 

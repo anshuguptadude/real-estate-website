@@ -238,11 +238,11 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 {property.priceDisplay}
               </span>
               <span className="text-xs text-gray-500 font-mono block mt-0.5">
-                ₹{property.pricePerSqFt.toLocaleString('en-IN')} per sq.ft
+                ₹{(property.pricePerSqFt ?? Math.round((property.price || 0) / (property.superAreaSqFt || 1)) ?? 0).toLocaleString('en-IN')} per sq.ft
               </span>
               <button
                 type="button"
-                onClick={() => onOpenEmiCalc(property.price)}
+                onClick={() => onOpenEmiCalc(property.price || 0)}
                 className="mt-2 text-xs font-semibold text-[#0F382C] hover:underline flex items-center gap-1"
               >
                 <Calculator className="w-3.5 h-3.5" />
@@ -256,13 +256,13 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
             <div>
               <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Configuration</span>
               <span className="text-sm font-bold text-[#0F382C] mt-0.5 block">
-                {property.bedrooms > 0 ? `${property.bedrooms} BHK (${property.bathrooms} Baths)` : 'Commercial Suite'}
+                {(property.bedrooms || 0) > 0 ? `${property.bedrooms} BHK (${property.bathrooms || 0} Baths)` : 'Commercial Suite'}
               </span>
             </div>
             <div>
               <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Super Built-up Area</span>
               <span className="text-sm font-bold text-[#0F382C] mt-0.5 block">
-                {property.superAreaSqFt.toLocaleString('en-IN')} sq.ft
+                {(property.superAreaSqFt || 0).toLocaleString('en-IN')} sq.ft
               </span>
             </div>
             <div>
@@ -369,9 +369,9 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
 
                 {isUserAdmin ? (
                   <div>
-                    <MapComponent lat={property.coordinates.lat} lng={property.coordinates.lng} />
+                    <MapComponent lat={property.coordinates?.lat ?? 27.1767} lng={property.coordinates?.lng ?? 78.0081} />
                     <p className="text-[11px] text-gray-500 mt-2 flex items-center gap-1">
-                      <span className="font-semibold text-emerald-800">Exact GPS Coordinates:</span> {property.coordinates.lat.toFixed(4)}°N, {property.coordinates.lng.toFixed(4)}°E (Visible exclusively to Admin account)
+                      <span className="font-semibold text-emerald-800">Exact GPS Coordinates:</span> {(property.coordinates?.lat ?? 27.1767).toFixed(4)}°N, {(property.coordinates?.lng ?? 78.0081).toFixed(4)}°E (Visible exclusively to Admin account)
                     </p>
                   </div>
                 ) : (

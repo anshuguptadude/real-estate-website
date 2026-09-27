@@ -337,7 +337,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                     }`}>
                       <span className="font-bold text-gray-600 px-2">Rate per Sq.Ft</span>
                       {compareList.map(p => (
-                        <span key={p.id} className="font-mono text-gray-900 font-semibold px-2">₹{p.pricePerSqFt.toLocaleString('en-IN')}/sq.ft</span>
+                        <span key={p.id} className="font-mono text-gray-900 font-semibold px-2">₹{(p.pricePerSqFt ?? Math.round((p.price || 0) / (p.superAreaSqFt || 1)) ?? 0).toLocaleString('en-IN')}/sq.ft</span>
                       ))}
                     </div>
 
@@ -348,7 +348,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                     }`}>
                       <span className="font-bold text-gray-600 px-2">Est. UP Stamp Duty (7%)</span>
                       {compareList.map(p => (
-                        <span key={p.id} className="text-gray-700 px-2">{calculateStampDuty(p.price)}</span>
+                        <span key={p.id} className="text-gray-700 px-2">{calculateStampDuty(p.price || 0)}</span>
                       ))}
                     </div>
 
@@ -395,7 +395,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                       <span className="font-bold text-gray-600 px-2">Super Built-up Area</span>
                       {compareList.map(p => (
                         <span key={p.id} className="font-mono font-bold text-gray-900 px-2">
-                          {p.superAreaSqFt.toLocaleString('en-IN')} sq.ft
+                          {(p.superAreaSqFt || 0).toLocaleString('en-IN')} sq.ft
                         </span>
                       ))}
                     </div>
@@ -408,7 +408,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                       <span className="font-bold text-gray-600 px-2">Carpet Area</span>
                       {compareList.map(p => (
                         <span key={p.id} className="font-mono text-gray-800 px-2">
-                          {p.carpetAreaSqFt.toLocaleString('en-IN')} sq.ft
+                          {(p.carpetAreaSqFt || 0).toLocaleString('en-IN')} sq.ft
                         </span>
                       ))}
                     </div>

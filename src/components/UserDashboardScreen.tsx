@@ -679,15 +679,15 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                           <div className="grid grid-cols-3 gap-2 py-2.5 my-3 border-y border-gray-100 text-xs text-gray-700 font-medium">
                             <div className="flex items-center gap-1">
                               <Bed className="w-3.5 h-3.5 text-gray-400" />
-                              <span>{prop.bedrooms > 0 ? `${prop.bedrooms} BHK` : 'Comm.'}</span>
+                              <span>{(prop.bedrooms || 0) > 0 ? `${prop.bedrooms} BHK` : 'Comm.'}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <Bath className="w-3.5 h-3.5 text-gray-400" />
-                              <span>{prop.bathrooms} Baths</span>
+                              <span>{prop.bathrooms || 0} Baths</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <Maximize className="w-3.5 h-3.5 text-gray-400" />
-                              <span>{prop.superAreaSqFt} sq.ft</span>
+                              <span>{(prop.superAreaSqFt || 0).toLocaleString('en-IN')} sq.ft</span>
                             </div>
                           </div>
                         </div>
@@ -1116,10 +1116,10 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                       <h4 className="text-sm font-serif-luxury font-bold text-[#0F382C] line-clamp-1">{prop.title}</h4>
                       <p className="text-xs text-gray-500 flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-[#0F382C]" />
-                        <span>{prop.locality ? (prop.locality.toLowerCase().includes('agra') ? prop.locality : `${prop.locality}, Agra`) : prop.location}</span>
+                        <span>{prop.locality ? (prop.locality.toLowerCase().includes('agra') ? prop.locality : `${prop.locality}, Agra`) : (prop.location || 'Agra')}</span>
                       </p>
                       <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
-                        <span className="text-xs text-gray-600 font-mono">{prop.superAreaSqFt} sq.ft</span>
+                        <span className="text-xs text-gray-600 font-mono">{(prop.superAreaSqFt || 0).toLocaleString('en-IN')} sq.ft</span>
                         <button
                           type="button"
                           onClick={() => onViewProperty(prop)}

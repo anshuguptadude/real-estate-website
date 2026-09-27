@@ -66,7 +66,7 @@ export const EmiCalculatorModal: React.FC<EmiCalculatorModalProps> = ({
               <div className="flex justify-between text-xs font-bold text-gray-700 mb-1">
                 <span>Loan Amount</span>
                 <span className="font-mono text-[#0F382C] text-sm font-extrabold">
-                  ₹{(loanAmount / 10000000).toFixed(2)} Cr (₹{loanAmount.toLocaleString('en-IN')})
+                  ₹{((loanAmount || 0) / 10000000).toFixed(2)} Cr (₹{(loanAmount || 0).toLocaleString('en-IN')})
                 </span>
               </div>
               <input

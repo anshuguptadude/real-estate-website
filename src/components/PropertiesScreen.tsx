@@ -89,11 +89,11 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
 
       // 1. Search Query
       if (filterState.searchQuery) {
-        const query = filterState.searchQuery.toLowerCase();
-        const matchTitle = item.title.toLowerCase().includes(query);
-        const matchLocation = item.location.toLowerCase().includes(query);
-        const matchLocality = item.locality.toLowerCase().includes(query);
-        const matchDesc = item.description.toLowerCase().includes(query);
+        const query = (filterState.searchQuery || '').toLowerCase();
+        const matchTitle = (item.title || '').toLowerCase().includes(query);
+        const matchLocation = (item.location || '').toLowerCase().includes(query);
+        const matchLocality = (item.locality || '').toLowerCase().includes(query);
+        const matchDesc = (item.description || '').toLowerCase().includes(query);
         if (!matchTitle && !matchLocation && !matchLocality && !matchDesc) return false;
       }
 
@@ -105,8 +105,9 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
 
       // 3. Locality
       if (filterState.locality && filterState.locality !== 'All Localities') {
-        if (!item.locality.toLowerCase().includes(filterState.locality.toLowerCase()) &&
-            !item.location.toLowerCase().includes(filterState.locality.toLowerCase())) {
+        const filterLoc = (filterState.locality || '').toLowerCase();
+        if (!(item.locality || '').toLowerCase().includes(filterLoc) &&
+            !(item.location || '').toLowerCase().includes(filterLoc)) {
           return false;
         }
       }
@@ -119,20 +120,22 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
       // 5. Price Range
       if (filterState.priceRange) {
         const [min, max] = filterState.priceRange;
-        if (item.price < min || item.price > max) return false;
+        const pPrice = item.price || 0;
+        if (pPrice < min || pPrice > max) return false;
       }
 
       // 6. BHK
       if (filterState.bhk) {
         const bhkNum = parseInt(filterState.bhk, 10);
         if (!isNaN(bhkNum)) {
-          if (bhkNum >= 5 ? item.bedrooms < 5 : item.bedrooms !== bhkNum) return false;
+          const pBeds = item.bedrooms || 0;
+          if (bhkNum >= 5 ? pBeds < 5 : pBeds !== bhkNum) return false;
         }
       }
 
       // 7. Possession
       if (filterState.possession && filterState.possession !== 'all') {
-        if (!item.possession.toLowerCase().includes(filterState.possession.toLowerCase())) return false;
+        if (!(item.possession || '').toLowerCase().includes((filterState.possession || '').toLowerCase())) return false;
       }
 
       // 8. Furnishing
@@ -142,10 +145,10 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
 
       return true;
     }).sort((a, b) => {
-      if (filterState.sortBy === 'price-asc') return a.price - b.price;
-      if (filterState.sortBy === 'price-desc') return b.price - a.price;
-      if (filterState.sortBy === 'area-desc') return b.superAreaSqFt - a.superAreaSqFt;
-      if (filterState.sortBy === 'newest') return b.yearBuilt - a.yearBuilt;
+      if (filterState.sortBy === 'price-asc') return (a.price || 0) - (b.price || 0);
+      if (filterState.sortBy === 'price-desc') return (b.price || 0) - (a.price || 0);
+      if (filterState.sortBy === 'area-desc') return (b.superAreaSqFt || 0) - (a.superAreaSqFt || 0);
+      if (filterState.sortBy === 'newest') return (b.yearBuilt || 0) - (a.yearBuilt || 0);
       return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
     });
   }, [properties, filterState]);
