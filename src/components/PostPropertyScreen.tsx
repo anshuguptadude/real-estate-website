@@ -1621,6 +1621,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       type="submit"
                       id="submit-property-listing-btn"
                       disabled={isSubmitting}
+                      onClick={handleSubmit}
                       className="bg-[#0F382C] hover:bg-[#164E3D] text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg hover:shadow-xl transition-all flex items-center gap-2 disabled:opacity-75 cursor-pointer disabled:cursor-not-allowed"
                     >
                       {isSubmitting ? (
