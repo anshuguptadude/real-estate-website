@@ -365,6 +365,31 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 </div>
               </div>
 
+              {/* Admin Only: Registered User Account & Owner Metadata */}
+              {isUserAdmin && (
+                <div className="p-4 bg-amber-50/90 border border-amber-300 rounded-xl space-y-2 text-xs text-amber-950">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-amber-800" />
+                      <span className="font-bold uppercase tracking-wider text-[#0F382C]">Admin Metadata • Linked User Account</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded bg-amber-200 font-mono text-[10px] font-bold">
+                      Account ID: #{property.ownerId || property.userId || 'N/A'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-amber-200 text-[11px]">
+                    <div><strong>Posted By:</strong> {property.postedBy?.name || property.ownerName || 'Property Owner'} ({property.postedBy?.role || 'Owner'})</div>
+                    <div><strong>Account Email:</strong> {property.postedBy?.email || property.ownerEmail || 'N/A'}</div>
+                    <div><strong>Direct Phone:</strong> {property.ownerContact || property.agent?.phone || 'N/A'}</div>
+                  </div>
+                  {property.address && (
+                    <div className="pt-1 border-t border-amber-200 text-[11px] font-mono">
+                      <strong>Exact Unmasked Street Address:</strong> {property.address}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Map - Restricted to Admin Account Only */}
               <div className="space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">

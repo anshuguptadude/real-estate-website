@@ -677,6 +677,32 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                             )}
                           </div>
 
+                          {/* Admin Only: Display which user account posted this property */}
+                          {isAdmin(user) && (
+                            <div className="mt-3 p-2.5 bg-gray-50 rounded-xl border border-gray-200 text-[11px] text-gray-700 space-y-1">
+                              <div className="flex items-center justify-between">
+                                <span className="font-bold text-[#0F382C] flex items-center gap-1">
+                                  <User className="w-3.5 h-3.5 text-[#C5A869]" />
+                                  <span>Posted by: {prop.postedBy?.name || prop.ownerName || 'Property Owner'}</span>
+                                </span>
+                                <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase">
+                                  {prop.postedBy?.role || 'Owner'}
+                                </span>
+                              </div>
+                              <div className="text-[10px] text-gray-500 flex flex-wrap items-center gap-2">
+                                {prop.postedBy?.email || prop.ownerEmail ? (
+                                  <span>✉️ {prop.postedBy?.email || prop.ownerEmail}</span>
+                                ) : null}
+                                {prop.ownerContact ? (
+                                  <span>📞 {prop.ownerContact}</span>
+                                ) : null}
+                                {prop.ownerId || prop.userId ? (
+                                  <span className="font-mono">ID: #{prop.ownerId || prop.userId}</span>
+                                ) : null}
+                              </div>
+                            </div>
+                          )}
+
                           {/* Quick specs */}
                           <div className="grid grid-cols-3 gap-2 py-2.5 my-3 border-y border-gray-100 text-xs text-gray-700 font-medium">
                             <div className="flex items-center gap-1">
@@ -1273,12 +1299,22 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                         <p className="text-xs text-gray-500 mt-1 line-clamp-2">
                           {prop.tagline || prop.description}
                         </p>
-                        <div className="mt-2 text-xs text-gray-600 space-y-0.5">
-                          <p><strong>Owner:</strong> {prop.ownerName || 'Property Owner'}</p>
-                          <p><strong>Contact:</strong> {prop.ownerContact || 'N/A'}</p>
-                          <p><strong>Primary Locality:</strong> {prop.locality}</p>
+                        <div className="mt-3 p-3 bg-amber-50/90 rounded-xl border border-amber-200 text-xs text-gray-800 space-y-1.5">
+                          <div className="flex items-center justify-between pb-1 border-b border-amber-200/60">
+                            <span className="font-bold text-[#0F382C] flex items-center gap-1.5">
+                              <User className="w-3.5 h-3.5 text-amber-800" />
+                              <span>User Account: {prop.postedBy?.name || prop.ownerName || 'Property Owner'}</span>
+                            </span>
+                            <span className="px-2 py-0.5 rounded bg-amber-200/80 text-amber-900 text-[10px] font-bold uppercase">
+                              {prop.postedBy?.role || 'Owner'}
+                            </span>
+                          </div>
+                          <p className="text-[11px]"><strong>Account Email:</strong> {prop.postedBy?.email || prop.ownerEmail || 'N/A'}</p>
+                          <p className="text-[11px]"><strong>Mobile / WhatsApp:</strong> {prop.ownerContact || 'N/A'}</p>
+                          <p className="text-[11px]"><strong>User ID:</strong> <span className="font-mono">#{prop.ownerId || prop.userId || 'N/A'}</span></p>
+                          <p className="text-[11px]"><strong>Primary Locality:</strong> {prop.locality}</p>
                           {prop.address && (
-                            <p className="text-amber-900 bg-amber-50/80 p-1.5 rounded border border-amber-200 font-mono text-[11px] mt-1">
+                            <p className="text-amber-950 font-mono text-[11px] pt-1 border-t border-amber-200/60">
                               <strong>Full Address (Admin View):</strong> {prop.address}
                             </p>
                           )}
