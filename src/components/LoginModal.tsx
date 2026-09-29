@@ -480,9 +480,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     placeholder="Enter your mobile number or email"
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                    className="w-full pl-10 pr-3 py-3 text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:border-[#0F382C]"
                   />
-                  <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 </div>
               </div>
 
@@ -498,7 +498,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       setAuthError('');
                       setForgotStep(1);
                     }}
-                    className="text-[11px] text-[#0F382C] font-semibold hover:underline"
+                    className="text-xs text-[#0F382C] font-semibold hover:underline"
                   >
                     Forgot Password?
                   </button>
@@ -510,9 +510,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     placeholder="Enter your password"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                    className="w-full pl-10 pr-3 py-3 text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:border-[#0F382C]"
                   />
-                  <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 </div>
               </div>
 
@@ -524,7 +524,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               <button
                 type="submit"
                 id="submit-login-btn"
-                className="w-full py-3 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                className="w-full min-h-[48px] py-3.5 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 touch-manipulation cursor-pointer"
               >
                 <span>Log In</span>
                 <ArrowRight className="w-4 h-4" />
@@ -548,9 +548,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     placeholder="e.g. Shrey Gupta"
                     value={signupName}
                     onChange={(e) => setSignupName(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                    className="w-full pl-10 pr-3 py-2.5 text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:border-[#0F382C]"
                   />
-                  <User className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <User className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 </div>
               </div>
 
@@ -565,9 +565,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     placeholder="+91 9149079913"
                     value={signupPhone}
                     onChange={(e) => setSignupPhone(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                    className="w-full pl-10 pr-3 py-2.5 text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:border-[#0F382C]"
                   />
-                  <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Phone className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 </div>
               </div>
 
@@ -580,13 +580,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   <select
                     value={signupSecurityQuestion}
                     onChange={(e) => setSignupSecurityQuestion(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                    className="w-full pl-10 pr-3 py-2.5 text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:border-[#0F382C]"
                   >
                     {SECURITY_QUESTIONS.map((q, idx) => (
                       <option key={idx} value={q}>{q}</option>
                     ))}
                   </select>
-                  <HelpCircle className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <HelpCircle className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 </div>
               </div>
 
@@ -600,7 +600,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   placeholder="e.g. Taj Mahal"
                   value={signupSecurityAnswer}
                   onChange={(e) => setSignupSecurityAnswer(e.target.value)}
-                  className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                  className="w-full px-3 py-2.5 text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:border-[#0F382C]"
                 />
               </div>
 
@@ -611,7 +611,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   <select
                     value={signupInterest}
                     onChange={(e) => setSignupInterest(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
+                    className="w-full px-2.5 py-2 text-base sm:text-xs bg-gray-50 border border-gray-200 rounded-xl text-gray-900"
                   >
                     <option value="Buying">Buying / Investing</option>
                     <option value="Selling/Listing">Selling Property</option>
@@ -625,7 +625,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     placeholder="e.g. ₹2.5 Cr+"
                     value={signupBudgetType}
                     onChange={(e) => setSignupBudgetType(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
+                    className="w-full px-2.5 py-2 text-base sm:text-xs bg-gray-50 border border-gray-200 rounded-xl text-gray-900"
                   />
                 </div>
               </div>
@@ -643,9 +643,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       placeholder="shrey@royalagraestate.in"
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                      className="w-full pl-10 pr-3 py-2.5 text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:border-[#0F382C]"
                     />
-                    <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   </div>
                 </div>
 
@@ -663,9 +663,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                         setSignupPassword(e.target.value);
                         if (authError === 'Passwords do not match') setAuthError('');
                       }}
-                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                      className="w-full pl-10 pr-3 py-2.5 text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:border-[#0F382C]"
                     />
-                    <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   </div>
                 </div>
 
@@ -683,13 +683,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                         setSignupConfirmPassword(e.target.value);
                         if (authError === 'Passwords do not match') setAuthError('');
                       }}
-                      className={`w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border rounded-lg text-gray-900 focus:bg-white ${
+                      className={`w-full pl-10 pr-3 py-2.5 text-base sm:text-sm bg-gray-50 border rounded-xl text-gray-900 focus:bg-white ${
                         signupConfirmPassword && signupPassword !== signupConfirmPassword
                           ? 'border-red-500 bg-red-50/30'
                           : 'border-gray-200 focus:border-[#0F382C]'
                       }`}
                     />
-                    <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   </div>
                   {signupConfirmPassword && signupPassword !== signupConfirmPassword && (
                     <p className="text-[11px] text-red-600 font-semibold mt-1">Passwords do not match</p>
@@ -700,7 +700,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               <button
                 type="submit"
                 id="submit-signup-btn"
-                className="w-full py-3 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 mt-4 shrink-0"
+                className="w-full min-h-[48px] py-3.5 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 mt-4 shrink-0 touch-manipulation cursor-pointer"
               >
                 <span>Create Account</span>
                 <ArrowRight className="w-4 h-4" />
@@ -726,7 +726,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       placeholder="e.g. shrey123@gmail.com"
                       value={forgotEmail}
                       onChange={(e) => setForgotEmail(e.target.value)}
-                      className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
+                      className="w-full px-3 py-3 text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-900"
                     />
                   </div>
                   <div>
@@ -737,12 +737,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       placeholder="Answer provided during signup"
                       value={forgotAnswer}
                       onChange={(e) => setForgotAnswer(e.target.value)}
-                      className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
+                      className="w-full px-3 py-3 text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-900"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full py-3 bg-[#0F382C] text-white rounded-lg font-bold text-xs uppercase tracking-wider"
+                    className="w-full min-h-[48px] py-3.5 bg-[#0F382C] text-white rounded-xl font-bold text-xs uppercase tracking-wider touch-manipulation cursor-pointer"
                   >
                     Verify Security Answer
                   </button>

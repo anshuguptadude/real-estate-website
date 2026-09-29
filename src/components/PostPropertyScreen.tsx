@@ -187,6 +187,14 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     }
   };
 
+  const scrollToTop = () => {
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {
+      window.scrollTo(0, 0);
+    }
+  };
+
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve) => {
       // Create a clean lightweight fallback in case the raw file is corrupt or unsupported
@@ -209,25 +217,18 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         return 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=70';
       };
 
-      // Safety timeout
+      // Safety timeout for mobile devices
       const timer = setTimeout(() => {
         resolve(createFallbackPlaceholder());
-      }, 10000);
+      }, 8000);
 
-      // Use Object URL for maximum performance with large DSLR / camera files up to 25MB
-      const blobUrl = URL.createObjectURL(file);
-      const img = new Image();
-
-      img.onload = () => {
+      // Helper function to compress from an Image or ImageBitmap
+      const processFromImageElement = (img: HTMLImageElement | ImageBitmap, naturalW: number, naturalH: number) => {
         clearTimeout(timer);
-        URL.revokeObjectURL(blobUrl);
-
         try {
-          // Multi-stage compression algorithm to ensure each image is ~35-48 KB
-          // 10 photos x 45 KB = ~450 KB total document payload (strictly within 1 MB Firestore limit)
           const runCanvasCompression = (maxDim: number, quality: number): string => {
-            let width = img.naturalWidth || img.width || 1200;
-            let height = img.naturalHeight || img.height || 800;
+            let width = naturalW || 1200;
+            let height = naturalH || 800;
 
             if (width > maxDim || height > maxDim) {
               if (width > height) {
@@ -247,7 +248,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
-            ctx.drawImage(img, 0, 0, width, height);
+            ctx.drawImage(img as any, 0, 0, width, height);
 
             return canvas.toDataURL('image/jpeg', quality);
           };
@@ -267,19 +268,75 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
           resolve(resultDataUrl);
         } catch (err) {
-          console.error("Canvas compression error:", err);
+          console.error("Canvas compression error on mobile:", err);
           resolve(createFallbackPlaceholder());
         }
       };
 
-      img.onerror = () => {
-        clearTimeout(timer);
-        URL.revokeObjectURL(blobUrl);
-        console.warn("Image decode error on file:", file.name);
-        resolve(createFallbackPlaceholder());
-      };
+      // Try modern hardware-accelerated createImageBitmap first if available
+      if (typeof window !== 'undefined' && 'createImageBitmap' in window) {
+        createImageBitmap(file)
+          .then((bitmap) => {
+            processFromImageElement(bitmap, bitmap.width, bitmap.height);
+          })
+          .catch(() => {
+            // Fallback to Image element with Object URL
+            tryDecodeWithImageTag();
+          });
+      } else {
+        tryDecodeWithImageTag();
+      }
 
-      img.src = blobUrl;
+      function tryDecodeWithImageTag() {
+        let blobUrl = '';
+        try {
+          blobUrl = URL.createObjectURL(file);
+        } catch {
+          // If createObjectURL fails on mobile, try FileReader
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => processFromImageElement(img, img.naturalWidth || img.width, img.naturalHeight || img.height);
+            img.onerror = () => {
+              clearTimeout(timer);
+              resolve(createFallbackPlaceholder());
+            };
+            img.src = e.target?.result as string;
+          };
+          reader.onerror = () => {
+            clearTimeout(timer);
+            resolve(createFallbackPlaceholder());
+          };
+          reader.readAsDataURL(file);
+          return;
+        }
+
+        const img = new Image();
+        img.onload = () => {
+          try { URL.revokeObjectURL(blobUrl); } catch {}
+          processFromImageElement(img, img.naturalWidth || img.width, img.naturalHeight || img.height);
+        };
+        img.onerror = () => {
+          try { URL.revokeObjectURL(blobUrl); } catch {}
+          // Try FileReader as last resort for mobile formats
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const fallbackImg = new Image();
+            fallbackImg.onload = () => processFromImageElement(fallbackImg, fallbackImg.naturalWidth || fallbackImg.width, fallbackImg.naturalHeight || fallbackImg.height);
+            fallbackImg.onerror = () => {
+              clearTimeout(timer);
+              resolve(createFallbackPlaceholder());
+            };
+            fallbackImg.src = e.target?.result as string;
+          };
+          reader.onerror = () => {
+            clearTimeout(timer);
+            resolve(createFallbackPlaceholder());
+          };
+          reader.readAsDataURL(file);
+        };
+        img.src = blobUrl;
+      }
     });
   };
 
@@ -332,12 +389,16 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         const rawSizeMb = (file.size / (1024 * 1024)).toFixed(1);
         const rawSizeStr = file.size >= 1024 * 1024 ? `${rawSizeMb} MB` : `${Math.round(file.size / 1024)} KB`;
         setProcessingProgress(`Optimizing photo ${i + 1} of ${validFiles.length} (${rawSizeStr} HD)...`);
+        
+        // Slight tick on mobile UI thread to allow progress bar rendering
+        await new Promise((r) => setTimeout(r, 40));
+
         const compressedUrl = await compressImage(file);
         const approxSizeInKB = Math.round((compressedUrl.length * 3) / 4 / 1024);
         newMediaItems.push({
           url: compressedUrl,
           type: 'image',
-          name: file.name,
+          name: file.name || `Photo ${uploadedMediaList.length + i + 1}`,
           size: `${rawSizeStr} raw • ${approxSizeInKB} KB HD`
         });
       }
@@ -376,6 +437,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     if (e.target.files && e.target.files.length > 0) {
       handleProcessFiles(e.target.files);
     }
+    // Reset input value so re-taking photo or picking same filename on mobile fires onChange reliably
+    try {
+      e.target.value = '';
+    } catch {}
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -413,14 +478,17 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     e.preventDefault();
     if (!validateStep1()) {
       setStep(1);
+      scrollToTop();
       return;
     }
     if (!validateStep2()) {
       setStep(2);
+      scrollToTop();
       return;
     }
     if (!validateStep4()) {
       setStep(4);
+      scrollToTop();
       return;
     }
 
@@ -789,7 +857,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       <button
                         type="button"
                         onClick={() => setListingIntent('Sale')}
-                        className={`py-3 rounded-xl border text-xs font-bold transition-all ${
+                        className={`min-h-[48px] py-3 rounded-xl border text-xs font-bold transition-all touch-manipulation ${
                           listingIntent === 'Sale' 
                             ? 'bg-[#0F382C] text-white border-[#0F382C] shadow-sm' 
                             : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
@@ -800,7 +868,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       <button
                         type="button"
                         onClick={() => setListingIntent('Rent')}
-                        className={`py-3 rounded-xl border text-xs font-bold transition-all ${
+                        className={`min-h-[48px] py-3 rounded-xl border text-xs font-bold transition-all touch-manipulation ${
                           listingIntent === 'Rent' 
                             ? 'bg-[#0F382C] text-white border-[#0F382C] shadow-sm' 
                             : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
@@ -824,7 +892,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                             setIsOtherPropertyType(false);
                             setCustomPropertyType('');
                           }}
-                          className={`p-3 rounded-lg border text-xs font-semibold text-left transition-all ${
+                          className={`min-h-[48px] p-3 rounded-xl border text-xs font-semibold text-left transition-all touch-manipulation ${
                             !isOtherPropertyType && propertyType === type
                               ? 'bg-emerald-50 text-emerald-950 border-emerald-500 ring-1 ring-emerald-500/20'
                               : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
@@ -839,7 +907,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                           setIsOtherPropertyType(true);
                           setPropertyType(customPropertyType || 'Other Typology');
                         }}
-                        className={`p-3 rounded-lg border text-xs font-semibold text-left transition-all ${
+                        className={`min-h-[48px] p-3 rounded-xl border text-xs font-semibold text-left transition-all touch-manipulation ${
                           isOtherPropertyType
                             ? 'bg-emerald-50 text-emerald-950 border-emerald-500 ring-1 ring-emerald-500/20'
                             : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
@@ -859,7 +927,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                             setCustomPropertyType(e.target.value);
                             setPropertyType(e.target.value);
                           }}
-                          className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
+                          className="w-full p-3.5 text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white focus:border-[#0F382C]"
                         />
                       </div>
                     )}
@@ -880,7 +948,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                           setLocality(val);
                         }
                       }}
-                      className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
+                      className="w-full p-3.5 min-h-[48px] text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white focus:border-[#0F382C]"
                     >
                       {AGRA_LOCALITIES.filter(l => l !== 'All Localities').map((l) => (
                         <option key={l} value={l}>{l}</option>
@@ -898,7 +966,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                             setCustomLocality(e.target.value);
                             setLocality(e.target.value);
                           }}
-                          className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
+                          className="w-full p-3.5 text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white focus:border-[#0F382C]"
                         />
                       </div>
                     )}
@@ -915,7 +983,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         setProjectTitle(e.target.value);
                         if (stepErrors.projectTitle) setStepErrors(prev => ({ ...prev, projectTitle: '' }));
                       }}
-                      className={`w-full p-3 text-xs sm:text-sm bg-gray-50 border rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C] ${
+                      className={`w-full p-3.5 text-base sm:text-sm bg-gray-50 border rounded-xl text-gray-800 focus:bg-white focus:border-[#0F382C] ${
                         stepErrors.projectTitle ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-200'
                       }`}
                     />
@@ -938,7 +1006,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         setAddress(e.target.value);
                         if (stepErrors.address) setStepErrors(prev => ({ ...prev, address: '' }));
                       }}
-                      className={`w-full p-3 text-xs sm:text-sm bg-gray-50 border rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C] ${
+                      className={`w-full p-3.5 text-base sm:text-sm bg-gray-50 border rounded-xl text-gray-800 focus:bg-white focus:border-[#0F382C] ${
                         stepErrors.address ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-200'
                       }`}
                     />
@@ -960,9 +1028,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       onClick={() => {
                         if (validateStep1()) {
                           setStep(2);
+                          scrollToTop();
                         }
                       }}
-                      className="bg-[#0F382C] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-[#164E3D] transition-all"
+                      className="w-full sm:w-auto min-h-[48px] bg-[#0F382C] text-white px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#164E3D] shadow-md transition-all touch-manipulation cursor-pointer"
                     >
                       <span>Continue to Specifications</span>
                       <ArrowRight className="w-4 h-4" />
@@ -987,7 +1056,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                           <button
                             type="button"
                             onClick={() => setAreaUnit('Sq.Ft')}
-                            className={`px-2 py-0.5 rounded transition-all ${
+                            className={`px-2.5 py-1 rounded transition-all touch-manipulation ${
                               areaUnit === 'Sq.Ft' ? 'bg-[#0F382C] text-white' : 'text-gray-600 hover:text-black'
                             }`}
                           >
@@ -996,7 +1065,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                           <button
                             type="button"
                             onClick={() => setAreaUnit('Sq.Yard')}
-                            className={`px-2 py-0.5 rounded transition-all ${
+                            className={`px-2.5 py-1 rounded transition-all touch-manipulation ${
                               areaUnit === 'Sq.Yard' ? 'bg-[#0F382C] text-white' : 'text-gray-600 hover:text-black'
                             }`}
                           >
@@ -1013,11 +1082,11 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                             if (stepErrors.superArea) setStepErrors(prev => ({ ...prev, superArea: '' }));
                           }}
                           placeholder="e.g. 3500"
-                          className={`w-full p-3 text-xs sm:text-sm bg-gray-50 border rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C] ${
+                          className={`w-full p-3.5 text-base sm:text-sm bg-gray-50 border rounded-xl text-gray-800 focus:bg-white focus:border-[#0F382C] ${
                             stepErrors.superArea ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-200'
                           }`}
                         />
-                        <span className="absolute right-3 top-3 text-xs text-gray-400 font-semibold pointer-events-none">
+                        <span className="absolute right-3.5 top-3.5 text-xs text-gray-400 font-semibold pointer-events-none">
                           {areaUnit}
                         </span>
                       </div>
@@ -1035,7 +1104,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       <select
                         value={bedrooms}
                         onChange={(e) => setBedrooms(e.target.value)}
-                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white"
+                        className="w-full p-3.5 min-h-[48px] text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white"
                       >
                         <option value="1">1 BHK</option>
                         <option value="2">2 BHK</option>
@@ -1052,7 +1121,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       <select
                         value={bathrooms}
                         onChange={(e) => setBathrooms(e.target.value)}
-                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white"
+                        className="w-full p-3.5 min-h-[48px] text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white"
                       >
                         <option value="1">1 Bathroom</option>
                         <option value="2">2 Bathrooms</option>
@@ -1068,7 +1137,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       <select
                         value={possession}
                         onChange={(e) => setPossession(e.target.value)}
-                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white"
+                        className="w-full p-3.5 min-h-[48px] text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white"
                       >
                         <option value="Ready to Move">Ready to Move</option>
                         <option value="Under Construction">Under Construction</option>
@@ -1082,7 +1151,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       <select
                         value={furnishing}
                         onChange={(e) => setFurnishing(e.target.value)}
-                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white"
+                        className="w-full p-3.5 min-h-[48px] text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white"
                       >
                         <option value="Designer Fitted">Designer Fitted</option>
                         <option value="Fully Furnished">Fully Furnished</option>
@@ -1105,7 +1174,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                           if (stepErrors.askingPrice) setStepErrors(prev => ({ ...prev, askingPrice: '' }));
                         }}
                         placeholder="e.g. 28500000"
-                        className={`w-full p-3 text-xs sm:text-sm bg-gray-50 border rounded-lg text-gray-800 font-mono focus:bg-white focus:border-[#0F382C] ${
+                        className={`w-full p-3.5 text-base sm:text-sm bg-gray-50 border rounded-xl text-gray-800 font-mono focus:bg-white focus:border-[#0F382C] ${
                           stepErrors.askingPrice ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-200'
                         }`}
                       />
@@ -1130,14 +1199,17 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex justify-between pt-4">
+                  <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-4">
                     <button
                       type="button"
-                      onClick={() => setStep(1)}
-                      className="text-xs font-bold text-gray-600 px-4 py-2 hover:text-[#0F382C] flex items-center gap-1.5"
+                      onClick={() => {
+                        setStep(1);
+                        scrollToTop();
+                      }}
+                      className="w-full sm:w-auto min-h-[44px] text-xs font-bold text-gray-600 px-4 py-2.5 hover:text-[#0F382C] flex items-center justify-center gap-1.5 touch-manipulation"
                     >
                       <ArrowLeft className="w-4 h-4" />
-                      <span>Back</span>
+                      <span>Back to Step 1</span>
                     </button>
                     <button
                       type="button"
@@ -1145,9 +1217,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       onClick={() => {
                         if (validateStep2()) {
                           setStep(3);
+                          scrollToTop();
                         }
                       }}
-                      className="bg-[#0F382C] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-[#164E3D] transition-all"
+                      className="w-full sm:w-auto min-h-[48px] bg-[#0F382C] text-white px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#164E3D] shadow-md transition-all touch-manipulation cursor-pointer"
                     >
                       <span>Continue to Amenities & Media</span>
                       <ArrowRight className="w-4 h-4" />
@@ -1175,9 +1248,9 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                             key={opt}
                             type="button"
                             onClick={() => toggleAmenity(opt)}
-                            className={`p-3 rounded-lg border text-xs font-medium text-left flex items-center justify-between transition-all ${
+                            className={`min-h-[48px] p-3 rounded-xl border text-xs font-medium text-left flex items-center justify-between transition-all touch-manipulation ${
                               isChecked
-                                ? 'bg-emerald-50 text-emerald-900 border-emerald-300 font-semibold'
+                                ? 'bg-emerald-50 text-emerald-900 border-emerald-300 font-semibold ring-1 ring-emerald-500/20'
                                 : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
                             }`}
                           >
@@ -1200,22 +1273,24 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       </span>
                     </div>
 
-                    {/* Hidden Native File Inputs with Safari-compatible accessibility */}
+                    {/* Native Offscreen File Inputs compatible with mobile Safari & Chrome */}
                     <input
+                      id="prop-file-upload-input"
                       type="file"
                       ref={fileInputRef}
                       onChange={handleFileChange}
                       accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif"
                       multiple
-                      className="sr-only opacity-0 absolute w-0 h-0 overflow-hidden pointer-events-none"
+                      className="hidden"
                     />
                     <input
+                      id="prop-camera-upload-input"
                       type="file"
                       ref={cameraInputRef}
                       onChange={handleFileChange}
                       accept="image/*"
                       capture="environment"
-                      className="sr-only opacity-0 absolute w-0 h-0 overflow-hidden pointer-events-none"
+                      className="hidden"
                     />
 
                     {/* PROCESSING PROGRESS BANNER */}
@@ -1243,9 +1318,9 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     {/* MULTIPLE MEDIA PREVIEW GALLERY IF SELECTED */}
                     {uploadedMediaList.length > 0 ? (
                       <div className="space-y-4">
-                        <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-xl text-xs text-amber-950 flex items-center justify-between">
+                        <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-xl text-xs text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1">
                           <span className="font-semibold">
-                            👉 Select which image to use as your <strong>Main Property Display Photo</strong>:
+                            👉 Tap image to set as <strong>Main Property Cover Photo</strong>:
                           </span>
                           <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
                             Photo #{selectedCoverIndex + 1} Selected as Cover
@@ -1259,7 +1334,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                               <div
                                 key={idx}
                                 onClick={() => setSelectedCoverIndex(idx)}
-                                className={`relative rounded-xl overflow-hidden border-2 bg-gray-900 group aspect-[4/3] cursor-pointer transition-all ${
+                                className={`relative rounded-xl overflow-hidden border-2 bg-gray-900 group aspect-[4/3] cursor-pointer transition-all touch-manipulation ${
                                   isChosenCover
                                     ? 'border-emerald-500 ring-4 ring-emerald-500/20 shadow-lg'
                                     : 'border-gray-200 hover:border-[#0F382C]'
@@ -1293,7 +1368,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                                         e.stopPropagation();
                                         setSelectedCoverIndex(idx);
                                       }}
-                                      className="bg-black/70 hover:bg-[#0F382C] backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded border border-white/20 transition-colors"
+                                      className="bg-black/70 hover:bg-[#0F382C] backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded border border-white/20 transition-colors touch-manipulation"
                                     >
                                       Set as Display Cover
                                     </button>
@@ -1312,10 +1387,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                                       setSelectedCoverIndex(prev => prev - 1);
                                     }
                                   }}
-                                  className="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 text-white p-1.5 rounded-full shadow-md transition-transform hover:scale-110 z-10"
+                                  className="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 text-white p-2 rounded-full shadow-md transition-transform hover:scale-110 z-10 touch-manipulation"
                                   title="Remove File"
                                 >
-                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <Trash2 className="w-4 h-4" />
                                 </button>
 
                                 <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between gap-1 bg-black/80 backdrop-blur-xs text-white text-[10px] px-2 py-1 rounded-md pointer-events-none shadow-sm z-10 border border-white/10">
@@ -1343,90 +1418,88 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                           <div className="flex items-center gap-2 w-full sm:w-auto">
                             {uploadedMediaList.length < MAX_PHOTOS && (
                               <>
-                                <button
-                                  type="button"
-                                  disabled={isProcessingPhotos}
-                                  onClick={() => fileInputRef.current?.click()}
-                                  className="flex-1 sm:flex-initial px-4 py-2 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                                <label
+                                  htmlFor="prop-file-upload-input"
+                                  className="flex-1 sm:flex-initial min-h-[44px] px-4 py-2.5 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer touch-manipulation"
                                 >
-                                  <Upload className="w-3.5 h-3.5 text-[#E4D5B7]" />
-                                  <span>Add More Photos ({MAX_PHOTOS - uploadedMediaList.length} left)</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  disabled={isProcessingPhotos}
-                                  onClick={() => cameraInputRef.current?.click()}
-                                  className="flex-1 sm:flex-initial px-4 py-2 bg-white hover:bg-gray-100 text-[#0F382C] border border-[#0F382C]/30 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                                  <Upload className="w-4 h-4 text-[#E4D5B7]" />
+                                  <span>Add More Photos</span>
+                                </label>
+                                <label
+                                  htmlFor="prop-camera-upload-input"
+                                  className="flex-1 sm:flex-initial min-h-[44px] px-4 py-2.5 bg-white hover:bg-gray-100 text-[#0F382C] border border-[#0F382C]/30 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer touch-manipulation"
                                 >
-                                  <Camera className="w-3.5 h-3.5 text-[#0F382C]" />
+                                  <Camera className="w-4 h-4 text-[#0F382C]" />
                                   <span>Camera</span>
-                                </button>
+                                </label>
                               </>
                             )}
                           </div>
                         </div>
                       </div>
                     ) : (
-                      /* INTERACTIVE DRAG & DROP DROPZONE */
+                      /* INTERACTIVE DRAG & DROP / MOBILE TOUCH ZONE */
                       <div
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
-                        className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center transition-all ${
+                        className={`border-2 border-dashed rounded-2xl p-6 sm:p-12 text-center transition-all ${
                           isDragging
                             ? 'border-emerald-600 bg-emerald-50/70 scale-[1.01]'
                             : 'border-gray-300 hover:border-[#0F382C] bg-gray-50/60 hover:bg-white'
                         }`}
                       >
-                        <div className="w-16 h-16 rounded-2xl bg-emerald-100/70 text-[#0F382C] flex items-center justify-center mx-auto mb-4 shadow-xs">
-                          <Upload className="w-8 h-8 text-[#0F382C]" />
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-emerald-100/70 text-[#0F382C] flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-xs">
+                          <Upload className="w-7 h-7 sm:w-8 sm:h-8 text-[#0F382C]" />
                         </div>
                         <h4 className="text-base font-serif-luxury font-bold text-[#0F382C]">
-                          Drag & drop property photos here (Up to 10 photos)
+                          Upload Property Photos (Up to 10 photos)
                         </h4>
                         <p className="text-xs text-gray-500 mt-1 mb-6 max-w-sm mx-auto">
-                          Upload high-resolution camera photos (JPEG, PNG, WEBP, HEIC) up to 25 MB each. Automatic HD optimization ensures ultra-fast page speed for buyers.
+                          Select high-resolution photos from gallery or capture live with your mobile camera. Supports JPEG, PNG, WEBP, and iPhone HEIC photos.
                         </p>
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                          <button
-                            type="button"
-                            disabled={isProcessingPhotos}
-                            onClick={() => fileInputRef.current?.click()}
-                            className="w-full sm:w-auto px-5 py-2.5 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                          <label
+                            htmlFor="prop-file-upload-input"
+                            className="w-full sm:w-auto min-h-[48px] px-6 py-3 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer touch-manipulation"
                           >
                             <Upload className="w-4 h-4 text-[#E4D5B7]" />
                             <span>Select Photos (Max 10, Up to 25 MB)</span>
-                          </button>
+                          </label>
 
-                          <button
-                            type="button"
-                            disabled={isProcessingPhotos}
-                            onClick={() => cameraInputRef.current?.click()}
-                            className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-gray-100 text-[#0F382C] border border-[#0F382C]/30 rounded-xl text-xs font-bold uppercase tracking-wider shadow-2xs flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                          <label
+                            htmlFor="prop-camera-upload-input"
+                            className="w-full sm:w-auto min-h-[48px] px-6 py-3 bg-white hover:bg-gray-100 text-[#0F382C] border border-[#0F382C]/30 rounded-xl text-xs font-bold uppercase tracking-wider shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer touch-manipulation"
                           >
                             <Camera className="w-4 h-4 text-[#0F382C]" />
                             <span>Live Camera Capture</span>
-                          </button>
+                          </label>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex justify-between pt-4">
+                  <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-4">
                     <button
                       type="button"
-                      onClick={() => setStep(2)}
-                      className="text-xs font-bold text-gray-600 px-4 py-2 hover:text-[#0F382C] flex items-center gap-1.5"
+                      onClick={() => {
+                        setStep(2);
+                        scrollToTop();
+                      }}
+                      className="w-full sm:w-auto min-h-[44px] text-xs font-bold text-gray-600 px-4 py-2.5 hover:text-[#0F382C] flex items-center justify-center gap-1.5 touch-manipulation"
                     >
                       <ArrowLeft className="w-4 h-4" />
-                      <span>Back</span>
+                      <span>Back to Step 2</span>
                     </button>
                     <button
                       type="button"
                       id="step3-continue-btn"
-                      onClick={() => setStep(4)}
-                      className="bg-[#0F382C] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-[#164E3D]"
+                      onClick={() => {
+                        setStep(4);
+                        scrollToTop();
+                      }}
+                      className="w-full sm:w-auto min-h-[48px] bg-[#0F382C] text-white px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#164E3D] shadow-md transition-all touch-manipulation cursor-pointer"
                     >
                       <span>Continue to Verification</span>
                       <ArrowRight className="w-4 h-4" />
@@ -1458,7 +1531,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         type="button"
                         id="verify-status-yes"
                         onClick={() => setIsVerified('yes')}
-                        className={`p-3 rounded-lg border text-left transition-all ${
+                        className={`min-h-[48px] p-3 rounded-xl border text-left transition-all touch-manipulation ${
                           isVerified === 'yes'
                             ? 'bg-emerald-50 border-emerald-500 text-emerald-900 ring-2 ring-emerald-500/20'
                             : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
@@ -1477,7 +1550,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         type="button"
                         id="verify-status-process"
                         onClick={() => setIsVerified('in_process')}
-                        className={`p-3 rounded-lg border text-left transition-all ${
+                        className={`min-h-[48px] p-3 rounded-xl border text-left transition-all touch-manipulation ${
                           isVerified === 'in_process'
                             ? 'bg-amber-50 border-amber-500 text-amber-900 ring-2 ring-amber-500/20'
                             : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
@@ -1496,7 +1569,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         type="button"
                         id="verify-status-no"
                         onClick={() => setIsVerified('no')}
-                        className={`p-3 rounded-lg border text-left transition-all ${
+                        className={`min-h-[48px] p-3 rounded-xl border text-left transition-all touch-manipulation ${
                           isVerified === 'no'
                             ? 'bg-gray-100 border-gray-500 text-gray-900 ring-2 ring-gray-400/20'
                             : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
@@ -1527,7 +1600,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                               setVerifiedByAuthority(e.target.value);
                             }}
                             placeholder="e.g., ADA Approved, RERA Verified, Agra Cantonment Board"
-                            className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-800 font-medium focus:border-[#0F382C] focus:ring-1 focus:ring-[#0F382C]"
+                            className="w-full p-3 text-base sm:text-sm bg-white border border-gray-300 rounded-xl text-gray-800 font-medium focus:border-[#0F382C] focus:ring-1 focus:ring-[#0F382C]"
                           />
                         </div>
 
@@ -1540,7 +1613,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                             placeholder="e.g. ADA/2024/9912 or UPRERAAGT2024"
                             value={verificationDocNumber}
                             onChange={(e) => setVerificationDocNumber(e.target.value)}
-                            className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-800 font-mono"
+                            className="w-full p-3 text-base sm:text-sm bg-white border border-gray-300 rounded-xl text-gray-800 font-mono"
                           />
                         </div>
                       </div>
@@ -1564,7 +1637,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                             setOwnerName(e.target.value);
                             if (stepErrors.ownerName) setStepErrors(prev => ({ ...prev, ownerName: '' }));
                           }}
-                          className={`w-full p-2.5 text-xs bg-white border rounded-lg ${
+                          className={`w-full p-3 text-base sm:text-sm bg-white border rounded-xl ${
                             stepErrors.ownerName ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-300'
                           }`}
                         />
@@ -1585,7 +1658,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                             setOwnerPhone(e.target.value);
                             if (stepErrors.ownerPhone) setStepErrors(prev => ({ ...prev, ownerPhone: '' }));
                           }}
-                          className={`w-full p-2.5 text-xs bg-white border rounded-lg ${
+                          className={`w-full p-3 text-base sm:text-sm bg-white border rounded-xl ${
                             stepErrors.ownerPhone ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-300'
                           }`}
                         />
@@ -1604,7 +1677,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                           value={ownerEmail}
                           onChange={(e) => setOwnerEmail(e.target.value)}
                           placeholder="e.g. owner@gmail.com"
-                          className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-800"
+                          className="w-full p-3 text-base sm:text-sm bg-white border border-gray-300 rounded-xl text-gray-800"
                         />
                       </div>
                     </div>
@@ -1617,15 +1690,18 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     </div>
                   )}
 
-                  <div className="flex justify-between pt-4">
+                  <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-4">
                     <button
                       type="button"
-                      onClick={() => setStep(3)}
+                      onClick={() => {
+                        setStep(3);
+                        scrollToTop();
+                      }}
                       disabled={isSubmitting}
-                      className="text-xs font-bold text-gray-600 px-4 py-2 hover:text-[#0F382C] flex items-center gap-1.5 disabled:opacity-50"
+                      className="w-full sm:w-auto min-h-[44px] text-xs font-bold text-gray-600 px-4 py-2.5 hover:text-[#0F382C] flex items-center justify-center gap-1.5 disabled:opacity-50 touch-manipulation"
                     >
                       <ArrowLeft className="w-4 h-4" />
-                      <span>Back</span>
+                      <span>Back to Step 3</span>
                     </button>
                     
                     <button
@@ -1633,7 +1709,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       id="submit-property-listing-btn"
                       disabled={isSubmitting}
                       onClick={handleSubmit}
-                      className="bg-[#0F382C] hover:bg-[#164E3D] text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg hover:shadow-xl transition-all flex items-center gap-2 disabled:opacity-75 cursor-pointer disabled:cursor-not-allowed"
+                      className="w-full sm:w-auto min-h-[50px] bg-[#0F382C] hover:bg-[#164E3D] text-white px-9 py-4 rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-75 cursor-pointer disabled:cursor-not-allowed touch-manipulation"
                     >
                       {isSubmitting ? (
                         <>
