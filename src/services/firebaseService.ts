@@ -22,6 +22,36 @@ const db = initializeFirestore(app, {
   ignoreUndefinedProperties: true
 }, databaseId);
 
+// SAFE TIMEOUT WRAPPER TO PREVENT HANGS ON NETWORK SLEEP / COLD BOOT
+export const withTimeout = <T>(promise: Promise<T>, timeoutMs: number = 3500, fallbackValue: T): Promise<T> => {
+  return new Promise<T>((resolve) => {
+    let hasResolved = false;
+    const timer = setTimeout(() => {
+      if (!hasResolved) {
+        hasResolved = true;
+        resolve(fallbackValue);
+      }
+    }, timeoutMs);
+
+    promise
+      .then((res) => {
+        if (!hasResolved) {
+          hasResolved = true;
+          clearTimeout(timer);
+          resolve(res);
+        }
+      })
+      .catch((err) => {
+        if (!hasResolved) {
+          hasResolved = true;
+          clearTimeout(timer);
+          console.warn("Operation timed out or failed, using fallback:", err);
+          resolve(fallbackValue);
+        }
+      });
+  });
+};
+
 // LOCALSTORAGE HELPERS FOR DELETED ITEMS & PERSISTENCE CACHE
 export const getDeletedPropertyIds = (): string[] => {
   try {
@@ -317,45 +347,57 @@ export const deleteFirestoreLead = async (leadId: string): Promise<boolean> => {
 
 // ACCOUNTS SYNC
 export const fetchFirestoreAccounts = async (): Promise<any[]> => {
-  try {
-    const querySnapshot = await getDocs(collection(db, 'accounts'));
-    return querySnapshot.docs.map(doc => doc.data());
-  } catch (error) {
-    console.error("Error fetching accounts:", error);
-    return [];
-  }
+  return withTimeout(
+    (async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'accounts'));
+        return querySnapshot.docs.map(doc => doc.data());
+      } catch (error) {
+        console.warn("Error fetching accounts:", error);
+        return [];
+      }
+    })(),
+    3500,
+    []
+  );
 };
 
 export const getFirestoreAccount = async (identifier: string): Promise<any | null> => {
-  try {
-    if (!identifier) return null;
-    const clean = identifier.trim().toLowerCase();
-    
-    // 1. Direct document check
-    const directDoc = await getDoc(doc(db, 'accounts', clean));
-    if (directDoc.exists()) {
-      return directDoc.data();
-    }
-    
-    // 2. Query by email
-    const qEmail = query(collection(db, 'accounts'), where('email', '==', clean));
-    const snapEmail = await getDocs(qEmail);
-    if (!snapEmail.empty) {
-      return snapEmail.docs[0].data();
-    }
-    
-    // 3. Query by phone
-    const qPhone = query(collection(db, 'accounts'), where('phone', '==', identifier.trim()));
-    const snapPhone = await getDocs(qPhone);
-    if (!snapPhone.empty) {
-      return snapPhone.docs[0].data();
-    }
-    
-    return null;
-  } catch (error) {
-    console.error("Error getting firestore account:", error);
-    return null;
-  }
+  if (!identifier) return null;
+  const clean = identifier.trim().toLowerCase();
+
+  return withTimeout(
+    (async () => {
+      try {
+        // 1. Direct document check
+        const directDoc = await getDoc(doc(db, 'accounts', clean));
+        if (directDoc.exists()) {
+          return directDoc.data();
+        }
+        
+        // 2. Query by email
+        const qEmail = query(collection(db, 'accounts'), where('email', '==', clean));
+        const snapEmail = await getDocs(qEmail);
+        if (!snapEmail.empty) {
+          return snapEmail.docs[0].data();
+        }
+        
+        // 3. Query by phone
+        const qPhone = query(collection(db, 'accounts'), where('phone', '==', identifier.trim()));
+        const snapPhone = await getDocs(qPhone);
+        if (!snapPhone.empty) {
+          return snapPhone.docs[0].data();
+        }
+        
+        return null;
+      } catch (error) {
+        console.warn("Error getting firestore account:", error);
+        return null;
+      }
+    })(),
+    3500,
+    null
+  );
 };
 
 export const saveFirestoreAccount = async (account: any): Promise<boolean> => {

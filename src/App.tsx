@@ -101,26 +101,54 @@ export default function App() {
 
   // Subscribe to real-time Firestore updates for properties, projects, and leads across all devices globally
   useEffect(() => {
-    const unsubscribeProps = subscribeFirestoreProperties(fetched => {
-      if (fetched) {
-        const active = fetched.filter(p => !p.isDeleted);
-        setProperties(active);
-        setPropertiesCache(active);
+    let unsubscribeProps: () => void = () => {};
+    let unsubscribeProjects: () => void = () => {};
+    let unsubscribeLeads: () => void = () => {};
+
+    const startSubscriptions = () => {
+      try { unsubscribeProps(); } catch {}
+      try { unsubscribeProjects(); } catch {}
+      try { unsubscribeLeads(); } catch {}
+
+      unsubscribeProps = subscribeFirestoreProperties(fetched => {
+        if (fetched) {
+          const active = fetched.filter(p => !p.isDeleted);
+          setProperties(active);
+          setPropertiesCache(active);
+        }
+      });
+
+      unsubscribeProjects = subscribeFirestoreProjects(fetched => {
+        if (fetched && fetched.length > 0) setProjectsList(fetched);
+      });
+
+      unsubscribeLeads = subscribeFirestoreLeads(fetched => {
+        if (fetched && fetched.length > 0) setLeads(fetched);
+      });
+    };
+
+    startSubscriptions();
+
+    // Auto-reconnect watchdog: re-subscribe cleanly whenever device turns on, wakes up, or comes back online
+    const handleWakeUpOrOnline = () => {
+      if (document.visibilityState === 'visible' || navigator.onLine) {
+        startSubscriptions();
       }
-    });
+    };
 
-    const unsubscribeProjects = subscribeFirestoreProjects(fetched => {
-      if (fetched && fetched.length > 0) setProjectsList(fetched);
-    });
-
-    const unsubscribeLeads = subscribeFirestoreLeads(fetched => {
-      if (fetched && fetched.length > 0) setLeads(fetched);
-    });
+    window.addEventListener('online', handleWakeUpOrOnline);
+    window.addEventListener('focus', handleWakeUpOrOnline);
+    window.addEventListener('pageshow', handleWakeUpOrOnline);
+    document.addEventListener('visibilitychange', handleWakeUpOrOnline);
 
     return () => {
-      unsubscribeProps();
-      unsubscribeProjects();
-      unsubscribeLeads();
+      try { unsubscribeProps(); } catch {}
+      try { unsubscribeProjects(); } catch {}
+      try { unsubscribeLeads(); } catch {}
+      window.removeEventListener('online', handleWakeUpOrOnline);
+      window.removeEventListener('focus', handleWakeUpOrOnline);
+      window.removeEventListener('pageshow', handleWakeUpOrOnline);
+      document.removeEventListener('visibilitychange', handleWakeUpOrOnline);
     };
   }, []);
 

@@ -627,10 +627,12 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       }
       setIsSubmitting(false);
       setSubmitted(true);
+      scrollToTop();
     } catch (err: any) {
       console.error('Submission error:', err);
       setSubmitError(err?.message || 'An unexpected error occurred while publishing. Please try again.');
       setIsSubmitting(false);
+      scrollToTop();
     }
   };
 
