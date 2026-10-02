@@ -169,18 +169,38 @@ export const mergeWithUserListings = (list: Property[]): Property[] => {
 // PROPERTIES REAL-TIME SYNC & FETCH
 export const subscribeFirestoreProperties = (callback: (properties: Property[]) => void) => {
   const unsubscribe = onSnapshot(collection(db, 'properties'), (snapshot) => {
-    if (snapshot.empty) {
-      setPropertiesCache([]);
-      callback([]);
-    } else {
-      const deletedLocal = getDeletedPropertyIds();
-      const activeProps = snapshot.docs
-        .map(doc => doc.data() as Property)
-        .filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
-      
-      setPropertiesCache(activeProps);
-      callback(activeProps);
-    }
+    const deletedLocal = getDeletedPropertyIds();
+    const currentCached = getPropertiesCache();
+
+    const serverProps = snapshot.docs
+      .map(doc => doc.data() as Property)
+      .filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
+
+    // Merge server properties with any active local user properties that haven't synced to server yet
+    const mergedMap = new Map<string, Property>();
+
+    // 1. Add server properties first
+    serverProps.forEach(p => {
+      if (p && p.id) mergedMap.set(p.id, p);
+    });
+
+    // 2. Merge local cached properties (preserving locally posted properties so snapshot never drops them)
+    currentCached.forEach(p => {
+      if (p && p.id && !deletedLocal.includes(p.id) && !p.isDeleted) {
+        if (!mergedMap.has(p.id)) {
+          mergedMap.set(p.id, p);
+          // Auto-sync missing local property to Firestore in background
+          try {
+            const sanitized = JSON.parse(JSON.stringify(p));
+            setDoc(doc(db, 'properties', p.id), sanitized).catch(() => {});
+          } catch {}
+        }
+      }
+    });
+
+    const mergedList = Array.from(mergedMap.values());
+    setPropertiesCache(mergedList);
+    callback(mergedList);
   }, (error) => {
     console.warn("Properties real-time listener notice (using resilient cache):", error);
     const cached = getPropertiesCache();
