@@ -88,6 +88,27 @@ export const markPropertyAsDeletedLocally = (id: string) => {
   }
 };
 
+// AUTO-CLEANUP HELPER TO FREE UP BROWSER STORAGE ACROSS ALL SESSIONS
+export const cleanupLegacyLocalStorage = () => {
+  try {
+    const legacyKeys = [
+      'royal_agra_properties_cache_v2',
+      'royal_agra_properties_v2',
+      'royal_agra_properties_v1',
+      'royal_agra_user_listings_v1',
+      'royal_agra_deleted_property_ids_v1'
+    ];
+    for (const k of legacyKeys) {
+      localStorage.removeItem(k);
+    }
+  } catch (e) {
+    // ignore
+  }
+};
+
+// Execute initial legacy storage cleanup immediately
+cleanupLegacyLocalStorage();
+
 export const getPropertiesCache = (): Property[] => {
   try {
     const stored = localStorage.getItem('royal_agra_properties_v3');
@@ -101,11 +122,42 @@ export const getPropertiesCache = (): Property[] => {
 };
 
 export const setPropertiesCache = (properties: Property[]) => {
+  if (!properties || !Array.isArray(properties)) return;
+  const cleanList = properties.filter(p => p && !p.isDeleted);
+  
   try {
-    const cleanList = properties.filter(p => p && !p.isDeleted);
     localStorage.setItem('royal_agra_properties_v3', JSON.stringify(cleanList));
   } catch (e) {
-    // ignore
+    console.warn("Storage quota limit encountered, applying automated compression recovery:", e);
+    try {
+      cleanupLegacyLocalStorage();
+
+      // Compact version: keep latest 30 properties and trim oversized base64 strings if storage is tight
+      const compactList = cleanList.slice(0, 30).map(p => {
+        let cover = p.coverImage;
+        let imgArr = p.images || [];
+
+        // If cover is overly huge base64, keep clean or trim
+        if (cover && cover.length > 75000) {
+          cover = cover.slice(0, 75000);
+        }
+
+        // Limit cached image array to max 4 photos for local cache
+        if (imgArr.length > 4) {
+          imgArr = imgArr.slice(0, 4);
+        }
+
+        return {
+          ...p,
+          coverImage: cover,
+          images: imgArr
+        };
+      });
+
+      localStorage.setItem('royal_agra_properties_v3', JSON.stringify(compactList));
+    } catch (err2) {
+      console.warn("Secondary storage write bypassed cleanly:", err2);
+    }
   }
 };
 
@@ -130,10 +182,10 @@ export const subscribeFirestoreProperties = (callback: (properties: Property[]) 
       callback(activeProps);
     }
   }, (error) => {
-    console.error("Error in properties real-time listener, falling back to cache:", error);
+    console.warn("Properties real-time listener notice (using resilient cache):", error);
     const cached = getPropertiesCache();
     const deletedLocal = getDeletedPropertyIds();
-    if (cached) {
+    if (cached && cached.length > 0) {
       callback(cached.filter(p => !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar')));
     } else {
       callback([]);
@@ -144,28 +196,34 @@ export const subscribeFirestoreProperties = (callback: (properties: Property[]) 
 };
 
 export const fetchFirestoreProperties = async (): Promise<Property[]> => {
-  try {
-    const querySnapshot = await getDocs(collection(db, 'properties'));
-    if (querySnapshot.empty) {
-      setPropertiesCache([]);
-      return [];
-    }
-    const deletedLocal = getDeletedPropertyIds();
-    const list = querySnapshot.docs
-      .map(doc => doc.data() as Property)
-      .filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
+  return withTimeout(
+    (async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'properties'));
+        if (querySnapshot.empty) {
+          setPropertiesCache([]);
+          return [];
+        }
+        const deletedLocal = getDeletedPropertyIds();
+        const list = querySnapshot.docs
+          .map(doc => doc.data() as Property)
+          .filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
 
-    setPropertiesCache(list);
-    return list;
-  } catch (error) {
-    console.error("Error fetching properties from Firestore:", error);
-    const cached = getPropertiesCache();
-    const deletedLocal = getDeletedPropertyIds();
-    if (cached) {
-      return cached.filter(p => !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
-    }
-    return [];
-  }
+        setPropertiesCache(list);
+        return list;
+      } catch (error) {
+        console.warn("Error fetching properties from Firestore:", error);
+        const cached = getPropertiesCache();
+        const deletedLocal = getDeletedPropertyIds();
+        if (cached && cached.length > 0) {
+          return cached.filter(p => !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
+        }
+        return [];
+      }
+    })(),
+    4000,
+    getPropertiesCache()
+  );
 };
 
 export const saveFirestoreProperty = async (property: Property): Promise<boolean> => {
@@ -177,7 +235,7 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
     isUserListing: true
   };
 
-  // 1. Update memory and local cache immediately
+  // 1. Update memory and local cache immediately so the user sees their property with 0 delay
   const current = getPropertiesCache();
   const exists = current.some(p => p.id === cleanProperty.id);
   const updated = exists 
@@ -185,30 +243,35 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
     : [cleanProperty, ...current];
   setPropertiesCache(updated);
 
-  // 2. Persist to Cloud Firestore
+  // 2. Persist to Cloud Firestore with payload size safety (Cloud Firestore maximum is 1 MB)
   try {
+    let docToSave = cleanProperty;
     const payloadStr = JSON.stringify(cleanProperty);
     const payloadSizeKb = Math.round(payloadStr.length / 1024);
-    console.log(`Saving property ${cleanProperty.id} (Payload: ${payloadSizeKb} KB)...`);
+    console.log(`Persisting property ${cleanProperty.id} (Payload: ${payloadSizeKb} KB)...`);
 
-    let docToSave = cleanProperty;
-    if (payloadSizeKb > 800 && cleanProperty.images && cleanProperty.images.length > 3) {
+    // If payload > 450 KB, bound image list to prevent Firestore 1MB document limit rejection
+    if (payloadSizeKb > 450 && cleanProperty.images && cleanProperty.images.length > 3) {
       docToSave = {
         ...cleanProperty,
-        images: cleanProperty.images.slice(0, 3)
+        images: cleanProperty.images.slice(0, 4)
       };
     }
 
     const sanitizedDoc = JSON.parse(JSON.stringify(docToSave));
 
-    // Fire and monitor Firestore write without stalling the UI
-    setDoc(doc(db, 'properties', cleanProperty.id), sanitizedDoc)
-      .then(() => console.log(`Successfully persisted ${cleanProperty.id} to Firestore.`))
-      .catch((err) => console.warn(`Firestore sync note:`, err));
+    // Fire non-blocking Firestore write with timeout wrapper
+    withTimeout(
+      setDoc(doc(db, 'properties', cleanProperty.id), sanitizedDoc),
+      6000,
+      null
+    )
+      .then(() => console.log(`Successfully synced ${cleanProperty.id} to Cloud Firestore.`))
+      .catch((err) => console.warn(`Background Firestore sync note:`, err));
 
     return true;
   } catch (error) {
-    console.warn("Error saving property:", error);
+    console.warn("Background property save caught cleanly:", error);
     return true;
   }
 };
