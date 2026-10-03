@@ -1,0 +1,22 @@
+---
+description: Architectural Guardrails for Real-Time Firestore State Sync & Property Management
+globs: src/services/**/*.ts, src/components/**/*.tsx
+---
+
+# Architectural Guardrails for Firestore State Sync & Mobile Property Management
+
+## 1. Bi-directional Cloud Reconciliation
+When listening to Firestore real-time snapshots (`onSnapshot`), never blindly overwrite local in-memory state if a local update, approval, or deletion is currently in-flight.
+- Maintain local caching strategies that reconcile server snapshots with local state.
+- Ensure pending admin approvals take immediate precedence and are synced to Firestore without being clobbered by lagging server snapshots.
+
+## 2. Awaited Writes with Explicit Timeout
+- All writes (`setDoc`, `updateDoc`, `deleteDoc`) must be awaited.
+- Wrap asynchronous Firestore calls in explicit timeout wrappers (`withTimeout(..., 5000, fallback)`) so UI operations remain deterministic even in flaky mobile network conditions.
+
+## 3. Client-side Media Compression Invariant
+- Never store raw uncompressed images in Firestore to prevent hitting the 1 MB document limit.
+- Canvas downsampling must constrain image dimensions (max 1440px) and quality (0.72) to keep each image <150 KB.
+
+## 4. Mobile Native Touch Targets & Visual Feedback
+- Provide immediate UI state feedback (toast notifications, loading indicators) upon user interactions like property approval, submission, or deletion to prevent duplicate submissions on mobile.

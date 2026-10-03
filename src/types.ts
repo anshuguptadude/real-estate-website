@@ -58,6 +58,9 @@ export interface Property {
   ownerName?: string;
   ownerContact?: string;
   ownerEmail?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  approvedAt?: string;
   postedBy?: {
     id?: string;
     name?: string;
