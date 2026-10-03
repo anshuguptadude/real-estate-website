@@ -176,7 +176,7 @@ export const subscribeFirestoreProperties = (callback: (properties: Property[]) 
       .map(doc => doc.data() as Property)
       .filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
 
-    // Merge server properties with any active local user properties that haven't synced to server yet
+    // Intelligent Bi-Directional Reconciliation Map
     const mergedMap = new Map<string, Property>();
 
     // 1. Add server properties first
@@ -184,16 +184,29 @@ export const subscribeFirestoreProperties = (callback: (properties: Property[]) 
       if (p && p.id) mergedMap.set(p.id, p);
     });
 
-    // 2. Merge local cached properties (preserving locally posted properties so snapshot never drops them)
-    currentCached.forEach(p => {
-      if (p && p.id && !deletedLocal.includes(p.id) && !p.isDeleted) {
-        if (!mergedMap.has(p.id)) {
-          mergedMap.set(p.id, p);
+    // 2. Reconcile with local cached properties:
+    // If local version was approved (isApproved: true) while server is still pending, local approval MUST prevail
+    // If local version was newly created and missing from server, preserve it and push to server
+    currentCached.forEach(pLocal => {
+      if (pLocal && pLocal.id && !deletedLocal.includes(pLocal.id) && !pLocal.isDeleted) {
+        if (!mergedMap.has(pLocal.id)) {
+          mergedMap.set(pLocal.id, pLocal);
           // Auto-sync missing local property to Firestore in background
           try {
-            const sanitized = JSON.parse(JSON.stringify(p));
-            setDoc(doc(db, 'properties', p.id), sanitized).catch(() => {});
+            const sanitized = JSON.parse(JSON.stringify(pLocal));
+            setDoc(doc(db, 'properties', pLocal.id), sanitized, { merge: true }).catch(() => {});
           } catch {}
+        } else {
+          const pServer = mergedMap.get(pLocal.id)!;
+          // If local has been approved (isApproved: true / published) but server snapshot is still pending,
+          // keep the approved local version and sync it to Firestore so server catches up immediately
+          if ((pLocal.isApproved === true || pLocal.status === 'published') && (!pServer.isApproved || pServer.status === 'pending_verification')) {
+            mergedMap.set(pLocal.id, { ...pServer, ...pLocal, status: 'published', isApproved: true, verificationStatus: 'Verified' });
+            try {
+              const sanitized = JSON.parse(JSON.stringify(mergedMap.get(pLocal.id)!));
+              setDoc(doc(db, 'properties', pLocal.id), sanitized, { merge: true }).catch(() => {});
+            } catch {}
+          }
         }
       }
     });
@@ -247,12 +260,17 @@ export const fetchFirestoreProperties = async (): Promise<Property[]> => {
 };
 
 export const saveFirestoreProperty = async (property: Property): Promise<boolean> => {
+  const isApproved = property.isApproved !== undefined 
+    ? property.isApproved 
+    : (property.status === 'published' || property.status === 'Active' || property.status === 'Sold' || property.status === 'Rented');
+
   const cleanProperty: Property = {
     ...property,
     isDeleted: false,
-    status: property.status || 'published',
-    isApproved: property.isApproved !== undefined ? property.isApproved : true,
-    isUserListing: true
+    status: property.status || (isApproved ? 'published' : 'pending_verification'),
+    isApproved: isApproved,
+    isUserListing: true,
+    updatedAt: property.updatedAt || new Date().toISOString()
   };
 
   // 1. Update memory and local cache immediately so the user sees their property with 0 delay
@@ -280,15 +298,14 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
 
     const sanitizedDoc = JSON.parse(JSON.stringify(docToSave));
 
-    // Fire non-blocking Firestore write with timeout wrapper
-    withTimeout(
-      setDoc(doc(db, 'properties', cleanProperty.id), sanitizedDoc),
-      6000,
+    // Await setDoc with timeout watchdog so Firestore writes reliably
+    await withTimeout(
+      setDoc(doc(db, 'properties', cleanProperty.id), sanitizedDoc, { merge: true }),
+      5000,
       null
-    )
-      .then(() => console.log(`Successfully synced ${cleanProperty.id} to Cloud Firestore.`))
-      .catch((err) => console.warn(`Background Firestore sync note:`, err));
+    );
 
+    console.log(`Successfully synced ${cleanProperty.id} to Cloud Firestore.`);
     return true;
   } catch (error) {
     console.warn("Background property save caught cleanly:", error);
