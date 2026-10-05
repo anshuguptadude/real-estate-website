@@ -229,14 +229,17 @@ export default function App() {
   const [projectsList, setProjectsList] = useState<Project[]>([]);
 
   const handleAddProject = async (newProj: Project) => {
+    setProjectsList(prev => [newProj, ...prev]);
     await saveFirestoreProject(newProj);
   };
 
   const handleEditProject = async (updatedProj: Project) => {
+    setProjectsList(prev => prev.map(p => p.id === updatedProj.id ? updatedProj : p));
     await saveFirestoreProject(updatedProj);
   };
 
   const handleDeleteProject = async (projId: string) => {
+    setProjectsList(prev => prev.filter(p => p.id !== projId));
     await deleteFirestoreProject(projId);
   };
 

@@ -525,6 +525,20 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                     </button>
                   </form>
                 )}
+
+                <div className="pt-3 mt-3 border-t border-gray-200">
+                  <a
+                    href={`https://wa.me/919149079913?text=${encodeURIComponent(
+                      `Hi Royal Agra Estate Concierge, I would like to inquire about ${property.title} (Property ID: #${property.id}, Price: ${property.priceDisplay}, Locality: ${property.locality || property.location}).`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full py-2.5 bg-[#25D366] hover:bg-[#1ebd54] text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all text-center"
+                  >
+                    <MessageSquare className="w-4 h-4 fill-white" />
+                    <span>Direct Concierge WhatsApp (+91 91490 79913)</span>
+                  </a>
+                </div>
               </div>
 
             </div>

@@ -26,14 +26,14 @@ export const EmiCalculatorModal: React.FC<EmiCalculatorModalProps> = ({
 
   // EMI Formula: P * r * (1+r)^n / ((1+r)^n - 1)
   const monthlyRate = interestRate / 12 / 100;
-  const totalMonths = tenureYears * 12;
-  const emi = Math.round(
-    (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) /
-    (Math.pow(1 + monthlyRate, totalMonths) - 1)
-  );
+  const totalMonths = Math.max(1, tenureYears * 12);
+  const factor = Math.pow(1 + monthlyRate, totalMonths);
+  const emi = monthlyRate > 0 && factor > 1
+    ? Math.round((loanAmount * monthlyRate * factor) / (factor - 1))
+    : Math.round(loanAmount / totalMonths);
 
   const totalPayment = emi * totalMonths;
-  const totalInterest = totalPayment - loanAmount;
+  const totalInterest = Math.max(0, totalPayment - loanAmount);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
@@ -119,7 +119,7 @@ export const EmiCalculatorModal: React.FC<EmiCalculatorModalProps> = ({
               </div>
               <input
                 type="range"
-                min="5"
+                min="1"
                 max="30"
                 step="1"
                 value={tenureYears}
@@ -127,7 +127,7 @@ export const EmiCalculatorModal: React.FC<EmiCalculatorModalProps> = ({
                 className="w-full accent-[#0F382C] cursor-pointer"
               />
               <div className="flex justify-between text-[11px] text-gray-400">
-                <span>5 Yrs</span>
+                <span>1 Yr</span>
                 <span>15 Yrs</span>
                 <span>30 Yrs</span>
               </div>

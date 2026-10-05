@@ -31,6 +31,7 @@ export const ProjectsScreen: React.FC<ProjectsScreenProps> = ({
   const [formUnits, setFormUnits] = useState('');
   const [formStatus, setFormStatus] = useState<'Ready to Move' | 'Under Construction' | 'Newly Launched'>('Under Construction');
   const [formPossession, setFormPossession] = useState('');
+  const [formReraNumber, setFormReraNumber] = useState('UPRERAAGT2024/9999');
   const [formCoverImage, setFormCoverImage] = useState('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80');
   const [formDescription, setFormDescription] = useState('');
   const [formTotalArea, setFormTotalArea] = useState('');
@@ -50,7 +51,7 @@ Starting Price:     ${proj.priceStarting}
 Total Units:        ${proj.units}
 Construction Status:${proj.status}
 Possession Date:    ${proj.possessionDate}
-Authority Approval: Agra Development Authority (ADA) / UP RERA
+Authority Approval: Agra Development Authority (ADA) / UP RERA (${proj.reraNumber || 'UPRERAAGT2024/9999'})
 
 -----------------------------------------------------
 PROJECT OVERVIEW & ARCHITECTURAL HIGHLIGHTS
@@ -95,6 +96,7 @@ Official Website:      https://real-estate-website-pi-azure.vercel.app/
     setFormUnits('32 Luxury Units');
     setFormStatus('Under Construction');
     setFormPossession('December 2026');
+    setFormReraNumber('UPRERAAGT2024/9999');
     setFormCoverImage('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80');
     setFormDescription('A landmark gated development offering modern architecture and world-class amenities.');
     setFormTotalArea('3.5 Acres Estate');
@@ -109,6 +111,7 @@ Official Website:      https://real-estate-website-pi-azure.vercel.app/
     setFormUnits(proj.units);
     setFormStatus(proj.status);
     setFormPossession(proj.possessionDate);
+    setFormReraNumber(proj.reraNumber || 'UPRERAAGT2024/9999');
     setFormCoverImage(proj.coverImage);
     setFormDescription(proj.description);
     setFormTotalArea(proj.totalArea);
@@ -126,7 +129,7 @@ Official Website:      https://real-estate-website-pi-azure.vercel.app/
       units: formUnits.trim() || '50 Units',
       status: formStatus,
       possessionDate: formPossession.trim() || 'December 2026',
-      reraNumber: 'UPRERAAGT2024/9999',
+      reraNumber: formReraNumber.trim() || 'UPRERAAGT2024/9999',
       coverImage: formCoverImage,
       images: [formCoverImage],
       description: formDescription.trim() || 'Luxury residential development in Agra.',
@@ -269,12 +272,17 @@ Official Website:      https://real-estate-website-pi-azure.vercel.app/
                     </div>
                   </div>
 
-                  {/* Location & Title Status */}
-                  <div className="flex items-center gap-4 text-xs text-gray-500 my-3">
+                  {/* Location & Title Status & UP RERA Badge */}
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 my-3">
                     <div className="flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5 text-[#0F382C]" />
                       <span>{project.locality}</span>
                     </div>
+                    <span>•</span>
+                    <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>UP RERA: {project.reraNumber || 'UPRERAAGT2024/9999'}</span>
+                    </span>
                     <span>•</span>
                     <span className="text-emerald-700 font-medium">Freehold Clear Title</span>
                   </div>
@@ -415,6 +423,31 @@ Official Website:      https://real-estate-website-pi-azure.vercel.app/
                     <option value="Ready to Move">Ready to Move</option>
                     <option value="Newly Launched">Newly Launched</option>
                   </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-gray-700 uppercase mb-1">UP RERA Reg. ID</label>
+                  <input
+                    type="text"
+                    required
+                    value={formReraNumber}
+                    onChange={(e) => setFormReraNumber(e.target.value)}
+                    placeholder="UPRERAAGT2024/9999"
+                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-gray-700 uppercase mb-1">Possession Date</label>
+                  <input
+                    type="text"
+                    required
+                    value={formPossession}
+                    onChange={(e) => setFormPossession(e.target.value)}
+                    placeholder="e.g. December 2026"
+                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
+                  />
                 </div>
               </div>
 
