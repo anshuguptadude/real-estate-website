@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Property, PropertyType, UserProfile } from '../types';
 import { AGRA_LOCALITIES, PROPERTY_TYPES } from '../data/mockData';
 import { isAdmin } from '../utils/security';
+import { saveFirestoreProperty } from '../services/firebaseService';
 import { 
   Building, 
   MapPin, 
@@ -519,8 +520,8 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         : `${verifiedByAuthority} (Under Review)`;
     }
 
-    const isPosterAdmin = isUserAdmin;
-    const initialStatus = isPosterAdmin ? 'published' : 'pending_verification';
+    const isPosterAdmin = isUserAdmin || isAdmin(user);
+    const initialStatus: 'Active' | 'pending_verification' = isPosterAdmin ? 'Active' : 'pending_verification';
     const isApproved = isPosterAdmin ? true : false;
 
     const uploadedUrls = uploadedMediaList.map(m => m.url);
@@ -569,7 +570,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       featured: true,
       isExclusive: true,
       verified: isLegallyVerified,
-      verificationStatus: isUserAdmin ? 'Verified' : resolvedVerificationStatus,
+      verificationStatus: isPosterAdmin ? 'Verified' : resolvedVerificationStatus,
       verifiedBy: resolvedAuthorityName,
       verificationNumber: verificationDocNumber.trim() || "",
       status: initialStatus,
@@ -584,7 +585,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         id: resolvedUserId,
         name: resolvedOwnerName,
         email: resolvedOwnerEmail,
-        role: user?.role || 'Owner'
+        role: user?.role || (isPosterAdmin ? 'admin' : 'Owner')
       },
       images: finalImages,
       coverImage: finalCover,
@@ -617,13 +618,12 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     };
 
     try {
+      // 1. Direct write to Cloud Firestore database
+      await saveFirestoreProperty(newProperty);
+
+      // 2. Notify parent state handler
       if (onPropertyCreated) {
-        const result = await onPropertyCreated(newProperty);
-        if (result === false) {
-          setSubmitError('Unable to save property to database. Please check your internet connection or try smaller images.');
-          setIsSubmitting(false);
-          return;
-        }
+        await onPropertyCreated(newProperty);
       }
       setIsSubmitting(false);
       setSubmitted(true);

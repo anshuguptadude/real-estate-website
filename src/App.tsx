@@ -395,8 +395,9 @@ export default function App() {
     const propToSave: Property = {
       ...newProp,
       isDeleted: false,
-      status: isPosterAdmin ? 'published' : 'pending_verification',
-      isApproved: isPosterAdmin ? true : false,
+      status: isPosterAdmin ? 'Active' : (newProp.status || 'pending_verification'),
+      isApproved: isPosterAdmin ? true : (newProp.isApproved || false),
+      verificationStatus: isPosterAdmin ? 'Verified' : newProp.verificationStatus,
       isUserListing: true
     };
     setProperties(prev => {
@@ -564,7 +565,7 @@ export default function App() {
     if (!prop) return;
     const updated: Property = { 
       ...prop, 
-      status: 'published',
+      status: 'Active',
       isApproved: true,
       verificationStatus: 'Verified'
     };
@@ -608,7 +609,11 @@ export default function App() {
 
     // For public visitors on browse/buy/rent pages:
     // Only show active, published, approved properties (exclude pending verification and rejected)
-    return (p.status === 'published' || p.status === 'Active' || p.status === 'Sold' || p.status === 'Rented') && p.isApproved === true;
+    const isLive = p.status === 'Active' || p.status === 'published' || p.status === 'Sold' || p.status === 'Rented';
+    const isExplicitlyPending = p.status === 'pending_verification' || p.status === 'Pending Approval' || p.isApproved === false;
+    const isExplicitlyRejected = p.status === 'rejected';
+
+    return isLive && !isExplicitlyPending && !isExplicitlyRejected;
   });
   const displayedProperties = publicProperties.map(p => getMaskedProperty(p, user));
   const savedProperties = displayedProperties.filter(p => savedPropertyIds.includes(p.id));

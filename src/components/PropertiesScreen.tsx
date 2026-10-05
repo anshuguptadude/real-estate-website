@@ -82,9 +82,10 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
       // 0. Deletion & Live Status Guard
       if (item.isDeleted) return false;
       if (!isAdminUser) {
-        const isLive = item.status === 'published' || item.status === 'Active' || item.isApproved === true || item.status === 'Sold' || item.status === 'Rented' || item.isUserListing || !item.status;
+        const isLive = item.status === 'Active' || item.status === 'published' || item.status === 'Sold' || item.status === 'Rented';
+        const isExplicitlyPending = item.status === 'pending_verification' || item.status === 'Pending Approval' || item.isApproved === false;
         const isExplicitlyRejected = item.status === 'rejected';
-        if (!isLive || isExplicitlyRejected) return false;
+        if (!isLive || isExplicitlyPending || isExplicitlyRejected) return false;
       }
 
       // 1. Search Query

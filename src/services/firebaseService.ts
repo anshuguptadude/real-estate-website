@@ -14,11 +14,27 @@ import {
 import { Property, Project } from '../types';
 import { PROPERTIES_DATA, PROJECTS_DATA } from '../data/mockData';
 import { LeadSubmission } from '../utils/security';
-import firebaseConfig from '../../firebase-applet-config.json';
+import firebaseConfigRaw from '../../firebase-applet-config.json';
 
-const app = initializeApp(firebaseConfig);
-const databaseId = (firebaseConfig as any).databaseId || '(default)';
-const db = initializeFirestore(app, {
+// Support both environment variables (production) and json config with safe fallback
+export const getFirebaseConfig = () => {
+  const env = (typeof import.meta !== 'undefined' && (import.meta as any).env) || {};
+  return {
+    projectId: env.VITE_FIREBASE_PROJECT_ID || firebaseConfigRaw.projectId || "startup-topic-76rpq",
+    databaseId: env.VITE_FIREBASE_DATABASE_ID || (firebaseConfigRaw as any).databaseId || "ai-studio-shreycapital-02f918d8-06c3-458c-a1d4-b0991807339e",
+    appId: env.VITE_FIREBASE_APP_ID || firebaseConfigRaw.appId || "1:249920231770:web:1eee413ecb37d1377fbb63",
+    apiKey: env.VITE_FIREBASE_API_KEY || firebaseConfigRaw.apiKey || "AIzaSyBieQlxB89sF0FDm1a4v2E9BbmnxrM6Fw",
+    authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || firebaseConfigRaw.authDomain || "startup-topic-76rpq.firebaseapp.com",
+    storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || firebaseConfigRaw.storageBucket || "startup-topic-76rpq.firebasestorage.app",
+    messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || firebaseConfigRaw.messagingSenderId || "249920231770",
+    measurementId: env.VITE_FIREBASE_MEASUREMENT_ID || firebaseConfigRaw.measurementId || ""
+  };
+};
+
+const firebaseConfig = getFirebaseConfig();
+export const app = initializeApp(firebaseConfig);
+export const databaseId = firebaseConfig.databaseId || '(default)';
+export const db = initializeFirestore(app, {
   ignoreUndefinedProperties: true
 }, databaseId);
 
@@ -228,7 +244,7 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
   const cleanProperty: Property = {
     ...property,
     isDeleted: false,
-    status: property.status || 'published',
+    status: property.status || 'Active',
     isApproved: property.isApproved !== undefined ? property.isApproved : true,
     isUserListing: true
   };
@@ -262,7 +278,7 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
 
     const payloadStr = JSON.stringify(docToSave);
     const payloadSizeKb = Math.round(payloadStr.length / 1024);
-    console.log(`Saving property ${cleanProperty.id} (Payload: ${payloadSizeKb} KB)...`);
+    console.log(`Saving property ${cleanProperty.id} to Firestore (Payload: ${payloadSizeKb} KB)...`);
 
     // If still over 500 KB, keep top 3 images to strictly respect Firestore 1 MB document quota
     if (payloadSizeKb > 500 && docToSave.images && docToSave.images.length > 3) {
@@ -274,17 +290,17 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
 
     const sanitizedDoc = JSON.parse(JSON.stringify(docToSave));
 
-    // Save with timeout protection
+    // Save directly to Firestore properties collection with timeout guard
     await withTimeout(
       setDoc(doc(db, 'properties', cleanProperty.id), sanitizedDoc, { merge: true }),
-      5000,
+      8000,
       undefined
     );
 
     console.log(`Successfully persisted ${cleanProperty.id} to Cloud Firestore.`);
     return true;
   } catch (error) {
-    console.warn("Cloud Firestore write note (saved to local backup):", error);
+    console.error("Cloud Firestore write note:", error);
     return true;
   }
 };
