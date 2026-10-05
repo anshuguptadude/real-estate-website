@@ -77,6 +77,7 @@ export interface UserProfile {
   email: string;
   phone: string;
   role: 'buyer' | 'owner' | 'admin';
+  permissions?: string[];
   avatar?: string;
   memberSince: string;
   city?: string;

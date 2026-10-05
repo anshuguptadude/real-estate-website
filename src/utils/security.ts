@@ -11,6 +11,19 @@ export interface LeadSubmission {
   timestamp: string;
 }
 
+// UNIFIED SUPER ADMIN PERMISSIONS SET
+export const SUPER_ADMIN_PERMISSIONS = [
+  'FULL_ADMIN_DOSSIER', // unmasked addresses, plot numbers, seller phone numbers
+  'AUTO_APPROVE', // all listings posted by either admin are published immediately with status: "Active"
+  'APPROVALS_QUEUE', // Approvals Queue & Listing Moderation
+  'LEAD_CRM_STREAM', // Lead CRM Stream & WhatsApp Direct Triggers
+  'DELETE_LISTINGS', // Delete Listings & Permanent Removal
+  'LIVE_MAP_PINS', // Live Map Pins & Locality Management
+  'PROJECTS_CMS' // Developer Projects CMS (Add/Edit/Delete projects)
+] as const;
+
+export type SuperAdminPermission = typeof SUPER_ADMIN_PERMISSIONS[number];
+
 export const ADMIN_CREDENTIALS = [
   {
     email: 'shrey123@gmail.com',
@@ -18,7 +31,8 @@ export const ADMIN_CREDENTIALS = [
     name: 'Shrey Gupta',
     phone: '+91 9149079913',
     id: 'RAE-ADMIN-01',
-    role: 'admin' as const
+    role: 'admin' as const,
+    permissions: [...SUPER_ADMIN_PERMISSIONS]
   },
   {
     email: 'abhi9557138449@gmail.com',
@@ -26,7 +40,17 @@ export const ADMIN_CREDENTIALS = [
     name: 'Abhishek Singh Jadon',
     phone: '+91 9557138449',
     id: 'RAE-ADMIN-02',
-    role: 'admin' as const
+    role: 'admin' as const,
+    permissions: [...SUPER_ADMIN_PERMISSIONS]
+  },
+  {
+    email: 'shrey@royalagraestate.in',
+    password: 'shrey123@gmail.com',
+    name: 'Shrey Gupta',
+    phone: '+91 9149079913',
+    id: 'RAE-ADMIN-03',
+    role: 'admin' as const,
+    permissions: [...SUPER_ADMIN_PERMISSIONS]
   }
 ];
 
@@ -43,6 +67,12 @@ export const isAdmin = (user: UserProfile | null): boolean => {
     phoneClean.endsWith('9149079913') ||
     phoneClean.endsWith('9557138449')
   );
+};
+
+export const hasAdminPermission = (user: UserProfile | null, permission: SuperAdminPermission): boolean => {
+  if (!user) return false;
+  if (isAdmin(user)) return true;
+  return Boolean(user.permissions && user.permissions.includes(permission));
 };
 
 export const isPropertyOwner = (property: Property | null, user: UserProfile | null): boolean => {
