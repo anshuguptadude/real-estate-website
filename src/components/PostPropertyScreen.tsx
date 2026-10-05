@@ -227,8 +227,8 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         clearTimeout(timer);
         try {
           const runCanvasCompression = (maxDim: number, quality: number): string => {
-            let width = naturalW || 1200;
-            let height = naturalH || 800;
+            let width = naturalW || 960;
+            let height = naturalH || 640;
 
             if (width > maxDim || height > maxDim) {
               if (width > height) {
@@ -253,17 +253,17 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
             return canvas.toDataURL('image/jpeg', quality);
           };
 
-          // Pass 1: 1200px @ 0.65
-          let resultDataUrl = runCanvasCompression(1200, 0.65);
+          // Pass 1: 960px @ 0.55 (Produces ~25-35 KB crisp photo)
+          let resultDataUrl = runCanvasCompression(960, 0.55);
 
-          // Pass 2: If result string > 68,000 chars (~50 KB), re-compress at 900px @ 0.52
-          if (resultDataUrl.length > 68000) {
-            resultDataUrl = runCanvasCompression(900, 0.52);
+          // Pass 2: If result string > 45,000 chars (~33 KB), re-compress at 720px @ 0.45
+          if (resultDataUrl.length > 45000) {
+            resultDataUrl = runCanvasCompression(720, 0.45);
           }
 
-          // Pass 3: If still > 68,000 chars, compress at 720px @ 0.45
-          if (resultDataUrl.length > 68000) {
-            resultDataUrl = runCanvasCompression(720, 0.45);
+          // Pass 3: If still > 35,000 chars, compress at 600px @ 0.40
+          if (resultDataUrl.length > 35000) {
+            resultDataUrl = runCanvasCompression(600, 0.40);
           }
 
           resolve(resultDataUrl);
@@ -618,15 +618,20 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
     try {
       if (onPropertyCreated) {
-        await onPropertyCreated(newProperty);
+        const result = await onPropertyCreated(newProperty);
+        if (result === false) {
+          setSubmitError('Unable to save property to database. Please check your internet connection or try smaller images.');
+          setIsSubmitting(false);
+          return;
+        }
       }
       setIsSubmitting(false);
       setSubmitted(true);
       scrollToTop();
     } catch (err: any) {
-      console.warn('Submission notice (saved to local cache & synced):', err);
+      console.error('Submission error:', err);
+      setSubmitError(err?.message || 'An unexpected error occurred while publishing. Please try again.');
       setIsSubmitting(false);
-      setSubmitted(true);
       scrollToTop();
     }
   };

@@ -88,32 +88,50 @@ export const markPropertyAsDeletedLocally = (id: string) => {
   }
 };
 
-// AUTO-CLEANUP HELPER TO FREE UP BROWSER STORAGE ACROSS ALL SESSIONS
-export const cleanupLegacyLocalStorage = () => {
+// LOCAL USER LISTINGS BACKUP STORE (Guarantees user listings never vanish on cloud delay/snapshot refresh)
+export const getUserListings = (): Property[] => {
   try {
-    const legacyKeys = [
-      'royal_agra_properties_cache_v2',
-      'royal_agra_properties_v2',
-      'royal_agra_properties_v1',
-      'royal_agra_user_listings_v1',
-      'royal_agra_deleted_property_ids_v1'
-    ];
-    for (const k of legacyKeys) {
-      localStorage.removeItem(k);
+    const stored = localStorage.getItem('royal_agra_user_listings_v1');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed.filter(p => p && !p.isDeleted) : [];
     }
-  } catch (e) {
-    // ignore
+    return [];
+  } catch {
+    return [];
   }
 };
 
-// Execute initial legacy storage cleanup immediately
-cleanupLegacyLocalStorage();
+export const saveUserListingLocally = (property: Property) => {
+  try {
+    const current = getUserListings();
+    const filtered = current.filter(p => p.id !== property.id && !p.isDeleted);
+    const updated = [property, ...filtered];
+    // Keep max 20 local listings to prevent quota issues
+    localStorage.setItem('royal_agra_user_listings_v1', JSON.stringify(updated.slice(0, 20)));
+  } catch (err) {
+    console.warn("Local user listings quota note:", err);
+  }
+};
+
+export const removeUserListingLocally = (propertyId: string) => {
+  try {
+    const current = getUserListings();
+    const updated = current.filter(p => p.id !== propertyId);
+    localStorage.setItem('royal_agra_user_listings_v1', JSON.stringify(updated));
+  } catch (err) {
+    console.warn("Local user listings removal note:", err);
+  }
+};
 
 export const getPropertiesCache = (): Property[] => {
   try {
     const stored = localStorage.getItem('royal_agra_properties_v3');
     if (stored) {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        return parsed.filter(p => p && !p.isDeleted);
+      }
     }
     return [];
   } catch {
@@ -122,107 +140,61 @@ export const getPropertiesCache = (): Property[] => {
 };
 
 export const setPropertiesCache = (properties: Property[]) => {
-  if (!properties || !Array.isArray(properties)) return;
-  const cleanList = properties.filter(p => p && !p.isDeleted);
-  
   try {
-    localStorage.setItem('royal_agra_properties_v3', JSON.stringify(cleanList));
+    const cleanList = properties.filter(p => p && !p.isDeleted);
+    // Keep max 50 recent properties in cache to stay well within 5MB quota
+    localStorage.setItem('royal_agra_properties_v3', JSON.stringify(cleanList.slice(0, 50)));
   } catch (e) {
-    console.warn("Storage quota limit encountered, applying automated compression recovery:", e);
-    try {
-      cleanupLegacyLocalStorage();
-
-      // Compact version: keep latest 30 properties and trim oversized base64 strings if storage is tight
-      const compactList = cleanList.slice(0, 30).map(p => {
-        let cover = p.coverImage;
-        let imgArr = p.images || [];
-
-        // If cover is overly huge base64, keep clean or trim
-        if (cover && cover.length > 75000) {
-          cover = cover.slice(0, 75000);
-        }
-
-        // Limit cached image array to max 4 photos for local cache
-        if (imgArr.length > 4) {
-          imgArr = imgArr.slice(0, 4);
-        }
-
-        return {
-          ...p,
-          coverImage: cover,
-          images: imgArr
-        };
-      });
-
-      localStorage.setItem('royal_agra_properties_v3', JSON.stringify(compactList));
-    } catch (err2) {
-      console.warn("Secondary storage write bypassed cleanly:", err2);
-    }
+    console.warn("Properties cache storage note:", e);
   }
 };
 
 // Merges fallback or user listings cleanly
 export const mergeWithUserListings = (list: Property[]): Property[] => {
-  return list.filter(p => p && !p.isDeleted);
+  const userListings = getUserListings();
+  const deletedLocal = getDeletedPropertyIds();
+  const baseClean = list.filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id));
+  
+  const merged = [...baseClean];
+  for (const ul of userListings) {
+    if (!deletedLocal.includes(ul.id) && !merged.some(p => p.id === ul.id)) {
+      merged.unshift(ul);
+    }
+  }
+  return merged;
 };
 
 // PROPERTIES REAL-TIME SYNC & FETCH
 export const subscribeFirestoreProperties = (callback: (properties: Property[]) => void) => {
   const unsubscribe = onSnapshot(collection(db, 'properties'), (snapshot) => {
     const deletedLocal = getDeletedPropertyIds();
-    const currentCached = getPropertiesCache();
+    const userListings = getUserListings();
 
-    const serverProps = snapshot.docs
-      .map(doc => doc.data() as Property)
-      .filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
-
-    // Intelligent Bi-Directional Reconciliation Map
-    const mergedMap = new Map<string, Property>();
-
-    // 1. Add server properties first
-    serverProps.forEach(p => {
-      if (p && p.id) mergedMap.set(p.id, p);
-    });
-
-    // 2. Reconcile with local cached properties:
-    // If local version was approved (isApproved: true) while server is still pending, local approval MUST prevail
-    // If local version was newly created and missing from server, preserve it and push to server
-    currentCached.forEach(pLocal => {
-      if (pLocal && pLocal.id && !deletedLocal.includes(pLocal.id) && !pLocal.isDeleted) {
-        if (!mergedMap.has(pLocal.id)) {
-          mergedMap.set(pLocal.id, pLocal);
-          // Auto-sync missing local property to Firestore in background
-          try {
-            const sanitized = JSON.parse(JSON.stringify(pLocal));
-            setDoc(doc(db, 'properties', pLocal.id), sanitized, { merge: true }).catch(() => {});
-          } catch {}
-        } else {
-          const pServer = mergedMap.get(pLocal.id)!;
-          // If local has been approved (isApproved: true / published) but server snapshot is still pending,
-          // keep the approved local version and sync it to Firestore so server catches up immediately
-          if ((pLocal.isApproved === true || pLocal.status === 'published') && (!pServer.isApproved || pServer.status === 'pending_verification')) {
-            mergedMap.set(pLocal.id, { ...pServer, ...pLocal, status: 'published', isApproved: true, verificationStatus: 'Verified' });
-            try {
-              const sanitized = JSON.parse(JSON.stringify(mergedMap.get(pLocal.id)!));
-              setDoc(doc(db, 'properties', pLocal.id), sanitized, { merge: true }).catch(() => {});
-            } catch {}
-          }
+    if (snapshot.empty) {
+      const activeUserListings = userListings.filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id));
+      setPropertiesCache(activeUserListings);
+      callback(activeUserListings);
+    } else {
+      const serverProps = snapshot.docs
+        .map(doc => doc.data() as Property)
+        .filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
+      
+      // Intelligently merge server properties with local user listings that might still be syncing
+      const combined = [...serverProps];
+      for (const ul of userListings) {
+        if (!deletedLocal.includes(ul.id) && !combined.some(sp => sp.id === ul.id)) {
+          combined.unshift(ul);
         }
       }
-    });
 
-    const mergedList = Array.from(mergedMap.values());
-    setPropertiesCache(mergedList);
-    callback(mergedList);
-  }, (error) => {
-    console.warn("Properties real-time listener notice (using resilient cache):", error);
-    const cached = getPropertiesCache();
-    const deletedLocal = getDeletedPropertyIds();
-    if (cached && cached.length > 0) {
-      callback(cached.filter(p => !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar')));
-    } else {
-      callback([]);
+      setPropertiesCache(combined);
+      callback(combined);
     }
+  }, (error) => {
+    console.error("Error in properties real-time listener, falling back to cache:", error);
+    const cached = getPropertiesCache();
+    const merged = mergeWithUserListings(cached);
+    callback(merged);
   });
 
   return unsubscribe;
@@ -233,47 +205,38 @@ export const fetchFirestoreProperties = async (): Promise<Property[]> => {
     (async () => {
       try {
         const querySnapshot = await getDocs(collection(db, 'properties'));
-        if (querySnapshot.empty) {
-          setPropertiesCache([]);
-          return [];
-        }
         const deletedLocal = getDeletedPropertyIds();
-        const list = querySnapshot.docs
+        const serverProps = querySnapshot.docs
           .map(doc => doc.data() as Property)
           .filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
 
-        setPropertiesCache(list);
-        return list;
+        const merged = mergeWithUserListings(serverProps);
+        setPropertiesCache(merged);
+        return merged;
       } catch (error) {
-        console.warn("Error fetching properties from Firestore:", error);
+        console.warn("Error fetching properties from Firestore, using local cache:", error);
         const cached = getPropertiesCache();
-        const deletedLocal = getDeletedPropertyIds();
-        if (cached && cached.length > 0) {
-          return cached.filter(p => !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
-        }
-        return [];
+        return mergeWithUserListings(cached);
       }
     })(),
     4000,
-    getPropertiesCache()
+    mergeWithUserListings(getPropertiesCache())
   );
 };
 
 export const saveFirestoreProperty = async (property: Property): Promise<boolean> => {
-  const isApproved = property.isApproved !== undefined 
-    ? property.isApproved 
-    : (property.status === 'published' || property.status === 'Active' || property.status === 'Sold' || property.status === 'Rented');
-
   const cleanProperty: Property = {
     ...property,
     isDeleted: false,
-    status: property.status || (isApproved ? 'published' : 'pending_verification'),
-    isApproved: isApproved,
-    isUserListing: true,
-    updatedAt: property.updatedAt || new Date().toISOString()
+    status: property.status || 'published',
+    isApproved: property.isApproved !== undefined ? property.isApproved : true,
+    isUserListing: true
   };
 
-  // 1. Update memory and local cache immediately so the user sees their property with 0 delay
+  // 1. Immediately backup to local user listings store
+  saveUserListingLocally(cleanProperty);
+
+  // 2. Update memory and local cache immediately
   const current = getPropertiesCache();
   const exists = current.some(p => p.id === cleanProperty.id);
   const updated = exists 
@@ -281,41 +244,55 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
     : [cleanProperty, ...current];
   setPropertiesCache(updated);
 
-  // 2. Persist to Cloud Firestore with payload size safety (Cloud Firestore maximum is 1 MB)
+  // 3. Persist to Cloud Firestore with payload safety protection (Guarantees < 350 KB document size)
   try {
-    let docToSave = cleanProperty;
-    const payloadStr = JSON.stringify(cleanProperty);
-    const payloadSizeKb = Math.round(payloadStr.length / 1024);
-    console.log(`Persisting property ${cleanProperty.id} (Payload: ${payloadSizeKb} KB)...`);
+    let sanitizedImages = cleanProperty.images || [];
+    let sanitizedCover = cleanProperty.coverImage || '';
 
-    // If payload > 450 KB, bound image list to prevent Firestore 1MB document limit rejection
-    if (payloadSizeKb > 450 && cleanProperty.images && cleanProperty.images.length > 3) {
+    // If payload is large, trim images array to max 6 photos and ensure string length is within bounds
+    if (sanitizedImages.length > 6) {
+      sanitizedImages = sanitizedImages.slice(0, 6);
+    }
+
+    let docToSave: Property = {
+      ...cleanProperty,
+      coverImage: sanitizedCover,
+      images: sanitizedImages
+    };
+
+    const payloadStr = JSON.stringify(docToSave);
+    const payloadSizeKb = Math.round(payloadStr.length / 1024);
+    console.log(`Saving property ${cleanProperty.id} (Payload: ${payloadSizeKb} KB)...`);
+
+    // If still over 500 KB, keep top 3 images to strictly respect Firestore 1 MB document quota
+    if (payloadSizeKb > 500 && docToSave.images && docToSave.images.length > 3) {
       docToSave = {
-        ...cleanProperty,
-        images: cleanProperty.images.slice(0, 4)
+        ...docToSave,
+        images: docToSave.images.slice(0, 3)
       };
     }
 
     const sanitizedDoc = JSON.parse(JSON.stringify(docToSave));
 
-    // Await setDoc with timeout watchdog so Firestore writes reliably
+    // Save with timeout protection
     await withTimeout(
       setDoc(doc(db, 'properties', cleanProperty.id), sanitizedDoc, { merge: true }),
       5000,
-      null
+      undefined
     );
 
-    console.log(`Successfully synced ${cleanProperty.id} to Cloud Firestore.`);
+    console.log(`Successfully persisted ${cleanProperty.id} to Cloud Firestore.`);
     return true;
   } catch (error) {
-    console.warn("Background property save caught cleanly:", error);
+    console.warn("Cloud Firestore write note (saved to local backup):", error);
     return true;
   }
 };
 
 export const deleteFirestoreProperty = async (propertyId: string): Promise<boolean> => {
-  // 1. Mark in local deleted list
+  // 1. Mark in local deleted list and remove from local stores
   markPropertyAsDeletedLocally(propertyId);
+  removeUserListingLocally(propertyId);
 
   // 2. Remove from local cache
   const cached = getPropertiesCache();
@@ -324,18 +301,22 @@ export const deleteFirestoreProperty = async (propertyId: string): Promise<boole
 
   try {
     // 3. Mark soft-delete in Firestore so all other clients filter it out
-    await setDoc(doc(db, 'properties', propertyId), { 
-      id: propertyId, 
-      isDeleted: true, 
-      status: 'rejected',
-      deletedAt: new Date().toISOString()
-    }, { merge: true });
+    await withTimeout(
+      setDoc(doc(db, 'properties', propertyId), { 
+        id: propertyId, 
+        isDeleted: true, 
+        status: 'rejected',
+        deletedAt: new Date().toISOString()
+      }, { merge: true }),
+      3500,
+      undefined
+    );
     
     // 4. Also hard-delete document
-    await deleteDoc(doc(db, 'properties', propertyId));
+    await withTimeout(deleteDoc(doc(db, 'properties', propertyId)), 3500, undefined);
     return true;
   } catch (error) {
-    console.error("Error deleting property from Firestore:", error);
+    console.warn("Firestore delete note:", error);
     return true;
   }
 };

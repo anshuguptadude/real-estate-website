@@ -560,20 +560,17 @@ export default function App() {
   };
 
   const handleApproveProperty = async (propertyId: string) => {
-    const prop = properties.find(p => p.id === propertyId) || getPropertiesCache().find(p => p.id === propertyId);
+    const prop = properties.find(p => p.id === propertyId);
     if (!prop) return;
     const updated: Property = { 
       ...prop, 
       status: 'published',
       isApproved: true,
-      verificationStatus: 'Verified',
-      approvedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      verificationStatus: 'Verified'
     };
     // 1. Immediately update React state and persistent cache
     setProperties(prev => {
-      const exists = prev.some(p => p.id === propertyId);
-      const nextList = exists ? prev.map(p => p.id === propertyId ? updated : p) : [updated, ...prev];
+      const nextList = prev.map(p => p.id === propertyId ? updated : p);
       setPropertiesCache(nextList);
       return nextList;
     });
@@ -585,17 +582,15 @@ export default function App() {
   };
 
   const handleRejectProperty = async (propertyId: string) => {
-    const prop = properties.find(p => p.id === propertyId) || getPropertiesCache().find(p => p.id === propertyId);
+    const prop = properties.find(p => p.id === propertyId);
     if (!prop) return;
     const updated: Property = { 
       ...prop, 
       status: 'rejected',
-      isApproved: false,
-      updatedAt: new Date().toISOString()
+      isApproved: false
     };
     setProperties(prev => {
-      const exists = prev.some(p => p.id === propertyId);
-      const nextList = exists ? prev.map(p => p.id === propertyId ? updated : p) : [updated, ...prev];
+      const nextList = prev.map(p => p.id === propertyId ? updated : p);
       setPropertiesCache(nextList);
       return nextList;
     });

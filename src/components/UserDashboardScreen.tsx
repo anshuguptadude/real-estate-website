@@ -85,7 +85,6 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   const [dob, setDob] = useState(user?.dob || '');
   const [profession, setProfession] = useState(user?.profession || '');
   const [profileSuccessMsg, setProfileSuccessMsg] = useState(false);
-  const [approvalToast, setApprovalToast] = useState<string | null>(null);
 
   // Password change state
   const [currentPassword, setCurrentPassword] = useState('');
@@ -1259,45 +1258,11 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
               </p>
             </div>
 
-            {approvalToast && (
-              <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm animate-fadeIn">
-                <div className="flex items-center gap-2.5 text-emerald-900 font-bold text-xs sm:text-sm">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <span>{approvalToast}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('listings')}
-                  className="px-3.5 py-1.5 bg-[#0F382C] text-white text-xs font-bold rounded-xl uppercase tracking-wider shadow-sm hover:bg-[#164E3D] transition-all"
-                >
-                  View in My Listed Properties →
-                </button>
-              </div>
-            )}
-
             {pendingProperties.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center space-y-4 shadow-sm">
+              <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center space-y-3 shadow-sm">
                 <ShieldCheck className="w-12 h-12 text-emerald-600 mx-auto" />
-                <h4 className="text-base font-bold text-gray-800">No Pending Submissions</h4>
-                <p className="text-xs text-gray-500 max-w-md mx-auto">
-                  All submitted properties have been reviewed. Approved properties are published live and can be managed under "My Listed Properties".
-                </p>
-                <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('listings')}
-                    className="px-5 py-2.5 bg-[#0F382C] text-white text-xs font-bold rounded-xl uppercase tracking-wider hover:bg-[#164E3D] transition-all"
-                  >
-                    View All Listed Properties
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onNavigateProperties}
-                    className="px-5 py-2.5 bg-gray-100 text-gray-800 hover:bg-gray-200 text-xs font-bold rounded-xl uppercase tracking-wider transition-all"
-                  >
-                    Explore Live Public Catalog
-                  </button>
-                </div>
+                <h4 className="text-base font-bold text-gray-700">No Pending Submissions</h4>
+                <p className="text-xs text-gray-500">All property submissions have been reviewed and processed.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1360,14 +1325,8 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                         <div className="grid grid-cols-2 gap-2">
                           <button
                             type="button"
-                            onClick={() => {
-                              if (onApproveProperty) {
-                                onApproveProperty(prop.id);
-                                setApprovalToast(`"${prop.title}" has been approved and published live on Royal Agra Estate!`);
-                                setTimeout(() => setApprovalToast(null), 6000);
-                              }
-                            }}
-                            className="py-2 px-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                            onClick={() => onApproveProperty && onApproveProperty(prop.id)}
+                            className="py-2 px-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1"
                           >
                             <CheckCircle2 className="w-3.5 h-3.5" />
                             <span>Approve (Publish)</span>
@@ -1375,7 +1334,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                           <button
                             type="button"
                             onClick={() => onRejectProperty && onRejectProperty(prop.id)}
-                            className="py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                            className="py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                             <span>Reject</span>
