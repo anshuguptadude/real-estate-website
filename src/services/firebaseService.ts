@@ -68,10 +68,36 @@ export const withTimeout = <T>(promise: Promise<T>, timeoutMs: number = 3500, fa
   });
 };
 
+// Safe localStorage helper for SSR/Node/Testing environments
+const safeStorage = {
+  getItem: (key: string): string | null => {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        return window.localStorage.getItem(key);
+      }
+    } catch {}
+    return null;
+  },
+  setItem: (key: string, value: string): void => {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem(key, value);
+      }
+    } catch {}
+  },
+  removeItem: (key: string): void => {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.removeItem(key);
+      }
+    } catch {}
+  }
+};
+
 // LOCALSTORAGE HELPERS FOR DELETED ITEMS & PERSISTENCE CACHE
 export const getDeletedPropertyIds = (): string[] => {
   try {
-    const stored = localStorage.getItem('royal_agra_deleted_property_ids_v2');
+    const stored = safeStorage.getItem('royal_agra_deleted_property_ids_v2');
     return stored ? JSON.parse(stored) : [];
   } catch {
     return [];
@@ -80,9 +106,9 @@ export const getDeletedPropertyIds = (): string[] => {
 
 export const clearDeletedPropertyIdsLocally = () => {
   try {
-    localStorage.removeItem('royal_agra_deleted_property_ids_v2');
-    localStorage.removeItem('royal_agra_properties_v3');
-    localStorage.removeItem('royal_agra_properties_cache_v2');
+    safeStorage.removeItem('royal_agra_deleted_property_ids_v2');
+    safeStorage.removeItem('royal_agra_properties_v3');
+    safeStorage.removeItem('royal_agra_properties_cache_v2');
   } catch (err) {
     console.error("Error clearing deleted IDs:", err);
   }
@@ -93,7 +119,7 @@ export const markPropertyAsDeletedLocally = (id: string) => {
     const deleted = getDeletedPropertyIds();
     if (!deleted.includes(id)) {
       deleted.push(id);
-      localStorage.setItem('royal_agra_deleted_property_ids_v2', JSON.stringify(deleted));
+      safeStorage.setItem('royal_agra_deleted_property_ids_v2', JSON.stringify(deleted));
     }
     // Also remove from cache
     const cached = getPropertiesCache();
@@ -107,7 +133,7 @@ export const markPropertyAsDeletedLocally = (id: string) => {
 // LOCAL USER LISTINGS BACKUP STORE (Guarantees user listings never vanish on cloud delay/snapshot refresh)
 export const getUserListings = (): Property[] => {
   try {
-    const stored = localStorage.getItem('royal_agra_user_listings_v1');
+    const stored = safeStorage.getItem('royal_agra_user_listings_v1');
     if (stored) {
       const parsed = JSON.parse(stored);
       return Array.isArray(parsed) ? parsed.filter(p => p && !p.isDeleted) : [];
@@ -124,7 +150,7 @@ export const saveUserListingLocally = (property: Property) => {
     const filtered = current.filter(p => p.id !== property.id && !p.isDeleted);
     const updated = [property, ...filtered];
     // Keep max 20 local listings to prevent quota issues
-    localStorage.setItem('royal_agra_user_listings_v1', JSON.stringify(updated.slice(0, 20)));
+    safeStorage.setItem('royal_agra_user_listings_v1', JSON.stringify(updated.slice(0, 20)));
   } catch (err) {
     console.warn("Local user listings quota note:", err);
   }
@@ -134,7 +160,7 @@ export const removeUserListingLocally = (propertyId: string) => {
   try {
     const current = getUserListings();
     const updated = current.filter(p => p.id !== propertyId);
-    localStorage.setItem('royal_agra_user_listings_v1', JSON.stringify(updated));
+    safeStorage.setItem('royal_agra_user_listings_v1', JSON.stringify(updated));
   } catch (err) {
     console.warn("Local user listings removal note:", err);
   }
@@ -142,7 +168,7 @@ export const removeUserListingLocally = (propertyId: string) => {
 
 export const getPropertiesCache = (): Property[] => {
   try {
-    const stored = localStorage.getItem('royal_agra_properties_v3');
+    const stored = safeStorage.getItem('royal_agra_properties_v3');
     if (stored) {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed)) {
@@ -159,7 +185,7 @@ export const setPropertiesCache = (properties: Property[]) => {
   try {
     const cleanList = properties.filter(p => p && !p.isDeleted);
     // Keep max 50 recent properties in cache to stay well within 5MB quota
-    localStorage.setItem('royal_agra_properties_v3', JSON.stringify(cleanList.slice(0, 50)));
+    safeStorage.setItem('royal_agra_properties_v3', JSON.stringify(cleanList.slice(0, 50)));
   } catch (e) {
     console.warn("Properties cache storage note:", e);
   }
