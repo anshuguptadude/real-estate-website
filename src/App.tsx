@@ -59,11 +59,7 @@ export default function App() {
 
   // Global Properties State (persisted locally and synced with Firebase Firestore)
   const [properties, setProperties] = useState<Property[]>(() => {
-    const cached = getPropertiesCache();
-    if (cached && cached.length > 0) {
-      return cached.filter(p => !p.isDeleted);
-    }
-    return [];
+    return mergeWithUserListings(getPropertiesCache());
   });
 
   // Sync user state to localStorage

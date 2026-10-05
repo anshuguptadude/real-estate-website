@@ -195,9 +195,18 @@ export const setPropertiesCache = (properties: Property[]) => {
 export const mergeWithUserListings = (list: Property[]): Property[] => {
   const userListings = getUserListings();
   const deletedLocal = getDeletedPropertyIds();
-  const baseClean = list.filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id));
+  const baseClean = (list && list.length > 0 ? list : PROPERTIES_DATA)
+    .filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id));
   
   const merged = [...baseClean];
+
+  // Guarantee baseline properties are present unless explicitly marked deleted
+  for (const bp of PROPERTIES_DATA) {
+    if (!deletedLocal.includes(bp.id) && !merged.some(p => p.id === bp.id)) {
+      merged.push(bp);
+    }
+  }
+
   for (const ul of userListings) {
     if (!deletedLocal.includes(ul.id) && !merged.some(p => p.id === ul.id)) {
       merged.unshift(ul);
@@ -210,30 +219,22 @@ export const mergeWithUserListings = (list: Property[]): Property[] => {
 export const subscribeFirestoreProperties = (callback: (properties: Property[]) => void) => {
   const unsubscribe = onSnapshot(collection(db, 'properties'), (snapshot) => {
     const deletedLocal = getDeletedPropertyIds();
-    const userListings = getUserListings();
 
     if (snapshot.empty) {
-      const activeUserListings = userListings.filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id));
-      setPropertiesCache(activeUserListings);
-      callback(activeUserListings);
+      const combined = mergeWithUserListings(PROPERTIES_DATA);
+      setPropertiesCache(combined);
+      callback(combined);
     } else {
       const serverProps = snapshot.docs
         .map(doc => doc.data() as Property)
         .filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
       
-      // Intelligently merge server properties with local user listings that might still be syncing
-      const combined = [...serverProps];
-      for (const ul of userListings) {
-        if (!deletedLocal.includes(ul.id) && !combined.some(sp => sp.id === ul.id)) {
-          combined.unshift(ul);
-        }
-      }
-
+      const combined = mergeWithUserListings(serverProps);
       setPropertiesCache(combined);
       callback(combined);
     }
   }, (error) => {
-    console.error("Error in properties real-time listener, falling back to cache:", error);
+    console.warn("Properties real-time listener note (using baseline & cache):", error);
     const cached = getPropertiesCache();
     const merged = mergeWithUserListings(cached);
     callback(merged);
@@ -256,7 +257,7 @@ export const fetchFirestoreProperties = async (): Promise<Property[]> => {
         setPropertiesCache(merged);
         return merged;
       } catch (error) {
-        console.warn("Error fetching properties from Firestore, using local cache:", error);
+        console.warn("Error fetching properties from Firestore, using baseline & cache:", error);
         const cached = getPropertiesCache();
         return mergeWithUserListings(cached);
       }
