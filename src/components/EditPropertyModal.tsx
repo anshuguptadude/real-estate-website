@@ -1,20 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Property, PropertyType } from '../types';
+import { Property, PropertyType, UserProfile } from '../types';
 import { AGRA_LOCALITIES, PROPERTY_TYPES } from '../data/mockData';
-import { X, Building2, Image as ImageIcon, IndianRupee, Save, Trash2, Plus, Upload, Star, Loader2, Check } from 'lucide-react';
+import { isAdmin } from '../utils/security';
+import { X, Building2, Image as ImageIcon, IndianRupee, Save, Trash2, Plus, Upload, Star, Loader2, Check, Lock, ShieldCheck } from 'lucide-react';
 
 interface EditPropertyModalProps {
   property: Property | null;
   isOpen: boolean;
   onClose: () => void;
   onSave: (updatedProperty: Property) => void;
+  user?: UserProfile | null;
 }
 
 export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
   property,
   isOpen,
   onClose,
-  onSave
+  onSave,
+  user
 }) => {
   const [title, setTitle] = useState(property?.title || '');
   const [tagline, setTagline] = useState(property?.tagline || '');
@@ -40,6 +43,7 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
   const [verified, setVerified] = useState<boolean>(property?.verified ?? true);
   const [verifiedBy, setVerifiedBy] = useState<string>(property?.verifiedBy || 'Agra Development Authority (ADA)');
   const [verificationNumber, setVerificationNumber] = useState<string>(property?.verificationNumber || '');
+  const isUserAdmin = isAdmin(user);
 
   useEffect(() => {
     if (property) {
@@ -435,18 +439,36 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center justify-between">
               <span>Complete Exact Address / House No. & Plot *</span>
-              <span className="text-[10px] text-amber-700 font-semibold">
-                🔒 Confidential: Visible only to Admins
-              </span>
+              {isUserAdmin ? (
+                <span className="text-[10px] text-emerald-800 font-semibold bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                  <span>Admin Unmasked Edit Access</span>
+                </span>
+              ) : (
+                <span className="text-[10px] text-amber-800 font-semibold bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                  <Lock className="w-3 h-3 text-amber-600" />
+                  <span>Admin Verified Lock</span>
+                </span>
+              )}
             </label>
             <textarea
               rows={2}
               required
+              disabled={!isUserAdmin}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="e.g. Plot 18, Royal Enclave, Near Hotel ITC Mughal, Fatehabad Road, Agra"
-              className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+              className={`w-full p-3 text-xs sm:text-sm border rounded-lg text-gray-900 ${
+                !isUserAdmin 
+                  ? 'bg-gray-100/90 border-gray-300 cursor-not-allowed opacity-90' 
+                  : 'bg-gray-50 border-gray-200 focus:bg-white focus:border-[#0F382C]'
+              }`}
             />
+            {!isUserAdmin && (
+              <p className="text-[10px] text-gray-500 mt-1 flex items-center gap-1">
+                <span>🔒 Exact plot & street addresses can only be modified by Royal Agra Estate administrators to preserve title integrity.</span>
+              </p>
+            )}
           </div>
 
           {/* Bedrooms, Bathrooms, Furnishing */}
@@ -491,29 +513,38 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           {/* Legal & Authority Verification */}
           <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-3">
             <div className="flex items-center justify-between">
-              <label className="block text-xs font-bold text-gray-700 uppercase">
-                Legal & Authority Approval Status
-              </label>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase">
+                  Legal & Authority Approval Status
+                </label>
+                {!isUserAdmin && (
+                  <span className="text-[10px] text-amber-700 font-medium block">
+                    🔒 Verified clearance locked by administrator
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
+                  disabled={!isUserAdmin}
                   onClick={() => setVerified(true)}
                   className={`px-3 py-1 text-xs rounded-md font-bold transition-all ${
                     verified
                       ? 'bg-emerald-700 text-white shadow-xs'
                       : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-100'
-                  }`}
+                  } ${!isUserAdmin ? 'cursor-not-allowed opacity-80' : ''}`}
                 >
                   ✓ Verified
                 </button>
                 <button
                   type="button"
+                  disabled={!isUserAdmin}
                   onClick={() => setVerified(false)}
                   className={`px-3 py-1 text-xs rounded-md font-bold transition-all ${
                     !verified
                       ? 'bg-gray-800 text-white shadow-xs'
                       : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-100'
-                  }`}
+                  } ${!isUserAdmin ? 'cursor-not-allowed opacity-80' : ''}`}
                 >
                   ✕ Independent / Not ADA
                 </button>
@@ -527,9 +558,12 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
                     Approved / Verified By
                   </label>
                   <select
+                    disabled={!isUserAdmin}
                     value={verifiedBy}
                     onChange={(e) => setVerifiedBy(e.target.value)}
-                    className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-900 font-medium"
+                    className={`w-full p-2.5 text-xs border rounded-lg text-gray-900 font-medium ${
+                      !isUserAdmin ? 'bg-gray-100/90 border-gray-300 cursor-not-allowed' : 'bg-white border-gray-300'
+                    }`}
                   >
                     <option value="Agra Development Authority (ADA)">Agra Development Authority (ADA)</option>
                     <option value="UP RERA (Real Estate Regulatory Authority)">UP RERA (Real Estate Regulatory Authority)</option>
@@ -546,10 +580,13 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
                   </label>
                   <input
                     type="text"
+                    disabled={!isUserAdmin}
                     placeholder="e.g. ADA/2024/782 or UPRERA"
                     value={verificationNumber}
                     onChange={(e) => setVerificationNumber(e.target.value)}
-                    className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-900 font-mono"
+                    className={`w-full p-2.5 text-xs border rounded-lg text-gray-900 font-mono ${
+                      !isUserAdmin ? 'bg-gray-100/90 border-gray-300 cursor-not-allowed' : 'bg-white border-gray-300'
+                    }`}
                   />
                 </div>
               </div>
