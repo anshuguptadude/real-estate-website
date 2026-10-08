@@ -485,7 +485,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
             </div>
 
             {/* Admin Notice Banner for Sample/Demo Listings */}
-            {isAdmin(user) && userProperties.some(p => /^prop-[1-8]$/.test(p.id)) && (
+            {isAdmin(user) && userProperties.some(p => /^prop-[1-8]$/.test(p.id) || ['prop-fatehabad-sovereign-01', 'prop-dayalbagh-heritage-02', 'prop-tajganj-kohinoor-03', 'prop-sikandra-greens-04'].includes(p.id) || p.isUserListing === false) && (
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
@@ -495,7 +495,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                     <h4 className="text-sm font-bold text-amber-900 flex items-center gap-2">
                       <span>Default Sample Properties Active</span>
                       <span className="px-2 py-0.5 rounded-full text-[11px] bg-amber-200 text-amber-900 font-semibold">
-                        {userProperties.filter(p => /^prop-[1-8]$/.test(p.id)).length} Template Listings
+                        {userProperties.filter(p => /^prop-[1-8]$/.test(p.id) || ['prop-fatehabad-sovereign-01', 'prop-dayalbagh-heritage-02', 'prop-tajganj-kohinoor-03', 'prop-sikandra-greens-04'].includes(p.id) || p.isUserListing === false).length} Template Listings
                       </span>
                     </h4>
                     <p className="text-xs text-amber-700 mt-1 leading-relaxed">
@@ -504,7 +504,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 shrink-0">
-                  {onRestoreDefaultProperties && userProperties.filter(p => /^prop-[1-8]$/.test(p.id)).length < 8 && (
+                  {onRestoreDefaultProperties && userProperties.filter(p => /^prop-[1-8]$/.test(p.id) || ['prop-fatehabad-sovereign-01', 'prop-dayalbagh-heritage-02', 'prop-tajganj-kohinoor-03', 'prop-sikandra-greens-04'].includes(p.id) || p.isUserListing === false).length < 4 && (
                     <button
                       type="button"
                       onClick={() => {
@@ -522,7 +522,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                     <button
                       type="button"
                       onClick={() => {
-                        const count = userProperties.filter(p => /^prop-[1-8]$/.test(p.id)).length;
+                        const count = userProperties.filter(p => /^prop-[1-8]$/.test(p.id) || ['prop-fatehabad-sovereign-01', 'prop-dayalbagh-heritage-02', 'prop-tajganj-kohinoor-03', 'prop-sikandra-greens-04'].includes(p.id) || p.isUserListing === false).length;
                         if (window.confirm(`Are you sure you want to permanently remove all ${count} sample demo listings? Only your real uploaded properties will remain.`)) {
                           onPurgeDemoProperties();
                         }

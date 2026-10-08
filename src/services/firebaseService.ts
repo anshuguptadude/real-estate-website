@@ -94,7 +94,7 @@ const safeStorage = {
   }
 };
 
-// LOCALSTORAGE & CLOUD HELPERS FOR DELETED ITEMS & PERSISTENCE CACHE
+// LOCALSTORAGE HELPERS FOR DELETED ITEMS & PERSISTENCE CACHE
 export const getDeletedPropertyIds = (): string[] => {
   try {
     const stored = safeStorage.getItem('royal_agra_deleted_property_ids_v2');
@@ -121,32 +121,48 @@ export const markPropertyAsDeletedLocally = (id: string) => {
       deleted.push(id);
       safeStorage.setItem('royal_agra_deleted_property_ids_v2', JSON.stringify(deleted));
     }
-    // Also remove from local user listings and properties cache
-    removeUserListingLocally(id);
+    // Also remove from cache
     const cached = getPropertiesCache();
     const filtered = cached.filter(p => p.id !== id);
     setPropertiesCache(filtered);
+    // Also remove from user listings
+    removeUserListingLocally(id);
   } catch (err) {
     console.error("Error saving deleted ID:", err);
   }
 };
 
-// FIRESTORE CLOUD TOMBSTONES (Cross-Device Deletion Sync: Phone <-> Mac <-> iPad)
+// CLOUD FIRESTORE DELETED PROPERTIES SYNC (Cross-Device Global Deletion Tombstones)
+export const saveFirestoreDeletedPropertyId = async (propertyId: string, deletedBy: string = 'admin'): Promise<boolean> => {
+  try {
+    await withTimeout(
+      setDoc(doc(db, 'deleted_properties', propertyId), {
+        id: propertyId,
+        deletedAt: new Date().toISOString(),
+        deletedBy: deletedBy || 'admin'
+      }, { merge: true }),
+      4000,
+      undefined
+    );
+    return true;
+  } catch (err) {
+    console.warn("Cloud tombstone write note:", err);
+    return false;
+  }
+};
+
 export const fetchFirestoreDeletedPropertyIds = async (): Promise<string[]> => {
   return withTimeout(
     (async () => {
       try {
         const querySnapshot = await getDocs(collection(db, 'deleted_properties'));
-        const cloudIds = querySnapshot.docs.map(doc => doc.id);
-        
-        // Merge cloud deleted IDs into local storage so offline/future loads are aware
+        const cloudIds = querySnapshot.docs.map(doc => doc.id || (doc.data() as any)?.id).filter(Boolean);
         const local = getDeletedPropertyIds();
-        const union = Array.from(new Set([...local, ...cloudIds]));
-        safeStorage.setItem('royal_agra_deleted_property_ids_v2', JSON.stringify(union));
-        
-        return union;
+        const merged = Array.from(new Set([...local, ...cloudIds]));
+        safeStorage.setItem('royal_agra_deleted_property_ids_v2', JSON.stringify(merged));
+        return merged;
       } catch (err) {
-        console.warn("Could not fetch cloud deleted properties:", err);
+        console.warn("Cloud tombstone fetch note (using local):", err);
         return getDeletedPropertyIds();
       }
     })(),
@@ -155,59 +171,48 @@ export const fetchFirestoreDeletedPropertyIds = async (): Promise<string[]> => {
   );
 };
 
-export const subscribeFirestoreDeletedPropertyIds = (callback: (deletedIds: string[]) => void) => {
+export const subscribeFirestoreDeletedPropertyIds = (callback: (deletedIds: string[]) => void): () => void => {
   try {
     const unsubscribe = onSnapshot(collection(db, 'deleted_properties'), (snapshot) => {
-      const cloudIds = snapshot.docs.map(doc => doc.id);
+      const cloudIds = snapshot.docs.map(doc => doc.id || (doc.data() as any)?.id).filter(Boolean);
       const local = getDeletedPropertyIds();
-      const union = Array.from(new Set([...local, ...cloudIds]));
-      
-      // Keep local storage updated
-      safeStorage.setItem('royal_agra_deleted_property_ids_v2', JSON.stringify(union));
-      
-      // Clean up any stale local user listings or cached items that match tombstone
-      for (const id of union) {
-        removeUserListingLocally(id);
-      }
-      
-      callback(union);
-    }, (error) => {
-      console.warn("Deleted properties real-time listener note:", error);
+      const merged = Array.from(new Set([...local, ...cloudIds]));
+      safeStorage.setItem('royal_agra_deleted_property_ids_v2', JSON.stringify(merged));
+
+      // Clean local cache & user listings
+      const cached = getPropertiesCache();
+      const cleanCache = cached.filter(p => !merged.includes(p.id));
+      setPropertiesCache(cleanCache);
+
+      const userListings = getUserListings();
+      const cleanListings = userListings.filter(p => !merged.includes(p.id));
+      safeStorage.setItem('royal_agra_user_listings_v1', JSON.stringify(cleanListings));
+
+      callback(merged);
+    }, (err) => {
+      console.warn("Deleted properties real-time listener note:", err);
       callback(getDeletedPropertyIds());
     });
     return unsubscribe;
   } catch (err) {
     console.warn("Failed to subscribe to deleted properties:", err);
-    callback(getDeletedPropertyIds());
     return () => {};
   }
 };
 
-export const saveFirestoreDeletedPropertyId = async (id: string, deletedBy: string = 'admin'): Promise<boolean> => {
-  markPropertyAsDeletedLocally(id);
+export const clearFirestoreDeletedPropertyIds = async (propertyIds?: string[]): Promise<boolean> => {
   try {
-    await withTimeout(
-      setDoc(doc(db, 'deleted_properties', id), {
-        id,
-        deletedAt: new Date().toISOString(),
-        deletedBy
-      }),
-      4000,
-      undefined
-    );
-    return true;
-  } catch (err) {
-    console.warn("Cloud tombstone write note:", err);
-    return true;
-  }
-};
-
-export const clearAllFirestoreDeletedPropertyIds = async (): Promise<boolean> => {
-  clearDeletedPropertyIdsLocally();
-  try {
-    const snap = await getDocs(collection(db, 'deleted_properties'));
-    const deletePromises = snap.docs.map(d => deleteDoc(doc(db, 'deleted_properties', d.id)));
-    await Promise.all(deletePromises);
+    if (propertyIds && propertyIds.length > 0) {
+      for (const id of propertyIds) {
+        await deleteDoc(doc(db, 'deleted_properties', id));
+      }
+    } else {
+      const snap = await getDocs(collection(db, 'deleted_properties'));
+      for (const d of snap.docs) {
+        await deleteDoc(d.ref);
+      }
+    }
+    clearDeletedPropertyIdsLocally();
     return true;
   } catch (err) {
     console.warn("Error clearing cloud deleted property IDs:", err);
@@ -311,7 +316,7 @@ export const mergeWithUserListings = (list: Property[], extraDeletedIds: string[
 
 // PROPERTIES REAL-TIME SYNC & FETCH
 export const subscribeFirestoreProperties = (callback: (properties: Property[]) => void) => {
-  const unsubscribe = onSnapshot(collection(db, 'properties'), async (snapshot) => {
+  const unsubscribe = onSnapshot(collection(db, 'properties'), (snapshot) => {
     const deletedLocal = getDeletedPropertyIds();
 
     if (snapshot.empty) {
@@ -375,6 +380,16 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
     isApproved: property.isApproved !== undefined ? property.isApproved : true,
     isUserListing: true
   };
+
+  // If restoring or creating a property that was in deleted list, clean it from deleted list
+  try {
+    const localDeleted = getDeletedPropertyIds();
+    if (localDeleted.includes(cleanProperty.id)) {
+      const updated = localDeleted.filter(id => id !== cleanProperty.id);
+      safeStorage.setItem('royal_agra_deleted_property_ids_v2', JSON.stringify(updated));
+    }
+    await withTimeout(deleteDoc(doc(db, 'deleted_properties', cleanProperty.id)), 3000, undefined);
+  } catch {}
 
   // 1. Immediately backup to local user listings store
   saveUserListingLocally(cleanProperty);
@@ -445,8 +460,21 @@ export const deleteFirestoreProperty = async (propertyId: string, deletedBy: str
   try {
     // 3. Persist permanent Cloud Tombstone to 'deleted_properties' collection
     await saveFirestoreDeletedPropertyId(propertyId, deletedBy);
+
+    // 4. Mark soft-delete in Firestore so all other clients filter it out
+    await withTimeout(
+      setDoc(doc(db, 'properties', propertyId), { 
+        id: propertyId, 
+        isDeleted: true, 
+        status: 'rejected',
+        deletedAt: new Date().toISOString(),
+        deletedBy
+      }, { merge: true }),
+      3500,
+      undefined
+    );
     
-    // 4. Also hard-delete document from 'properties' collection
+    // 5. Also hard-delete document from 'properties' collection
     await withTimeout(deleteDoc(doc(db, 'properties', propertyId)), 3500, undefined);
     return true;
   } catch (error) {

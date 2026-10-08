@@ -15,10 +15,9 @@ import {
   getDeletedPropertyIds,
   markPropertyAsDeletedLocally,
   clearDeletedPropertyIdsLocally,
-  fetchFirestoreDeletedPropertyIds,
   subscribeFirestoreDeletedPropertyIds,
-  saveFirestoreDeletedPropertyId,
-  clearAllFirestoreDeletedPropertyIds,
+  fetchFirestoreDeletedPropertyIds,
+  clearFirestoreDeletedPropertyIds,
   getPropertiesCache,
   setPropertiesCache,
   mergeWithUserListings
@@ -61,12 +60,9 @@ export default function App() {
     return null;
   });
 
-  // Deleted Property IDs synchronized with Cloud Firestore (for real-time cross-device sync)
-  const [deletedIds, setDeletedIds] = useState<string[]>(() => getDeletedPropertyIds());
-
   // Global Properties State (persisted locally and synced with Firebase Firestore)
   const [properties, setProperties] = useState<Property[]>(() => {
-    return mergeWithUserListings(getPropertiesCache(), getDeletedPropertyIds());
+    return mergeWithUserListings(getPropertiesCache());
   });
 
   // Sync user state to localStorage
@@ -102,34 +98,35 @@ export default function App() {
     migrateLocalAccountsToCloud();
   }, []);
 
-  // Subscribe to real-time Firestore updates for properties, deleted tombstones, projects, and leads across all devices globally
+  // Subscribe to real-time Firestore updates for properties, projects, leads, and deleted tombstones across all devices globally
   useEffect(() => {
-    let unsubscribeDeleted: () => void = () => {};
     let unsubscribeProps: () => void = () => {};
     let unsubscribeProjects: () => void = () => {};
     let unsubscribeLeads: () => void = () => {};
+    let unsubscribeDeleted: () => void = () => {};
 
     const startSubscriptions = () => {
-      try { unsubscribeDeleted(); } catch {}
       try { unsubscribeProps(); } catch {}
       try { unsubscribeProjects(); } catch {}
       try { unsubscribeLeads(); } catch {}
+      try { unsubscribeDeleted(); } catch {}
 
-      // 1. Subscribe to Cloud Tombstones so deletions on Phone instantly update Mac
-      unsubscribeDeleted = subscribeFirestoreDeletedPropertyIds(ids => {
-        setDeletedIds(ids);
-        setProperties(prev => {
-          const filtered = prev.filter(p => !ids.includes(p.id) && !p.isDeleted);
-          setPropertiesCache(filtered);
-          return filtered;
-        });
+      // 1. Listen for global deletions across all devices
+      unsubscribeDeleted = subscribeFirestoreDeletedPropertyIds(deletedIds => {
+        if (deletedIds && deletedIds.length > 0) {
+          setProperties(prev => {
+            const cleaned = prev.filter(p => !deletedIds.includes(p.id) && !p.isDeleted);
+            setPropertiesCache(cleaned);
+            return cleaned;
+          });
+        }
       });
 
-      // 2. Subscribe to Properties collection
+      // 2. Listen for properties catalog updates
       unsubscribeProps = subscribeFirestoreProperties(fetched => {
         if (fetched) {
-          const currentDeleted = getDeletedPropertyIds();
-          const active = fetched.filter(p => !p.isDeleted && !currentDeleted.includes(p.id));
+          const deletedLocal = getDeletedPropertyIds();
+          const active = fetched.filter(p => !p.isDeleted && !deletedLocal.includes(p.id));
           setProperties(active);
           setPropertiesCache(active);
         }
@@ -159,10 +156,10 @@ export default function App() {
     document.addEventListener('visibilitychange', handleWakeUpOrOnline);
 
     return () => {
-      try { unsubscribeDeleted(); } catch {}
       try { unsubscribeProps(); } catch {}
       try { unsubscribeProjects(); } catch {}
       try { unsubscribeLeads(); } catch {}
+      try { unsubscribeDeleted(); } catch {}
       window.removeEventListener('online', handleWakeUpOrOnline);
       window.removeEventListener('focus', handleWakeUpOrOnline);
       window.removeEventListener('pageshow', handleWakeUpOrOnline);
@@ -453,9 +450,8 @@ export default function App() {
   };
 
   const handleDeleteProperty = async (propertyId: string) => {
-    // 1. Mark in persistent storage and update deleted IDs state immediately
+    // 1. Mark in persistent storage so page reloads or seed arrays never bring it back
     markPropertyAsDeletedLocally(propertyId);
-    setDeletedIds(prev => Array.from(new Set([...prev, propertyId])));
 
     // 2. Remove immediately from local state and update local cache
     setProperties(prev => {
@@ -471,21 +467,17 @@ export default function App() {
       setSelectedProperty(null);
     }
 
-    // 4. Trigger persistent Cloud Tombstone & delete in Firestore
+    // 4. Trigger persistent soft-delete, cloud tombstone & hard-delete in Firestore
     await deleteFirestoreProperty(propertyId, user?.email || 'admin');
   };
 
   const handlePurgeDemoProperties = async () => {
-    const demoIds = [
-      'prop-fatehabad-sovereign-01',
-      'prop-dayalbagh-heritage-02',
-      'prop-tajganj-kohinoor-03',
-      'prop-sikandra-greens-04',
+    const demoIds = Array.from(new Set([
       'prop-1', 'prop-2', 'prop-3', 'prop-4', 'prop-5', 'prop-6', 'prop-7', 'prop-8',
-      'prop-harish-nagar-89'
-    ];
+      'prop-fatehabad-sovereign-01', 'prop-dayalbagh-heritage-02', 'prop-tajganj-kohinoor-03', 'prop-sikandra-greens-04',
+      ...PROPERTIES_DATA.map(p => p.id)
+    ]));
     demoIds.forEach(id => markPropertyAsDeletedLocally(id));
-    setDeletedIds(prev => Array.from(new Set([...prev, ...demoIds])));
 
     setProperties(prev => {
       const nextList = prev.filter(p => !demoIds.includes(p.id));
@@ -499,12 +491,16 @@ export default function App() {
   };
 
   const handleRestoreDefaultProperties = async () => {
+    const demoIds = Array.from(new Set([
+      'prop-1', 'prop-2', 'prop-3', 'prop-4', 'prop-5', 'prop-6', 'prop-7', 'prop-8',
+      'prop-fatehabad-sovereign-01', 'prop-dayalbagh-heritage-02', 'prop-tajganj-kohinoor-03', 'prop-sikandra-greens-04',
+      ...PROPERTIES_DATA.map(p => p.id)
+    ]));
+    await clearFirestoreDeletedPropertyIds(demoIds);
     clearDeletedPropertyIdsLocally();
-    await clearAllFirestoreDeletedPropertyIds();
-    setDeletedIds([]);
     const seeded = (PROPERTIES_DATA as Property[]).map((p, idx) => ({
       ...p,
-      status: p.status || (idx === 3 ? 'Sold' : 'published'),
+      status: p.status || (idx === 3 ? 'Sold' : 'Active'),
       isApproved: true,
       isDeleted: false,
       isUserListing: idx === 0 || idx === 2,
