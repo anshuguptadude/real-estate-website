@@ -605,6 +605,21 @@ export const fetchFirestoreAccounts = async (): Promise<any[]> => {
   );
 };
 
+export const subscribeFirestoreAccounts = (callback: (accounts: any[]) => void): () => void => {
+  try {
+    const unsubscribe = onSnapshot(collection(db, 'accounts'), (snapshot) => {
+      const accounts = snapshot.docs.map(doc => doc.data());
+      callback(accounts);
+    }, (error) => {
+      console.warn("Error in real-time accounts listener:", error);
+    });
+    return unsubscribe;
+  } catch (error) {
+    console.warn("Failed to subscribe to accounts:", error);
+    return () => {};
+  }
+};
+
 export const getFirestoreAccount = async (identifier: string): Promise<any | null> => {
   if (!identifier) return null;
   const clean = identifier.trim().toLowerCase();

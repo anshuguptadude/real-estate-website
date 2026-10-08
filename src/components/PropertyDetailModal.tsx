@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Property, UserProfile } from '../types';
-import { isAdmin, isPropertyOwnerOrAdmin } from '../utils/security';
+import { isAdmin, isCEO, isPropertyOwnerOrAdmin, canViewFullAddress } from '../utils/security';
 import { saveFirestoreLead } from '../services/firebaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapComponent } from './MapComponent';
@@ -66,9 +66,10 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
 
   if (!property) return null;
 
-  const isUserAdmin = isAdmin(user);
+  const hasFullAddressAccess = canViewFullAddress(property, user);
+  const isUserAdmin = isAdmin(user) || isCEO(user);
   const isOwnerOrAdmin = isPropertyOwnerOrAdmin(property, user);
-  const displayAddress = isUserAdmin && property.address 
+  const displayAddress = hasFullAddressAccess && property.address 
     ? property.address 
     : (property.locality 
         ? (property.locality.toLowerCase().includes('agra') ? property.locality : `${property.locality}, Agra`)
@@ -365,13 +366,13 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 </div>
               </div>
 
-              {/* Admin Only: Registered User Account & Owner Metadata */}
-              {isUserAdmin && (
+              {/* Admin & Authorized User Only: Registered User Account & Owner Metadata */}
+              {hasFullAddressAccess && (
                 <div className="p-4 bg-amber-50/90 border border-amber-300 rounded-xl space-y-2 text-xs text-amber-950">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <ShieldCheck className="w-4 h-4 text-amber-800" />
-                      <span className="font-bold uppercase tracking-wider text-[#0F382C]">Admin Metadata • Linked User Account</span>
+                      <span className="font-bold uppercase tracking-wider text-[#0F382C]">Authorized Access • Unmasked Dossier</span>
                     </div>
                     <span className="px-2 py-0.5 rounded bg-amber-200 font-mono text-[10px] font-bold">
                       Account ID: #{property.ownerId || property.userId || 'N/A'}
@@ -390,17 +391,17 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 </div>
               )}
 
-              {/* Map - Restricted to Admin Account Only */}
+              {/* Map - Restricted to Authorized Accounts with Full Address Access */}
               <div className="space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                   <h4 className="text-sm font-bold text-[#0F382C] uppercase tracking-wider flex items-center gap-1.5">
                     <MapPin className="w-4 h-4 text-[#0F382C]" />
                     <span>Property Location</span>
                   </h4>
-                  {isUserAdmin ? (
+                  {hasFullAddressAccess ? (
                     <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 w-fit">
                       <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                      <span>Admin Full Access • Exact GPS Map & Street View</span>
+                      <span>Full Access • Exact GPS Map & Street View</span>
                     </span>
                   ) : (
                     <span className="text-[10px] font-bold text-gray-600 bg-gray-100 border border-gray-300 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 w-fit">
@@ -409,11 +410,11 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                   )}
                 </div>
 
-                {isUserAdmin ? (
+                {hasFullAddressAccess ? (
                   <div>
                     <MapComponent lat={property.coordinates?.lat ?? 27.1767} lng={property.coordinates?.lng ?? 78.0081} />
                     <p className="text-[11px] text-gray-500 mt-2 flex items-center gap-1">
-                      <span className="font-semibold text-emerald-800">Exact GPS Coordinates:</span> {(property.coordinates?.lat ?? 27.1767).toFixed(4)}°N, {(property.coordinates?.lng ?? 78.0081).toFixed(4)}°E (Visible exclusively to Admin account)
+                      <span className="font-semibold text-emerald-800">Exact GPS Coordinates:</span> {(property.coordinates?.lat ?? 27.1767).toFixed(4)}°N, {(property.coordinates?.lng ?? 78.0081).toFixed(4)}°E (Visible to authorized accounts)
                     </p>
                   </div>
                 ) : (

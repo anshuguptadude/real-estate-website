@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserProfile, Property, UserDashboardTab } from '../types';
-import { isAdmin, LeadSubmission, ADMIN_CREDENTIALS } from '../utils/security';
-import { saveFirestoreAccount, getFirestoreAccount } from '../services/firebaseService';
+import { isAdmin, isCEO, LeadSubmission, ADMIN_CREDENTIALS, SUPER_ADMIN_PERMISSIONS } from '../utils/security';
+import { saveFirestoreAccount, getFirestoreAccount, subscribeFirestoreAccounts } from '../services/firebaseService';
 import { 
   Building2, 
   User, 
@@ -24,7 +24,21 @@ import {
   Camera, 
   Save,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Crown,
+  Key,
+  Lock,
+  Unlock,
+  Shield,
+  Search,
+  Check,
+  X,
+  Users,
+  Sliders,
+  RefreshCw,
+  SlidersHorizontal,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 interface UserDashboardScreenProps {
@@ -77,7 +91,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   const [name, setName] = useState(user?.name || 'Valued Client');
   const [phone, setPhone] = useState(user?.phone || '+91 91490 79913');
   const [email, setEmail] = useState(user?.email || 'client@royalagraestate.in');
-  const [role, setRole] = useState<'buyer' | 'owner' | 'admin'>(user?.role || 'owner');
+  const [role, setRole] = useState<UserProfile['role']>(user?.role || 'owner');
   const [avatar, setAvatar] = useState(user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80');
   const [preferredLocality, setPreferredLocality] = useState(user?.preferredLocality || 'Fatehabad Road, Agra');
   const [primaryInterest, setPrimaryInterest] = useState(user?.primaryInterest || 'Buying');
@@ -94,13 +108,22 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
 
+  // CEO Master Access & RBAC Console State
+  const [allAccounts, setAllAccounts] = useState<UserProfile[]>([]);
+  const [editingAccounts, setEditingAccounts] = useState<Record<string, UserProfile>>({});
+  const [accountSearchQuery, setAccountSearchQuery] = useState('');
+  const [accountRoleFilter, setAccountRoleFilter] = useState<'all' | 'ceo' | 'admin' | 'owner' | 'buyer' | 'agent' | 'staff'>('all');
+  const [expandedAccountEmail, setExpandedAccountEmail] = useState<string | null>(null);
+  const [savingAccountEmail, setSavingAccountEmail] = useState<string | null>(null);
+  const [saveAccountSuccessMsg, setSaveAccountSuccessMsg] = useState<string | null>(null);
+
   // Sync state with user when user changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       setName(user.name);
       setPhone(user.phone);
       setEmail(user.email);
-      setRole(user.role);
+      setRole(user.role as any);
       setAvatar(user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80');
       setPreferredLocality(user.preferredLocality || 'Fatehabad Road, Agra');
       setPrimaryInterest(user.primaryInterest || 'Buying');
@@ -110,6 +133,202 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
       setProfession(user.profession || '');
     }
   }, [user]);
+
+  // Subscribe to real-time accounts from Firestore
+  useEffect(() => {
+    if (!isCEO(user)) return;
+
+    // 1. Initial seed from localStorage + ADMIN_CREDENTIALS
+    let initialAccounts: UserProfile[] = [];
+    try {
+      const stored = localStorage.getItem('royal_agra_accounts_v1');
+      if (stored) {
+        initialAccounts = JSON.parse(stored);
+      }
+    } catch {}
+
+    ADMIN_CREDENTIALS.forEach(admin => {
+      const exists = initialAccounts.some(acc => acc.email && acc.email.toLowerCase() === admin.email.toLowerCase());
+      if (!exists) {
+        initialAccounts.push({
+          id: admin.id,
+          name: admin.name,
+          email: admin.email,
+          phone: admin.phone,
+          role: admin.role,
+          memberSince: '2024',
+          permissions: [...admin.permissions]
+        });
+      }
+    });
+
+    setAllAccounts(initialAccounts);
+
+    // 2. Real-time Firestore sync
+    const unsubscribe = subscribeFirestoreAccounts((firestoreAccounts) => {
+      if (firestoreAccounts && firestoreAccounts.length > 0) {
+        const mergedMap = new Map<string, UserProfile>();
+        ADMIN_CREDENTIALS.forEach(admin => {
+          mergedMap.set(admin.email.toLowerCase(), {
+            id: admin.id,
+            name: admin.name,
+            email: admin.email,
+            phone: admin.phone,
+            role: admin.role,
+            memberSince: '2024',
+            permissions: [...admin.permissions]
+          });
+        });
+        firestoreAccounts.forEach(acc => {
+          if (acc.email) {
+            mergedMap.set(acc.email.toLowerCase(), acc);
+          }
+        });
+        setAllAccounts(Array.from(mergedMap.values()));
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [user]);
+
+  const getActiveAccountData = (emailKey: string): UserProfile => {
+    if (editingAccounts[emailKey]) {
+      return editingAccounts[emailKey];
+    }
+    const found = allAccounts.find(a => a.email && a.email.toLowerCase() === emailKey.toLowerCase());
+    if (found) return found;
+    return {
+      id: `RAE-${Date.now()}`,
+      name: 'Client',
+      email: emailKey,
+      phone: '',
+      role: 'buyer',
+      memberSince: '2025',
+      permissions: []
+    };
+  };
+
+  const handleTogglePermission = (accountEmail: string, permission: string) => {
+    const acc = getActiveAccountData(accountEmail);
+    const currentPerms = acc.permissions ? [...acc.permissions] : [];
+    const hasPerm = currentPerms.includes(permission);
+    const newPerms = hasPerm
+      ? currentPerms.filter(p => p !== permission)
+      : [...currentPerms, permission];
+
+    setEditingAccounts(prev => ({
+      ...prev,
+      [accountEmail]: {
+        ...acc,
+        permissions: newPerms
+      }
+    }));
+  };
+
+  const handleRoleChange = (accountEmail: string, newRole: UserProfile['role']) => {
+    const acc = getActiveAccountData(accountEmail);
+    let perms = acc.permissions ? [...acc.permissions] : [];
+    if ((newRole === 'admin' || newRole === 'ceo') && perms.length === 0) {
+      perms = [...SUPER_ADMIN_PERMISSIONS];
+    }
+
+    setEditingAccounts(prev => ({
+      ...prev,
+      [accountEmail]: {
+        ...acc,
+        role: newRole,
+        permissions: perms
+      }
+    }));
+  };
+
+  const handleToggleUnlockedProperty = (accountEmail: string, propertyId: string) => {
+    const acc = getActiveAccountData(accountEmail);
+    const currentUnlocked = acc.unlockedPropertyIds ? [...acc.unlockedPropertyIds] : [];
+    const hasUnlocked = currentUnlocked.includes(propertyId);
+    const updatedUnlocked = hasUnlocked
+      ? currentUnlocked.filter(id => id !== propertyId)
+      : [...currentUnlocked, propertyId];
+
+    setEditingAccounts(prev => ({
+      ...prev,
+      [accountEmail]: {
+        ...acc,
+        unlockedPropertyIds: updatedUnlocked
+      }
+    }));
+  };
+
+  const handleGrantAllProperties = (accountEmail: string) => {
+    const acc = getActiveAccountData(accountEmail);
+    const allPropIds = (allProperties || userProperties).map(p => p.id);
+    setEditingAccounts(prev => ({
+      ...prev,
+      [accountEmail]: {
+        ...acc,
+        unlockedPropertyIds: allPropIds
+      }
+    }));
+  };
+
+  const handleRevokeAllProperties = (accountEmail: string) => {
+    const acc = getActiveAccountData(accountEmail);
+    setEditingAccounts(prev => ({
+      ...prev,
+      [accountEmail]: {
+        ...acc,
+        unlockedPropertyIds: []
+      }
+    }));
+  };
+
+  const handleSaveAccountPermissions = async (accountEmail: string) => {
+    const accToSave = getActiveAccountData(accountEmail);
+    setSavingAccountEmail(accountEmail);
+    try {
+      // 1. Direct write to Cloud Firestore accounts collection
+      await saveFirestoreAccount(accToSave);
+
+      // 2. Synchronize local cache
+      let storedAccounts: any[] = [];
+      try {
+        const stored = localStorage.getItem('royal_agra_accounts_v1');
+        if (stored) storedAccounts = JSON.parse(stored);
+      } catch {}
+
+      const idx = storedAccounts.findIndex(a => a.email && a.email.toLowerCase() === accountEmail.toLowerCase());
+      if (idx >= 0) {
+        storedAccounts[idx] = { ...storedAccounts[idx], ...accToSave };
+      } else {
+        storedAccounts.push(accToSave);
+      }
+      localStorage.setItem('royal_agra_accounts_v1', JSON.stringify(storedAccounts));
+
+      // 3. Update local state
+      setAllAccounts(prev => {
+        const exists = prev.some(a => a.email && a.email.toLowerCase() === accountEmail.toLowerCase());
+        if (exists) {
+          return prev.map(a => (a.email && a.email.toLowerCase() === accountEmail.toLowerCase()) ? accToSave : a);
+        }
+        return [...prev, accToSave];
+      });
+
+      // 4. If current logged in user was modified, update active profile
+      if (user && user.email.toLowerCase() === accountEmail.toLowerCase()) {
+        onUpdateProfile(accToSave);
+      }
+
+      setSaveAccountSuccessMsg(`Access permissions & role successfully pushed to Cloud Firestore for ${accToSave.name || accToSave.email}`);
+      setTimeout(() => setSaveAccountSuccessMsg(null), 4000);
+    } catch (err) {
+      console.error('Failed to save account permissions:', err);
+      alert('Failed to save permissions to Firestore. Please try again.');
+    } finally {
+      setSavingAccountEmail(null);
+    }
+  };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -466,6 +685,27 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                 activeTab === 'approvals' ? 'bg-[#E4D5B7] text-[#0F382C]' : 'bg-gray-200 text-gray-700'
               }`}>
                 {pendingProperties.length}
+              </span>
+            </button>
+          )}
+
+          {isCEO(user) && (
+            <button
+              type="button"
+              id="tab-ceo-access"
+              onClick={() => setActiveTab('ceo-access')}
+              className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
+                activeTab === 'ceo-access'
+                  ? 'bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 text-white shadow-lg ring-2 ring-amber-400/50'
+                  : 'text-amber-800 hover:text-amber-950 bg-amber-50/80 hover:bg-amber-100 border border-amber-300'
+              }`}
+            >
+              <Crown className="w-4 h-4 text-amber-400" />
+              <span>👑 CEO Access & RBAC Master</span>
+              <span className={`px-2 py-0.5 text-[10px] rounded-full font-mono ${
+                activeTab === 'ceo-access' ? 'bg-[#0F382C] text-[#E4D5B7]' : 'bg-amber-200 text-amber-900'
+              }`}>
+                {allAccounts.length} Accounts
               </span>
             </button>
           )}
@@ -1365,6 +1605,571 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* TAB 6: CEO Master Access & RBAC Console (CEO Only) */}
+        {activeTab === 'ceo-access' && isCEO(user) && (
+          <div className="space-y-6">
+            {/* CEO Header Banner */}
+            <div className="bg-gradient-to-r from-[#1A1305] via-[#2D1F08] to-[#1A1305] border-2 border-[#C5A869]/60 rounded-2xl p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-radial from-[#C5A869]/20 to-transparent pointer-events-none -mr-20 -mt-20" />
+              
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#C5A869] to-[#997B38] text-[#1A1305] flex items-center justify-center shadow-lg font-bold">
+                      <Crown className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-xl sm:text-2xl font-serif-luxury font-bold text-white tracking-wide">
+                          👑 CEO Master Access & RBAC Engine
+                        </h2>
+                        <span className="px-3 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-[#C5A869] text-[#1A1305] shadow-xs">
+                          Supreme Authority
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#E4D5B7] mt-1 font-medium">
+                        Real-time Role-Based Access Control • Granular Address Unmasking • Cloud Firestore Direct Sync
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <p className="text-xs text-gray-300 mt-3 max-w-2xl leading-relaxed">
+                    As CEO, you have supreme authority to grant or revoke executive privileges across all accounts in real-time. 
+                    Control who can view full unmasked addresses, approve seller listings, delete properties, view CRM leads, or unlock specific VIP properties for individual clients.
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-start md:items-end gap-2 shrink-0">
+                  <div className="flex items-center gap-2 bg-black/40 border border-[#C5A869]/30 px-3.5 py-1.5 rounded-xl text-xs text-[#E4D5B7]">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                    <span className="font-mono font-semibold">Firestore Cloud Sync: LIVE</span>
+                  </div>
+                  <span className="text-[11px] text-gray-400 font-mono">
+                    Total Network Accounts: <strong>{allAccounts.length}</strong>
+                  </span>
+                </div>
+              </div>
+
+              {/* Status Banner */}
+              {saveAccountSuccessMsg && (
+                <div className="mt-4 p-3.5 bg-emerald-950/90 border border-emerald-500/80 rounded-xl text-emerald-200 text-xs font-semibold flex items-center gap-2.5 animate-fadeIn">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{saveAccountSuccessMsg}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Filter and Search Controls */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 shadow-sm space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                {/* Search Bar */}
+                <div className="relative flex-1 max-w-md">
+                  <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={accountSearchQuery}
+                    onChange={(e) => setAccountSearchQuery(e.target.value)}
+                    placeholder="Search accounts by name, email, phone, or ID..."
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-[#0F382C] focus:bg-white outline-hidden transition-all"
+                  />
+                  {accountSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setAccountSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Role Filter Tabs */}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {(['all', 'ceo', 'admin', 'owner', 'buyer', 'agent', 'staff'] as const).map((r) => {
+                    const count = r === 'all' 
+                      ? allAccounts.length 
+                      : allAccounts.filter(a => (a.role || 'buyer') === r).length;
+                    return (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setAccountRoleFilter(r)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all flex items-center gap-1.5 ${
+                          accountRoleFilter === r
+                            ? 'bg-[#0F382C] text-white shadow-xs'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <span>{r === 'all' ? 'All Roles' : r}</span>
+                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                          accountRoleFilter === r ? 'bg-[#E4D5B7] text-[#0F382C]' : 'bg-gray-200 text-gray-600'
+                        }`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Accounts List */}
+            <div className="space-y-4">
+              {allAccounts
+                .filter(acc => {
+                  if (accountRoleFilter !== 'all' && (acc.role || 'buyer') !== accountRoleFilter) {
+                    return false;
+                  }
+                  if (accountSearchQuery.trim()) {
+                    const q = accountSearchQuery.toLowerCase().trim();
+                    const nameMatch = acc.name?.toLowerCase().includes(q);
+                    const emailMatch = acc.email?.toLowerCase().includes(q);
+                    const phoneMatch = acc.phone?.toLowerCase().includes(q);
+                    const idMatch = acc.id?.toLowerCase().includes(q);
+                    return Boolean(nameMatch || emailMatch || phoneMatch || idMatch);
+                  }
+                  return true;
+                })
+                .map((acc) => {
+                  const activeData = getActiveAccountData(acc.email);
+                  const isExpanded = expandedAccountEmail === acc.email;
+                  const isSaving = savingAccountEmail === acc.email;
+                  const isSelfCEO = user?.email?.toLowerCase() === acc.email.toLowerCase();
+
+                  const permissions = activeData.permissions || [];
+                  const hasFullAddress = permissions.includes('FULL_ADDRESS_ACCESS') || activeData.role === 'ceo';
+                  const hasAutoApprove = permissions.includes('AUTO_APPROVE') || activeData.role === 'ceo';
+                  const hasModerate = permissions.includes('APPROVALS_QUEUE') || permissions.includes('MODERATE_LISTINGS') || activeData.role === 'ceo';
+                  const hasDelete = permissions.includes('DELETE_LISTINGS') || permissions.includes('DELETE_PROPERTIES') || activeData.role === 'ceo';
+                  const hasCRM = permissions.includes('LEAD_CRM_STREAM') || permissions.includes('LEAD_CRM_ACCESS') || activeData.role === 'ceo';
+                  const hasCMS = permissions.includes('PROJECTS_CMS') || activeData.role === 'ceo';
+
+                  const unlockedCount = activeData.unlockedPropertyIds?.length || 0;
+
+                  return (
+                    <div
+                      key={acc.email}
+                      className={`bg-white rounded-2xl border transition-all duration-200 overflow-hidden shadow-sm ${
+                        isExpanded ? 'border-[#C5A869] ring-2 ring-[#C5A869]/20 shadow-md' : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      {/* Account Summary Bar */}
+                      <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <img
+                            src={activeData.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
+                            alt={activeData.name}
+                            className="w-14 h-14 rounded-2xl object-cover border-2 border-gray-200 shadow-xs shrink-0"
+                          />
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="text-base font-serif-luxury font-bold text-[#0F382C]">
+                                {activeData.name || 'Account User'}
+                              </h3>
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+                                activeData.role === 'ceo'
+                                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                                  : activeData.role === 'admin'
+                                  ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                                  : activeData.role === 'owner'
+                                  ? 'bg-blue-100 text-blue-900 border border-blue-200'
+                                  : activeData.role === 'agent'
+                                  ? 'bg-purple-100 text-purple-900 border border-purple-200'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {activeData.role === 'ceo' ? '👑 Founder & CEO' : activeData.role === 'admin' ? '🛡️ Admin' : activeData.role}
+                              </span>
+                              {isSelfCEO && (
+                                <span className="px-2 py-0.5 rounded-full text-[9px] bg-amber-500 text-white font-bold uppercase">
+                                  You
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-4 text-xs text-gray-500 mt-1 flex-wrap font-mono">
+                              <span className="flex items-center gap-1">
+                                <Mail className="w-3.5 h-3.5 text-gray-400" />
+                                {activeData.email}
+                              </span>
+                              {activeData.phone && (
+                                <span className="flex items-center gap-1">
+                                  <Phone className="w-3.5 h-3.5 text-gray-400" />
+                                  {activeData.phone}
+                                </span>
+                              )}
+                              <span>ID: #{activeData.id}</span>
+                            </div>
+
+                            {/* Quick Badges */}
+                            <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
+                              {hasFullAddress && (
+                                <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold rounded-md flex items-center gap-1">
+                                  <Unlock className="w-3 h-3 text-emerald-600" />
+                                  <span>Full Address Unmasked</span>
+                                </span>
+                              )}
+                              {!hasFullAddress && unlockedCount > 0 && (
+                                <span className="px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold rounded-md flex items-center gap-1">
+                                  <Key className="w-3 h-3 text-amber-600" />
+                                  <span>{unlockedCount} Property Address{unlockedCount > 1 ? 'es' : ''} Unlocked</span>
+                                </span>
+                              )}
+                              {!hasFullAddress && unlockedCount === 0 && (
+                                <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-medium rounded-md flex items-center gap-1">
+                                  <Lock className="w-3 h-3 text-gray-400" />
+                                  <span>Locality Masked</span>
+                                </span>
+                              )}
+                              {hasAutoApprove && (
+                                <span className="px-2 py-0.5 bg-blue-50 border border-blue-200 text-blue-800 text-[10px] font-bold rounded-md">
+                                  ⚡ Auto-Publish
+                                </span>
+                              )}
+                              {hasModerate && (
+                                <span className="px-2 py-0.5 bg-purple-50 border border-purple-200 text-purple-800 text-[10px] font-bold rounded-md">
+                                  🛡️ Approver
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Right Buttons */}
+                        <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                          <button
+                            type="button"
+                            onClick={() => setExpandedAccountEmail(isExpanded ? null : acc.email)}
+                            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                              isExpanded 
+                                ? 'bg-[#0F382C] text-white shadow-xs' 
+                                : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+                            }`}
+                          >
+                            <SlidersHorizontal className="w-3.5 h-3.5" />
+                            <span>{isExpanded ? 'Collapse Access Panel' : 'Configure Permissions & Role'}</span>
+                            {isExpanded ? <ChevronUp className="w-3.5 h-3.5 ml-0.5" /> : <ChevronDown className="w-3.5 h-3.5 ml-0.5" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Expanded RBAC Configuration Panel */}
+                      {isExpanded && (
+                        <div className="border-t border-gray-200 bg-[#FAF8F5] p-5 sm:p-6 space-y-6 animate-fadeIn">
+                          {/* 1. Role Assignment */}
+                          <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0F382C] flex items-center gap-2">
+                                <Users className="w-4 h-4 text-[#C5A869]" />
+                                <span>1. Primary Account Role</span>
+                              </h4>
+                              <span className="text-[11px] text-gray-500 font-mono">
+                                Current: <strong>{activeData.role}</strong>
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
+                              {(['ceo', 'admin', 'agent', 'owner', 'buyer', 'staff'] as const).map((r) => {
+                                const isSelected = activeData.role === r;
+                                return (
+                                  <button
+                                    key={r}
+                                    type="button"
+                                    onClick={() => handleRoleChange(acc.email, r)}
+                                    className={`p-2.5 rounded-xl text-xs font-bold capitalize transition-all border text-center ${
+                                      isSelected
+                                        ? 'bg-[#0F382C] text-white border-[#0F382C] shadow-sm'
+                                        : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                    }`}
+                                  >
+                                    <div className="text-sm mb-0.5">
+                                      {r === 'ceo' ? '👑' : r === 'admin' ? '🛡️' : r === 'agent' ? '👔' : r === 'owner' ? '🏡' : r === 'buyer' ? '💼' : '🛎️'}
+                                    </div>
+                                    <span>{r}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* 2. Super Admin & Privileges Matrix */}
+                          <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0F382C] flex items-center gap-2">
+                                <Shield className="w-4 h-4 text-[#C5A869]" />
+                                <span>2. System Privileges & Privacy Controls</span>
+                              </h4>
+                              <span className="text-[11px] text-gray-500">
+                                Toggle specific functional rights for this user
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {/* Toggle 1: FULL_ADDRESS_ACCESS */}
+                              <div
+                                onClick={() => handleTogglePermission(acc.email, 'FULL_ADDRESS_ACCESS')}
+                                className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
+                                  hasFullAddress 
+                                    ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950' 
+                                    : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={hasFullAddress}
+                                  onChange={() => {}} // handled by parent div
+                                  className="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500"
+                                />
+                                <div>
+                                  <div className="font-bold text-xs flex items-center gap-1.5">
+                                    <MapPin className="w-3.5 h-3.5 text-emerald-700" />
+                                    <span>Global Full Address & GPS Unmasking</span>
+                                  </div>
+                                  <p className="text-[11px] text-gray-600 mt-0.5 leading-tight">
+                                    Grants complete access to view unmasked house/plot numbers, direct seller contact details, and precise map pins for ALL properties on the platform.
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Toggle 2: AUTO_APPROVE */}
+                              <div
+                                onClick={() => handleTogglePermission(acc.email, 'AUTO_APPROVE')}
+                                className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
+                                  hasAutoApprove 
+                                    ? 'bg-blue-50/70 border-blue-300 text-blue-950' 
+                                    : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={hasAutoApprove}
+                                  onChange={() => {}}
+                                  className="mt-0.5 rounded text-blue-600 focus:ring-blue-500"
+                                />
+                                <div>
+                                  <div className="font-bold text-xs flex items-center gap-1.5">
+                                    <Sparkles className="w-3.5 h-3.5 text-blue-700" />
+                                    <span>Instant Auto-Publish (Bypass Verification)</span>
+                                  </div>
+                                  <p className="text-[11px] text-gray-600 mt-0.5 leading-tight">
+                                    Properties submitted by this user immediately receive status "Active" & "Verified" without waiting in the admin approval queue.
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Toggle 3: APPROVALS_QUEUE */}
+                              <div
+                                onClick={() => handleTogglePermission(acc.email, 'APPROVALS_QUEUE')}
+                                className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
+                                  hasModerate 
+                                    ? 'bg-purple-50/70 border-purple-300 text-purple-950' 
+                                    : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={hasModerate}
+                                  onChange={() => {}}
+                                  className="mt-0.5 rounded text-purple-600 focus:ring-purple-500"
+                                />
+                                <div>
+                                  <div className="font-bold text-xs flex items-center gap-1.5">
+                                    <ShieldCheck className="w-3.5 h-3.5 text-purple-700" />
+                                    <span>Property Approvals & Moderation</span>
+                                  </div>
+                                  <p className="text-[11px] text-gray-600 mt-0.5 leading-tight">
+                                    Grants authority to inspect pending property submissions, approve them live for the public, or reject fraudulent listings.
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Toggle 4: DELETE_LISTINGS */}
+                              <div
+                                onClick={() => handleTogglePermission(acc.email, 'DELETE_LISTINGS')}
+                                className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
+                                  hasDelete 
+                                    ? 'bg-rose-50/70 border-rose-300 text-rose-950' 
+                                    : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={hasDelete}
+                                  onChange={() => {}}
+                                  className="mt-0.5 rounded text-rose-600 focus:ring-rose-500"
+                                />
+                                <div>
+                                  <div className="font-bold text-xs flex items-center gap-1.5">
+                                    <Trash2 className="w-3.5 h-3.5 text-rose-700" />
+                                    <span>Permanent Listing Deletion</span>
+                                  </div>
+                                  <p className="text-[11px] text-gray-600 mt-0.5 leading-tight">
+                                    Allows deleting property listings permanently from Cloud Firestore and removing them from all client sessions.
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Toggle 5: LEAD_CRM_STREAM */}
+                              <div
+                                onClick={() => handleTogglePermission(acc.email, 'LEAD_CRM_STREAM')}
+                                className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
+                                  hasCRM 
+                                    ? 'bg-amber-50/70 border-amber-300 text-amber-950' 
+                                    : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={hasCRM}
+                                  onChange={() => {}}
+                                  className="mt-0.5 rounded text-amber-600 focus:ring-amber-500"
+                                />
+                                <div>
+                                  <div className="font-bold text-xs flex items-center gap-1.5">
+                                    <Calendar className="w-3.5 h-3.5 text-amber-700" />
+                                    <span>Lead CRM Stream & Inquiries</span>
+                                  </div>
+                                  <p className="text-[11px] text-gray-600 mt-0.5 leading-tight">
+                                    Grants access to incoming prospective buyer inquiries, schedule visit requests, and direct WhatsApp contact triggers.
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Toggle 6: PROJECTS_CMS */}
+                              <div
+                                onClick={() => handleTogglePermission(acc.email, 'PROJECTS_CMS')}
+                                className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
+                                  hasCMS 
+                                    ? 'bg-teal-50/70 border-teal-300 text-teal-950' 
+                                    : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={hasCMS}
+                                  onChange={() => {}}
+                                  className="mt-0.5 rounded text-teal-600 focus:ring-teal-500"
+                                />
+                                <div>
+                                  <div className="font-bold text-xs flex items-center gap-1.5">
+                                    <Building2 className="w-3.5 h-3.5 text-teal-700" />
+                                    <span>Developer Projects CMS</span>
+                                  </div>
+                                  <p className="text-[11px] text-gray-600 mt-0.5 leading-tight">
+                                    Allows creating and editing new developer master-planned townships and uploading brochure download links.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 3. Granular Single-Property Unlocks (VIP Access) */}
+                          <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                              <div>
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0F382C] flex items-center gap-2">
+                                  <Key className="w-4 h-4 text-[#C5A869]" />
+                                  <span>3. Granular Single-Property Address Unlocks (Selective VIP Access)</span>
+                                </h4>
+                                <p className="text-[11px] text-gray-500 mt-0.5">
+                                  Allow this specific client to view the exact private address of selected properties (e.g. during active site visits or deals) without giving them full global admin access.
+                                </p>
+                              </div>
+
+                              <div className="flex items-center gap-2 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => handleGrantAllProperties(acc.email)}
+                                  className="px-2.5 py-1 text-[11px] font-bold bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200 rounded-lg"
+                                >
+                                  Unlock All Properties
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRevokeAllProperties(acc.email)}
+                                  className="px-2.5 py-1 text-[11px] font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg"
+                                >
+                                  Clear All Unlocks
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-64 overflow-y-auto p-1">
+                              {(allProperties || userProperties).map((prop) => {
+                                const isUnlocked = activeData.unlockedPropertyIds?.includes(prop.id) || hasFullAddress;
+                                return (
+                                  <div
+                                    key={prop.id}
+                                    onClick={() => !hasFullAddress && handleToggleUnlockedProperty(acc.email, prop.id)}
+                                    className={`p-2.5 rounded-xl border text-xs flex items-center gap-2.5 transition-all ${
+                                      hasFullAddress
+                                        ? 'bg-emerald-50/40 border-emerald-200 opacity-80 cursor-default'
+                                        : isUnlocked
+                                        ? 'bg-amber-50 border-amber-300 cursor-pointer shadow-xs'
+                                        : 'bg-gray-50 border-gray-200 hover:border-gray-300 cursor-pointer'
+                                    }`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      disabled={hasFullAddress}
+                                      checked={isUnlocked}
+                                      onChange={() => {}}
+                                      className="rounded text-amber-600 focus:ring-amber-500"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-bold text-[#0F382C] truncate">{prop.title}</p>
+                                      <p className="text-[10px] text-gray-500 truncate">{prop.locality} • {prop.priceDisplay}</p>
+                                    </div>
+                                    <span className="text-[10px] font-mono text-gray-400 shrink-0">#{prop.id.slice(0, 8)}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Action Footer */}
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                            <span className="text-xs text-gray-500">
+                              Changes will write directly to Firestore <code className="font-mono text-[11px] bg-gray-100 px-1 py-0.5 rounded">accounts/{acc.email}</code>
+                            </span>
+
+                            <div className="flex items-center gap-3">
+                              <button
+                                type="button"
+                                onClick={() => setExpandedAccountEmail(null)}
+                                className="px-4 py-2 text-xs font-semibold text-gray-600 hover:text-gray-800"
+                              >
+                                Cancel
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={isSaving}
+                                onClick={() => handleSaveAccountPermissions(acc.email)}
+                                className="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center gap-2 disabled:opacity-50"
+                              >
+                                {isSaving ? (
+                                  <>
+                                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                    <span>Syncing to Firestore...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Save className="w-3.5 h-3.5" />
+                                    <span>Save & Push Permissions</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
           </div>
         )}
 
