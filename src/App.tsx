@@ -15,6 +15,10 @@ import {
   getDeletedPropertyIds,
   markPropertyAsDeletedLocally,
   clearDeletedPropertyIdsLocally,
+  fetchFirestoreDeletedPropertyIds,
+  subscribeFirestoreDeletedPropertyIds,
+  saveFirestoreDeletedPropertyId,
+  clearAllFirestoreDeletedPropertyIds,
   getPropertiesCache,
   setPropertiesCache,
   mergeWithUserListings
@@ -57,9 +61,12 @@ export default function App() {
     return null;
   });
 
+  // Deleted Property IDs synchronized with Cloud Firestore (for real-time cross-device sync)
+  const [deletedIds, setDeletedIds] = useState<string[]>(() => getDeletedPropertyIds());
+
   // Global Properties State (persisted locally and synced with Firebase Firestore)
   const [properties, setProperties] = useState<Property[]>(() => {
-    return mergeWithUserListings(getPropertiesCache());
+    return mergeWithUserListings(getPropertiesCache(), getDeletedPropertyIds());
   });
 
   // Sync user state to localStorage
@@ -95,20 +102,34 @@ export default function App() {
     migrateLocalAccountsToCloud();
   }, []);
 
-  // Subscribe to real-time Firestore updates for properties, projects, and leads across all devices globally
+  // Subscribe to real-time Firestore updates for properties, deleted tombstones, projects, and leads across all devices globally
   useEffect(() => {
+    let unsubscribeDeleted: () => void = () => {};
     let unsubscribeProps: () => void = () => {};
     let unsubscribeProjects: () => void = () => {};
     let unsubscribeLeads: () => void = () => {};
 
     const startSubscriptions = () => {
+      try { unsubscribeDeleted(); } catch {}
       try { unsubscribeProps(); } catch {}
       try { unsubscribeProjects(); } catch {}
       try { unsubscribeLeads(); } catch {}
 
+      // 1. Subscribe to Cloud Tombstones so deletions on Phone instantly update Mac
+      unsubscribeDeleted = subscribeFirestoreDeletedPropertyIds(ids => {
+        setDeletedIds(ids);
+        setProperties(prev => {
+          const filtered = prev.filter(p => !ids.includes(p.id) && !p.isDeleted);
+          setPropertiesCache(filtered);
+          return filtered;
+        });
+      });
+
+      // 2. Subscribe to Properties collection
       unsubscribeProps = subscribeFirestoreProperties(fetched => {
         if (fetched) {
-          const active = fetched.filter(p => !p.isDeleted);
+          const currentDeleted = getDeletedPropertyIds();
+          const active = fetched.filter(p => !p.isDeleted && !currentDeleted.includes(p.id));
           setProperties(active);
           setPropertiesCache(active);
         }
@@ -138,6 +159,7 @@ export default function App() {
     document.addEventListener('visibilitychange', handleWakeUpOrOnline);
 
     return () => {
+      try { unsubscribeDeleted(); } catch {}
       try { unsubscribeProps(); } catch {}
       try { unsubscribeProjects(); } catch {}
       try { unsubscribeLeads(); } catch {}
@@ -431,8 +453,9 @@ export default function App() {
   };
 
   const handleDeleteProperty = async (propertyId: string) => {
-    // 1. Mark in persistent storage so page reloads or seed arrays never bring it back
+    // 1. Mark in persistent storage and update deleted IDs state immediately
     markPropertyAsDeletedLocally(propertyId);
+    setDeletedIds(prev => Array.from(new Set([...prev, propertyId])));
 
     // 2. Remove immediately from local state and update local cache
     setProperties(prev => {
@@ -448,13 +471,21 @@ export default function App() {
       setSelectedProperty(null);
     }
 
-    // 4. Trigger persistent soft-delete & hard-delete in Firestore
-    await deleteFirestoreProperty(propertyId);
+    // 4. Trigger persistent Cloud Tombstone & delete in Firestore
+    await deleteFirestoreProperty(propertyId, user?.email || 'admin');
   };
 
   const handlePurgeDemoProperties = async () => {
-    const demoIds = ['prop-1', 'prop-2', 'prop-3', 'prop-4', 'prop-5', 'prop-6', 'prop-7', 'prop-8'];
+    const demoIds = [
+      'prop-fatehabad-sovereign-01',
+      'prop-dayalbagh-heritage-02',
+      'prop-tajganj-kohinoor-03',
+      'prop-sikandra-greens-04',
+      'prop-1', 'prop-2', 'prop-3', 'prop-4', 'prop-5', 'prop-6', 'prop-7', 'prop-8',
+      'prop-harish-nagar-89'
+    ];
     demoIds.forEach(id => markPropertyAsDeletedLocally(id));
+    setDeletedIds(prev => Array.from(new Set([...prev, ...demoIds])));
 
     setProperties(prev => {
       const nextList = prev.filter(p => !demoIds.includes(p.id));
@@ -463,12 +494,14 @@ export default function App() {
     });
 
     for (const id of demoIds) {
-      await deleteFirestoreProperty(id);
+      await deleteFirestoreProperty(id, user?.email || 'admin');
     }
   };
 
   const handleRestoreDefaultProperties = async () => {
     clearDeletedPropertyIdsLocally();
+    await clearAllFirestoreDeletedPropertyIds();
+    setDeletedIds([]);
     const seeded = (PROPERTIES_DATA as Property[]).map((p, idx) => ({
       ...p,
       status: p.status || (idx === 3 ? 'Sold' : 'published'),

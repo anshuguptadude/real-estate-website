@@ -94,7 +94,7 @@ const safeStorage = {
   }
 };
 
-// LOCALSTORAGE HELPERS FOR DELETED ITEMS & PERSISTENCE CACHE
+// LOCALSTORAGE & CLOUD HELPERS FOR DELETED ITEMS & PERSISTENCE CACHE
 export const getDeletedPropertyIds = (): string[] => {
   try {
     const stored = safeStorage.getItem('royal_agra_deleted_property_ids_v2');
@@ -121,7 +121,8 @@ export const markPropertyAsDeletedLocally = (id: string) => {
       deleted.push(id);
       safeStorage.setItem('royal_agra_deleted_property_ids_v2', JSON.stringify(deleted));
     }
-    // Also remove from cache
+    // Also remove from local user listings and properties cache
+    removeUserListingLocally(id);
     const cached = getPropertiesCache();
     const filtered = cached.filter(p => p.id !== id);
     setPropertiesCache(filtered);
@@ -130,13 +131,100 @@ export const markPropertyAsDeletedLocally = (id: string) => {
   }
 };
 
+// FIRESTORE CLOUD TOMBSTONES (Cross-Device Deletion Sync: Phone <-> Mac <-> iPad)
+export const fetchFirestoreDeletedPropertyIds = async (): Promise<string[]> => {
+  return withTimeout(
+    (async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'deleted_properties'));
+        const cloudIds = querySnapshot.docs.map(doc => doc.id);
+        
+        // Merge cloud deleted IDs into local storage so offline/future loads are aware
+        const local = getDeletedPropertyIds();
+        const union = Array.from(new Set([...local, ...cloudIds]));
+        safeStorage.setItem('royal_agra_deleted_property_ids_v2', JSON.stringify(union));
+        
+        return union;
+      } catch (err) {
+        console.warn("Could not fetch cloud deleted properties:", err);
+        return getDeletedPropertyIds();
+      }
+    })(),
+    3500,
+    getDeletedPropertyIds()
+  );
+};
+
+export const subscribeFirestoreDeletedPropertyIds = (callback: (deletedIds: string[]) => void) => {
+  try {
+    const unsubscribe = onSnapshot(collection(db, 'deleted_properties'), (snapshot) => {
+      const cloudIds = snapshot.docs.map(doc => doc.id);
+      const local = getDeletedPropertyIds();
+      const union = Array.from(new Set([...local, ...cloudIds]));
+      
+      // Keep local storage updated
+      safeStorage.setItem('royal_agra_deleted_property_ids_v2', JSON.stringify(union));
+      
+      // Clean up any stale local user listings or cached items that match tombstone
+      for (const id of union) {
+        removeUserListingLocally(id);
+      }
+      
+      callback(union);
+    }, (error) => {
+      console.warn("Deleted properties real-time listener note:", error);
+      callback(getDeletedPropertyIds());
+    });
+    return unsubscribe;
+  } catch (err) {
+    console.warn("Failed to subscribe to deleted properties:", err);
+    callback(getDeletedPropertyIds());
+    return () => {};
+  }
+};
+
+export const saveFirestoreDeletedPropertyId = async (id: string, deletedBy: string = 'admin'): Promise<boolean> => {
+  markPropertyAsDeletedLocally(id);
+  try {
+    await withTimeout(
+      setDoc(doc(db, 'deleted_properties', id), {
+        id,
+        deletedAt: new Date().toISOString(),
+        deletedBy
+      }),
+      4000,
+      undefined
+    );
+    return true;
+  } catch (err) {
+    console.warn("Cloud tombstone write note:", err);
+    return true;
+  }
+};
+
+export const clearAllFirestoreDeletedPropertyIds = async (): Promise<boolean> => {
+  clearDeletedPropertyIdsLocally();
+  try {
+    const snap = await getDocs(collection(db, 'deleted_properties'));
+    const deletePromises = snap.docs.map(d => deleteDoc(doc(db, 'deleted_properties', d.id)));
+    await Promise.all(deletePromises);
+    return true;
+  } catch (err) {
+    console.warn("Error clearing cloud deleted property IDs:", err);
+    return false;
+  }
+};
+
 // LOCAL USER LISTINGS BACKUP STORE (Guarantees user listings never vanish on cloud delay/snapshot refresh)
 export const getUserListings = (): Property[] => {
   try {
+    const deleted = getDeletedPropertyIds();
     const stored = safeStorage.getItem('royal_agra_user_listings_v1');
     if (stored) {
       const parsed = JSON.parse(stored);
-      return Array.isArray(parsed) ? parsed.filter(p => p && !p.isDeleted) : [];
+      return Array.isArray(parsed) 
+        ? parsed.filter(p => p && !p.isDeleted && !deleted.includes(p.id)) 
+        : [];
     }
     return [];
   } catch {
@@ -146,8 +234,10 @@ export const getUserListings = (): Property[] => {
 
 export const saveUserListingLocally = (property: Property) => {
   try {
+    const deleted = getDeletedPropertyIds();
+    if (deleted.includes(property.id)) return;
     const current = getUserListings();
-    const filtered = current.filter(p => p.id !== property.id && !p.isDeleted);
+    const filtered = current.filter(p => p.id !== property.id && !p.isDeleted && !deleted.includes(p.id));
     const updated = [property, ...filtered];
     // Keep max 20 local listings to prevent quota issues
     safeStorage.setItem('royal_agra_user_listings_v1', JSON.stringify(updated.slice(0, 20)));
@@ -168,11 +258,12 @@ export const removeUserListingLocally = (propertyId: string) => {
 
 export const getPropertiesCache = (): Property[] => {
   try {
+    const deleted = getDeletedPropertyIds();
     const stored = safeStorage.getItem('royal_agra_properties_v3');
     if (stored) {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed)) {
-        return parsed.filter(p => p && !p.isDeleted);
+        return parsed.filter(p => p && !p.isDeleted && !deleted.includes(p.id));
       }
     }
     return [];
@@ -183,7 +274,8 @@ export const getPropertiesCache = (): Property[] => {
 
 export const setPropertiesCache = (properties: Property[]) => {
   try {
-    const cleanList = properties.filter(p => p && !p.isDeleted);
+    const deleted = getDeletedPropertyIds();
+    const cleanList = properties.filter(p => p && !p.isDeleted && !deleted.includes(p.id));
     // Keep max 50 recent properties in cache to stay well within 5MB quota
     safeStorage.setItem('royal_agra_properties_v3', JSON.stringify(cleanList.slice(0, 50)));
   } catch (e) {
@@ -191,24 +283,26 @@ export const setPropertiesCache = (properties: Property[]) => {
   }
 };
 
-// Merges fallback or user listings cleanly
-export const mergeWithUserListings = (list: Property[]): Property[] => {
-  const userListings = getUserListings();
-  const deletedLocal = getDeletedPropertyIds();
+// Merges fallback or user listings cleanly while strictly honoring Cloud & Local Tombstones
+export const mergeWithUserListings = (list: Property[], extraDeletedIds: string[] = []): Property[] => {
+  const localDeleted = getDeletedPropertyIds();
+  const allDeleted = Array.from(new Set([...localDeleted, ...extraDeletedIds]));
+  const userListings = getUserListings().filter(p => !allDeleted.includes(p.id));
+  
   const baseClean = (list && list.length > 0 ? list : PROPERTIES_DATA)
-    .filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id));
+    .filter(p => p && !p.isDeleted && !allDeleted.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
   
   const merged = [...baseClean];
 
-  // Guarantee baseline properties are present unless explicitly marked deleted
+  // Guarantee baseline properties are present ONLY IF not explicitly deleted on any device
   for (const bp of PROPERTIES_DATA) {
-    if (!deletedLocal.includes(bp.id) && !merged.some(p => p.id === bp.id)) {
+    if (!allDeleted.includes(bp.id) && !merged.some(p => p.id === bp.id)) {
       merged.push(bp);
     }
   }
 
   for (const ul of userListings) {
-    if (!deletedLocal.includes(ul.id) && !merged.some(p => p.id === ul.id)) {
+    if (!allDeleted.includes(ul.id) && !merged.some(p => p.id === ul.id)) {
       merged.unshift(ul);
     }
   }
@@ -217,11 +311,11 @@ export const mergeWithUserListings = (list: Property[]): Property[] => {
 
 // PROPERTIES REAL-TIME SYNC & FETCH
 export const subscribeFirestoreProperties = (callback: (properties: Property[]) => void) => {
-  const unsubscribe = onSnapshot(collection(db, 'properties'), (snapshot) => {
+  const unsubscribe = onSnapshot(collection(db, 'properties'), async (snapshot) => {
     const deletedLocal = getDeletedPropertyIds();
 
     if (snapshot.empty) {
-      const combined = mergeWithUserListings(PROPERTIES_DATA);
+      const combined = mergeWithUserListings(PROPERTIES_DATA, deletedLocal);
       setPropertiesCache(combined);
       callback(combined);
     } else {
@@ -229,7 +323,7 @@ export const subscribeFirestoreProperties = (callback: (properties: Property[]) 
         .map(doc => doc.data() as Property)
         .filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
       
-      const combined = mergeWithUserListings(serverProps);
+      const combined = mergeWithUserListings(serverProps, deletedLocal);
       setPropertiesCache(combined);
       callback(combined);
     }
@@ -247,13 +341,19 @@ export const fetchFirestoreProperties = async (): Promise<Property[]> => {
   return withTimeout(
     (async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'properties'));
-        const deletedLocal = getDeletedPropertyIds();
+        const [querySnapshot, cloudDeletedIds] = await Promise.all([
+          getDocs(collection(db, 'properties')),
+          fetchFirestoreDeletedPropertyIds()
+        ]);
+        
+        const localDeleted = getDeletedPropertyIds();
+        const allDeleted = Array.from(new Set([...localDeleted, ...cloudDeletedIds]));
+        
         const serverProps = querySnapshot.docs
           .map(doc => doc.data() as Property)
-          .filter(p => p && !p.isDeleted && !deletedLocal.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
+          .filter(p => p && !p.isDeleted && !allDeleted.includes(p.id) && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'));
 
-        const merged = mergeWithUserListings(serverProps);
+        const merged = mergeWithUserListings(serverProps, allDeleted);
         setPropertiesCache(merged);
         return merged;
       } catch (error) {
@@ -332,7 +432,7 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
   }
 };
 
-export const deleteFirestoreProperty = async (propertyId: string): Promise<boolean> => {
+export const deleteFirestoreProperty = async (propertyId: string, deletedBy: string = 'admin'): Promise<boolean> => {
   // 1. Mark in local deleted list and remove from local stores
   markPropertyAsDeletedLocally(propertyId);
   removeUserListingLocally(propertyId);
@@ -343,19 +443,10 @@ export const deleteFirestoreProperty = async (propertyId: string): Promise<boole
   setPropertiesCache(filtered);
 
   try {
-    // 3. Mark soft-delete in Firestore so all other clients filter it out
-    await withTimeout(
-      setDoc(doc(db, 'properties', propertyId), { 
-        id: propertyId, 
-        isDeleted: true, 
-        status: 'rejected',
-        deletedAt: new Date().toISOString()
-      }, { merge: true }),
-      3500,
-      undefined
-    );
+    // 3. Persist permanent Cloud Tombstone to 'deleted_properties' collection
+    await saveFirestoreDeletedPropertyId(propertyId, deletedBy);
     
-    // 4. Also hard-delete document
+    // 4. Also hard-delete document from 'properties' collection
     await withTimeout(deleteDoc(doc(db, 'properties', propertyId)), 3500, undefined);
     return true;
   } catch (error) {
