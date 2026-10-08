@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UserProfile, Property, UserDashboardTab } from '../types';
 import { isAdmin, LeadSubmission, ADMIN_CREDENTIALS } from '../utils/security';
+import { saveFirestoreAccount, getFirestoreAccount } from '../services/firebaseService';
 import { 
   Building2, 
   User, 
@@ -110,7 +111,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
     }
   }, [user]);
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     setPasswordError('');
@@ -140,12 +141,22 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
         try {
           localStorage.setItem('royal_agra_accounts_v1', JSON.stringify(savedAccounts));
         } catch {}
+        await saveFirestoreAccount({
+          ...account,
+          email: user.email,
+          password: newPassword.trim()
+        });
       } else {
         const adminAcc = ADMIN_CREDENTIALS.find(a => a.email.toLowerCase() === user.email.toLowerCase());
         if (adminAcc && adminAcc.password !== currentPassword) {
           setPasswordError('Current password is incorrect.');
           return;
         }
+        await saveFirestoreAccount({
+          ...(user || {}),
+          email: user.email,
+          password: newPassword.trim()
+        });
       }
       setPasswordSuccess(true);
       setCurrentPassword('');

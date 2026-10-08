@@ -663,8 +663,10 @@ export const saveFirestoreAccount = async (account: any): Promise<boolean> => {
 // FAVORITES SYNC
 export const saveUserFavorite = async (userId: string, propertyId: string) => {
   try {
-    const docRef = doc(db, 'favorites', `${userId}_${propertyId}`);
-    await setDoc(docRef, { userId, propertyId, createdAt: new Date() });
+    if (!userId || !propertyId) return false;
+    const cleanUserId = userId.trim().toLowerCase();
+    const docRef = doc(db, 'favorites', `${cleanUserId}_${propertyId}`);
+    await setDoc(docRef, { userId: cleanUserId, propertyId, createdAt: new Date().toISOString() });
     return true;
   } catch (error) {
     console.error("Error saving favorite: ", error);
@@ -672,9 +674,24 @@ export const saveUserFavorite = async (userId: string, propertyId: string) => {
   }
 };
 
-export const getUserFavorites = async (userId: string) => {
+export const deleteUserFavorite = async (userId: string, propertyId: string) => {
   try {
-    const q = query(collection(db, 'favorites'), where('userId', '==', userId));
+    if (!userId || !propertyId) return false;
+    const cleanUserId = userId.trim().toLowerCase();
+    const docRef = doc(db, 'favorites', `${cleanUserId}_${propertyId}`);
+    await deleteDoc(docRef);
+    return true;
+  } catch (error) {
+    console.error("Error deleting favorite: ", error);
+    return false;
+  }
+};
+
+export const getUserFavorites = async (userId: string): Promise<string[]> => {
+  try {
+    if (!userId) return [];
+    const cleanUserId = userId.trim().toLowerCase();
+    const q = query(collection(db, 'favorites'), where('userId', '==', cleanUserId));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => doc.data().propertyId);
   } catch (error) {

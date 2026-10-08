@@ -18,6 +18,9 @@ import {
   subscribeFirestoreDeletedPropertyIds,
   fetchFirestoreDeletedPropertyIds,
   clearFirestoreDeletedPropertyIds,
+  saveUserFavorite,
+  deleteUserFavorite,
+  getUserFavorites,
   getPropertiesCache,
   setPropertiesCache,
   mergeWithUserListings
@@ -200,6 +203,20 @@ export default function App() {
       // ignore
     }
   }, [savedPropertyIds]);
+
+  // Sync user favorites from Cloud Firestore when user is authenticated
+  useEffect(() => {
+    if (user) {
+      const userKey = (user.email || user.id || user.phone || '').trim().toLowerCase();
+      if (userKey) {
+        getUserFavorites(userKey).then(cloudFavs => {
+          if (cloudFavs && cloudFavs.length > 0) {
+            setSavedPropertyIds(prev => Array.from(new Set([...prev, ...cloudFavs])));
+          }
+        }).catch(err => console.warn('Favorites fetch note:', err));
+      }
+    }
+  }, [user]);
 
   // Compare properties state (max 3)
   const [compareList, setCompareList] = useState<Property[]>([]);
@@ -540,15 +557,26 @@ export default function App() {
     navigateTo('properties');
   };
 
-  const handleToggleSave = (id: string) => {
+  const handleToggleSave = async (id: string) => {
     if (!user) {
       setLoginPromptMessage('Please log in or create an account to save properties to your favorites.');
       setLoginModalOpen(true);
       return;
     }
+    const isSaved = savedPropertyIds.includes(id);
+    const userKey = (user.email || user.id || user.phone || '').trim().toLowerCase();
+
     setSavedPropertyIds(prev =>
-      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+      isSaved ? prev.filter(item => item !== id) : [...prev, id]
     );
+
+    if (userKey) {
+      if (isSaved) {
+        await deleteUserFavorite(userKey, id);
+      } else {
+        await saveUserFavorite(userKey, id);
+      }
+    }
   };
 
   const handleInquireContact = async (property: Property) => {
