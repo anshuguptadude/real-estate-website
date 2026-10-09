@@ -72,7 +72,7 @@ Royal Agra Estate Advisory Desk
 Shrey Gupta:           +91 91490 79913 | shrey@royalagraestate.in
 Abhishek Singh Jadon:  +91 95571 38449 | abhishek@royalagraestate.in
 Corporate Office:      Fatehabad Road Corridor, Agra, Uttar Pradesh
-Official Website:      https://real-estate-website-pi-azure.vercel.app/
+Official Portal:       https://royalagraestate.in
 =====================================================`;
 
       const blob = new Blob([brochureContent], { type: 'text/plain;charset=utf-8' });
