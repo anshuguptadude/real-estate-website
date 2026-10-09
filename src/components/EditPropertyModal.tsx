@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Property, PropertyType, UserProfile } from '../types';
 import { AGRA_LOCALITIES, PROPERTY_TYPES } from '../data/mockData';
+import { AGRA_LOCALITY_COORDINATES } from './LocationPickerMap';
 import { isAdmin } from '../utils/security';
-import { X, Building2, Image as ImageIcon, IndianRupee, Save, Trash2, Plus, Upload, Star, Loader2, Check, Lock, ShieldCheck, MapPin, PlusCircle, AlertTriangle } from 'lucide-react';
+import { X, Building2, Image as ImageIcon, IndianRupee, Save, Trash2, Plus, Upload, Star, Loader2, Check, Lock, ShieldCheck, MapPin, PlusCircle, AlertTriangle, ExternalLink } from 'lucide-react';
 
 interface EditPropertyModalProps {
   property: Property | null;
@@ -26,6 +27,31 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
   const [locality, setLocality] = useState(property?.locality || 'Fatehabad Road');
   const [address, setAddress] = useState(property?.address || '');
   const [privateLocationNote, setPrivateLocationNote] = useState(property?.privateLocationNote || '');
+  const [locationLink, setLocationLink] = useState(property?.locationLink || '');
+  const [parsedCoordinates, setParsedCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+
+  const extractCoordinatesFromInput = (input: string): { lat: number; lng: number } | null => {
+    if (!input || !input.trim()) return null;
+    const urlMatch = input.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (urlMatch) {
+      const lat = parseFloat(urlMatch[1]);
+      const lng = parseFloat(urlMatch[2]);
+      if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
+    }
+    const queryMatch = input.match(/[?&](?:q|ll)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (queryMatch) {
+      const lat = parseFloat(queryMatch[1]);
+      const lng = parseFloat(queryMatch[2]);
+      if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
+    }
+    const coordMatch = input.match(/(-?\d+\.\d+)[\s,]+(-?\d+\.\d+)/);
+    if (coordMatch) {
+      const lat = parseFloat(coordMatch[1]);
+      const lng = parseFloat(coordMatch[2]);
+      if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
+    }
+    return null;
+  };
   const [landmarks, setLandmarks] = useState<{ name: string; distance: string; travelTime: string }[]>(
     property?.landmarks && property.landmarks.length > 0 ? property.landmarks : []
   );
@@ -99,6 +125,8 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
       setLocality(property.locality);
       setAddress(property.address);
       setPrivateLocationNote(property.privateLocationNote || '');
+      setLocationLink(property.locationLink || '');
+      setParsedCoordinates(extractCoordinatesFromInput(property.locationLink || ''));
       setLandmarks(property.landmarks && property.landmarks.length > 0 ? property.landmarks : []);
       setSuperAreaSqFt(property.superAreaSqFt);
       setBedrooms(property.bedrooms);
@@ -311,6 +339,9 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
       ? (status === 'published' || status === 'Active' || Boolean(property.isApproved))
       : (willRequireReApproval ? false : Boolean(property.isApproved));
 
+    const extractedCoords = extractCoordinatesFromInput(locationLink);
+    const updatedCoordinates = extractedCoords || property.coordinates || (AGRA_LOCALITY_COORDINATES[locality] || { lat: 27.1767, lng: 78.0081 });
+
     const updated: Property = {
       ...property,
       title,
@@ -323,6 +354,8 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
       location: `${locality}, Agra`,
       address: address.trim() || property.address || `${locality}, Agra`,
       privateLocationNote: privateLocationNote.trim() || undefined,
+      locationLink: locationLink.trim() || undefined,
+      coordinates: updatedCoordinates,
       landmarks: landmarks.length > 0 ? landmarks : (property.landmarks || []),
       superAreaSqFt,
       bedrooms,
@@ -547,25 +580,64 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           </div>
 
           {/* Confidential Private Location & Navigation Box */}
-          <div className="p-4 bg-amber-50/70 border border-amber-300/80 rounded-xl space-y-2">
+          <div className="p-4 bg-amber-50/70 border border-amber-300/80 rounded-xl space-y-3">
             <div className="flex items-center justify-between">
               <label className="block text-xs font-bold text-amber-950 uppercase tracking-wider flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5 text-amber-700" />
-                <span>Confidential Private Location Note & Landmark Directions (Admin & CEO Eyes Only)</span>
+                <span>Confidential Private Location & Navigation (Admin & CEO Eyes Only)</span>
               </label>
               <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
-                Admin Only
+                Admin & CEO Only
               </span>
             </div>
-            <textarea
-              rows={2}
-              placeholder="e.g. Turn right after Gate 3 of Imperial Towers, property is second villa on the left. Key with caretaker Mr. Munna Lal."
-              value={privateLocationNote}
-              onChange={(e) => setPrivateLocationNote(e.target.value)}
-              className="w-full p-2.5 text-xs bg-white border border-amber-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
-            />
+
+            {/* Google Maps Location Link / GPS Pin URL */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-amber-700" />
+                  <span>Google Maps Location Link / GPS Pin URL</span>
+                </label>
+                {parsedCoordinates && (
+                  <span className="text-[10px] font-mono text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300 flex items-center gap-1">
+                    <Check className="w-3 h-3 text-emerald-700" />
+                    <span>GPS Detected ({parsedCoordinates.lat.toFixed(4)}, {parsedCoordinates.lng.toFixed(4)})</span>
+                  </span>
+                )}
+              </div>
+              <input
+                type="url"
+                placeholder="Paste Google Maps share link or GPS pin URL (e.g. https://maps.app.goo.gl/... or https://maps.google.com/?q=...)"
+                value={locationLink}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setLocationLink(val);
+                  const coords = extractCoordinatesFromInput(val);
+                  setParsedCoordinates(coords);
+                }}
+                className="w-full p-2.5 text-xs bg-white border border-amber-200 rounded-lg text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-[#0F382C]"
+              />
+              <p className="text-[10px] text-amber-800/90 leading-tight">
+                📍 Share exact Google Maps location link or GPS pin. Displayed on the interactive map for CEO and Admins.
+              </p>
+            </div>
+
+            {/* Landmark Directions & Caretaker Note */}
+            <div className="space-y-1">
+              <label className="block text-xs font-bold text-amber-900">
+                Private Directions & Caretaker Instructions
+              </label>
+              <textarea
+                rows={2}
+                placeholder="e.g. Turn right after Gate 3 of Imperial Towers, property is second villa on the left. Key with caretaker Mr. Munna Lal."
+                value={privateLocationNote}
+                onChange={(e) => setPrivateLocationNote(e.target.value)}
+                className="w-full p-2.5 text-xs bg-white border border-amber-200 rounded-lg text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-[#0F382C]"
+              />
+            </div>
+
             <p className="text-[11px] text-amber-900 leading-tight">
-              Strictly restricted to platform administrators & CEO to coordinate private client inspections without revealing private plot directions publicly.
+              🔒 Strictly restricted to platform administrators & CEO to coordinate private client inspections without revealing private plot directions publicly.
             </p>
           </div>
 

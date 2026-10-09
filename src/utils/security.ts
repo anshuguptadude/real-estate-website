@@ -193,6 +193,8 @@ export const getMaskedProperty = (property: Property, user: UserProfile | null):
     ...property,
     address: primaryLocality,
     coordinates: { lat: 27.1767, lng: 78.0081 },
+    privateLocationNote: undefined,
+    locationLink: undefined,
     ownerContact: undefined,
     agent: {
       name: 'Royal Agra Estate Concierge',

@@ -55,6 +55,7 @@ export interface Property {
   isUserListing?: boolean;
   editPendingApproval?: boolean;
   privateLocationNote?: string;
+  locationLink?: string; // Google Maps share link or GPS pin URL (Confidential - Admin/CEO only)
   ownerId?: string;
   userId?: string;
   ownerName?: string;

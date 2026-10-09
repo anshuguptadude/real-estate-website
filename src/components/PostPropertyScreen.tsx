@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Property, PropertyType, UserProfile } from '../types';
 import { AGRA_LOCALITIES, PROPERTY_TYPES } from '../data/mockData';
+import { AGRA_LOCALITY_COORDINATES } from './LocationPickerMap';
 import { isAdmin } from '../utils/security';
 import { saveFirestoreProperty } from '../services/firebaseService';
 import { 
@@ -25,7 +26,8 @@ import {
   AlertCircle,
   Loader2,
   PlusCircle,
-  Lock
+  Lock,
+  ExternalLink
 } from 'lucide-react';
 
 interface PostPropertyScreenProps {
@@ -55,6 +57,31 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const [projectTitle, setProjectTitle] = useState('');
   const [address, setAddress] = useState('');
   const [privateLocationNote, setPrivateLocationNote] = useState('');
+  const [locationLink, setLocationLink] = useState('');
+  const [parsedCoordinates, setParsedCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+
+  const extractCoordinatesFromInput = (input: string): { lat: number; lng: number } | null => {
+    if (!input || !input.trim()) return null;
+    const urlMatch = input.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (urlMatch) {
+      const lat = parseFloat(urlMatch[1]);
+      const lng = parseFloat(urlMatch[2]);
+      if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
+    }
+    const queryMatch = input.match(/[?&](?:q|ll)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (queryMatch) {
+      const lat = parseFloat(queryMatch[1]);
+      const lng = parseFloat(queryMatch[2]);
+      if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
+    }
+    const coordMatch = input.match(/(-?\d+\.\d+)[\s,]+(-?\d+\.\d+)/);
+    if (coordMatch) {
+      const lat = parseFloat(coordMatch[1]);
+      const lng = parseFloat(coordMatch[2]);
+      if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
+    }
+    return null;
+  };
   const [selectedLandmarks, setSelectedLandmarks] = useState<{ name: string; distance: string; travelTime: string }[]>([
     { name: 'Taj Mahal (East Gate)', distance: '4.5 km', travelTime: '10 mins' },
     { name: 'Agra Metro Station (Fatehabad Road)', distance: '1.2 km', travelTime: '3 mins' },
@@ -142,6 +169,8 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     setProjectTitle('');
     setAddress('');
     setPrivateLocationNote('');
+    setLocationLink('');
+    setParsedCoordinates(null);
     setSelectedLandmarks([
       { name: 'Taj Mahal (East Gate)', distance: '4.5 km', travelTime: '10 mins' },
       { name: 'Agra Metro Station (Fatehabad Road)', distance: '1.2 km', travelTime: '3 mins' },
@@ -602,6 +631,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     const resolvedOwnerName = ownerName.trim() || user?.name || 'Property Owner';
     const resolvedUserId = user?.id || (resolvedOwnerEmail ? `user-${resolvedOwnerEmail.replace(/[^a-z0-9]/g, '')}` : `user-${Date.now()}`);
 
+    const extractedCoords = extractCoordinatesFromInput(locationLink);
+    const matchedLocalityCoords = AGRA_LOCALITY_COORDINATES[finalLocality] || { lat: 27.1767, lng: 78.0081 };
+    const resolvedCoordinates = extractedCoords || parsedCoordinates || matchedLocalityCoords;
+
     const newProperty: Property = {
       id: generatedId,
       title: projectTitle.trim() || `Luxury ${propertyType} in ${finalLocality}`,
@@ -647,6 +680,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       coverImage: finalCover,
       description: `Spectacular ${propertyType} situated in the prestigious enclave of ${finalLocality}, Agra. Designed for distinguished living with spacious layouts, high ceilings, premium fittings, and comprehensive security infrastructure.`,
       privateLocationNote: privateLocationNote.trim() || undefined,
+      locationLink: locationLink.trim() || undefined,
       highlights: [
         `${furnishing} with bespoke craftsmanship`,
         'Optimal Natural Sunlight & Cross-Ventilation',
@@ -671,7 +705,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       parkingSpots: 3,
       gatedSecurity: true,
       powerBackup: true,
-      coordinates: { lat: 27.1767, lng: 78.0081 }
+      coordinates: resolvedCoordinates
     };
 
     try {
@@ -1081,25 +1115,64 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                   </div>
 
                   {/* Private Location & Navigation Box (Admin & CEO Eyes Only) */}
-                  <div className="p-4 bg-amber-50/70 border border-amber-300/80 rounded-2xl space-y-2">
+                  <div className="p-4 sm:p-5 bg-amber-50/70 border border-amber-300/80 rounded-2xl space-y-3.5">
                     <div className="flex items-center justify-between">
                       <label className="block text-xs font-bold text-amber-950 uppercase tracking-wider flex items-center gap-1.5">
                         <Lock className="w-3.5 h-3.5 text-amber-700" />
-                        <span>Confidential Private Location Note & Landmark Directions (Admin & CEO Eyes Only)</span>
+                        <span>Confidential Private Location & Navigation (Admin & CEO Eyes Only)</span>
                       </label>
                       <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
-                        Admin Only
+                        Admin & CEO Only
                       </span>
                     </div>
-                    <textarea
-                      rows={2}
-                      placeholder="e.g. Turn right after Gate 3 of Imperial Towers, property is second villa on the left. Key with caretaker Mr. Munna Lal."
-                      value={privateLocationNote}
-                      onChange={(e) => setPrivateLocationNote(e.target.value)}
-                      className="w-full p-3 text-base sm:text-sm bg-white border border-amber-200 rounded-xl text-gray-900 focus:bg-white focus:border-[#0F382C]"
-                    />
+
+                    {/* Google Maps Location Link / GPS Pin URL */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-amber-700" />
+                          <span>Google Maps Location Link / GPS Pin URL</span>
+                        </label>
+                        {parsedCoordinates && (
+                          <span className="text-[10px] font-mono text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300 flex items-center gap-1">
+                            <Check className="w-3 h-3 text-emerald-700" />
+                            <span>GPS Detected ({parsedCoordinates.lat.toFixed(4)}, {parsedCoordinates.lng.toFixed(4)})</span>
+                          </span>
+                        )}
+                      </div>
+                      <input
+                        type="url"
+                        placeholder="Paste Google Maps share link or GPS pin URL (e.g. https://maps.app.goo.gl/... or https://maps.google.com/?q=...)"
+                        value={locationLink}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setLocationLink(val);
+                          const coords = extractCoordinatesFromInput(val);
+                          setParsedCoordinates(coords);
+                        }}
+                        className="w-full p-3 text-base sm:text-sm bg-white border border-amber-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-[#0F382C]"
+                      />
+                      <p className="text-[11px] text-amber-800/90 leading-tight">
+                        📍 Share your exact Google Maps location link or GPS pin. When viewed by the CEO or verified Admin accounts, this exact location will be displayed in the property details map section to navigate directly to the property.
+                      </p>
+                    </div>
+
+                    {/* Landmark Directions & Caretaker Note */}
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-amber-900">
+                        Private Directions & Caretaker Instructions
+                      </label>
+                      <textarea
+                        rows={2}
+                        placeholder="e.g. Turn right after Gate 3 of Imperial Towers, property is second villa on the left. Key with caretaker Mr. Munna Lal."
+                        value={privateLocationNote}
+                        onChange={(e) => setPrivateLocationNote(e.target.value)}
+                        className="w-full p-3 text-base sm:text-sm bg-white border border-amber-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-[#0F382C]"
+                      />
+                    </div>
+
                     <p className="text-[11px] text-amber-900 leading-tight">
-                      This private note is strictly restricted to verified platform administrators and the CEO to guide private escorted client inspections without exposing your private plot or gate directions publicly.
+                      🔒 This confidential box (both location link and directions) is strictly restricted to verified platform administrators and the CEO. Public buyers will only see the general locality ({locality || 'Agra'}).
                     </p>
                   </div>
 
