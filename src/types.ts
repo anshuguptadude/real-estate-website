@@ -20,7 +20,7 @@ export interface Property {
   superAreaSqFt: number;
   carpetAreaSqFt: number;
   furnishing: 'Fully Furnished' | 'Semi-Furnished' | 'Unfurnished' | 'Designer Fitted';
-  facing: 'North-East (Vastu)' | 'East' | 'North' | 'Taj View (South-East)' | 'Park Facing';
+  facing: 'North-East (Morning Sun)' | 'East' | 'North' | 'Taj View (South-East)' | 'Park Facing';
   reraId: string;
   possession: 'Ready to Move' | 'Immediate' | 'Dec 2025' | 'Under Construction';
   featured: boolean;
@@ -53,6 +53,8 @@ export interface Property {
   isApproved?: boolean;
   isDeleted?: boolean;
   isUserListing?: boolean;
+  editPendingApproval?: boolean;
+  privateLocationNote?: string;
   ownerId?: string;
   userId?: string;
   ownerName?: string;
@@ -77,6 +79,9 @@ export interface UserProfile {
   email: string;
   phone: string;
   role: 'buyer' | 'owner' | 'admin' | 'ceo' | 'agent' | 'staff';
+  status?: 'active' | 'suspended' | 'disabled';
+  disabledReason?: string;
+  disabledAt?: string;
   permissions?: string[];
   unlockedPropertyIds?: string[];
   avatar?: string;

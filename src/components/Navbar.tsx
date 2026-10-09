@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ActiveScreen, UserProfile } from '../types';
-import { Landmark, Menu, X, Building2, User, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
+import { ActiveScreen, UserProfile, UserDashboardTab } from '../types';
+import { isCEO, isAdmin } from '../utils/security';
+import { Landmark, Menu, X, Building2, User, LogOut, LayoutDashboard, ChevronDown, Crown, ShieldCheck, Heart } from 'lucide-react';
 
 interface NavbarProps {
   activeScreen: ActiveScreen;
-  onNavigate: (screen: ActiveScreen) => void;
+  onNavigate: (screen: ActiveScreen, propertyId?: string | null, targetTab?: UserDashboardTab) => void;
   onOpenLogin: () => void;
   onOpenPostProperty: () => void;
   user: UserProfile | null;
@@ -162,14 +163,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                 {/* Dropdown Menu */}
                 {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 text-gray-800 z-50 animate-fadeIn">
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 text-gray-800 z-50 animate-fadeIn divide-y divide-gray-100">
                     
                     {/* User Info Header in Dropdown */}
-                    <div className="px-4 py-3 border-b border-gray-100 bg-[#FAF8F5]">
+                    <div className="px-4 py-3 bg-[#FAF8F5]">
                       <p className="text-xs font-bold text-[#0F382C] line-clamp-1">{user.name}</p>
                       <p className="text-[11px] text-gray-500 truncate">{user.email}</p>
                       <span className="inline-block mt-1 text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#E4D5B7] text-[#0F382C]">
-                        {user.role === 'owner' ? 'Property Owner' : 'Investor'}
+                        {isCEO(user) ? '👑 Founder & CEO' : isAdmin(user) ? '🛡️ Administrator' : user.role === 'owner' ? 'Property Owner' : 'Investor / Buyer'}
                       </span>
                     </div>
 
@@ -178,7 +179,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         type="button"
                         id="dropdown-my-dashboard-btn"
                         onClick={() => {
-                          onNavigate('dashboard');
+                          onNavigate('dashboard', null, 'listings');
                           setProfileDropdownOpen(false);
                         }}
                         className="w-full text-left px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-emerald-50 hover:text-[#0F382C] flex items-center gap-2.5 transition-colors"
@@ -191,7 +192,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         type="button"
                         id="dropdown-listed-props-btn"
                         onClick={() => {
-                          onNavigate('dashboard');
+                          onNavigate('dashboard', null, 'listings');
                           setProfileDropdownOpen(false);
                         }}
                         className="w-full text-left px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-emerald-50 hover:text-[#0F382C] flex items-center gap-2.5 transition-colors"
@@ -204,7 +205,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         type="button"
                         id="dropdown-profile-settings-btn"
                         onClick={() => {
-                          onNavigate('dashboard');
+                          onNavigate('dashboard', null, 'profile');
                           setProfileDropdownOpen(false);
                         }}
                         className="w-full text-left px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-emerald-50 hover:text-[#0F382C] flex items-center gap-2.5 transition-colors"
@@ -212,6 +213,49 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <User className="w-4 h-4 text-gray-500" />
                         <span>Profile Settings</span>
                       </button>
+
+                      <button
+                        type="button"
+                        id="dropdown-saved-estates-btn"
+                        onClick={() => {
+                          onNavigate('dashboard', null, 'saved');
+                          setProfileDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-emerald-50 hover:text-[#0F382C] flex items-center gap-2.5 transition-colors"
+                      >
+                        <Heart className="w-4 h-4 text-gray-500" />
+                        <span>Saved Estates</span>
+                      </button>
+
+                      {isAdmin(user) && (
+                        <button
+                          type="button"
+                          id="dropdown-approvals-btn"
+                          onClick={() => {
+                            onNavigate('dashboard', null, 'approvals');
+                            setProfileDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-xs font-medium text-amber-900 hover:bg-amber-50 flex items-center gap-2.5 transition-colors"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-amber-700" />
+                          <span>Property Approvals</span>
+                        </button>
+                      )}
+
+                      {isCEO(user) && (
+                        <button
+                          type="button"
+                          id="dropdown-ceo-access-btn"
+                          onClick={() => {
+                            onNavigate('dashboard', null, 'ceo-access');
+                            setProfileDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-xs font-bold text-amber-900 bg-amber-50/60 hover:bg-amber-100 flex items-center gap-2.5 transition-colors"
+                        >
+                          <Crown className="w-4 h-4 text-amber-600" />
+                          <span>👑 CEO Master RBAC Console</span>
+                        </button>
+                      )}
                     </div>
 
                     <div className="pt-1 border-t border-gray-100">

@@ -91,6 +91,9 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
         id: `TOUR-${Math.floor(10000 + Math.random() * 90000)}`,
         propertyId: property.id,
         propertyTitle: property.title,
+        propertyPrice: property.priceDisplay,
+        propertyLocality: property.locality || property.location,
+        propertyImage: property.coverImage || (property.images && property.images[0]) || '',
         buyerName: inquiryName.trim(),
         phone: inquiryPhone.trim(),
         email: user?.email || 'direct-visitor@royalagraestate.in',
@@ -388,6 +391,11 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                       <strong>Exact Unmasked Street Address:</strong> {property.address}
                     </div>
                   )}
+                  {property.privateLocationNote && (
+                    <div className="pt-1 border-t border-amber-200 text-[11px] text-amber-900 bg-amber-100/60 p-2 rounded-lg">
+                      <strong>🔒 Confidential Landmark & Navigation Note:</strong> {property.privateLocationNote}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -530,7 +538,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 <div className="pt-3 mt-3 border-t border-gray-200">
                   <a
                     href={`https://wa.me/919149079913?text=${encodeURIComponent(
-                      `Hi Royal Agra Estate Concierge, I would like to inquire about ${property.title} (Property ID: #${property.id}, Price: ${property.priceDisplay}, Locality: ${property.locality || property.location}).`
+                      `Hi Royal Agra Estate Concierge, I would like to inquire about ${property.title} (Property ID: #${property.id}, Price: ${property.priceDisplay}, Locality: ${property.locality || property.location})${inquiryName ? ` - Inquired by ${inquiryName}${inquiryPhone ? ` (${inquiryPhone})` : ''}` : (user?.name ? ` - Inquired by ${user.name}${user.phone ? ` (${user.phone})` : ''}` : '')}.`
                     )}`}
                     target="_blank"
                     rel="noreferrer"

@@ -210,7 +210,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           {/* Unified Clean "Inquire / Contact" Button */}
           <a
             href={`https://wa.me/919149079913?text=${encodeURIComponent(
-              `Hi Royal Agra Estate, I am interested in Property ID #${property.id}.`
+              `Hi Royal Agra Estate Concierge, I would like to inquire about ${property.title} (Property ID: #${property.id}, Price: ${property.priceDisplay}, Locality: ${property.locality || property.location}).`
             )}`}
             target="_blank"
             rel="noreferrer"

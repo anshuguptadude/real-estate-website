@@ -173,6 +173,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
 
     if (matchedAccount) {
+      if (matchedAccount.status === 'disabled' || matchedAccount.status === 'suspended') {
+        setAuthError('This account has been temporarily disabled/suspended by Royal Agra Estate administration. Please contact the concierge desk at +91 91490 79913.');
+        return;
+      }
+
       if (matchedAccount.password === enteredPassword) {
         const userToAuth: UserProfile = {
           id: matchedAccount.id,
@@ -180,6 +185,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           email: matchedAccount.email,
           phone: matchedAccount.phone,
           role: matchedAccount.role || role,
+          status: matchedAccount.status || 'active',
+          permissions: matchedAccount.permissions,
+          unlockedPropertyIds: matchedAccount.unlockedPropertyIds,
           avatar: matchedAccount.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
           memberSince: matchedAccount.memberSince || '2024',
           preferredLocality: matchedAccount.preferredLocality || 'Agra'

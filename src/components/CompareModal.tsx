@@ -20,7 +20,7 @@ const COMPARISON_AMENITIES = [
   '24/7 Security & CCTV',
   '100% Power Backup',
   'Clubhouse & Gymnasium',
-  'Vastu Compliant',
+  'Optimal Natural Sunlight & Air',
   'Private Lift / Elevator',
   'Landscaped Garden / Terrace',
   'Italian Marble Flooring',
@@ -77,8 +77,8 @@ export const CompareModal: React.FC<CompareModalProps> = ({
     if (needle.includes('power')) {
       return property.powerBackup || list.some(a => a.toLowerCase().includes('power') || a.toLowerCase().includes('backup'));
     }
-    if (needle.includes('vastu')) {
-      return property.facing.includes('Vastu') || list.some(a => a.toLowerCase().includes('vastu'));
+    if (needle.includes('sunlight') || needle.includes('air') || needle.includes('ventilation')) {
+      return property.facing.includes('Sun') || list.some(a => a.toLowerCase().includes('sun') || a.toLowerCase().includes('ventilation'));
     }
     if (needle.includes('lift') || needle.includes('elevator')) {
       return list.some(a => a.toLowerCase().includes('lift') || a.toLowerCase().includes('elevator'));

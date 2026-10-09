@@ -675,6 +675,18 @@ export const saveFirestoreAccount = async (account: any): Promise<boolean> => {
   }
 };
 
+export const deleteFirestoreAccount = async (emailOrId: string): Promise<boolean> => {
+  try {
+    if (!emailOrId) return false;
+    const docId = emailOrId.toLowerCase().trim();
+    await deleteDoc(doc(db, 'accounts', docId));
+    return true;
+  } catch (error) {
+    console.error("Error deleting account from Firestore:", error);
+    return false;
+  }
+};
+
 // FAVORITES SYNC
 export const saveUserFavorite = async (userId: string, propertyId: string) => {
   try {

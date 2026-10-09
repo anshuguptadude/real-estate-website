@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ActiveScreen, Property, Project, FilterState, PropertyType, ListingType, UserProfile } from './types';
+import { ActiveScreen, Property, Project, FilterState, PropertyType, ListingType, UserProfile, UserDashboardTab } from './types';
 import { isAdmin, getMaskedProperty, LeadSubmission } from './utils/security';
 import { 
   subscribeFirestoreProperties,
@@ -49,6 +49,7 @@ import { Footer } from './components/Footer';
 export default function App() {
   // Navigation & Screen state
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>('home');
+  const [dashboardTab, setDashboardTab] = useState<UserDashboardTab>('listings');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const hasOpenedModalInApp = useRef(false);
 
@@ -288,7 +289,27 @@ export default function App() {
   const [savedDrawerOpen, setSavedDrawerOpen] = useState(false);
 
   // Scroll to top on screen change
-  const navigateTo = (screen: ActiveScreen, propertyId: string | null = null, addToHistory: boolean = true) => {
+  const navigateTo = (
+    screen: ActiveScreen, 
+    propertyId: string | null = null, 
+    addToHistoryOrTargetTab: boolean | UserDashboardTab = true, 
+    maybeTargetTab?: UserDashboardTab
+  ) => {
+    let addToHistory = true;
+    let targetTab: UserDashboardTab | undefined;
+
+    if (typeof addToHistoryOrTargetTab === 'boolean') {
+      addToHistory = addToHistoryOrTargetTab;
+      targetTab = maybeTargetTab;
+    } else if (typeof addToHistoryOrTargetTab === 'string') {
+      targetTab = addToHistoryOrTargetTab;
+      addToHistory = true;
+    }
+
+    if (targetTab) {
+      setDashboardTab(targetTab);
+    }
+
     if (screen === 'dashboard' && !user) {
       setLoginPromptMessage('Please log in or create an account to view your dashboard.');
       setPendingDashboardRedirect(true);
@@ -788,6 +809,8 @@ export default function App() {
         {/* SCREEN: User Dashboard */}
         {activeScreen === 'dashboard' && (
           <UserDashboardScreen
+            key={`${dashboardTab}-${user?.id || 'guest'}`}
+            initialTab={dashboardTab}
             user={user}
             userProperties={userProperties}
             savedProperties={savedProperties}

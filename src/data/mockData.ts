@@ -100,7 +100,7 @@ export const PROPERTIES_DATA: Property[] = [
     superAreaSqFt: 3800,
     carpetAreaSqFt: 3100,
     furnishing: 'Designer Fitted',
-    facing: 'North-East (Vastu)',
+    facing: 'North-East (Morning Sun)',
     reraId: 'UPRERA-AGR-4419',
     possession: 'Ready to Move',
     featured: true,
@@ -117,8 +117,8 @@ export const PROPERTIES_DATA: Property[] = [
       'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80'
     ],
     coverImage: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-    description: 'Immerse in the serene tranquility of Dayalbagh. This palatial residence offers 100% Vastu-compliant architecture, sprawling private manicured lawn, rooftop stargazing terrace, and state-of-the-art security systems.',
-    highlights: ['100% Vastu Compliant', 'Yamuna River Breeze', 'ADA Approved Clear Deed', 'EV Charging Station'],
+    description: 'Immerse in the serene tranquility of Dayalbagh. This palatial residence offers optimal natural sunlight and ventilation architecture, sprawling private manicured lawn, rooftop stargazing terrace, and state-of-the-art security systems.',
+    highlights: ['Optimal Natural Sunlight', 'Yamuna River Breeze', 'ADA Approved Clear Deed', 'EV Charging Station'],
     amenities: ['Private Garden / Terrace', '24/7 Security & CCTV', '100% Power Backup', 'Solar Plant', 'EV Charging Station'],
     landmarks: [
       { name: 'Dayalbagh Temple', distance: '600 m', travelTime: '2 mins' },

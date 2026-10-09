@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { UserProfile, Property, UserDashboardTab } from '../types';
 import { isAdmin, isCEO, LeadSubmission, ADMIN_CREDENTIALS, SUPER_ADMIN_PERMISSIONS } from '../utils/security';
-import { saveFirestoreAccount, getFirestoreAccount, subscribeFirestoreAccounts } from '../services/firebaseService';
+import { saveFirestoreAccount, getFirestoreAccount, subscribeFirestoreAccounts, deleteFirestoreAccount } from '../services/firebaseService';
 import { 
   Building2, 
   User, 
@@ -22,23 +22,29 @@ import {
   Maximize, 
   Eye, 
   Camera, 
-  Save,
-  Clock,
-  ArrowRight,
-  Crown,
-  Key,
-  Lock,
-  Unlock,
-  Shield,
-  Search,
-  Check,
-  X,
-  Users,
-  Sliders,
-  RefreshCw,
-  SlidersHorizontal,
-  ChevronDown,
-  ChevronUp
+  Save, 
+  Clock, 
+  ArrowRight, 
+  Crown, 
+  Key, 
+  Lock, 
+  Unlock, 
+  Shield, 
+  Search, 
+  Check, 
+  X, 
+  Users, 
+  Sliders, 
+  RefreshCw, 
+  SlidersHorizontal, 
+  ChevronDown, 
+  ChevronUp,
+  UserX,
+  UserCheck,
+  PowerOff,
+  Upload,
+  UploadCloud,
+  MessageSquare
 } from 'lucide-react';
 
 interface UserDashboardScreenProps {
@@ -320,14 +326,173 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
         onUpdateProfile(accToSave);
       }
 
-      setSaveAccountSuccessMsg(`Access permissions & role successfully pushed to Cloud Firestore for ${accToSave.name || accToSave.email}`);
+      setSaveAccountSuccessMsg(`Access permissions & role successfully updated for ${accToSave.name || accToSave.email}`);
       setTimeout(() => setSaveAccountSuccessMsg(null), 4000);
     } catch (err) {
       console.error('Failed to save account permissions:', err);
-      alert('Failed to save permissions to Firestore. Please try again.');
+      alert('Failed to save permissions. Please try again.');
     } finally {
       setSavingAccountEmail(null);
     }
+  };
+
+  // CEO Account Suspension / Disabling
+  const handleToggleAccountStatus = async (accountEmail: string) => {
+    const acc = getActiveAccountData(accountEmail);
+    const newStatus = (acc.status === 'disabled' || acc.status === 'suspended') ? 'active' : 'disabled';
+    const updatedAcc: UserProfile = {
+      ...acc,
+      status: newStatus,
+      disabledAt: newStatus === 'disabled' ? new Date().toISOString() : undefined,
+      disabledReason: newStatus === 'disabled' ? 'Temporarily suspended by CEO administration.' : undefined
+    };
+
+    setSavingAccountEmail(accountEmail);
+    try {
+      await saveFirestoreAccount(updatedAcc);
+      
+      let storedAccounts: any[] = [];
+      try {
+        const stored = localStorage.getItem('royal_agra_accounts_v1');
+        if (stored) storedAccounts = JSON.parse(stored);
+      } catch {}
+
+      const idx = storedAccounts.findIndex(a => a.email && a.email.toLowerCase() === accountEmail.toLowerCase());
+      if (idx >= 0) {
+        storedAccounts[idx] = { ...storedAccounts[idx], ...updatedAcc };
+      }
+      localStorage.setItem('royal_agra_accounts_v1', JSON.stringify(storedAccounts));
+
+      setAllAccounts(prev => prev.map(a => a.email.toLowerCase() === accountEmail.toLowerCase() ? updatedAcc : a));
+      setEditingAccounts(prev => ({ ...prev, [accountEmail]: updatedAcc }));
+
+      setSaveAccountSuccessMsg(`Account for ${acc.name || acc.email} is now ${newStatus === 'disabled' ? '🔴 SUSPENDED / DISABLED' : '🟢 ACTIVE'}`);
+      setTimeout(() => setSaveAccountSuccessMsg(null), 4000);
+    } catch (err) {
+      console.error('Failed to update account status:', err);
+      alert('Failed to update account status. Please try again.');
+    } finally {
+      setSavingAccountEmail(null);
+    }
+  };
+
+  // CEO Permanent Account Deletion
+  const [deleteAccountConfirmEmail, setDeleteAccountConfirmEmail] = useState<string | null>(null);
+
+  const handleDeleteAccountPermanently = async (accountEmail: string) => {
+    setSavingAccountEmail(accountEmail);
+    try {
+      // 1. Delete from Firestore accounts
+      await deleteFirestoreAccount(accountEmail);
+
+      // 2. Delete from local cache
+      let storedAccounts: any[] = [];
+      try {
+        const stored = localStorage.getItem('royal_agra_accounts_v1');
+        if (stored) storedAccounts = JSON.parse(stored);
+      } catch {}
+
+      const filtered = storedAccounts.filter(a => a.email && a.email.toLowerCase() !== accountEmail.toLowerCase());
+      localStorage.setItem('royal_agra_accounts_v1', JSON.stringify(filtered));
+
+      // 3. Update state
+      setAllAccounts(prev => prev.filter(a => a.email.toLowerCase() !== accountEmail.toLowerCase()));
+      setEditingAccounts(prev => {
+        const copy = { ...prev };
+        delete copy[accountEmail];
+        return copy;
+      });
+
+      setDeleteAccountConfirmEmail(null);
+      setSaveAccountSuccessMsg(`Account ${accountEmail} has been permanently deleted from the Royal Agra network.`);
+      setTimeout(() => setSaveAccountSuccessMsg(null), 4000);
+    } catch (err) {
+      console.error('Failed to delete account:', err);
+      alert('Failed to delete account. Please try again.');
+    } finally {
+      setSavingAccountEmail(null);
+    }
+  };
+
+  // Live Camera state for Profile Photo
+  const [cameraModalOpen, setCameraModalOpen] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const profilePhotoInputRef = useRef<HTMLInputElement | null>(null);
+
+  const startCamera = async () => {
+    setCameraError(null);
+    setCameraModalOpen(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 640 }, height: { ideal: 640 }, facingMode: 'user' },
+        audio: false
+      });
+      setCameraStream(stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play().catch(() => {});
+      }
+    } catch (err) {
+      console.error('Camera access error:', err);
+      setCameraError('Camera access not available or permission was denied. Please allow camera permissions or upload a photo from your files.');
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(t => t.stop());
+      setCameraStream(null);
+    }
+    setCameraModalOpen(false);
+    setCameraError(null);
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+    const canvas = document.createElement('canvas');
+    const size = Math.min(video.videoWidth || 640, video.videoHeight || 640);
+    canvas.width = 400;
+    canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      const startX = ((video.videoWidth || 640) - size) / 2;
+      const startY = ((video.videoHeight || 640) - size) / 2;
+      ctx.drawImage(video, startX, startY, size, size, 0, 0, 400, 400);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      setAvatar(dataUrl);
+    }
+    stopCamera();
+  };
+
+  const handleProfilePhotoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const size = Math.min(img.width, img.height);
+        canvas.width = 400;
+        canvas.height = 400;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          const startX = (img.width - size) / 2;
+          const startY = (img.height - size) / 2;
+          ctx.drawImage(img, startX, startY, size, size, 0, 0, 400, 400);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+          setAvatar(dataUrl);
+        }
+      };
+      if (typeof event.target?.result === 'string') {
+        img.src = event.target.result;
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
@@ -1084,34 +1249,61 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                 <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
                   Profile Photo
                 </label>
-                <div className="flex items-center gap-5">
-                  <img
-                    src={avatar}
-                    alt="Current Avatar"
-                    className="w-16 h-16 rounded-2xl object-cover border-2 border-[#C5A869] shadow-sm"
-                  />
-                  <div className="space-y-1.5 flex-1">
-                    <input
-                      type="url"
-                      value={avatar}
-                      onChange={(e) => setAvatar(e.target.value)}
-                      placeholder="Enter photo image URL..."
-                      className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white"
+                <div className="flex flex-col sm:flex-row sm:items-center gap-5 p-4 bg-gray-50/80 rounded-2xl border border-gray-200">
+                  <div className="relative shrink-0">
+                    <img
+                      src={avatar}
+                      alt="Current Avatar"
+                      className="w-20 h-20 rounded-2xl object-cover border-2 border-[#C5A869] shadow-md"
                     />
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-gray-400 font-medium">Presets:</span>
-                      {avatarPresets.map((preset, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => setAvatar(preset)}
-                          className={`w-7 h-7 rounded-lg overflow-hidden border ${
-                            avatar === preset ? 'border-[#0F382C] ring-2 ring-[#0F382C]/30' : 'border-gray-200 opacity-70'
-                          }`}
-                        >
-                          <img src={preset} alt="preset" className="w-full h-full object-cover" />
-                        </button>
-                      ))}
+                  </div>
+
+                  <div className="space-y-3 flex-1">
+                    {/* Hidden File Input */}
+                    <input
+                      type="file"
+                      ref={profilePhotoInputRef}
+                      accept="image/*"
+                      onChange={handleProfilePhotoFile}
+                      className="hidden"
+                    />
+
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => profilePhotoInputRef.current?.click()}
+                        className="px-4 py-2 bg-white hover:bg-gray-100 text-[#0F382C] border border-gray-300 rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-2"
+                      >
+                        <UploadCloud className="w-4 h-4 text-[#0F382C]" />
+                        <span>Upload Photo</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={startCamera}
+                        className="px-4 py-2 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-2"
+                      >
+                        <Camera className="w-4 h-4 text-[#C5A869]" />
+                        <span>Take Live Photo</span>
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1 border-t border-gray-200/60">
+                      <span className="text-[11px] text-gray-500 font-medium">Or choose classic portrait:</span>
+                      <div className="flex items-center gap-1.5">
+                        {avatarPresets.map((preset, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setAvatar(preset)}
+                            className={`w-7 h-7 rounded-lg overflow-hidden border transition-all ${
+                              avatar === preset ? 'border-[#0F382C] ring-2 ring-[#0F382C]/40 scale-105' : 'border-gray-200 opacity-70 hover:opacity-100'
+                            }`}
+                          >
+                            <img src={preset} alt="preset" className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1440,55 +1632,88 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                     <thead>
                       <tr className="bg-[#0F382C] text-white uppercase text-[10px] tracking-wider">
                         <th className="p-4">Lead ID & Date</th>
-                        <th className="p-4">Buyer Name & Contact</th>
-                        <th className="p-4">Property Reference</th>
-                        <th className="p-4">Preferred Visit Time</th>
-                        <th className="p-4 text-right">Actions</th>
+                        <th className="p-4">Property Dossier</th>
+                        <th className="p-4">Buyer / Sender Details</th>
+                        <th className="p-4">Schedule / Notes</th>
+                        <th className="p-4 text-right">Concierge Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-gray-800">
-                      {leads.map((lead) => (
-                        <tr key={lead.id} className="hover:bg-gray-50/80 transition-colors">
-                          <td className="p-4 font-mono">
-                            <span className="font-bold text-[#0F382C] block">#{lead.id}</span>
-                            <span className="text-[10px] text-gray-400">{lead.timestamp}</span>
-                          </td>
-                          <td className="p-4">
-                            <span className="font-bold text-gray-900 block">{lead.buyerName}</span>
-                            <span className="text-emerald-700 font-medium block">{lead.phone}</span>
-                            <span className="text-gray-500 block">{lead.email}</span>
-                          </td>
-                          <td className="p-4">
-                            <span className="font-semibold text-[#0F382C] block">{lead.propertyTitle}</span>
-                            <span className="text-[10px] font-mono text-gray-400">ID: {lead.propertyId}</span>
-                          </td>
-                          <td className="p-4 font-medium text-gray-700">
-                            {lead.preferredTime ? new Date(lead.preferredTime).toLocaleString() : 'Not Specified'}
-                          </td>
-                          <td className="p-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <a
-                                href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${lead.buyerName}, regarding your inquiry for Royal Agra Estate...`)}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[10px]"
-                              >
-                                WhatsApp
-                              </a>
-                              {onDeleteLead && (
-                                <button
-                                  type="button"
-                                  onClick={() => onDeleteLead(lead.id)}
-                                  className="p-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded"
-                                  title="Delete lead"
+                      {leads.map((lead) => {
+                        const linkedProp = (allProperties || userProperties).find(p => p.id === lead.propertyId);
+                        const waText = encodeURIComponent(
+                          `🏰 *Royal Agra Estate — Client Inquiry Follow-up*\n\n` +
+                          `👤 *Client:* ${lead.buyerName} (${lead.phone})\n` +
+                          `📧 *Email:* ${lead.email}\n` +
+                          `📍 *Property:* ${lead.propertyTitle} (ID: #${lead.propertyId})\n` +
+                          (linkedProp ? `💰 *Price:* ${linkedProp.priceDisplay} | *Locality:* ${linkedProp.locality}\n` : '') +
+                          `🗓️ *Requested Time:* ${lead.preferredTime || 'Immediate Advisory'}\n\n` +
+                          `Hello ${lead.buyerName}, thank you for reaching out to Royal Agra Estate regarding ${lead.propertyTitle}. How may we assist with your schedule and site viewing?`
+                        );
+
+                        return (
+                          <tr key={lead.id} className="hover:bg-gray-50/80 transition-colors">
+                            <td className="p-4 font-mono align-top">
+                              <span className="font-bold text-[#0F382C] block">#{lead.id}</span>
+                              <span className="text-[10px] text-gray-400 block mt-0.5">{lead.timestamp}</span>
+                            </td>
+                            <td className="p-4 align-top">
+                              <div className="flex items-start gap-2.5">
+                                {linkedProp?.coverImage && (
+                                  <img
+                                    src={linkedProp.coverImage}
+                                    alt={lead.propertyTitle}
+                                    className="w-12 h-12 rounded-lg object-cover border border-gray-200 shrink-0"
+                                  />
+                                )}
+                                <div>
+                                  <span className="font-bold text-[#0F382C] block hover:underline cursor-pointer" onClick={() => linkedProp && onViewProperty(linkedProp)}>
+                                    {lead.propertyTitle}
+                                  </span>
+                                  <div className="flex items-center gap-2 text-[11px] text-gray-500 mt-0.5">
+                                    {linkedProp?.priceDisplay && <span className="font-bold text-emerald-800">{linkedProp.priceDisplay}</span>}
+                                    {linkedProp?.locality && <span>• {linkedProp.locality}</span>}
+                                  </div>
+                                  <span className="text-[10px] font-mono text-gray-400 block">Ref: #{lead.propertyId}</span>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-4 align-top">
+                              <span className="font-bold text-gray-900 block">{lead.buyerName}</span>
+                              <span className="text-emerald-700 font-medium block">{lead.phone}</span>
+                              <span className="text-gray-500 text-[11px] block">{lead.email}</span>
+                            </td>
+                            <td className="p-4 align-top font-medium text-gray-700">
+                              <span className="bg-amber-50 border border-amber-200 px-2 py-1 rounded-md text-[11px] text-amber-950 inline-block">
+                                {lead.preferredTime || 'Immediate Tour Request'}
+                              </span>
+                            </td>
+                            <td className="p-4 text-right align-top">
+                              <div className="flex items-center justify-end gap-2">
+                                <a
+                                  href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}?text=${waText}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="px-3 py-1.5 bg-[#25D366] hover:bg-[#1ebd54] text-white rounded-lg font-bold text-[11px] shadow-xs flex items-center gap-1.5 transition-all"
                                 >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                                  <MessageSquare className="w-3.5 h-3.5 fill-white" />
+                                  <span>WhatsApp Client</span>
+                                </a>
+                                {onDeleteLead && (
+                                  <button
+                                    type="button"
+                                    onClick={() => onDeleteLead(lead.id)}
+                                    className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition-colors"
+                                    title="Delete lead"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -1631,7 +1856,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                         </span>
                       </div>
                       <p className="text-xs text-[#E4D5B7] mt-1 font-medium">
-                        Real-time Role-Based Access Control • Granular Address Unmasking • Cloud Firestore Direct Sync
+                        Real-time Role-Based Access Control • Granular Address Unmasking • Secure Cloud Synchronization
                       </p>
                     </div>
                   </div>
@@ -1645,7 +1870,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                 <div className="flex flex-col items-start md:items-end gap-2 shrink-0">
                   <div className="flex items-center gap-2 bg-black/40 border border-[#C5A869]/30 px-3.5 py-1.5 rounded-xl text-xs text-[#E4D5B7]">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                    <span className="font-mono font-semibold">Firestore Cloud Sync: LIVE</span>
+                    <span className="font-mono font-semibold">Cloud Database Status: LIVE</span>
                   </div>
                   <span className="text-[11px] text-gray-400 font-mono">
                     Total Network Accounts: <strong>{allAccounts.length}</strong>
@@ -1785,6 +2010,12 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                               {isSelfCEO && (
                                 <span className="px-2 py-0.5 rounded-full text-[9px] bg-amber-500 text-white font-bold uppercase">
                                   You
+                                </span>
+                              )}
+                              {(activeData.status === 'disabled' || activeData.status === 'suspended') && (
+                                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1">
+                                  <PowerOff className="w-3 h-3 text-rose-600" />
+                                  <span>Suspended / Disabled</span>
                                 </span>
                               )}
                             </div>
@@ -2006,7 +2237,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                                     <span>Permanent Listing Deletion</span>
                                   </div>
                                   <p className="text-[11px] text-gray-600 mt-0.5 leading-tight">
-                                    Allows deleting property listings permanently from Cloud Firestore and removing them from all client sessions.
+                                    Allows deleting property listings permanently from the cloud database and removing them from all client sessions.
                                   </p>
                                 </div>
                               </div>
@@ -2130,12 +2361,40 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                           </div>
 
                           {/* Action Footer */}
-                          <div className="flex items-center justify-between pt-2 border-t border-gray-200">
-                            <span className="text-xs text-gray-500">
-                              Changes will write directly to Firestore <code className="font-mono text-[11px] bg-gray-100 px-1 py-0.5 rounded">accounts/{acc.email}</code>
-                            </span>
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-gray-200">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {!isSelfCEO && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleAccountStatus(acc.email)}
+                                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                                      activeData.status === 'disabled' || activeData.status === 'suspended'
+                                        ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300'
+                                        : 'bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300'
+                                    }`}
+                                  >
+                                    <PowerOff className="w-3.5 h-3.5" />
+                                    <span>
+                                      {activeData.status === 'disabled' || activeData.status === 'suspended'
+                                        ? 'Re-activate Account'
+                                        : 'Suspend / Disable Account'}
+                                    </span>
+                                  </button>
 
-                            <div className="flex items-center gap-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeleteAccountConfirmEmail(acc.email)}
+                                    className="px-3.5 py-2 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-all flex items-center gap-1.5"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                                    <span>Delete Account Permanently</span>
+                                  </button>
+                                </>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-3 self-end sm:self-auto">
                               <button
                                 type="button"
                                 onClick={() => setExpandedAccountEmail(null)}
@@ -2153,7 +2412,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                                 {isSaving ? (
                                   <>
                                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                                    <span>Syncing to Firestore...</span>
+                                    <span>Saving Live...</span>
                                   </>
                                 ) : (
                                   <>
@@ -2175,7 +2434,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
 
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Property Confirmation Modal */}
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white max-w-sm w-full rounded-2xl p-6 text-center space-y-4 shadow-2xl border border-gray-200">
@@ -2207,6 +2466,114 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
               >
                 Yes, Delete
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Confirmation Modal (CEO) */}
+      {deleteAccountConfirmEmail && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white max-w-md w-full rounded-2xl p-6 text-center space-y-4 shadow-2xl border border-rose-200">
+            <div className="w-14 h-14 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+              <UserX className="w-8 h-8" />
+            </div>
+            <h3 className="text-lg font-serif-luxury font-bold text-gray-900">
+              Permanently Delete Account?
+            </h3>
+            <div className="text-xs text-gray-600 space-y-2">
+              <p>
+                Are you sure you want to permanently delete the account for <strong className="text-rose-950 font-mono">{deleteAccountConfirmEmail}</strong>?
+              </p>
+              <p className="p-3 bg-rose-50 rounded-xl border border-rose-200 text-rose-900 text-[11px] text-left">
+                ⚠️ <strong>CEO Warning:</strong> This will erase their credentials, custom permissions, and access privileges from the Royal Agra network permanently across all devices.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeleteAccountConfirmEmail(null)}
+                className="flex-1 py-2.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                id="confirm-delete-account-btn"
+                onClick={() => handleDeleteAccountPermanently(deleteAccountConfirmEmail)}
+                className="flex-1 py-2.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Delete Account</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Live Camera Photo Capture Modal */}
+      {cameraModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white max-w-md w-full rounded-3xl overflow-hidden shadow-2xl border border-gray-200">
+            {/* Camera Header */}
+            <div className="p-4 bg-[#0F382C] text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Camera className="w-5 h-5 text-[#C5A869]" />
+                <h3 className="text-sm font-bold font-serif-luxury text-white">Live Profile Photo Capture</h3>
+              </div>
+              <button
+                type="button"
+                onClick={stopCamera}
+                className="p-1 text-white/80 hover:text-white rounded-full hover:bg-white/10"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Video Viewfinder */}
+            <div className="p-6 space-y-4 text-center">
+              {cameraError ? (
+                <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 space-y-2">
+                  <AlertCircle className="w-6 h-6 text-rose-600 mx-auto" />
+                  <p className="font-semibold">{cameraError}</p>
+                </div>
+              ) : (
+                <div className="relative aspect-square max-w-[280px] mx-auto rounded-2xl overflow-hidden bg-black border-4 border-[#C5A869] shadow-inner flex items-center justify-center">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover scale-x-[-1]"
+                  />
+                  <div className="absolute inset-0 pointer-events-none border-2 border-white/40 rounded-full m-4" />
+                </div>
+              )}
+
+              <p className="text-[11px] text-gray-500">
+                Position your face inside the circle and click Snap Picture.
+              </p>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={stopCamera}
+                  className="flex-1 py-2.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl"
+                >
+                  Cancel
+                </button>
+                {!cameraError && (
+                  <button
+                    type="button"
+                    id="snap-profile-photo-btn"
+                    onClick={capturePhoto}
+                    className="flex-1 py-2.5 text-xs font-bold text-white bg-[#0F382C] hover:bg-[#164E3D] rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+                  >
+                    <Camera className="w-4 h-4 text-[#C5A869]" />
+                    <span>Snap Picture</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

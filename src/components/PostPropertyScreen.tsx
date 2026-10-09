@@ -54,6 +54,13 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const [isOtherLocality, setIsOtherLocality] = useState<boolean>(false);
   const [projectTitle, setProjectTitle] = useState('');
   const [address, setAddress] = useState('');
+  const [privateLocationNote, setPrivateLocationNote] = useState('');
+  const [selectedLandmarks, setSelectedLandmarks] = useState<{ name: string; distance: string; travelTime: string }[]>([
+    { name: 'Taj Mahal (East Gate)', distance: '4.5 km', travelTime: '10 mins' },
+    { name: 'Agra Metro Station (Fatehabad Road)', distance: '1.2 km', travelTime: '3 mins' },
+    { name: 'Agra-Lucknow Expressway Toll Plaza', distance: '5.8 km', travelTime: '12 mins' },
+    { name: 'Agra Cantt Railway Station', distance: '7.5 km', travelTime: '18 mins' }
+  ]);
   const [superArea, setSuperArea] = useState<string>('3500');
   const [areaUnit, setAreaUnit] = useState<'Sq.Ft' | 'Sq.Yard'>('Sq.Ft');
   const [bedrooms, setBedrooms] = useState<string>('4');
@@ -69,6 +76,18 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     '24/7 Security',
     'Private Garden'
   ]);
+
+  // Available Agra Landmark Presets
+  const AGRA_LANDMARK_PRESETS = [
+    { name: 'Taj Mahal (East Gate)', distance: '4.5 km', travelTime: '10 mins' },
+    { name: 'Agra Metro Station (Taj East Gate / Fatehabad Rd)', distance: '1.2 km', travelTime: '3 mins' },
+    { name: 'Agra-Lucknow Expressway Toll Plaza', distance: '5.8 km', travelTime: '12 mins' },
+    { name: 'Agra Cantt Railway Station', distance: '7.5 km', travelTime: '18 mins' },
+    { name: 'Dayalbagh Educational Institute & Heritage Zone', distance: '6.2 km', travelTime: '15 mins' },
+    { name: 'Inner Ring Road (Delhi-Agra Access)', distance: '3.4 km', travelTime: '8 mins' },
+    { name: 'Sanjay Place Commercial Hub & Civil Lines', distance: '5.0 km', travelTime: '12 mins' },
+    { name: 'Agra Domestic Airport (Kheria Civil Terminal)', distance: '11.0 km', travelTime: '25 mins' }
+  ];
 
   // Media Upload States (Supports up to 10 High-Quality Photos, up to 25 MB each)
   const MAX_PHOTOS = 10;
@@ -122,6 +141,13 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     setIsOtherLocality(false);
     setProjectTitle('');
     setAddress('');
+    setPrivateLocationNote('');
+    setSelectedLandmarks([
+      { name: 'Taj Mahal (East Gate)', distance: '4.5 km', travelTime: '10 mins' },
+      { name: 'Agra Metro Station (Fatehabad Road)', distance: '1.2 km', travelTime: '3 mins' },
+      { name: 'Agra-Lucknow Expressway Toll Plaza', distance: '5.8 km', travelTime: '12 mins' },
+      { name: 'Agra Cantt Railway Station', distance: '7.5 km', travelTime: '18 mins' }
+    ]);
     setSuperArea('3500');
     setAreaUnit('Sq.Ft');
     setBedrooms('4');
@@ -186,6 +212,36 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     } else {
       setSelectedAmenities([...selectedAmenities, item]);
     }
+  };
+
+  const toggleLandmarkPreset = (preset: { name: string; distance: string; travelTime: string }) => {
+    const exists = selectedLandmarks.some(l => l.name === preset.name);
+    if (exists) {
+      setSelectedLandmarks(selectedLandmarks.filter(l => l.name !== preset.name));
+    } else {
+      setSelectedLandmarks([...selectedLandmarks, { ...preset }]);
+    }
+  };
+
+  const updateLandmarkField = (index: number, field: 'name' | 'distance' | 'travelTime', value: string) => {
+    setSelectedLandmarks(prev => {
+      const copy = [...prev];
+      if (copy[index]) {
+        copy[index] = { ...copy[index], [field]: value };
+      }
+      return copy;
+    });
+  };
+
+  const removeLandmark = (index: number) => {
+    setSelectedLandmarks(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const addCustomLandmark = () => {
+    setSelectedLandmarks(prev => [
+      ...prev,
+      { name: 'Custom Agra Landmark', distance: '2.5 km', travelTime: '6 mins' }
+    ]);
   };
 
   const scrollToTop = () => {
@@ -564,7 +620,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       superAreaSqFt: numSuperArea,
       carpetAreaSqFt: Math.round(numSuperArea * 0.78),
       furnishing: furnishing as any,
-      facing: 'North-East (Vastu)',
+      facing: 'North-East (Morning Sun)',
       reraId: verificationDocNumber.trim() || (isLegallyVerified ? `UPRERA-AGR-${Math.floor(1000 + Math.random() * 9000)}` : 'N/A'),
       possession: possession as any,
       featured: true,
@@ -590,14 +646,15 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       images: finalImages,
       coverImage: finalCover,
       description: `Spectacular ${propertyType} situated in the prestigious enclave of ${finalLocality}, Agra. Designed for distinguished living with spacious layouts, high ceilings, premium fittings, and comprehensive security infrastructure.`,
+      privateLocationNote: privateLocationNote.trim() || undefined,
       highlights: [
         `${furnishing} with bespoke craftsmanship`,
-        '100% Vastu Compliant Orientation',
+        'Optimal Natural Sunlight & Cross-Ventilation',
         'High-Speed Connectivity to Expressway & Taj Corridor',
         'Multi-car covered garage & 24/7 power backup'
       ],
       amenities: selectedAmenities,
-      landmarks: [
+      landmarks: selectedLandmarks.length > 0 ? selectedLandmarks : [
         { name: `${finalLocality} Metro Station`, distance: '1.2 km', travelTime: '3 mins' },
         { name: 'Taj Mahal East Gate', distance: '4.5 km', travelTime: '10 mins' },
         { name: 'Agra-Lucknow Expressway', distance: '5.8 km', travelTime: '12 mins' }
@@ -1021,6 +1078,129 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     <p className="text-[11px] text-gray-500">
                       🔒 <span className="font-semibold">Privacy Protected:</span> Only the property's locality ({locality || 'Agra'}) is shown publicly on the website. Full house/plot addresses are never revealed to buyers.
                     </p>
+                  </div>
+
+                  {/* Private Location & Navigation Box (Admin & CEO Eyes Only) */}
+                  <div className="p-4 bg-amber-50/70 border border-amber-300/80 rounded-2xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-bold text-amber-950 uppercase tracking-wider flex items-center gap-1.5">
+                        <Lock className="w-3.5 h-3.5 text-amber-700" />
+                        <span>Confidential Private Location Note & Landmark Directions (Admin & CEO Eyes Only)</span>
+                      </label>
+                      <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
+                        Admin Only
+                      </span>
+                    </div>
+                    <textarea
+                      rows={2}
+                      placeholder="e.g. Turn right after Gate 3 of Imperial Towers, property is second villa on the left. Key with caretaker Mr. Munna Lal."
+                      value={privateLocationNote}
+                      onChange={(e) => setPrivateLocationNote(e.target.value)}
+                      className="w-full p-3 text-base sm:text-sm bg-white border border-amber-200 rounded-xl text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                    />
+                    <p className="text-[11px] text-amber-900 leading-tight">
+                      This private note is strictly restricted to verified platform administrators and the CEO to guide private escorted client inspections without exposing your private plot or gate directions publicly.
+                    </p>
+                  </div>
+
+                  {/* Interactive Agra Landmarks & Connectivity Selector */}
+                  <div className="p-4 sm:p-5 bg-gray-50 rounded-2xl border border-gray-200 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                          <MapPin className="w-4 h-4 text-[#0F382C]" />
+                          <span>Agra Connectivity & Major Landmarks ({selectedLandmarks.length} Selected)</span>
+                        </label>
+                        <p className="text-[11px] text-gray-500 mt-0.5">
+                          Select nearby Agra connectivity hubs, metro stations, expressways, and monuments to showcase on your property profile.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={addCustomLandmark}
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0F382C] hover:text-[#164E3D] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1.5 rounded-lg transition-colors w-fit"
+                      >
+                        <PlusCircle className="w-3.5 h-3.5 text-[#0F382C]" />
+                        <span>+ Custom Landmark</span>
+                      </button>
+                    </div>
+
+                    {/* Quick Preset Chips */}
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] font-bold text-gray-600 uppercase">Tap to toggle popular Agra hubs:</span>
+                      <div className="flex flex-wrap gap-2">
+                        {AGRA_LANDMARK_PRESETS.map((preset) => {
+                          const isSelected = selectedLandmarks.some(l => l.name === preset.name);
+                          return (
+                            <button
+                              key={preset.name}
+                              type="button"
+                              onClick={() => toggleLandmarkPreset(preset)}
+                              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 touch-manipulation ${
+                                isSelected
+                                  ? 'bg-[#0F382C] text-white shadow-xs font-semibold'
+                                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-100'
+                              }`}
+                            >
+                              <span>{preset.name}</span>
+                              {isSelected ? <Check className="w-3.5 h-3.5 text-[#E4D5B7]" /> : <span className="text-[10px] text-gray-400">+</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Editable Active Landmarks List */}
+                    {selectedLandmarks.length > 0 && (
+                      <div className="space-y-2 pt-2 border-t border-gray-200">
+                        <span className="text-[10px] font-bold text-gray-600 uppercase block">Selected Landmarks & Distance Guide:</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-56 overflow-y-auto pr-1">
+                          {selectedLandmarks.map((lm, idx) => (
+                            <div key={idx} className="p-3 bg-white border border-gray-200 rounded-xl space-y-2 shadow-2xs">
+                              <div className="flex items-center justify-between gap-1">
+                                <input
+                                  type="text"
+                                  value={lm.name}
+                                  onChange={(e) => updateLandmarkField(idx, 'name', e.target.value)}
+                                  placeholder="Landmark name"
+                                  className="w-full text-xs font-bold text-gray-900 border-b border-gray-200 focus:border-[#0F382C] pb-0.5 outline-hidden"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeLandmark(idx)}
+                                  className="text-gray-400 hover:text-rose-600 p-1"
+                                  title="Remove Landmark"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 text-[11px]">
+                                <div>
+                                  <label className="text-[10px] text-gray-500 block">Distance:</label>
+                                  <input
+                                    type="text"
+                                    value={lm.distance}
+                                    onChange={(e) => updateLandmarkField(idx, 'distance', e.target.value)}
+                                    placeholder="e.g. 1.5 km"
+                                    className="w-full p-1 bg-gray-50 border border-gray-200 rounded text-xs"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-[10px] text-gray-500 block">Travel Time:</label>
+                                  <input
+                                    type="text"
+                                    value={lm.travelTime}
+                                    onChange={(e) => updateLandmarkField(idx, 'travelTime', e.target.value)}
+                                    placeholder="e.g. 5 mins"
+                                    className="w-full p-1 bg-gray-50 border border-gray-200 rounded text-xs"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex justify-end pt-4">
