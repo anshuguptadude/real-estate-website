@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Property, UserProfile } from '../types';
-import { isAdmin, isCEO, isPropertyOwnerOrAdmin, canViewFullAddress } from '../utils/security';
-import { saveFirestoreLead } from '../services/firebaseService';
+import { Property } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapComponent } from './MapComponent';
+import { formatAgraLocality } from '../utils/security';
 import {
   X,
 
@@ -26,8 +25,7 @@ import {
   ArrowRight,
   Calculator,
   Heart,
-  Share2,
-  ExternalLink
+  Share2
 } from 'lucide-react';
 
 interface PropertyDetailModalProps {
@@ -37,7 +35,8 @@ interface PropertyDetailModalProps {
   onOpenEmiCalc: (price: number) => void;
   onToggleSave: (id: string) => void;
   isSaved: boolean;
-  user?: UserProfile | null;
+  isAdminUser?: boolean;
+  onApproveProperty?: (id: string) => void;
 }
 
 export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
@@ -47,7 +46,8 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   onOpenEmiCalc,
   onToggleSave,
   isSaved,
-  user
+  isAdminUser,
+  onApproveProperty
 }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [inquiryName, setInquiryName] = useState('');
@@ -56,25 +56,18 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   const [chauffeurReq, setChauffeurReq] = useState(true);
   const [inquirySubmitted, setInquirySubmitted] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [approvedSuccess, setApprovedSuccess] = useState(false);
 
   useEffect(() => {
     if (property) {
       setActiveImageIndex(0);
       setInquirySubmitted(false);
       setCopied(false);
+      setApprovedSuccess(false);
     }
   }, [property?.id]);
 
   if (!property) return null;
-
-  const hasFullAddressAccess = canViewFullAddress(property, user);
-  const isUserAdmin = isAdmin(user) || isCEO(user);
-  const isOwnerOrAdmin = isPropertyOwnerOrAdmin(property, user);
-  const displayAddress = hasFullAddressAccess && property.address 
-    ? property.address 
-    : (property.locality 
-        ? (property.locality.toLowerCase().includes('agra') ? property.locality : `${property.locality}, Agra`)
-        : (property.location || 'Agra'));
 
   const handleCopyLink = () => {
     const shareUrl = `${window.location.origin}?property=${property.id}`;
@@ -84,33 +77,24 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
     });
   };
 
-  const handleInquirySubmit = async (e: React.FormEvent) => {
+  const handleInquirySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!property) return;
-    try {
-      const newLead = {
-        id: `TOUR-${Math.floor(10000 + Math.random() * 90000)}`,
-        propertyId: property.id,
-        propertyTitle: property.title,
-        propertyPrice: property.priceDisplay,
-        propertyLocality: property.locality || property.location,
-        propertyImage: property.coverImage || (property.images && property.images[0]) || '',
-        buyerName: inquiryName.trim(),
-        phone: inquiryPhone.trim(),
-        email: user?.email || 'direct-visitor@royalagraestate.in',
-        preferredTime: `${inquiryDate} ${chauffeurReq ? '(Chauffeur Included)' : ''}`,
-        timestamp: new Date().toLocaleString()
-      };
-      await saveFirestoreLead(newLead);
-    } catch (err) {
-      console.warn('Could not save tour lead:', err);
-    }
     setInquirySubmitted(true);
     setTimeout(() => {
       setInquirySubmitted(false);
       onClose();
     }, 2500);
   };
+
+  const handleApprove = () => {
+    if (onApproveProperty && property) {
+      onApproveProperty(property.id);
+      setApprovedSuccess(true);
+      setTimeout(() => setApprovedSuccess(false), 3000);
+    }
+  };
+
+  const displayLocality = formatAgraLocality(property.primaryAgraLocality || property.locality || property.location);
 
   return (
     <motion.div 
@@ -134,9 +118,16 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
               {property.propertyType} • {property.listingType === 'Rent' ? 'Rental Lease' : 'Freehold Sale'}
             </span>
             <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-[#C5A869]" />
-            <span className="hidden sm:inline-block text-xs text-gray-300 font-medium">
-              Verified Clean Title
-            </span>
+            {isAdminUser ? (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30 text-[10px] font-bold uppercase tracking-wider">
+                <Sparkles className="w-3 h-3 text-amber-300" />
+                Admin View Active
+              </span>
+            ) : (
+              <span className="hidden sm:inline-block text-xs text-gray-300 font-medium">
+                Verified Clean Title
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -188,10 +179,16 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 <span className="px-3 py-1 rounded-md bg-[#0F382C] text-[#E4D5B7] text-xs font-bold uppercase tracking-wider shadow-md">
                   {property.possession}
                 </span>
-                <span className="px-3 py-1 rounded-md bg-white/90 text-[#0F382C] text-xs font-bold tracking-wider shadow-md flex items-center gap-1">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  Verified Clear Title
-                </span>
+                {property.status === 'Pending Approval' ? (
+                  <span className="px-3 py-1 rounded-md bg-amber-600 text-white text-xs font-bold tracking-wider shadow-md flex items-center gap-1">
+                    <span>⏳ Pending Admin Approval</span>
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 rounded-md bg-white/90 text-[#0F382C] text-xs font-bold tracking-wider shadow-md flex items-center gap-1">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    Verified Clear Title
+                  </span>
+                )}
               </div>
               <div className="absolute bottom-4 right-4 bg-black/60 text-white text-xs px-3 py-1 rounded backdrop-blur-xs font-mono">
                 {activeImageIndex + 1} / {property.images.length} Photos
@@ -219,14 +216,9 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
           <div className="flex flex-col md:flex-row md:items-start justify-between pb-6 border-b border-gray-200 gap-4">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-2">
-                <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                <div className="flex items-center gap-1.5 text-xs text-gray-600 font-semibold bg-gray-100 px-2.5 py-1 rounded-md">
                   <MapPin className="w-4 h-4 text-[#0F382C]" />
-                  <span>{displayAddress}</span>
-                  {isUserAdmin && property.address && (
-                    <span className="ml-1 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
-                      Exact Address (Admin View)
-                    </span>
-                  )}
+                  <span>{displayLocality}</span>
                 </div>
 
                 {/* Verification Authority Badge */}
@@ -235,7 +227,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Verified by {property.verifiedBy || 'ADA / Regulatory Authority'}</span>
                   </span>
-                ) : property.verificationStatus === 'In Process' ? (
+                ) : property.verificationStatus === 'In Process' || property.status === 'Pending Approval' ? (
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold">
                     <span>⏳ Verification In Process ({property.verifiedBy || 'Applied'})</span>
                   </span>
@@ -260,11 +252,11 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 {property.priceDisplay}
               </span>
               <span className="text-xs text-gray-500 font-mono block mt-0.5">
-                ₹{(property.pricePerSqFt ?? Math.round((property.price || 0) / (property.superAreaSqFt || 1)) ?? 0).toLocaleString('en-IN')} per sq.ft
+                ₹{property.pricePerSqFt.toLocaleString('en-IN')} per sq.ft
               </span>
               <button
                 type="button"
-                onClick={() => onOpenEmiCalc(property.price || 0)}
+                onClick={() => onOpenEmiCalc(property.price)}
                 className="mt-2 text-xs font-semibold text-[#0F382C] hover:underline flex items-center gap-1"
               >
                 <Calculator className="w-3.5 h-3.5" />
@@ -273,18 +265,48 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
             </div>
           </div>
 
+          {/* Admin Action Bar (if property is pending and user is admin) */}
+          {isAdminUser && (
+            <div className="p-4 bg-amber-50 border border-amber-300 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping" />
+                <span className="text-xs font-bold text-amber-900 uppercase">
+                  Admin Listing Controls: Status is {property.status || 'Active'}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {property.status === 'Pending Approval' && onApproveProperty && (
+                  <button
+                    type="button"
+                    onClick={handleApprove}
+                    className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-1.5 transition-all"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Approve & Publish Listing</span>
+                  </button>
+                )}
+                {approvedSuccess && (
+                  <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-3 py-1.5 rounded-lg">
+                    ✓ Listing Published Live!
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Quick Specs Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-5 bg-[#FAF8F5] rounded-xl border border-gray-200/80">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 p-5 bg-[#FAF8F5] rounded-xl border border-gray-200/80">
             <div>
               <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Configuration</span>
               <span className="text-sm font-bold text-[#0F382C] mt-0.5 block">
-                {(property.bedrooms || 0) > 0 ? `${property.bedrooms} BHK (${property.bathrooms || 0} Baths)` : 'Commercial Suite'}
+                {property.bedrooms > 0 ? `${property.bedrooms} BHK (${property.bathrooms} Baths)` : 'Commercial Suite'}
               </span>
             </div>
             <div>
               <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Super Built-up Area</span>
               <span className="text-sm font-bold text-[#0F382C] mt-0.5 block">
-                {(property.superAreaSqFt || 0).toLocaleString('en-IN')} sq.ft
+                {property.superAreaSqFt.toLocaleString('en-IN')} sq.ft
               </span>
             </div>
             <div>
@@ -299,7 +321,111 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 {property.furnishing}
               </span>
             </div>
+            <div>
+              <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Posted / Listed On</span>
+              <span className="text-sm font-bold text-[#0F382C] mt-0.5 flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-[#C5A869]" />
+                <span>{property.postedDate || '09 Oct 2024'}</span>
+              </span>
+            </div>
           </div>
+
+          {/* Admin View Dossier Box (ADMIN ONLY) */}
+          {isAdminUser ? (
+            <div className="p-6 bg-amber-50/80 border-2 border-amber-300 rounded-2xl space-y-4 shadow-sm">
+              <div className="flex items-center justify-between pb-3 border-b border-amber-200">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-xs">
+                    🔐
+                  </div>
+                  <div>
+                    <h3 className="font-serif-luxury font-bold text-base text-amber-950">
+                      Admin View: Full Address & Confidential Dossier
+                    </h3>
+                    <p className="text-[11px] text-amber-800">
+                      This private section is visible only to authenticated Royal Agra Estate administrators.
+                    </p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 bg-amber-200 text-amber-900 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                  Admin Only
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+                <div className="p-3 bg-white rounded-xl border border-amber-200/80 space-y-1">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Full Street Address</span>
+                  <p className="font-semibold text-gray-900 leading-snug">
+                    {property.fullAddress || property.address || 'Address on file with admin'}
+                  </p>
+                </div>
+
+                <div className="p-3 bg-white rounded-xl border border-amber-200/80 space-y-1">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Building / Project Name</span>
+                  <p className="font-semibold text-gray-900">
+                    {property.buildingName || property.title}
+                  </p>
+                </div>
+
+                <div className="p-3 bg-white rounded-xl border border-amber-200/80 space-y-1">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">House / Plot / Unit Number</span>
+                  <p className="font-semibold text-gray-900">
+                    {property.plotNumber || 'Plot on record'}
+                  </p>
+                </div>
+
+                <div className="p-3 bg-white rounded-xl border border-amber-200/80 space-y-1">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Agra Locality / Sector</span>
+                  <p className="font-semibold text-gray-900">
+                    {displayLocality}
+                  </p>
+                </div>
+
+                <div className="p-3 bg-white rounded-xl border border-amber-200/80 space-y-1">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Owner / Lister Name</span>
+                  <p className="font-semibold text-gray-900">
+                    {property.ownerName || property.agent?.name || 'Managing Partner'}
+                  </p>
+                </div>
+
+                <div className="p-3 bg-white rounded-xl border border-amber-200/80 space-y-1">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Direct Owner Contact</span>
+                  <div className="flex items-center gap-2">
+                    <p className="font-mono font-bold text-emerald-800">
+                      {property.ownerContact || property.agent?.phone || '+91 91490 79913'}
+                    </p>
+                    <a
+                      href={`tel:${property.ownerContact || property.agent?.phone || '+919149079913'}`}
+                      className="text-[10px] bg-emerald-700 text-white px-2 py-0.5 rounded font-bold hover:bg-emerald-800"
+                    >
+                      Call
+                    </a>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-white rounded-xl border border-amber-200/80 space-y-1">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Submission / Posted Date</span>
+                  <p className="font-semibold text-gray-900 flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-amber-700" />
+                    <span>{property.postedDate || '09 Oct 2024'}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Privacy Protected Notice for Non-Admin Public Visitors */
+            <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-start gap-3 text-xs text-emerald-900">
+              <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-bold text-emerald-950">
+                  Location Privacy & Confidentiality Protocol
+                </h4>
+                <p className="text-[11px] text-emerald-800 mt-0.5 leading-relaxed">
+                  To protect seller security and exclusive discretion, only the primary Agra locality ({displayLocality}) is shown publicly. Exact house/plot numbers, full street addresses, and private access directions are shared exclusively during confirmed site tours coordinated by our senior advisors.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Highlights & Description */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -350,128 +476,34 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
               </div>
 
               {/* Nearby Landmarks & Connectivity */}
-              <div>
-                <h4 className="text-sm font-bold text-[#0F382C] uppercase tracking-wider mb-3">
-                  Connectivity & Agra Landmarks
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {property.landmarks.map((l, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg text-xs">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-[#0F382C]" />
-                        <span className="font-semibold text-gray-800">{l.name}</span>
+              {property.landmarks && property.landmarks.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-bold text-[#0F382C] uppercase tracking-wider mb-3">
+                    Connectivity & Agra Landmarks
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {property.landmarks.map((l, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg text-xs">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-[#0F382C]" />
+                          <span className="font-semibold text-gray-800">{l.name}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-mono text-gray-600 block">{l.distance}</span>
+                          <span className="text-[10px] text-emerald-700 font-semibold">{l.travelTime}</span>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className="font-mono text-gray-600 block">{l.distance}</span>
-                        <span className="text-[10px] text-emerald-700 font-semibold">{l.travelTime}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Admin & Authorized User Only: Registered User Account & Owner Metadata */}
-              {hasFullAddressAccess && (
-                <div className="p-4 bg-amber-50/90 border border-amber-300 rounded-xl space-y-2 text-xs text-amber-950">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-amber-800" />
-                      <span className="font-bold uppercase tracking-wider text-[#0F382C]">Authorized Access • Unmasked Dossier</span>
-                    </div>
-                    <span className="px-2 py-0.5 rounded bg-amber-200 font-mono text-[10px] font-bold">
-                      Account ID: #{property.ownerId || property.userId || 'N/A'}
-                    </span>
+                    ))}
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-amber-200 text-[11px]">
-                    <div><strong>Posted By:</strong> {property.postedBy?.name || property.ownerName || 'Property Owner'} ({property.postedBy?.role || 'Owner'})</div>
-                    <div><strong>Account Email:</strong> {property.postedBy?.email || property.ownerEmail || 'N/A'}</div>
-                    <div><strong>Direct Phone:</strong> {property.ownerContact || property.agent?.phone || 'N/A'}</div>
-                  </div>
-                  {property.address && (
-                    <div className="pt-1 border-t border-amber-200 text-[11px] font-mono">
-                      <strong>Exact Unmasked Street Address:</strong> {property.address}
-                    </div>
-                  )}
-                  {property.privateLocationNote && (
-                    <div className="pt-1 border-t border-amber-200 text-[11px] text-amber-900 bg-amber-100/60 p-2 rounded-lg">
-                      <strong>🔒 Confidential Landmark & Navigation Note:</strong> {property.privateLocationNote}
-                    </div>
-                  )}
                 </div>
               )}
 
-              {/* Map - Restricted to Authorized Accounts with Full Address Access */}
-              <div className="space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                  <h4 className="text-sm font-bold text-[#0F382C] uppercase tracking-wider flex items-center gap-1.5">
-                    <MapPin className="w-4 h-4 text-[#0F382C]" />
-                    <span>Property Location</span>
-                  </h4>
-                  {hasFullAddressAccess ? (
-                    <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 w-fit">
-                      <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                      <span>Full Access • Exact GPS Map & Street View</span>
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-bold text-gray-600 bg-gray-100 border border-gray-300 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 w-fit">
-                      <span>🔒 Protected For Seller Privacy</span>
-                    </span>
-                  )}
-                </div>
-
-                {hasFullAddressAccess ? (
-                  <div className="space-y-2">
-                    <MapComponent 
-                      lat={property.coordinates?.lat ?? 27.1767} 
-                      lng={property.coordinates?.lng ?? 78.0081}
-                      locationLink={property.locationLink}
-                      title={property.title}
-                    />
-                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-gray-600">
-                      <p className="flex items-center gap-1">
-                        <span className="font-semibold text-emerald-800">Exact GPS Pin:</span> {(property.coordinates?.lat ?? 27.1767).toFixed(5)}°N, {(property.coordinates?.lng ?? 78.0081).toFixed(5)}°E
-                      </p>
-                      {property.locationLink && (
-                        <a
-                          href={property.locationLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 font-bold text-[#0F382C] hover:text-[#164E3D] bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-2.5 py-1 rounded-md transition-colors"
-                        >
-                          <ExternalLink className="w-3 h-3 text-[#0F382C]" />
-                          <span>Open User's Shared Location Link ↗</span>
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-5 bg-gradient-to-br from-gray-50 to-gray-100/80 border border-gray-200/90 rounded-xl text-center space-y-3 shadow-2xs">
-                    <div className="w-11 h-11 rounded-full bg-[#0F382C]/10 text-[#0F382C] flex items-center justify-center mx-auto shadow-2xs">
-                      <MapPin className="w-5 h-5 text-[#0F382C]" />
-                    </div>
-                    <div className="space-y-1 max-w-md mx-auto">
-                      <h5 className="text-xs font-bold text-gray-900 uppercase tracking-wide">
-                        Exact Google Map Location Protected For Seller Privacy
-                      </h5>
-                      <p className="text-xs text-gray-600 leading-relaxed">
-                        Primary Area Locality: <strong className="text-gray-900 font-semibold">{displayAddress}</strong>. To protect seller privacy and prevent unscheduled visits, live Google Map GPS pin & full exact street address are visible only to platform administrators. Verified buyers receive exact site directions upon scheduling a private tour.
-                      </p>
-                    </div>
-                    <div className="pt-1">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const formEl = document.querySelector('form');
-                          if (formEl) formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0F382C] hover:bg-[#164E3D] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer"
-                      >
-                        <span>Schedule Site Tour for Exact Directions</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                )}
+              {/* Map */}
+              <div>
+                <h4 className="text-sm font-bold text-[#0F382C] uppercase tracking-wider mb-3">
+                  Property Locality Map ({displayLocality})
+                </h4>
+                <MapComponent lat={property.coordinates.lat} lng={property.coordinates.lng} />
               </div>
 
             </div>
@@ -553,20 +585,6 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                     </button>
                   </form>
                 )}
-
-                <div className="pt-3 mt-3 border-t border-gray-200">
-                  <a
-                    href={`https://wa.me/919149079913?text=${encodeURIComponent(
-                      `Hi Royal Agra Estate Concierge, I would like to inquire about ${property.title} (Property ID: #${property.id}, Price: ${property.priceDisplay}, Locality: ${property.locality || property.location})${inquiryName ? ` - Inquired by ${inquiryName}${inquiryPhone ? ` (${inquiryPhone})` : ''}` : (user?.name ? ` - Inquired by ${user.name}${user.phone ? ` (${user.phone})` : ''}` : '')}.`
-                    )}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full py-2.5 bg-[#25D366] hover:bg-[#1ebd54] text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all text-center"
-                  >
-                    <MessageSquare className="w-4 h-4 fill-white" />
-                    <span>Direct Concierge WhatsApp (+91 91490 79913)</span>
-                  </a>
-                </div>
               </div>
 
             </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Property } from '../types';
 import { Bed, Bath, Maximize, MapPin, ShieldCheck, Heart, Sparkles, Eye, Calendar, ArrowRight, MessageSquare, Trash2 } from 'lucide-react';
+import { formatAgraLocality } from '../utils/security';
 
 interface PropertyCardProps {
   property: Property;
@@ -13,6 +14,7 @@ interface PropertyCardProps {
   onInquireContact?: (property: Property) => void;
   isAdminUser?: boolean;
   onDeleteProperty?: (id: string) => void;
+  onApproveProperty?: (id: string) => void;
 }
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({
@@ -25,22 +27,16 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   isComparing,
   onInquireContact,
   isAdminUser,
-  onDeleteProperty
+  onDeleteProperty,
+  onApproveProperty
 }) => {
+  const displayLocality = formatAgraLocality(property.primaryAgraLocality || property.locality || property.location);
+
   return (
     <div className="bg-white rounded-xl overflow-hidden border border-gray-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group h-full">
       
       {/* Media & Badges Container */}
-      <a
-        href={`?property=${property.id}`}
-        onClick={(e) => {
-          if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
-            e.preventDefault();
-            onSelect(property);
-          }
-        }}
-        className="relative aspect-[16/10] overflow-hidden bg-gray-100 cursor-pointer block"
-      >
+      <div className="relative aspect-[16/10] overflow-hidden bg-gray-100 cursor-pointer" onClick={() => onSelect(property)}>
         <img
           src={property.coverImage}
           alt={property.title}
@@ -53,18 +49,18 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 
         {/* Top-Left: Price Tag Badge + Optional Exclusive tags + Status */}
         <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5 pointer-events-none z-10">
-          {/* Main Price Tag Badge */}
-          <div className="bg-white text-[#0F382C] px-3.5 py-1.5 rounded-lg shadow-lg border border-gray-100 flex items-center gap-1">
-            <span className="text-sm sm:text-base font-sans font-black tracking-normal text-[#0F382C]">
-              {property.priceDisplay}
-            </span>
-          </div>
-
-          {property.status && property.status !== 'Active' && property.status.toLowerCase() !== 'published' && (
-            <div className={`px-2.5 py-0.5 rounded-md shadow-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
-              property.status === 'Pending Approval' ? 'bg-amber-700 text-white' : 'bg-amber-600 text-white'
+          {property.status && property.status !== 'Active' ? (
+            <div className={`px-3 py-1 rounded-md shadow-md text-xs font-bold uppercase tracking-wider flex items-center gap-1 ${
+              property.status === 'Pending Approval' ? 'bg-amber-600 text-white' : 'bg-amber-700 text-white'
             }`}>
               <span>{property.status}</span>
+            </div>
+          ) : (
+            /* Main Price Tag Badge */
+            <div className="bg-white text-[#0F382C] px-3.5 py-1.5 rounded-lg shadow-lg border border-gray-100 flex items-center gap-1">
+              <span className="text-sm sm:text-base font-sans font-black tracking-normal text-[#0F382C]">
+                {property.priceDisplay}
+              </span>
             </div>
           )}
 
@@ -75,9 +71,16 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
               Exclusive
             </span>
           )}
+
+          {/* Admin Tag indicator */}
+          {isAdminUser && (
+            <span className="px-2 py-0.5 rounded bg-black/70 text-amber-300 text-[9px] font-bold tracking-wider uppercase border border-amber-400/40">
+              Admin View
+            </span>
+          )}
         </div>
 
-        {/* Top-Right: Favorite Button (Gated if unauthenticated handled in App.tsx) */}
+        {/* Top-Right: Favorite Button */}
         <button
           type="button"
           id={`fav-btn-${property.id}`}
@@ -114,56 +117,38 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           </div>
 
           <span className="text-[11px] bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded text-gray-200 border border-white/10 font-mono">
-            ₹{(property.pricePerSqFt ?? Math.round((property.price || 0) / (property.superAreaSqFt || 1)) ?? 0).toLocaleString('en-IN')}/sq.ft
+            ₹{property.pricePerSqFt.toLocaleString('en-IN')}/sq.ft
           </span>
         </div>
-      </a>
+      </div>
 
       {/* Body Content */}
       <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
         
         <div>
-          {/* Location Line */}
-          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium mb-1.5">
+          {/* Location Line - Always Agra Locality Only for privacy */}
+          <div className="flex items-center gap-1 text-xs text-gray-600 font-medium mb-1.5">
             <MapPin className="w-3.5 h-3.5 text-[#0F382C] shrink-0" />
-            <span className="truncate" title={isAdminUser && property.address ? property.address : undefined}>
-              {isAdminUser && property.address
-                ? property.address
-                : (property.locality ? (property.locality.toLowerCase().includes('agra') ? property.locality : `${property.locality}, Agra`) : (property.location || 'Agra'))}
-            </span>
-            {isAdminUser && property.address && (
-              <span className="ml-auto text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 shrink-0">
-                Admin Address View
-              </span>
-            )}
+            <span className="truncate">{displayLocality}</span>
           </div>
 
           {/* Property Title */}
           <h3
             id={`prop-title-${property.id}`}
+            onClick={() => onSelect(property)}
             className="text-base sm:text-lg font-serif-luxury font-bold text-[#0F382C] hover:text-[#164E3D] cursor-pointer line-clamp-1 transition-colors"
           >
-            <a
-              href={`?property=${property.id}`}
-              onClick={(e) => {
-                if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
-                  e.preventDefault();
-                  onSelect(property);
-                }
-              }}
-            >
-              {property.title || 'Luxury Estate'}
-            </a>
+            {property.title}
           </h3>
 
           {/* Subtitle / Tagline */}
           <p className="text-xs text-gray-600 mt-1 line-clamp-2 leading-relaxed">
-            {property.tagline || property.description || ''}
+            {property.tagline}
           </p>
 
           {/* Key Specs Strip */}
           <div className="grid grid-cols-3 gap-2 py-3 my-3 border-y border-gray-100 text-gray-700">
-            {(property.bedrooms || 0) > 0 ? (
+            {property.bedrooms > 0 ? (
               <div className="flex items-center gap-1.5 text-xs font-medium">
                 <Bed className="w-4 h-4 text-gray-400 shrink-0" />
                 <span>{property.bedrooms} Beds</span>
@@ -175,7 +160,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
               </div>
             )}
 
-            {(property.bathrooms || 0) > 0 && (
+            {property.bathrooms > 0 && (
               <div className="flex items-center gap-1.5 text-xs font-medium">
                 <Bath className="w-4 h-4 text-gray-400 shrink-0" />
                 <span>{property.bathrooms} Baths</span>
@@ -184,7 +169,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 
             <div className="flex items-center gap-1.5 text-xs font-medium">
               <Maximize className="w-4 h-4 text-gray-400 shrink-0" />
-              <span>{(property.superAreaSqFt || 0).toLocaleString('en-IN')} sq.ft</span>
+              <span>{property.superAreaSqFt.toLocaleString('en-IN')} sq.ft</span>
             </div>
           </div>
 
@@ -207,10 +192,25 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         {/* Card Footer Actions */}
         <div className="space-y-2 pt-3 mt-2 border-t border-gray-100">
           
+          {/* Admin Quick Publish Action if Pending */}
+          {isAdminUser && property.status === 'Pending Approval' && onApproveProperty && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onApproveProperty(property.id);
+              }}
+              className="w-full py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-xs transition-all mb-1.5"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>Publish Listing (Admin)</span>
+            </button>
+          )}
+
           {/* Unified Clean "Inquire / Contact" Button */}
           <a
             href={`https://wa.me/919149079913?text=${encodeURIComponent(
-              `Hi Royal Agra Estate Concierge, I would like to inquire about ${property.title} (Property ID: #${property.id}, Price: ${property.priceDisplay}, Locality: ${property.locality || property.location}).`
+              `Hi Royal Agra Estate, I am interested in Property ID #${property.id} in ${displayLocality}.`
             )}`}
             target="_blank"
             rel="noreferrer"
@@ -269,20 +269,15 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
                 <span>Book Tour</span>
               </button>
 
-              <a
-                href={`?property=${property.id}`}
+              <button
+                type="button"
                 id={`view-details-btn-${property.id}`}
-                onClick={(e) => {
-                  if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
-                    e.preventDefault();
-                    onSelect(property);
-                  }
-                }}
+                onClick={() => onSelect(property)}
                 className="text-xs font-semibold bg-[#0F382C] hover:bg-[#164E3D] text-white px-3.5 py-1.5 rounded shadow-xs hover:shadow-sm transition-all flex items-center gap-1"
               >
                 <span>View</span>
                 <ArrowRight className="w-3.5 h-3.5" />
-              </a>
+              </button>
             </div>
           </div>
         </div>

@@ -1,9 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Property, PropertyType, UserProfile } from '../types';
 import { AGRA_LOCALITIES, PROPERTY_TYPES } from '../data/mockData';
-import { AGRA_LOCALITY_COORDINATES } from './LocationPickerMap';
 import { isAdmin } from '../utils/security';
-import { saveFirestoreProperty } from '../services/firebaseService';
 import { 
   Building, 
   MapPin, 
@@ -15,134 +13,46 @@ import {
   ArrowLeft, 
   ShieldCheck,
   Check,
-  LayoutDashboard,
-  Camera,
-  Video,
-  Image as ImageIcon,
-  Trash2,
-  Play,
-  Film,
-  FileText,
-  AlertCircle,
-  Loader2,
-  PlusCircle,
-  Lock,
-  ExternalLink
+  LayoutDashboard
 } from 'lucide-react';
 
 interface PostPropertyScreenProps {
   onSuccessNavigate: () => void;
   user?: UserProfile | null;
-  onPropertyCreated?: (property: Property) => Promise<boolean> | void;
+  onPropertyCreated?: (property: Property) => void;
   onNavigateDashboard?: () => void;
-  onOpenLogin?: (message?: string) => void;
 }
 
 export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   onSuccessNavigate,
   user,
   onPropertyCreated,
-  onNavigateDashboard,
-  onOpenLogin
+  onNavigateDashboard
 }) => {
-  const isUserAdmin = isAdmin(user);
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [listingIntent, setListingIntent] = useState<'Sale' | 'Rent'>('Sale');
-  const [propertyType, setPropertyType] = useState<string>('Luxury Villa');
-  const [customPropertyType, setCustomPropertyType] = useState<string>('');
-  const [isOtherPropertyType, setIsOtherPropertyType] = useState<boolean>(false);
+  const [propertyType, setPropertyType] = useState<PropertyType>('Luxury Villa');
   const [locality, setLocality] = useState<string>('Fatehabad Road');
-  const [customLocality, setCustomLocality] = useState<string>('');
-  const [isOtherLocality, setIsOtherLocality] = useState<boolean>(false);
   const [projectTitle, setProjectTitle] = useState('');
   const [address, setAddress] = useState('');
-  const [privateLocationNote, setPrivateLocationNote] = useState('');
-  const [locationLink, setLocationLink] = useState('');
-  const [parsedCoordinates, setParsedCoordinates] = useState<{ lat: number; lng: number } | null>(null);
-
-  const extractCoordinatesFromInput = (input: string): { lat: number; lng: number } | null => {
-    if (!input || !input.trim()) return null;
-    const urlMatch = input.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-    if (urlMatch) {
-      const lat = parseFloat(urlMatch[1]);
-      const lng = parseFloat(urlMatch[2]);
-      if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
-    }
-    const queryMatch = input.match(/[?&](?:q|ll)=(-?\d+\.\d+),(-?\d+\.\d+)/);
-    if (queryMatch) {
-      const lat = parseFloat(queryMatch[1]);
-      const lng = parseFloat(queryMatch[2]);
-      if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
-    }
-    const coordMatch = input.match(/(-?\d+\.\d+)[\s,]+(-?\d+\.\d+)/);
-    if (coordMatch) {
-      const lat = parseFloat(coordMatch[1]);
-      const lng = parseFloat(coordMatch[2]);
-      if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
-    }
-    return null;
-  };
-  const [selectedLandmarks, setSelectedLandmarks] = useState<{ name: string; distance: string; travelTime: string }[]>([
-    { name: 'Taj Mahal (East Gate)', distance: '4.5 km', travelTime: '10 mins' },
-    { name: 'Agra Metro Station (Fatehabad Road)', distance: '1.2 km', travelTime: '3 mins' },
-    { name: 'Agra-Lucknow Expressway Toll Plaza', distance: '5.8 km', travelTime: '12 mins' },
-    { name: 'Agra Cantt Railway Station', distance: '7.5 km', travelTime: '18 mins' }
-  ]);
   const [superArea, setSuperArea] = useState<string>('3500');
-  const [areaUnit, setAreaUnit] = useState<'Sq.Ft' | 'Sq.Yard'>('Sq.Ft');
   const [bedrooms, setBedrooms] = useState<string>('4');
   const [bathrooms, setBathrooms] = useState<string>('4');
   const [askingPrice, setAskingPrice] = useState<string>('28500000');
   const [furnishing, setFurnishing] = useState('Fully Furnished');
   const [possession, setPossession] = useState('Ready to Move');
   const [ownerName, setOwnerName] = useState(user?.name || '');
-  const [ownerPhone, setOwnerPhone] = useState(user?.phone || '');
-  const [ownerEmail, setOwnerEmail] = useState(user?.email || '');
+  const [ownerPhone, setOwnerPhone] = useState(user?.phone || '+91 91490 79913');
+  const [ownerEmail, setOwnerEmail] = useState(user?.email || 'shrey@royalagraestate.in');
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([
     'Swimming Pool',
+    '100% Power Backup',
     '24/7 Security',
     'Private Garden'
   ]);
-
-  // Available Agra Landmark Presets
-  const AGRA_LANDMARK_PRESETS = [
-    { name: 'Taj Mahal (East Gate)', distance: '4.5 km', travelTime: '10 mins' },
-    { name: 'Agra Metro Station (Taj East Gate / Fatehabad Rd)', distance: '1.2 km', travelTime: '3 mins' },
-    { name: 'Agra-Lucknow Expressway Toll Plaza', distance: '5.8 km', travelTime: '12 mins' },
-    { name: 'Agra Cantt Railway Station', distance: '7.5 km', travelTime: '18 mins' },
-    { name: 'Dayalbagh Educational Institute & Heritage Zone', distance: '6.2 km', travelTime: '15 mins' },
-    { name: 'Inner Ring Road (Delhi-Agra Access)', distance: '3.4 km', travelTime: '8 mins' },
-    { name: 'Sanjay Place Commercial Hub & Civil Lines', distance: '5.0 km', travelTime: '12 mins' },
-    { name: 'Agra Domestic Airport (Kheria Civil Terminal)', distance: '11.0 km', travelTime: '25 mins' }
-  ];
-
-  // Media Upload States (Supports up to 10 High-Quality Photos, up to 25 MB each)
-  const MAX_PHOTOS = 10;
-  const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB per file
-
-  // Auto-sync owner info when user prop is available or updates
-  useEffect(() => {
-    if (user) {
-      if (user.name) setOwnerName(prev => prev || user.name);
-      if (user.phone) setOwnerPhone(prev => prev || user.phone);
-      if (user.email) setOwnerEmail(prev => prev || user.email);
-    }
-  }, [user]);
-
-  const [uploadedMediaList, setUploadedMediaList] = useState<{
-    url: string;
-    type: 'image' | 'video';
-    name: string;
-    size: string;
-  }[]>([]);
-  const [selectedCoverIndex, setSelectedCoverIndex] = useState<number>(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [mediaError, setMediaError] = useState<string>('');
-  const [isProcessingPhotos, setIsProcessingPhotos] = useState(false);
-  const [processingProgress, setProcessingProgress] = useState('');
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [coverImageUrl, setCoverImageUrl] = useState<string>(
+    'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80'
+  );
   
   // Verification states
   const [isVerified, setIsVerified] = useState<'yes' | 'no' | 'in_process'>('yes');
@@ -153,87 +63,34 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
   const [submitted, setSubmitted] = useState(false);
   const [createdPropertyRef, setCreatedPropertyRef] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string>('');
-  const [stepErrors, setStepErrors] = useState<{ [key: string]: string }>({});
 
-  const resetForm = () => {
-    setStep(1);
-    setListingIntent('Sale');
-    setPropertyType('Luxury Villa');
-    setCustomPropertyType('');
-    setIsOtherPropertyType(false);
-    setLocality('Fatehabad Road');
-    setCustomLocality('');
-    setIsOtherLocality(false);
-    setProjectTitle('');
-    setAddress('');
-    setPrivateLocationNote('');
-    setLocationLink('');
-    setParsedCoordinates(null);
-    setSelectedLandmarks([
-      { name: 'Taj Mahal (East Gate)', distance: '4.5 km', travelTime: '10 mins' },
-      { name: 'Agra Metro Station (Fatehabad Road)', distance: '1.2 km', travelTime: '3 mins' },
-      { name: 'Agra-Lucknow Expressway Toll Plaza', distance: '5.8 km', travelTime: '12 mins' },
-      { name: 'Agra Cantt Railway Station', distance: '7.5 km', travelTime: '18 mins' }
-    ]);
-    setSuperArea('3500');
-    setAreaUnit('Sq.Ft');
-    setBedrooms('4');
-    setBathrooms('4');
-    setAskingPrice('28500000');
-    setFurnishing('Fully Furnished');
-    setPossession('Ready to Move');
-    setSelectedAmenities(['Swimming Pool', '24/7 Security', 'Private Garden']);
-    setUploadedMediaList([]);
-    setSelectedCoverIndex(0);
-    setIsVerified('yes');
-    setVerifiedByAuthority('Agra Development Authority (ADA)');
-    setCustomAuthority('');
-    setVerificationDocNumber('');
-    setTitleType('Freehold Clear Title');
-    setSubmitted(false);
-    setCreatedPropertyRef('');
-    setSubmitError('');
-    setStepErrors({});
-  };
+  useEffect(() => {
+    if (user) {
+      if (user.name && !ownerName) setOwnerName(user.name);
+      if (user.phone && !ownerPhone) setOwnerPhone(user.phone);
+      if (user.email && !ownerEmail) setOwnerEmail(user.email);
+    }
+  }, [user]);
 
   const amenityOptions = [
     'Swimming Pool',
     'Private Garden',
+    '100% Power Backup',
     '24/7 Security',
     'Home Theater',
     'Private Gym / Spa',
-    'EV Charging Point'
+    'Servant Quarters',
+    'EV Charging Point',
+    'Vastu Compliant',
+    'Covered Car Garage'
   ];
 
-  const formatINRCommas = (numStr: string): string => {
-    const clean = numStr.replace(/[^0-9]/g, '');
-    const num = parseFloat(clean);
-    if (isNaN(num)) return '';
-    return num.toLocaleString('en-IN');
-  };
-
-  const convertNumberToIndianWords = (num: number): string => {
-    if (num <= 0 || isNaN(num)) return '';
-    let result = '';
-    const crore = Math.floor(num / 10000000);
-    let remainder = num % 10000000;
-    const lakh = Math.floor(remainder / 100000);
-    remainder = remainder % 100000;
-    const thousand = Math.floor(remainder / 1000);
-    remainder = remainder % 1000;
-    const hundred = Math.floor(remainder / 100);
-    remainder = remainder % 100;
-
-    if (crore > 0) result += `${crore} Crore `;
-    if (lakh > 0) result += `${lakh} Lakh `;
-    if (thousand > 0) result += `${thousand} Thousand `;
-    if (hundred > 0) result += `${hundred} Hundred `;
-    if (remainder > 0) result += `${remainder} `;
-    
-    return result.trim() + ' Rupees';
-  };
+  const sampleCoverImages = [
+    'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80'
+  ];
 
   const toggleAmenity = (item: string) => {
     if (selectedAmenities.includes(item)) {
@@ -241,314 +98,6 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     } else {
       setSelectedAmenities([...selectedAmenities, item]);
     }
-  };
-
-  const toggleLandmarkPreset = (preset: { name: string; distance: string; travelTime: string }) => {
-    const exists = selectedLandmarks.some(l => l.name === preset.name);
-    if (exists) {
-      setSelectedLandmarks(selectedLandmarks.filter(l => l.name !== preset.name));
-    } else {
-      setSelectedLandmarks([...selectedLandmarks, { ...preset }]);
-    }
-  };
-
-  const updateLandmarkField = (index: number, field: 'name' | 'distance' | 'travelTime', value: string) => {
-    setSelectedLandmarks(prev => {
-      const copy = [...prev];
-      if (copy[index]) {
-        copy[index] = { ...copy[index], [field]: value };
-      }
-      return copy;
-    });
-  };
-
-  const removeLandmark = (index: number) => {
-    setSelectedLandmarks(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const addCustomLandmark = () => {
-    setSelectedLandmarks(prev => [
-      ...prev,
-      { name: 'Custom Agra Landmark', distance: '2.5 km', travelTime: '6 mins' }
-    ]);
-  };
-
-  const scrollToTop = () => {
-    try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch {
-      window.scrollTo(0, 0);
-    }
-  };
-
-  const compressImage = (file: File): Promise<string> => {
-    return new Promise((resolve) => {
-      // Create a clean lightweight fallback in case the raw file is corrupt or unsupported
-      const createFallbackPlaceholder = () => {
-        try {
-          const fbCanvas = document.createElement('canvas');
-          fbCanvas.width = 800;
-          fbCanvas.height = 533;
-          const fbCtx = fbCanvas.getContext('2d');
-          if (fbCtx) {
-            fbCtx.fillStyle = '#0F382C';
-            fbCtx.fillRect(0, 0, 800, 533);
-            fbCtx.fillStyle = '#C5A880';
-            fbCtx.font = 'bold 28px sans-serif';
-            fbCtx.textAlign = 'center';
-            fbCtx.fillText('Royal Agra Estate — Verified Photo', 400, 270);
-            return fbCanvas.toDataURL('image/jpeg', 0.60);
-          }
-        } catch {}
-        return 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=70';
-      };
-
-      // Safety timeout for mobile devices
-      const timer = setTimeout(() => {
-        resolve(createFallbackPlaceholder());
-      }, 8000);
-
-      // Helper function to compress from an Image or ImageBitmap
-      const processFromImageElement = (img: HTMLImageElement | ImageBitmap, naturalW: number, naturalH: number) => {
-        clearTimeout(timer);
-        try {
-          const runCanvasCompression = (maxDim: number, quality: number): string => {
-            let width = naturalW || 960;
-            let height = naturalH || 640;
-
-            if (width > maxDim || height > maxDim) {
-              if (width > height) {
-                height = Math.round((height * maxDim) / width);
-                width = maxDim;
-              } else {
-                width = Math.round((width * maxDim) / height);
-                height = maxDim;
-              }
-            }
-
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return createFallbackPlaceholder();
-
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            ctx.drawImage(img as any, 0, 0, width, height);
-
-            return canvas.toDataURL('image/jpeg', quality);
-          };
-
-          // Pass 1: 960px @ 0.55 (Produces ~25-35 KB crisp photo)
-          let resultDataUrl = runCanvasCompression(960, 0.55);
-
-          // Pass 2: If result string > 45,000 chars (~33 KB), re-compress at 720px @ 0.45
-          if (resultDataUrl.length > 45000) {
-            resultDataUrl = runCanvasCompression(720, 0.45);
-          }
-
-          // Pass 3: If still > 35,000 chars, compress at 600px @ 0.40
-          if (resultDataUrl.length > 35000) {
-            resultDataUrl = runCanvasCompression(600, 0.40);
-          }
-
-          resolve(resultDataUrl);
-        } catch (err) {
-          console.error("Canvas compression error on mobile:", err);
-          resolve(createFallbackPlaceholder());
-        }
-      };
-
-      // Try modern hardware-accelerated createImageBitmap first if available
-      if (typeof window !== 'undefined' && 'createImageBitmap' in window) {
-        createImageBitmap(file)
-          .then((bitmap) => {
-            processFromImageElement(bitmap, bitmap.width, bitmap.height);
-          })
-          .catch(() => {
-            // Fallback to Image element with Object URL
-            tryDecodeWithImageTag();
-          });
-      } else {
-        tryDecodeWithImageTag();
-      }
-
-      function tryDecodeWithImageTag() {
-        let blobUrl = '';
-        try {
-          blobUrl = URL.createObjectURL(file);
-        } catch {
-          // If createObjectURL fails on mobile, try FileReader
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => processFromImageElement(img, img.naturalWidth || img.width, img.naturalHeight || img.height);
-            img.onerror = () => {
-              clearTimeout(timer);
-              resolve(createFallbackPlaceholder());
-            };
-            img.src = e.target?.result as string;
-          };
-          reader.onerror = () => {
-            clearTimeout(timer);
-            resolve(createFallbackPlaceholder());
-          };
-          reader.readAsDataURL(file);
-          return;
-        }
-
-        const img = new Image();
-        img.onload = () => {
-          try { URL.revokeObjectURL(blobUrl); } catch {}
-          processFromImageElement(img, img.naturalWidth || img.width, img.naturalHeight || img.height);
-        };
-        img.onerror = () => {
-          try { URL.revokeObjectURL(blobUrl); } catch {}
-          // Try FileReader as last resort for mobile formats
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const fallbackImg = new Image();
-            fallbackImg.onload = () => processFromImageElement(fallbackImg, fallbackImg.naturalWidth || fallbackImg.width, fallbackImg.naturalHeight || fallbackImg.height);
-            fallbackImg.onerror = () => {
-              clearTimeout(timer);
-              resolve(createFallbackPlaceholder());
-            };
-            fallbackImg.src = e.target?.result as string;
-          };
-          reader.onerror = () => {
-            clearTimeout(timer);
-            resolve(createFallbackPlaceholder());
-          };
-          reader.readAsDataURL(file);
-        };
-        img.src = blobUrl;
-      }
-    });
-  };
-
-  const handleProcessFiles = async (files: FileList | File[]) => {
-    setMediaError('');
-    const fileArray = Array.from(files);
-    if (fileArray.length === 0) return;
-
-    if (uploadedMediaList.length >= MAX_PHOTOS) {
-      setMediaError(`Maximum ${MAX_PHOTOS} photos allowed per property listing.`);
-      return;
-    }
-
-    const remainingSlots = MAX_PHOTOS - uploadedMediaList.length;
-    let validFiles: File[] = [];
-
-    for (const file of fileArray) {
-      const isImage = 
-        file.type.startsWith('image/') || 
-        /\.(jpe?g|png|webp|gif|bmp|heic|heif|svg)$/i.test(file.name) || 
-        !file.type;
-
-      if (!isImage) {
-        setMediaError('Please select valid photos (JPEG, PNG, WEBP, HEIC) for listing display.');
-        continue;
-      }
-
-      if (file.size > MAX_FILE_SIZE_BYTES) {
-        setMediaError(`"${file.name}" exceeds the maximum 25 MB file size limit.`);
-        continue;
-      }
-
-      validFiles.push(file);
-    }
-
-    if (validFiles.length > remainingSlots) {
-      setMediaError(`Maximum ${MAX_PHOTOS} photos allowed per property. Only the first ${remainingSlots} photo(s) were selected.`);
-      validFiles = validFiles.slice(0, remainingSlots);
-    }
-
-    if (validFiles.length === 0) return;
-
-    setIsProcessingPhotos(true);
-
-    try {
-      const newMediaItems: { url: string; type: 'image'; name: string; size: string }[] = [];
-
-      for (let i = 0; i < validFiles.length; i++) {
-        const file = validFiles[i];
-        const rawSizeMb = (file.size / (1024 * 1024)).toFixed(1);
-        const rawSizeStr = file.size >= 1024 * 1024 ? `${rawSizeMb} MB` : `${Math.round(file.size / 1024)} KB`;
-        setProcessingProgress(`Optimizing photo ${i + 1} of ${validFiles.length} (${rawSizeStr} HD)...`);
-        
-        // Slight tick on mobile UI thread to allow progress bar rendering
-        await new Promise((r) => setTimeout(r, 40));
-
-        const compressedUrl = await compressImage(file);
-        const approxSizeInKB = Math.round((compressedUrl.length * 3) / 4 / 1024);
-        newMediaItems.push({
-          url: compressedUrl,
-          type: 'image',
-          name: file.name || `Photo ${uploadedMediaList.length + i + 1}`,
-          size: `${rawSizeStr} raw • ${approxSizeInKB} KB HD`
-        });
-      }
-
-      setUploadedMediaList((prev) => [...prev, ...newMediaItems]);
-    } catch (err) {
-      console.error('Error processing images:', err);
-      setMediaError('An error occurred while optimizing photos. Please try again.');
-    } finally {
-      setIsProcessingPhotos(false);
-      setProcessingProgress('');
-    }
-  };
-
-  const validateStep1 = (): boolean => {
-    const errors: { [key: string]: string } = {};
-    if (isOtherPropertyType && !customPropertyType.trim()) {
-      errors.customPropertyType = 'Please enter a custom property typology';
-    }
-    if (isOtherLocality && !customLocality.trim()) {
-      errors.customLocality = 'Please enter your custom Agra locality';
-    }
-    setStepErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const validateStep2 = (): boolean => {
-    return true;
-  };
-
-  const validateStep4 = (): boolean => {
-    return true;
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleProcessFiles(e.target.files);
-    }
-    // Reset input value so re-taking photo or picking same filename on mobile fires onChange reliably
-    try {
-      e.target.value = '';
-    } catch {}
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleProcessFiles(e.dataTransfer.files);
-    }
-  };
-
-  const handleRemoveMedia = (index: number) => {
-    setUploadedMediaList((prev) => prev.filter((_, idx) => idx !== index));
   };
 
   const formatPriceDisplay = (amt: number, type: 'Sale' | 'Rent') => {
@@ -560,32 +109,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     return `₹${(amt / 100000).toFixed(2)} Lacs`;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateStep1()) {
-      setStep(1);
-      scrollToTop();
-      return;
-    }
-    if (!validateStep2()) {
-      setStep(2);
-      scrollToTop();
-      return;
-    }
-    if (!validateStep4()) {
-      setStep(4);
-      scrollToTop();
-      return;
-    }
-
-    setSubmitError('');
-    setIsSubmitting(true);
-
-    const finalLocality = isOtherLocality ? (customLocality.trim() || 'Custom Locality') : locality;
-    const numPrice = Number(askingPrice.replace(/[^0-9]/g, '')) || 25000000;
-    const rawArea = Number(superArea) || 3000;
-    const numSuperArea = areaUnit === 'Sq.Yard' ? Math.round(rawArea * 9) : rawArea;
-
+    const numPrice = Number(askingPrice) || 25000000;
+    const numSuperArea = Number(superArea) || 3000;
     const generatedId = `prop-user-${Date.now()}`;
     const refCode = `RAE-${Math.floor(100000 + Math.random() * 900000)}`;
     setCreatedPropertyRef(refCode);
@@ -605,91 +132,58 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         : `${verifiedByAuthority} (Under Review)`;
     }
 
-    const isPosterAdmin = isUserAdmin || isAdmin(user);
-    const initialStatus: 'Active' | 'pending_verification' = isPosterAdmin ? 'Active' : 'pending_verification';
-    const isApproved = isPosterAdmin ? true : false;
-
-    const uploadedUrls = uploadedMediaList.map(m => m.url);
-    const coverIdx = selectedCoverIndex >= 0 && selectedCoverIndex < uploadedUrls.length ? selectedCoverIndex : 0;
-    const finalCover = uploadedUrls[coverIdx] || 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80';
-    
-    let finalImages: string[] = [];
-    if (uploadedUrls.length > 0) {
-      const chosenCover = uploadedUrls[coverIdx];
-      const otherImages = uploadedUrls.filter((_, i) => i !== coverIdx);
-      finalImages = [chosenCover, ...otherImages];
-    } else {
-      finalImages = [
-        finalCover,
-        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=80'
-      ];
-    }
-
-    const resolvedOwnerEmail = (ownerEmail.trim() || user?.email || '').toLowerCase().trim();
-    const resolvedOwnerPhone = (ownerPhone.trim() || user?.phone || '').trim();
-    const resolvedOwnerName = ownerName.trim() || user?.name || 'Property Owner';
-    const resolvedUserId = user?.id || (resolvedOwnerEmail ? `user-${resolvedOwnerEmail.replace(/[^a-z0-9]/g, '')}` : `user-${Date.now()}`);
-
-    const extractedCoords = extractCoordinatesFromInput(locationLink);
-    const matchedLocalityCoords = AGRA_LOCALITY_COORDINATES[finalLocality] || { lat: 27.1767, lng: 78.0081 };
-    const resolvedCoordinates = extractedCoords || parsedCoordinates || matchedLocalityCoords;
-
     const newProperty: Property = {
       id: generatedId,
-      title: projectTitle.trim() || `Luxury ${propertyType} in ${finalLocality}`,
-      tagline: `Exclusive ${furnishing} ${propertyType} with prime connectivity on ${finalLocality}, Agra.`,
+      title: projectTitle.trim() || `Luxury ${propertyType} in ${locality}`,
+      tagline: `Exclusive ${furnishing} estate (${titleType}) with prime connectivity on ${locality}, Agra.`,
       propertyType,
       listingType: listingIntent,
       price: numPrice,
       priceDisplay: formatPriceDisplay(numPrice, listingIntent),
       pricePerSqFt: Math.round(numPrice / numSuperArea),
-      location: `${finalLocality}, Agra`,
-      locality: finalLocality,
-      address: address.trim() || `${finalLocality}, Agra`,
+      location: `${locality}, Agra`,
+      locality,
+      primaryAgraLocality: `${locality}, Agra`,
+      address: `${locality}, Agra`,
+      fullAddress: address.trim() || `${projectTitle ? projectTitle + ', ' : ''}${locality}, Agra`,
+      buildingName: projectTitle.trim() || undefined,
+      plotNumber: undefined,
       bedrooms: Number(bedrooms) || 4,
       bathrooms: Number(bathrooms) || 4,
       balconies: 2,
       superAreaSqFt: numSuperArea,
       carpetAreaSqFt: Math.round(numSuperArea * 0.78),
       furnishing: furnishing as any,
-      facing: 'North-East (Morning Sun)',
+      facing: 'North-East (Vastu)',
       reraId: verificationDocNumber.trim() || (isLegallyVerified ? `UPRERA-AGR-${Math.floor(1000 + Math.random() * 9000)}` : 'N/A'),
       possession: possession as any,
       featured: true,
       isExclusive: true,
       verified: isLegallyVerified,
-      verificationStatus: isPosterAdmin ? 'Verified' : resolvedVerificationStatus,
+      verificationStatus: isAdmin(user) ? resolvedVerificationStatus : 'In Process',
       verifiedBy: resolvedAuthorityName,
-      verificationNumber: verificationDocNumber.trim() || "",
-      status: initialStatus,
-      isApproved: isApproved,
+      verificationNumber: verificationDocNumber.trim() || undefined,
+      status: isAdmin(user) ? 'Active' : 'Pending Approval',
       isUserListing: true,
-      ownerId: resolvedUserId,
-      userId: resolvedUserId,
-      ownerName: resolvedOwnerName,
-      ownerContact: resolvedOwnerPhone,
-      ownerEmail: resolvedOwnerEmail,
-      postedBy: {
-        id: resolvedUserId,
-        name: resolvedOwnerName,
-        email: resolvedOwnerEmail,
-        role: user?.role || (isPosterAdmin ? 'admin' : 'Owner')
-      },
-      images: finalImages,
-      coverImage: finalCover,
-      description: `Spectacular ${propertyType} situated in the prestigious enclave of ${finalLocality}, Agra. Designed for distinguished living with spacious layouts, high ceilings, premium fittings, and comprehensive security infrastructure.`,
-      privateLocationNote: privateLocationNote.trim() || undefined,
-      locationLink: locationLink.trim() || undefined,
+      ownerId: user?.id || 'RAE-OWNER-01',
+      ownerName: ownerName || user?.name || 'Property Owner',
+      ownerContact: ownerPhone || user?.phone || '+91 91490 79913',
+      images: [
+        coverImageUrl,
+        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=80'
+      ],
+      coverImage: coverImageUrl,
+      description: `Spectacular ${propertyType} situated in the prestigious enclave of ${locality}, Agra. Designed for distinguished living with spacious layouts, high ceilings, premium fittings, and comprehensive security infrastructure.`,
       highlights: [
         `${furnishing} with bespoke craftsmanship`,
-        'Optimal Natural Sunlight & Cross-Ventilation',
+        '100% Vastu Compliant Orientation',
         'High-Speed Connectivity to Expressway & Taj Corridor',
         'Multi-car covered garage & 24/7 power backup'
       ],
       amenities: selectedAmenities,
-      landmarks: selectedLandmarks.length > 0 ? selectedLandmarks : [
-        { name: `${finalLocality} Metro Station`, distance: '1.2 km', travelTime: '3 mins' },
+      landmarks: [
+        { name: `${locality} Metro Station`, distance: '1.2 km', travelTime: '3 mins' },
         { name: 'Taj Mahal East Gate', distance: '4.5 km', travelTime: '10 mins' },
         { name: 'Agra-Lucknow Expressway', distance: '5.8 km', travelTime: '12 mins' }
       ],
@@ -705,119 +199,16 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       parkingSpots: 3,
       gatedSecurity: true,
       powerBackup: true,
-      coordinates: resolvedCoordinates
+      coordinates: { lat: 27.1767, lng: 78.0081 },
+      postedDate: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+      createdAt: new Date().toISOString()
     };
 
-    try {
-      // 1. Direct write to Cloud Firestore database
-      await saveFirestoreProperty(newProperty);
-
-      // 2. Notify parent state handler
-      if (onPropertyCreated) {
-        await onPropertyCreated(newProperty);
-      }
-      setIsSubmitting(false);
-      setSubmitted(true);
-      scrollToTop();
-    } catch (err: any) {
-      console.error('Submission error:', err);
-      setSubmitError(err?.message || 'An unexpected error occurred while publishing. Please try again.');
-      setIsSubmitting(false);
-      scrollToTop();
+    if (onPropertyCreated) {
+      onPropertyCreated(newProperty);
     }
+    setSubmitted(true);
   };
-
-  // If user is not authenticated, display luxury barrier screen
-  if (!user) {
-    return (
-      <div className="bg-[#FAF8F5] min-h-screen py-12 sm:py-20 flex items-center justify-center">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 w-full text-center">
-          
-          <div className="bg-white rounded-3xl p-8 sm:p-12 shadow-xl border border-gray-200/90 relative overflow-hidden">
-            {/* Top decorative accent */}
-            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#0F382C] via-[#C5A869] to-[#0F382C]" />
-
-            {/* Shield / Lock Icon */}
-            <div className="w-20 h-20 bg-[#0F382C]/10 text-[#0F382C] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner border border-[#0F382C]/20">
-              <Lock className="w-10 h-10 text-[#0F382C]" />
-            </div>
-
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0F382C]/10 text-[#0F382C] text-xs font-bold uppercase tracking-wider mb-4 border border-[#0F382C]/15">
-              <ShieldCheck className="w-4 h-4 text-[#C5A869]" />
-              <span>Exclusive Owner & Developer Portal</span>
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl font-serif-luxury font-bold text-[#0F382C] mb-3">
-              Sign In Required to List Property
-            </h1>
-
-            <p className="text-sm text-gray-600 max-w-md mx-auto mb-8 leading-relaxed">
-              To ensure 100% verified listings, owner privacy, and direct buyer connections, property posting is reserved exclusively for registered accounts on Royal Agra Estate.
-            </p>
-
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 max-w-md mx-auto mb-10">
-              <button
-                type="button"
-                id="barrier-login-btn"
-                onClick={() => onOpenLogin?.('Please sign in or create an account to list your property on Royal Agra Estate.')}
-                className="w-full sm:w-auto flex-1 bg-[#0F382C] hover:bg-[#164E3D] text-white px-6 py-3.5 rounded-xl text-xs font-bold tracking-wider uppercase shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>Sign In / Create Account</span>
-                <ArrowRight className="w-4 h-4 text-[#E4D5B7]" />
-              </button>
-
-              <button
-                type="button"
-                id="barrier-browse-btn"
-                onClick={onSuccessNavigate}
-                className="w-full sm:w-auto px-6 py-3.5 rounded-xl text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all cursor-pointer"
-              >
-                Browse Properties
-              </button>
-            </div>
-
-            {/* Luxury Platform Highlights */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left pt-6 border-t border-gray-100">
-              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-gray-50/80 border border-gray-100">
-                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-xs font-bold text-gray-800">Direct HNI Buyers</h4>
-                  <p className="text-[11px] text-gray-500">Connect with genuine luxury buyers across UP & Delhi NCR.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-gray-50/80 border border-gray-100">
-                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-xs font-bold text-gray-800">Zero Listing Fees</h4>
-                  <p className="text-[11px] text-gray-500">100% free direct owner listings with 0% platform commission.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-gray-50/80 border border-gray-100">
-                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-xs font-bold text-gray-800">Strict Location Privacy</h4>
-                  <p className="text-[11px] text-gray-500">Public visitors only see primary locality; exact address stays protected.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-gray-50/80 border border-gray-100">
-                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-xs font-bold text-gray-800">Instant Lead Dashboard</h4>
-                  <p className="text-[11px] text-gray-500">Track inquiries, schedule visits, and manage status live.</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-[#FAF8F5] min-h-screen py-10 sm:py-16">
@@ -833,460 +224,175 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
             List Your Luxury Property in Agra
           </h1>
           <p className="text-sm text-gray-600 mt-2">
-            Showcase your exclusive property directly to verified HNI buyers and elite investors across Uttar Pradesh and Delhi NCR.
+            Connect directly with verified High-Net-Worth Individuals (HNIs), NRIs, and serious buyers in Agra with complete confidentiality.
           </p>
         </div>
 
-        {/* Multi-step Navigation Stepper */}
-        <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-200 mb-8">
-          <div className="flex items-center justify-between">
+        {/* Multi-step Card */}
+        <div className="bg-white rounded-2xl border border-gray-200/80 shadow-lg overflow-hidden">
+          
+          {/* Step Progress Bar */}
+          <div className="bg-[#0F382C] px-6 py-4 text-white flex items-center justify-between border-b border-[#164E3D]">
             {[
-              { num: 1, label: 'Basic Details' },
-              { num: 2, label: 'Area & Price' },
-              { num: 3, label: 'Amenities & Media' },
-              { num: 4, label: 'Legal & Owner' }
+              { num: 1, title: 'Basic Info' },
+              { num: 2, title: 'Specs & Price' },
+              { num: 3, title: 'Amenities & Media' },
+              { num: 4, title: 'Legal & Owner Info' }
             ].map((s) => (
-              <div 
-                key={s.num} 
-                onClick={() => {
-                  if (s.num < step) setStep(s.num as any);
-                }}
-                className={`flex items-center gap-2 cursor-pointer transition-all ${
-                  step === s.num 
-                    ? 'text-[#0F382C] font-bold' 
-                    : step > s.num 
-                    ? 'text-emerald-700 font-semibold' 
-                    : 'text-gray-400 font-medium'
-                }`}
-              >
-                <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                  step === s.num 
-                    ? 'bg-[#0F382C] text-white ring-4 ring-[#0F382C]/10' 
-                    : step > s.num 
-                    ? 'bg-emerald-100 text-emerald-800' 
-                    : 'bg-gray-100 text-gray-400'
+              <div key={s.num} className="flex items-center gap-2">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                  step === s.num
+                    ? 'bg-[#E4D5B7] text-[#0F382C]'
+                    : step > s.num
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-[#164E3D] text-gray-400'
                 }`}>
-                  {step > s.num ? <Check className="w-4 h-4" /> : s.num}
+                  {step > s.num ? '✓' : s.num}
                 </div>
-                <span className="hidden sm:inline text-xs">{s.label}</span>
+                <span className="hidden sm:inline-block text-xs font-medium text-gray-200">
+                  {s.title}
+                </span>
               </div>
             ))}
           </div>
-        </div>
 
-        {/* Step Content Card */}
-        <div className="bg-white rounded-2xl p-6 sm:p-10 shadow-md border border-gray-200/90">
           {submitted ? (
-            /* SUCCESS STATE AFTER SUBMISSION */
-            <div className="text-center py-12 space-y-5">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto animate-bounce">
+            <div className="p-10 sm:p-16 text-center space-y-5">
+              <div className="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-2">
                 <CheckCircle className="w-10 h-10" />
               </div>
-              <h2 className="text-2xl sm:text-3xl font-serif-luxury font-bold text-[#0F382C]">
-                {isUserAdmin ? 'Property Published Live!' : 'Property Submitted for Verification!'}
+              <h2 className="text-2xl font-serif-luxury font-bold text-[#0F382C]">
+                {isAdmin(user) ? 'Property Published Live to Portfolio!' : 'Property Submitted for Admin Review!'}
               </h2>
               <p className="text-sm text-gray-600 max-w-lg mx-auto">
-                Thank you, <strong>{ownerName || user?.name || 'Property Owner'}</strong>. Your luxury listing in <strong>{locality}</strong> has been {isUserAdmin ? 'published directly to the live website' : 'submitted for admin verification'} with reference ID <strong>#{createdPropertyRef || 'RAE-892140'}</strong>.
+                {isAdmin(user) ? (
+                  <>Thank you, <strong>{ownerName || 'Admin'}</strong>. Your luxury listing in <strong>{locality}</strong> is active with reference ID <strong>#{createdPropertyRef || 'RAE-892140'}</strong>.</>
+                ) : (
+                  <>Thank you, <strong>{ownerName || 'Property Owner'}</strong>. Your listing in <strong>{locality}</strong> has been registered with reference ID <strong>#{createdPropertyRef || 'RAE-892140'}</strong>. It is currently in <strong>Pending Approval</strong> status and will be reviewed and published by our admin team shortly. Location privacy is strictly protected.</>
+                )}
               </p>
               
-              <div className="bg-emerald-50 rounded-xl p-4 max-w-md mx-auto border border-emerald-200 text-xs text-emerald-900 space-y-1">
-                <p className="font-bold">Next Steps:</p>
-                {isUserAdmin ? (
-                  <>
-                    <p>1. Your listing is live across all public property grids immediately for all buyers.</p>
-                    <p>2. You can manage or edit this property at any time from your Dashboard.</p>
-                  </>
-                ) : (
-                  <>
-                    <p>1. Our verification team will review your property details and contact information shortly.</p>
-                    <p>2. You can track your property's approval status anytime under "My Listed Properties" in your Dashboard.</p>
-                  </>
-                )}
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                <button
-                  type="button"
-                  id="post-another-property-btn"
-                  onClick={resetForm}
-                  className="w-full sm:w-auto bg-[#0F382C] text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#164E3D] flex items-center justify-center gap-2 shadow-md transition-all"
-                >
-                  <PlusCircle className="w-4 h-4 text-[#E4D5B7]" />
-                  <span>Post Another Property</span>
-                </button>
+              <div className="pt-6 flex flex-wrap items-center justify-center gap-4">
                 {onNavigateDashboard && (
                   <button
                     type="button"
+                    id="post-view-dashboard-btn"
                     onClick={onNavigateDashboard}
-                    className="w-full sm:w-auto bg-white border border-[#0F382C]/30 text-[#0F382C] hover:bg-gray-50 px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm"
+                    className="bg-[#0F382C] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#164E3D] flex items-center gap-2 shadow-md"
                   >
                     <LayoutDashboard className="w-4 h-4" />
-                    <span>Go to My Dashboard</span>
+                    <span>View in My Dashboard</span>
                   </button>
                 )}
+
                 <button
                   type="button"
+                  id="post-success-home-btn"
                   onClick={onSuccessNavigate}
-                  className="w-full sm:w-auto bg-gray-100 hover:bg-gray-200 text-gray-800 px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider"
                 >
-                  Explore Property Showcase
+                  Return to Home
                 </button>
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} noValidate className="space-y-8">
+            <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-6">
               
-              {/* STEP 1: Basic Details */}
+              {/* STEP 1: Basic Info */}
               {step === 1 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-serif-luxury font-bold text-[#0F382C]">
-                    Step 1: Property Type & Agra Location
+                    Step 1: Property Type & Agra Locality
                   </h3>
 
-                  {/* Intent Switcher: Sale vs Rent */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-2">Listing Intent</label>
-                    <div className="grid grid-cols-2 gap-3 max-w-md">
+                  {/* Intent Switcher */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-gray-700 uppercase">Listing Intent</label>
+                    <div className="grid grid-cols-2 gap-4">
                       <button
                         type="button"
                         onClick={() => setListingIntent('Sale')}
-                        className={`min-h-[48px] py-3 rounded-xl border text-xs font-bold transition-all touch-manipulation ${
-                          listingIntent === 'Sale' 
-                            ? 'bg-[#0F382C] text-white border-[#0F382C] shadow-sm' 
+                        className={`py-3 rounded-xl border text-sm font-bold transition-all ${
+                          listingIntent === 'Sale'
+                            ? 'bg-[#0F382C] text-white border-[#0F382C] shadow-sm'
                             : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
                         }`}
                       >
-                        Sell Property (Capital Sale)
+                        Sell Property
                       </button>
                       <button
                         type="button"
                         onClick={() => setListingIntent('Rent')}
-                        className={`min-h-[48px] py-3 rounded-xl border text-xs font-bold transition-all touch-manipulation ${
-                          listingIntent === 'Rent' 
-                            ? 'bg-[#0F382C] text-white border-[#0F382C] shadow-sm' 
+                        className={`py-3 rounded-xl border text-sm font-bold transition-all ${
+                          listingIntent === 'Rent'
+                            ? 'bg-[#0F382C] text-white border-[#0F382C] shadow-sm'
                             : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
                         }`}
                       >
-                        Lease / Rent Property
+                        Lease / Rent Out
                       </button>
                     </div>
                   </div>
 
-                  {/* Property Category */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-2">Property Typology</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                      {['Luxury Villa', 'Penthouse', 'Heritage Haveli', 'Apartment', 'Gated Township Plot', 'Commercial / Retail', 'House'].map((type) => (
-                        <button
-                          key={type}
-                          type="button"
-                          onClick={() => {
-                            setPropertyType(type);
-                            setIsOtherPropertyType(false);
-                            setCustomPropertyType('');
-                          }}
-                          className={`min-h-[48px] p-3 rounded-xl border text-xs font-semibold text-left transition-all touch-manipulation ${
-                            !isOtherPropertyType && propertyType === type
-                              ? 'bg-emerald-50 text-emerald-950 border-emerald-500 ring-1 ring-emerald-500/20'
-                              : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-                          }`}
-                        >
-                          {type}
-                        </button>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsOtherPropertyType(true);
-                          setPropertyType(customPropertyType || 'Other Typology');
-                        }}
-                        className={`min-h-[48px] p-3 rounded-xl border text-xs font-semibold text-left transition-all touch-manipulation ${
-                          isOtherPropertyType
-                            ? 'bg-emerald-50 text-emerald-950 border-emerald-500 ring-1 ring-emerald-500/20'
-                            : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-                        }`}
-                      >
-                        Other (Specify Custom)
-                      </button>
-                    </div>
-
-                    {isOtherPropertyType && (
-                      <div className="mt-2.5">
-                        <input
-                          type="text"
-                          placeholder="Type custom property type (e.g. Row House, Studio, Farmhouse)"
-                          value={customPropertyType}
-                          onChange={(e) => {
-                            setCustomPropertyType(e.target.value);
-                            setPropertyType(e.target.value);
-                          }}
-                          className="w-full p-3.5 text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white focus:border-[#0F382C]"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Locality in Agra */}
+                  {/* Property Type */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-gray-700 uppercase">Primary Agra Locality</label>
+                    <label className="block text-xs font-bold text-gray-700 uppercase">Property Type</label>
                     <select
-                      value={isOtherLocality ? 'Other' : locality}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === 'Other') {
-                          setIsOtherLocality(true);
-                          setLocality(customLocality);
-                        } else {
-                          setIsOtherLocality(false);
-                          setLocality(val);
-                        }
-                      }}
-                      className="w-full p-3.5 min-h-[48px] text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white focus:border-[#0F382C]"
+                      value={propertyType}
+                      onChange={(e) => setPropertyType(e.target.value as PropertyType)}
+                      className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-medium focus:bg-white"
                     >
-                      {AGRA_LOCALITIES.filter(l => l !== 'All Localities').map((l) => (
+                      {PROPERTY_TYPES.filter(t => t !== 'All').map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Locality */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-gray-700 uppercase">Agra Locality</label>
+                    <select
+                      value={locality}
+                      onChange={(e) => setLocality(e.target.value)}
+                      className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-medium focus:bg-white"
+                    >
+                      {AGRA_LOCALITIES.filter(l => l !== 'All Localities').map(l => (
                         <option key={l} value={l}>{l}</option>
                       ))}
-                      <option value="Other">Other (Specify Custom Locality)</option>
                     </select>
-
-                    {isOtherLocality && (
-                      <div className="mt-2">
-                        <input
-                          type="text"
-                          placeholder="Enter custom Agra locality name (e.g. Dayalbagh, Bodla)"
-                          value={customLocality}
-                          onChange={(e) => {
-                            setCustomLocality(e.target.value);
-                            setLocality(e.target.value);
-                          }}
-                          className="w-full p-3.5 text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white focus:border-[#0F382C]"
-                        />
-                      </div>
-                    )}
                   </div>
 
                   {/* Property / Project Name */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-gray-700 uppercase">Building / House / Project Name *</label>
+                    <label className="block text-xs font-bold text-gray-700 uppercase">Building / House / Project Name</label>
                     <input
                       type="text"
+                      required
                       placeholder="e.g. The Taj Sovereign Villa or Royal Palms"
                       value={projectTitle}
-                      onChange={(e) => {
-                        setProjectTitle(e.target.value);
-                        if (stepErrors.projectTitle) setStepErrors(prev => ({ ...prev, projectTitle: '' }));
-                      }}
-                      className={`w-full p-3.5 text-base sm:text-sm bg-gray-50 border rounded-xl text-gray-800 focus:bg-white focus:border-[#0F382C] ${
-                        stepErrors.projectTitle ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-200'
-                      }`}
+                      onChange={(e) => setProjectTitle(e.target.value)}
+                      className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
                     />
-                    {stepErrors.projectTitle && (
-                      <p className="text-[11px] text-red-600 font-semibold flex items-center gap-1">
-                        <AlertCircle className="w-3.5 h-3.5" />
-                        <span>{stepErrors.projectTitle}</span>
-                      </p>
-                    )}
                   </div>
 
                   {/* Detailed Address */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-gray-700 uppercase">Full Address & Landmarks in Agra *</label>
+                    <label className="block text-xs font-bold text-gray-700 uppercase">Full Address & Landmarks in Agra</label>
                     <textarea
                       rows={2}
+                      required
                       placeholder="e.g. Plot 14, Royal Enclave, Near ITC Mughal, Fatehabad Road, Agra"
                       value={address}
-                      onChange={(e) => {
-                        setAddress(e.target.value);
-                        if (stepErrors.address) setStepErrors(prev => ({ ...prev, address: '' }));
-                      }}
-                      className={`w-full p-3.5 text-base sm:text-sm bg-gray-50 border rounded-xl text-gray-800 focus:bg-white focus:border-[#0F382C] ${
-                        stepErrors.address ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-200'
-                      }`}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
                     />
-                    {stepErrors.address && (
-                      <p className="text-[11px] text-red-600 font-semibold flex items-center gap-1">
-                        <AlertCircle className="w-3.5 h-3.5" />
-                        <span>{stepErrors.address}</span>
-                      </p>
-                    )}
-                    <p className="text-[11px] text-gray-500">
-                      🔒 <span className="font-semibold">Privacy Protected:</span> Only the property's locality ({locality || 'Agra'}) is shown publicly on the website. Full house/plot addresses are never revealed to buyers.
-                    </p>
-                  </div>
-
-                  {/* Private Location & Navigation Box (Admin & CEO Eyes Only) */}
-                  <div className="p-4 sm:p-5 bg-amber-50/70 border border-amber-300/80 rounded-2xl space-y-3.5">
-                    <div className="flex items-center justify-between">
-                      <label className="block text-xs font-bold text-amber-950 uppercase tracking-wider flex items-center gap-1.5">
-                        <Lock className="w-3.5 h-3.5 text-amber-700" />
-                        <span>Confidential Private Location & Navigation (Admin & CEO Eyes Only)</span>
-                      </label>
-                      <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
-                        Admin & CEO Only
-                      </span>
-                    </div>
-
-                    {/* Google Maps Location Link / GPS Pin URL */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <label className="block text-xs font-bold text-amber-900 flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-amber-700" />
-                          <span>Google Maps Location Link / GPS Pin URL</span>
-                        </label>
-                        {parsedCoordinates && (
-                          <span className="text-[10px] font-mono text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300 flex items-center gap-1">
-                            <Check className="w-3 h-3 text-emerald-700" />
-                            <span>GPS Detected ({parsedCoordinates.lat.toFixed(4)}, {parsedCoordinates.lng.toFixed(4)})</span>
-                          </span>
-                        )}
-                      </div>
-                      <input
-                        type="url"
-                        placeholder="Paste Google Maps share link or GPS pin URL (e.g. https://maps.app.goo.gl/... or https://maps.google.com/?q=...)"
-                        value={locationLink}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setLocationLink(val);
-                          const coords = extractCoordinatesFromInput(val);
-                          setParsedCoordinates(coords);
-                        }}
-                        className="w-full p-3 text-base sm:text-sm bg-white border border-amber-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-[#0F382C]"
-                      />
-                      <p className="text-[11px] text-amber-800/90 leading-tight">
-                        📍 Share your exact Google Maps location link or GPS pin. When viewed by the CEO or verified Admin accounts, this exact location will be displayed in the property details map section to navigate directly to the property.
-                      </p>
-                    </div>
-
-                    {/* Landmark Directions & Caretaker Note */}
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-amber-900">
-                        Private Directions & Caretaker Instructions
-                      </label>
-                      <textarea
-                        rows={2}
-                        placeholder="e.g. Turn right after Gate 3 of Imperial Towers, property is second villa on the left. Key with caretaker Mr. Munna Lal."
-                        value={privateLocationNote}
-                        onChange={(e) => setPrivateLocationNote(e.target.value)}
-                        className="w-full p-3 text-base sm:text-sm bg-white border border-amber-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-[#0F382C]"
-                      />
-                    </div>
-
-                    <p className="text-[11px] text-amber-900 leading-tight">
-                      🔒 This confidential box (both location link and directions) is strictly restricted to verified platform administrators and the CEO. Public buyers will only see the general locality ({locality || 'Agra'}).
-                    </p>
-                  </div>
-
-                  {/* Interactive Agra Landmarks & Connectivity Selector */}
-                  <div className="p-4 sm:p-5 bg-gray-50 rounded-2xl border border-gray-200 space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                      <div>
-                        <label className="block text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
-                          <MapPin className="w-4 h-4 text-[#0F382C]" />
-                          <span>Agra Connectivity & Major Landmarks ({selectedLandmarks.length} Selected)</span>
-                        </label>
-                        <p className="text-[11px] text-gray-500 mt-0.5">
-                          Select nearby Agra connectivity hubs, metro stations, expressways, and monuments to showcase on your property profile.
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={addCustomLandmark}
-                        className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0F382C] hover:text-[#164E3D] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1.5 rounded-lg transition-colors w-fit"
-                      >
-                        <PlusCircle className="w-3.5 h-3.5 text-[#0F382C]" />
-                        <span>+ Custom Landmark</span>
-                      </button>
-                    </div>
-
-                    {/* Quick Preset Chips */}
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] font-bold text-gray-600 uppercase">Tap to toggle popular Agra hubs:</span>
-                      <div className="flex flex-wrap gap-2">
-                        {AGRA_LANDMARK_PRESETS.map((preset) => {
-                          const isSelected = selectedLandmarks.some(l => l.name === preset.name);
-                          return (
-                            <button
-                              key={preset.name}
-                              type="button"
-                              onClick={() => toggleLandmarkPreset(preset)}
-                              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 touch-manipulation ${
-                                isSelected
-                                  ? 'bg-[#0F382C] text-white shadow-xs font-semibold'
-                                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-100'
-                              }`}
-                            >
-                              <span>{preset.name}</span>
-                              {isSelected ? <Check className="w-3.5 h-3.5 text-[#E4D5B7]" /> : <span className="text-[10px] text-gray-400">+</span>}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Editable Active Landmarks List */}
-                    {selectedLandmarks.length > 0 && (
-                      <div className="space-y-2 pt-2 border-t border-gray-200">
-                        <span className="text-[10px] font-bold text-gray-600 uppercase block">Selected Landmarks & Distance Guide:</span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-56 overflow-y-auto pr-1">
-                          {selectedLandmarks.map((lm, idx) => (
-                            <div key={idx} className="p-3 bg-white border border-gray-200 rounded-xl space-y-2 shadow-2xs">
-                              <div className="flex items-center justify-between gap-1">
-                                <input
-                                  type="text"
-                                  value={lm.name}
-                                  onChange={(e) => updateLandmarkField(idx, 'name', e.target.value)}
-                                  placeholder="Landmark name"
-                                  className="w-full text-xs font-bold text-gray-900 border-b border-gray-200 focus:border-[#0F382C] pb-0.5 outline-hidden"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => removeLandmark(idx)}
-                                  className="text-gray-400 hover:text-rose-600 p-1"
-                                  title="Remove Landmark"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                              <div className="grid grid-cols-2 gap-2 text-[11px]">
-                                <div>
-                                  <label className="text-[10px] text-gray-500 block">Distance:</label>
-                                  <input
-                                    type="text"
-                                    value={lm.distance}
-                                    onChange={(e) => updateLandmarkField(idx, 'distance', e.target.value)}
-                                    placeholder="e.g. 1.5 km"
-                                    className="w-full p-1 bg-gray-50 border border-gray-200 rounded text-xs"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-[10px] text-gray-500 block">Travel Time:</label>
-                                  <input
-                                    type="text"
-                                    value={lm.travelTime}
-                                    onChange={(e) => updateLandmarkField(idx, 'travelTime', e.target.value)}
-                                    placeholder="e.g. 5 mins"
-                                    className="w-full p-1 bg-gray-50 border border-gray-200 rounded text-xs"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
 
                   <div className="flex justify-end pt-4">
                     <button
                       type="button"
-                      id="step1-continue-btn"
-                      onClick={() => {
-                        if (validateStep1()) {
-                          setStep(2);
-                          scrollToTop();
-                        }
-                      }}
-                      className="w-full sm:w-auto min-h-[48px] bg-[#0F382C] text-white px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#164E3D] shadow-md transition-all touch-manipulation cursor-pointer"
+                      onClick={() => setStep(2)}
+                      className="bg-[#0F382C] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-[#164E3D]"
                     >
                       <span>Continue to Specifications</span>
                       <ArrowRight className="w-4 h-4" />
@@ -1303,65 +409,24 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Super Area + Unit Selector */}
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label className="block text-xs font-bold text-gray-700 uppercase">Super Area</label>
-                        <div className="flex items-center gap-1 bg-gray-100 p-0.5 rounded-md border border-gray-200 text-[10px] font-bold">
-                          <button
-                            type="button"
-                            onClick={() => setAreaUnit('Sq.Ft')}
-                            className={`px-2.5 py-1 rounded transition-all touch-manipulation ${
-                              areaUnit === 'Sq.Ft' ? 'bg-[#0F382C] text-white' : 'text-gray-600 hover:text-black'
-                            }`}
-                          >
-                            Sq.Ft
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setAreaUnit('Sq.Yard')}
-                            className={`px-2.5 py-1 rounded transition-all touch-manipulation ${
-                              areaUnit === 'Sq.Yard' ? 'bg-[#0F382C] text-white' : 'text-gray-600 hover:text-black'
-                            }`}
-                          >
-                            Sq.Yard
-                          </button>
-                        </div>
-                      </div>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={superArea}
-                          onChange={(e) => {
-                            setSuperArea(e.target.value);
-                            if (stepErrors.superArea) setStepErrors(prev => ({ ...prev, superArea: '' }));
-                          }}
-                          placeholder="e.g. 3500"
-                          className={`w-full p-3.5 text-base sm:text-sm bg-gray-50 border rounded-xl text-gray-800 focus:bg-white focus:border-[#0F382C] ${
-                            stepErrors.superArea ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-200'
-                          }`}
-                        />
-                        <span className="absolute right-3.5 top-3.5 text-xs text-gray-400 font-semibold pointer-events-none">
-                          {areaUnit}
-                        </span>
-                      </div>
-                      {stepErrors.superArea && (
-                        <p className="text-[11px] text-red-600 font-semibold flex items-center gap-1">
-                          <AlertCircle className="w-3.5 h-3.5" />
-                          <span>{stepErrors.superArea}</span>
-                        </p>
-                      )}
+                      <label className="block text-xs font-bold text-gray-700 uppercase">Super Area (Sq.Ft)</label>
+                      <input
+                        type="number"
+                        required
+                        value={superArea}
+                        onChange={(e) => setSuperArea(e.target.value)}
+                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"
+                      />
                     </div>
 
-                    {/* Bedrooms (BHK) */}
                     <div className="space-y-2">
                       <label className="block text-xs font-bold text-gray-700 uppercase">Bedrooms (BHK)</label>
                       <select
                         value={bedrooms}
                         onChange={(e) => setBedrooms(e.target.value)}
-                        className="w-full p-3.5 min-h-[48px] text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white"
+                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"
                       >
-                        <option value="1">1 BHK</option>
                         <option value="2">2 BHK</option>
                         <option value="3">3 BHK</option>
                         <option value="4">4 BHK</option>
@@ -1370,43 +435,28 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       </select>
                     </div>
 
-                    {/* Bathrooms */}
                     <div className="space-y-2">
-                      <label className="block text-xs font-bold text-gray-700 uppercase">Bathrooms</label>
-                      <select
-                        value={bathrooms}
-                        onChange={(e) => setBathrooms(e.target.value)}
-                        className="w-full p-3.5 min-h-[48px] text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white"
-                      >
-                        <option value="1">1 Bathroom</option>
-                        <option value="2">2 Bathrooms</option>
-                        <option value="3">3 Bathrooms</option>
-                        <option value="4">4 Bathrooms</option>
-                        <option value="5">5+ Bathrooms</option>
-                      </select>
+                      <label className="block text-xs font-bold text-gray-700 uppercase">
+                        {listingIntent === 'Sale' ? 'Expected Sale Price (₹ INR)' : 'Expected Monthly Rent (₹ INR)'}
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        value={askingPrice}
+                        onChange={(e) => setAskingPrice(e.target.value)}
+                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-mono"
+                      />
+                      <span className="text-[11px] text-gray-500 font-mono">
+                        ≈ {formatPriceDisplay(Number(askingPrice) || 0, listingIntent)}
+                      </span>
                     </div>
 
-                    {/* Possession Status */}
-                    <div className="space-y-2">
-                      <label className="block text-xs font-bold text-gray-700 uppercase">Possession Status</label>
-                      <select
-                        value={possession}
-                        onChange={(e) => setPossession(e.target.value)}
-                        className="w-full p-3.5 min-h-[48px] text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white"
-                      >
-                        <option value="Ready to Move">Ready to Move</option>
-                        <option value="Under Construction">Under Construction</option>
-                        <option value="Newly Launched">Newly Launched</option>
-                      </select>
-                    </div>
-
-                    {/* Furnishing Status */}
                     <div className="space-y-2">
                       <label className="block text-xs font-bold text-gray-700 uppercase">Furnishing Status</label>
                       <select
                         value={furnishing}
                         onChange={(e) => setFurnishing(e.target.value)}
-                        className="w-full p-3.5 min-h-[48px] text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white"
+                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"
                       >
                         <option value="Designer Fitted">Designer Fitted</option>
                         <option value="Fully Furnished">Fully Furnished</option>
@@ -1414,68 +464,21 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         <option value="Unfurnished">Unfurnished</option>
                       </select>
                     </div>
-
-                    {/* Asking Price with Comma Format & Word Breakdown */}
-                    <div className="space-y-2 sm:col-span-2">
-                      <label className="block text-xs font-bold text-gray-700 uppercase">
-                        {listingIntent === 'Sale' ? 'Expected Sale Price (₹ INR) *' : 'Expected Monthly Rent (₹ INR) *'}
-                      </label>
-                      <input
-                        type="text"
-                        value={askingPrice}
-                        onChange={(e) => {
-                          const raw = e.target.value.replace(/[^0-9]/g, '');
-                          setAskingPrice(raw);
-                          if (stepErrors.askingPrice) setStepErrors(prev => ({ ...prev, askingPrice: '' }));
-                        }}
-                        placeholder="e.g. 28500000"
-                        className={`w-full p-3.5 text-base sm:text-sm bg-gray-50 border rounded-xl text-gray-800 font-mono focus:bg-white focus:border-[#0F382C] ${
-                          stepErrors.askingPrice ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-200'
-                        }`}
-                      />
-                      {stepErrors.askingPrice && (
-                        <p className="text-[11px] text-red-600 font-semibold flex items-center gap-1">
-                          <AlertCircle className="w-3.5 h-3.5" />
-                          <span>{stepErrors.askingPrice}</span>
-                        </p>
-                      )}
-
-                      {askingPrice && Number(askingPrice) > 0 && (
-                        <div className="p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl text-xs space-y-1">
-                          <div className="flex items-center justify-between text-emerald-950 font-mono font-bold">
-                            <span>Formatted Amount (INR):</span>
-                            <span className="text-sm">₹ {formatINRCommas(askingPrice)}</span>
-                          </div>
-                          <div className="text-emerald-900 font-medium text-[11px] capitalize">
-                            <strong>Amount in Words:</strong> {convertNumberToIndianWords(Number(askingPrice))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
                   </div>
 
-                  <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-4">
+                  <div className="flex justify-between pt-4">
                     <button
                       type="button"
-                      onClick={() => {
-                        setStep(1);
-                        scrollToTop();
-                      }}
-                      className="w-full sm:w-auto min-h-[44px] text-xs font-bold text-gray-600 px-4 py-2.5 hover:text-[#0F382C] flex items-center justify-center gap-1.5 touch-manipulation"
+                      onClick={() => setStep(1)}
+                      className="text-xs font-bold text-gray-600 px-4 py-2 hover:text-[#0F382C] flex items-center gap-1.5"
                     >
                       <ArrowLeft className="w-4 h-4" />
-                      <span>Back to Step 1</span>
+                      <span>Back</span>
                     </button>
                     <button
                       type="button"
-                      id="step2-continue-btn"
-                      onClick={() => {
-                        if (validateStep2()) {
-                          setStep(3);
-                          scrollToTop();
-                        }
-                      }}
-                      className="w-full sm:w-auto min-h-[48px] bg-[#0F382C] text-white px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#164E3D] shadow-md transition-all touch-manipulation cursor-pointer"
+                      onClick={() => setStep(3)}
+                      className="bg-[#0F382C] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-[#164E3D]"
                     >
                       <span>Continue to Amenities & Media</span>
                       <ArrowRight className="w-4 h-4" />
@@ -1484,11 +487,11 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                 </div>
               )}
 
-              {/* STEP 3: Amenities & Photos / Videos Upload */}
+              {/* STEP 3: Amenities & Photos */}
               {step === 3 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-serif-luxury font-bold text-[#0F382C]">
-                    Step 3: Select Amenities & Media Upload
+                    Step 3: Select Amenities & Cover Photo
                   </h3>
 
                   <div>
@@ -1503,9 +506,9 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                             key={opt}
                             type="button"
                             onClick={() => toggleAmenity(opt)}
-                            className={`min-h-[48px] p-3 rounded-xl border text-xs font-medium text-left flex items-center justify-between transition-all touch-manipulation ${
+                            className={`p-3 rounded-lg border text-xs font-medium text-left flex items-center justify-between transition-all ${
                               isChecked
-                                ? 'bg-emerald-50 text-emerald-900 border-emerald-300 font-semibold ring-1 ring-emerald-500/20'
+                                ? 'bg-emerald-50 text-emerald-900 border-emerald-300 font-semibold'
                                 : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
                             }`}
                           >
@@ -1517,244 +520,49 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     </div>
                   </div>
 
-                  {/* DEDICATED MEDIA UPLOAD COMPONENT (Photos & Videos) */}
-                  <div className="space-y-3 pt-2">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                      <label className="block text-xs font-bold text-gray-700 uppercase">
-                        Property Photos & Gallery ({uploadedMediaList.length}/{MAX_PHOTOS} Uploaded)
-                      </label>
-                      <span className="text-[11px] text-emerald-800 font-semibold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                        HD Quality • Max 10 Photos • Up to 25 MB each
-                      </span>
+                  {/* Photo Selection / Presets */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-gray-700 uppercase">Cover Image Photo</label>
+                    <input
+                      type="url"
+                      value={coverImageUrl}
+                      onChange={(e) => setCoverImageUrl(e.target.value)}
+                      className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white"
+                      placeholder="https://images.unsplash.com/..."
+                    />
+
+                    <div className="flex items-center gap-3 pt-2">
+                      <span className="text-[11px] text-gray-500 font-semibold">Select Architectural Preset:</span>
+                      <div className="flex gap-2 overflow-x-auto py-1">
+                        {sampleCoverImages.map((img, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setCoverImageUrl(img)}
+                            className={`w-14 h-10 rounded-lg overflow-hidden border-2 transition-all ${
+                              coverImageUrl === img ? 'border-[#0F382C] scale-105' : 'border-gray-200 opacity-60 hover:opacity-100'
+                            }`}
+                          >
+                            <img src={img} alt="preset" className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
                     </div>
-
-                    {/* Native Offscreen File Inputs compatible with mobile Safari & Chrome */}
-                    <input
-                      id="prop-file-upload-input"
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif"
-                      multiple
-                      className="hidden"
-                    />
-                    <input
-                      id="prop-camera-upload-input"
-                      type="file"
-                      ref={cameraInputRef}
-                      onChange={handleFileChange}
-                      accept="image/*"
-                      capture="environment"
-                      className="hidden"
-                    />
-
-                    {/* PROCESSING PROGRESS BANNER */}
-                    {isProcessingPhotos && (
-                      <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-xl text-xs text-emerald-900 flex items-center gap-3 shadow-xs animate-pulse">
-                        <Loader2 className="w-5 h-5 text-emerald-700 animate-spin shrink-0" />
-                        <div className="space-y-0.5">
-                          <p className="font-bold text-emerald-950">
-                            {processingProgress || 'Processing High-Resolution Photos...'}
-                          </p>
-                          <p className="text-[11px] text-emerald-700">
-                            Optimizing crisp HD details and compressing for instant cloud database sync.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {mediaError && (
-                      <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center gap-2 font-medium">
-                        <AlertCircle className="w-4 h-4 shrink-0" />
-                        <span>{mediaError}</span>
-                      </div>
-                    )}
-
-                    {/* MULTIPLE MEDIA PREVIEW GALLERY IF SELECTED */}
-                    {uploadedMediaList.length > 0 ? (
-                      <div className="space-y-4">
-                        <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-xl text-xs text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1">
-                          <span className="font-semibold">
-                            👉 Tap image to set as <strong>Main Property Cover Photo</strong>:
-                          </span>
-                          <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
-                            Photo #{selectedCoverIndex + 1} Selected as Cover
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          {uploadedMediaList.map((item, idx) => {
-                            const isChosenCover = selectedCoverIndex === idx;
-                            return (
-                              <div
-                                key={idx}
-                                onClick={() => setSelectedCoverIndex(idx)}
-                                className={`relative rounded-xl overflow-hidden border-2 bg-gray-900 group aspect-[4/3] cursor-pointer transition-all touch-manipulation ${
-                                  isChosenCover
-                                    ? 'border-emerald-500 ring-4 ring-emerald-500/20 shadow-lg'
-                                    : 'border-gray-200 hover:border-[#0F382C]'
-                                }`}
-                              >
-                                {item.type === 'video' ? (
-                                  <video
-                                    src={item.url}
-                                    controls
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <img
-                                    src={item.url}
-                                    alt={`Upload ${idx + 1}`}
-                                    className="w-full h-full object-cover"
-                                  />
-                                )}
-
-                                {/* Cover Photo Badge */}
-                                <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                                  {isChosenCover ? (
-                                    <span className="bg-emerald-700 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1 border border-emerald-400">
-                                      <Check className="w-3 h-3 text-white" />
-                                      ★ Main Display Cover
-                                    </span>
-                                  ) : (
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedCoverIndex(idx);
-                                      }}
-                                      className="bg-black/70 hover:bg-[#0F382C] backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded border border-white/20 transition-colors touch-manipulation"
-                                    >
-                                      Set as Display Cover
-                                    </button>
-                                  )}
-                                </div>
-
-                                {/* Remove Button */}
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRemoveMedia(idx);
-                                    if (selectedCoverIndex === idx) {
-                                      setSelectedCoverIndex(0);
-                                    } else if (selectedCoverIndex > idx) {
-                                      setSelectedCoverIndex(prev => prev - 1);
-                                    }
-                                  }}
-                                  className="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 text-white p-2 rounded-full shadow-md transition-transform hover:scale-110 z-10 touch-manipulation"
-                                  title="Remove File"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-
-                                <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between gap-1 bg-black/80 backdrop-blur-xs text-white text-[10px] px-2 py-1 rounded-md pointer-events-none shadow-sm z-10 border border-white/10">
-                                  <span className="truncate max-w-[50%] text-gray-200 font-medium">{item.name}</span>
-                                  <span className="font-bold text-amber-300 bg-black/60 px-1.5 py-0.5 rounded border border-amber-300/40 shrink-0 text-[10px]">
-                                    {item.size}
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-
-                        {/* Additional Action Buttons */}
-                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-gray-700 font-bold">
-                              {uploadedMediaList.length} of {MAX_PHOTOS} photo(s) selected
-                            </span>
-                            <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-full border border-emerald-300">
-                              HD Portfolio Ready
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-2 w-full sm:w-auto">
-                            {uploadedMediaList.length < MAX_PHOTOS && (
-                              <>
-                                <label
-                                  htmlFor="prop-file-upload-input"
-                                  className="flex-1 sm:flex-initial min-h-[44px] px-4 py-2.5 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer touch-manipulation"
-                                >
-                                  <Upload className="w-4 h-4 text-[#E4D5B7]" />
-                                  <span>Add More Photos</span>
-                                </label>
-                                <label
-                                  htmlFor="prop-camera-upload-input"
-                                  className="flex-1 sm:flex-initial min-h-[44px] px-4 py-2.5 bg-white hover:bg-gray-100 text-[#0F382C] border border-[#0F382C]/30 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer touch-manipulation"
-                                >
-                                  <Camera className="w-4 h-4 text-[#0F382C]" />
-                                  <span>Camera</span>
-                                </label>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      /* INTERACTIVE DRAG & DROP / MOBILE TOUCH ZONE */
-                      <div
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                        className={`border-2 border-dashed rounded-2xl p-6 sm:p-12 text-center transition-all ${
-                          isDragging
-                            ? 'border-emerald-600 bg-emerald-50/70 scale-[1.01]'
-                            : 'border-gray-300 hover:border-[#0F382C] bg-gray-50/60 hover:bg-white'
-                        }`}
-                      >
-                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-emerald-100/70 text-[#0F382C] flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-xs">
-                          <Upload className="w-7 h-7 sm:w-8 sm:h-8 text-[#0F382C]" />
-                        </div>
-                        <h4 className="text-base font-serif-luxury font-bold text-[#0F382C]">
-                          Upload Property Photos (Up to 10 photos)
-                        </h4>
-                        <p className="text-xs text-gray-500 mt-1 mb-6 max-w-sm mx-auto">
-                          Select high-resolution photos from gallery or capture live with your mobile camera. Supports JPEG, PNG, WEBP, and iPhone HEIC photos.
-                        </p>
-
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                          <label
-                            htmlFor="prop-file-upload-input"
-                            className="w-full sm:w-auto min-h-[48px] px-6 py-3 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer touch-manipulation"
-                          >
-                            <Upload className="w-4 h-4 text-[#E4D5B7]" />
-                            <span>Select Photos (Max 10, Up to 25 MB)</span>
-                          </label>
-
-                          <label
-                            htmlFor="prop-camera-upload-input"
-                            className="w-full sm:w-auto min-h-[48px] px-6 py-3 bg-white hover:bg-gray-100 text-[#0F382C] border border-[#0F382C]/30 rounded-xl text-xs font-bold uppercase tracking-wider shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer touch-manipulation"
-                          >
-                            <Camera className="w-4 h-4 text-[#0F382C]" />
-                            <span>Live Camera Capture</span>
-                          </label>
-                        </div>
-                      </div>
-                    )}
                   </div>
 
-                  <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-4">
+                  <div className="flex justify-between pt-4">
                     <button
                       type="button"
-                      onClick={() => {
-                        setStep(2);
-                        scrollToTop();
-                      }}
-                      className="w-full sm:w-auto min-h-[44px] text-xs font-bold text-gray-600 px-4 py-2.5 hover:text-[#0F382C] flex items-center justify-center gap-1.5 touch-manipulation"
+                      onClick={() => setStep(2)}
+                      className="text-xs font-bold text-gray-600 px-4 py-2 hover:text-[#0F382C] flex items-center gap-1.5"
                     >
                       <ArrowLeft className="w-4 h-4" />
-                      <span>Back to Step 2</span>
+                      <span>Back</span>
                     </button>
                     <button
                       type="button"
-                      id="step3-continue-btn"
-                      onClick={() => {
-                        setStep(4);
-                        scrollToTop();
-                      }}
-                      className="w-full sm:w-auto min-h-[48px] bg-[#0F382C] text-white px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#164E3D] shadow-md transition-all touch-manipulation cursor-pointer"
+                      onClick={() => setStep(4)}
+                      className="bg-[#0F382C] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-[#164E3D]"
                     >
                       <span>Continue to Verification</span>
                       <ArrowRight className="w-4 h-4" />
@@ -1786,7 +594,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         type="button"
                         id="verify-status-yes"
                         onClick={() => setIsVerified('yes')}
-                        className={`min-h-[48px] p-3 rounded-xl border text-left transition-all touch-manipulation ${
+                        className={`p-3 rounded-lg border text-left transition-all ${
                           isVerified === 'yes'
                             ? 'bg-emerald-50 border-emerald-500 text-emerald-900 ring-2 ring-emerald-500/20'
                             : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
@@ -1805,7 +613,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         type="button"
                         id="verify-status-process"
                         onClick={() => setIsVerified('in_process')}
-                        className={`min-h-[48px] p-3 rounded-xl border text-left transition-all touch-manipulation ${
+                        className={`p-3 rounded-lg border text-left transition-all ${
                           isVerified === 'in_process'
                             ? 'bg-amber-50 border-amber-500 text-amber-900 ring-2 ring-amber-500/20'
                             : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
@@ -1824,7 +632,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         type="button"
                         id="verify-status-no"
                         onClick={() => setIsVerified('no')}
-                        className={`min-h-[48px] p-3 rounded-xl border text-left transition-all touch-manipulation ${
+                        className={`p-3 rounded-lg border text-left transition-all ${
                           isVerified === 'no'
                             ? 'bg-gray-100 border-gray-500 text-gray-900 ring-2 ring-gray-400/20'
                             : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
@@ -1840,143 +648,151 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       </button>
                     </div>
 
-                    {/* Custom Authority Verification */}
+                    {/* Authority Selection if Verified or In-Process */}
                     {isVerified !== 'no' && (
                       <div className="pt-3 border-t border-gray-200/80 space-y-3">
-                        <div>
-                          <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                            Approved / Verified By Authority
-                          </label>
-                          <input
-                            type="text"
-                            value={customAuthority || verifiedByAuthority}
-                            onChange={(e) => {
-                              setCustomAuthority(e.target.value);
-                              setVerifiedByAuthority(e.target.value);
-                            }}
-                            placeholder="e.g., ADA Approved, RERA Verified, Agra Cantonment Board"
-                            className="w-full p-3 text-base sm:text-sm bg-white border border-gray-300 rounded-xl text-gray-800 font-medium focus:border-[#0F382C] focus:ring-1 focus:ring-[#0F382C]"
-                          />
-                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                              {isVerified === 'yes' ? 'Verified / Approved By Which Authority?' : 'Applied With Which Authority?'}
+                            </label>
+                            <select
+                              id="verified-authority-select"
+                              value={verifiedByAuthority}
+                              onChange={(e) => setVerifiedByAuthority(e.target.value)}
+                              className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-800 font-medium focus:border-[#0F382C] focus:ring-1 focus:ring-[#0F382C]"
+                            >
+                              <option value="Agra Development Authority (ADA)">Agra Development Authority (ADA)</option>
+                              <option value="UP RERA (Real Estate Regulatory Authority)">UP RERA (Real Estate Regulatory Authority)</option>
+                              <option value="Tehsil Registry / Sub-Registrar Agra">Tehsil Registry / Sub-Registrar Agra</option>
+                              <option value="Nagar Nigam Agra (Municipal Corporation)">Nagar Nigam Agra (Municipal Corporation)</option>
+                              <option value="Royal Agra Legal Advisory Cell">Royal Agra Legal Advisory Cell</option>
+                              <option value="Agra Cantonment Board">Agra Cantonment Board</option>
+                              <option value="Nationalized / Private Bank (Home Loan Approved)">Nationalized / Private Bank (Home Loan Approved)</option>
+                              <option value="Other Authority (Specify)">Other Authority (Specify)</option>
+                            </select>
+                          </div>
 
-                        <div>
-                          <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
-                            Sanction / RERA / Approval File Reference Number (Optional)
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="e.g. ADA/2024/9912 or UPRERAAGT2024"
-                            value={verificationDocNumber}
-                            onChange={(e) => setVerificationDocNumber(e.target.value)}
-                            className="w-full p-3 text-base sm:text-sm bg-white border border-gray-300 rounded-xl text-gray-800 font-mono"
-                          />
+                          {verifiedByAuthority === 'Other Authority (Specify)' && (
+                            <div>
+                              <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                                Specify Authority / Organization Name
+                              </label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="e.g. Housing Society, Zila Panchayat, Advocate Cell"
+                                value={customAuthority}
+                                onChange={(e) => setCustomAuthority(e.target.value)}
+                                className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-800 focus:border-[#0F382C]"
+                              />
+                            </div>
+                          )}
+
+                          <div>
+                            <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                              Approval / RERA / Khasra Reference No. (Optional)
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="e.g. ADA/2024/782 or UPRERAAGT2024"
+                              value={verificationDocNumber}
+                              onChange={(e) => setVerificationDocNumber(e.target.value)}
+                              className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-800 font-mono focus:border-[#0F382C]"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                              Title & Land Conversion Type
+                            </label>
+                            <select
+                              value={titleType}
+                              onChange={(e) => setTitleType(e.target.value)}
+                              className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-800 font-medium focus:border-[#0F382C]"
+                            >
+                              <option value="Freehold Clear Title">Freehold Clear Title (Registered)</option>
+                              <option value="143 Converted (Agri to Residential)">Section 143 Land Converted (Agri to Residential)</option>
+                              <option value="ADA Sanctioned Map">ADA Sanctioned Map Approved</option>
+                              <option value="Society Allotment / Transfer">Society Allotment / Transfer</option>
+                              <option value="Ancestral Heritage Freehold">Ancestral Heritage Freehold</option>
+                            </select>
+                          </div>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  {/* 2. Owner Contact Information */}
-                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-4">
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Confidential Owner / Developer Contact
-                    </label>
+                  {/* 2. Owner Contact Details */}
+                  <div className="space-y-4 pt-2">
+                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      Owner & Trustee Contact Details
+                    </h4>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Owner / Trustee Full Name</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Seth Shanti Prasad"
+                        value={ownerName}
+                        onChange={(e) => setOwnerName(e.target.value)}
+                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">Owner Name *</label>
-                        <input
-                          type="text"
-                          id="owner-name-input"
-                          value={ownerName}
-                          onChange={(e) => {
-                            setOwnerName(e.target.value);
-                            if (stepErrors.ownerName) setStepErrors(prev => ({ ...prev, ownerName: '' }));
-                          }}
-                          className={`w-full p-3 text-base sm:text-sm bg-white border rounded-xl ${
-                            stepErrors.ownerName ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-300'
-                          }`}
-                        />
-                        {stepErrors.ownerName && (
-                          <p className="text-[11px] text-red-600 font-semibold flex items-center gap-1 mt-1">
-                            <AlertCircle className="w-3.5 h-3.5" />
-                            <span>{stepErrors.ownerName}</span>
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">Owner Contact Phone *</label>
+                        <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Mobile Number</label>
                         <input
                           type="tel"
-                          id="owner-phone-input"
+                          required
+                          placeholder="+91 91490 79913"
                           value={ownerPhone}
-                          onChange={(e) => {
-                            setOwnerPhone(e.target.value);
-                            if (stepErrors.ownerPhone) setStepErrors(prev => ({ ...prev, ownerPhone: '' }));
-                          }}
-                          className={`w-full p-3 text-base sm:text-sm bg-white border rounded-xl ${
-                            stepErrors.ownerPhone ? 'border-red-400 ring-1 ring-red-400 bg-red-50/20' : 'border-gray-300'
-                          }`}
+                          onChange={(e) => setOwnerPhone(e.target.value)}
+                          className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"
                         />
-                        {stepErrors.ownerPhone && (
-                          <p className="text-[11px] text-red-600 font-semibold flex items-center gap-1 mt-1">
-                            <AlertCircle className="w-3.5 h-3.5" />
-                            <span>{stepErrors.ownerPhone}</span>
-                          </p>
-                        )}
                       </div>
+
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">Owner Email Address</label>
+                        <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address</label>
                         <input
                           type="email"
-                          id="owner-email-input"
+                          required
+                          placeholder="owner@royalagraestate.in"
                           value={ownerEmail}
                           onChange={(e) => setOwnerEmail(e.target.value)}
-                          placeholder="e.g. owner@gmail.com"
-                          className="w-full p-3 text-base sm:text-sm bg-white border border-gray-300 rounded-xl text-gray-800"
+                          className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"
                         />
                       </div>
+                    </div>
+
+                    <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 space-y-1">
+                      <div className="flex items-center gap-1.5 font-bold">
+                        <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                        <span>Confidential Discretion Guarantee</span>
+                      </div>
+                      <p className="text-[11px] text-emerald-700">
+                        Your direct contact details are never made public. Inquiries are vetted by our Senior Agra Portfolio Advisors before connecting with you.
+                      </p>
                     </div>
                   </div>
 
-                  {submitError && (
-                    <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-xs text-red-800 flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
-                      <span>{submitError}</span>
-                    </div>
-                  )}
-
-                  <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-4">
+                  <div className="flex justify-between pt-4">
                     <button
                       type="button"
-                      onClick={() => {
-                        setStep(3);
-                        scrollToTop();
-                      }}
-                      disabled={isSubmitting}
-                      className="w-full sm:w-auto min-h-[44px] text-xs font-bold text-gray-600 px-4 py-2.5 hover:text-[#0F382C] flex items-center justify-center gap-1.5 disabled:opacity-50 touch-manipulation"
+                      onClick={() => setStep(3)}
+                      className="text-xs font-bold text-gray-600 px-4 py-2 hover:text-[#0F382C] flex items-center gap-1.5"
                     >
                       <ArrowLeft className="w-4 h-4" />
-                      <span>Back to Step 3</span>
+                      <span>Back</span>
                     </button>
-                    
                     <button
-                      type="button"
-                      id="submit-property-listing-btn"
-                      disabled={isSubmitting}
-                      onClick={handleSubmit}
-                      className="w-full sm:w-auto min-h-[50px] bg-[#0F382C] hover:bg-[#164E3D] text-white px-9 py-4 rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-75 cursor-pointer disabled:cursor-not-allowed touch-manipulation"
+                      type="submit"
+                      id="submit-post-property-final-btn"
+                      className="bg-emerald-700 hover:bg-emerald-800 text-white px-8 py-3 rounded-lg text-xs font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all"
                     >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 text-[#E4D5B7] animate-spin" />
-                          <span>Publishing to Royal Agra...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Publish Property Listing</span>
-                          <Sparkles className="w-4 h-4 text-[#E4D5B7]" />
-                        </>
-                      )}
+                      Publish Property to Dashboard & Network
                     </button>
                   </div>
                 </div>
@@ -1984,6 +800,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
             </form>
           )}
+
         </div>
 
       </div>

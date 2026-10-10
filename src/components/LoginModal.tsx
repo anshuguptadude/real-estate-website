@@ -114,7 +114,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         email: foundAdmin.email,
         phone: foundAdmin.phone,
         role: 'admin',
-        permissions: foundAdmin.permissions ? [...foundAdmin.permissions] : undefined,
+        permissions: (foundAdmin as any).permissions ? [...(foundAdmin as any).permissions] : undefined,
         avatar: foundAdmin.email.includes('shrey')
           ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
           : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',

@@ -1,31 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ActiveScreen, Property, Project, FilterState, PropertyType, ListingType, UserProfile, UserDashboardTab } from './types';
-import { isAdmin, getMaskedProperty, LeadSubmission } from './utils/security';
-import { 
-  subscribeFirestoreProperties,
-  saveFirestoreProperty, 
-  deleteFirestoreProperty, 
-  subscribeFirestoreProjects,
-  saveFirestoreProject, 
-  deleteFirestoreProject, 
-  subscribeFirestoreLeads,
-  saveFirestoreLead,
-  deleteFirestoreLead,
-  saveFirestoreAccount,
-  getDeletedPropertyIds,
-  markPropertyAsDeletedLocally,
-  clearDeletedPropertyIdsLocally,
-  subscribeFirestoreDeletedPropertyIds,
-  fetchFirestoreDeletedPropertyIds,
-  clearFirestoreDeletedPropertyIds,
-  saveUserFavorite,
-  deleteUserFavorite,
-  getUserFavorites,
-  getPropertiesCache,
-  setPropertiesCache,
-  mergeWithUserListings
-} from './services/firebaseService';
-import { PROPERTIES_DATA } from './data/mockData';
+import { ActiveScreen, Property, FilterState, PropertyType, ListingType, UserProfile, Project } from './types';
+import { PROPERTIES_DATA, PROJECTS_DATA } from './data/mockData';
+import { isAdmin, getMaskedProperty, formatAgraLocality, LeadSubmission } from './utils/security';
 import { LeadInquiryModal } from './components/LeadInquiryModal';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
@@ -49,7 +25,6 @@ import { Footer } from './components/Footer';
 export default function App() {
   // Navigation & Screen state
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>('home');
-  const [dashboardTab, setDashboardTab] = useState<UserDashboardTab>('listings');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const hasOpenedModalInApp = useRef(false);
 
@@ -64,9 +39,49 @@ export default function App() {
     return null;
   });
 
-  // Global Properties State (persisted locally and synced with Firebase Firestore)
+  // Normalize properties helper to guarantee privacy and consistency
+  const normalizeProperty = (p: any, idx?: number): Property => {
+    const primaryAgraLocality = formatAgraLocality(p.primaryAgraLocality || p.locality || p.location);
+    const loc = primaryAgraLocality.replace(', Agra', '').trim();
+    const fullAddress = p.fullAddress || (p.address && p.address !== primaryAgraLocality ? p.address : undefined);
+    const defaultDates = ['09 Oct 2024', '07 Oct 2024', '04 Oct 2024', '28 Sep 2024', '22 Sep 2024', '15 Sep 2024'];
+    const postedDate = p.postedDate || (idx !== undefined ? defaultDates[idx % defaultDates.length] : '09 Oct 2024');
+    return {
+      ...p,
+      locality: loc,
+      primaryAgraLocality,
+      location: primaryAgraLocality,
+      address: primaryAgraLocality,
+      fullAddress: fullAddress || `${primaryAgraLocality}, Uttar Pradesh`,
+      buildingName: p.buildingName || undefined,
+      plotNumber: p.plotNumber || undefined,
+      status: p.status || (idx === 3 ? 'Sold' : 'Active'),
+      postedDate: postedDate,
+      createdAt: p.createdAt || new Date().toISOString()
+    };
+  };
+
+  // Global Properties State (with persistence & user additions/edits)
   const [properties, setProperties] = useState<Property[]>(() => {
-    return mergeWithUserListings(getPropertiesCache());
+    try {
+      const stored = localStorage.getItem('royal_agra_properties_v2');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((p, idx) => normalizeProperty(p, idx));
+        }
+      }
+    } catch {
+      // ignore
+    }
+    // Seed initial properties with owner listing tags for user's properties
+    return PROPERTIES_DATA.map((p, idx) => normalizeProperty({
+      ...p,
+      status: p.status || (idx === 3 ? 'Sold' : 'Active'),
+      isUserListing: idx === 0 || idx === 2, // First and third properties belong to Shrey Gupta
+      ownerId: (idx === 0 || idx === 2) ? 'RAE-OWNER-01' : undefined,
+      ownerName: (idx === 0 || idx === 2) ? 'Shrey Gupta' : p.agent?.name || 'Managing Partner'
+    }, idx));
   });
 
   // Sync user state to localStorage
@@ -82,94 +97,14 @@ export default function App() {
     }
   }, [user]);
 
-  // Auto-migrate any local browser accounts to Cloud Firestore so they are accessible across all browsers/devices
+  // Sync properties state to localStorage
   useEffect(() => {
-    const migrateLocalAccountsToCloud = async () => {
-      try {
-        const stored = localStorage.getItem('royal_agra_accounts_v1');
-        if (stored) {
-          const accounts = JSON.parse(stored);
-          if (Array.isArray(accounts)) {
-            for (const acc of accounts) {
-              await saveFirestoreAccount(acc);
-            }
-          }
-        }
-      } catch (err) {
-        console.warn('Auto-sync local accounts error:', err);
-      }
-    };
-    migrateLocalAccountsToCloud();
-  }, []);
-
-  // Subscribe to real-time Firestore updates for properties, projects, leads, and deleted tombstones across all devices globally
-  useEffect(() => {
-    let unsubscribeProps: () => void = () => {};
-    let unsubscribeProjects: () => void = () => {};
-    let unsubscribeLeads: () => void = () => {};
-    let unsubscribeDeleted: () => void = () => {};
-
-    const startSubscriptions = () => {
-      try { unsubscribeProps(); } catch {}
-      try { unsubscribeProjects(); } catch {}
-      try { unsubscribeLeads(); } catch {}
-      try { unsubscribeDeleted(); } catch {}
-
-      // 1. Listen for global deletions across all devices
-      unsubscribeDeleted = subscribeFirestoreDeletedPropertyIds(deletedIds => {
-        if (deletedIds && deletedIds.length > 0) {
-          setProperties(prev => {
-            const cleaned = prev.filter(p => !deletedIds.includes(p.id) && !p.isDeleted);
-            setPropertiesCache(cleaned);
-            return cleaned;
-          });
-        }
-      });
-
-      // 2. Listen for properties catalog updates
-      unsubscribeProps = subscribeFirestoreProperties(fetched => {
-        if (fetched) {
-          const deletedLocal = getDeletedPropertyIds();
-          const active = fetched.filter(p => !p.isDeleted && !deletedLocal.includes(p.id));
-          setProperties(active);
-          setPropertiesCache(active);
-        }
-      });
-
-      unsubscribeProjects = subscribeFirestoreProjects(fetched => {
-        if (fetched && fetched.length > 0) setProjectsList(fetched);
-      });
-
-      unsubscribeLeads = subscribeFirestoreLeads(fetched => {
-        if (fetched && fetched.length > 0) setLeads(fetched);
-      });
-    };
-
-    startSubscriptions();
-
-    // Auto-reconnect watchdog: re-subscribe cleanly whenever device turns on, wakes up, or comes back online
-    const handleWakeUpOrOnline = () => {
-      if (document.visibilityState === 'visible' || navigator.onLine) {
-        startSubscriptions();
-      }
-    };
-
-    window.addEventListener('online', handleWakeUpOrOnline);
-    window.addEventListener('focus', handleWakeUpOrOnline);
-    window.addEventListener('pageshow', handleWakeUpOrOnline);
-    document.addEventListener('visibilitychange', handleWakeUpOrOnline);
-
-    return () => {
-      try { unsubscribeProps(); } catch {}
-      try { unsubscribeProjects(); } catch {}
-      try { unsubscribeLeads(); } catch {}
-      try { unsubscribeDeleted(); } catch {}
-      window.removeEventListener('online', handleWakeUpOrOnline);
-      window.removeEventListener('focus', handleWakeUpOrOnline);
-      window.removeEventListener('pageshow', handleWakeUpOrOnline);
-      document.removeEventListener('visibilitychange', handleWakeUpOrOnline);
-    };
-  }, []);
+    try {
+      localStorage.setItem('royal_agra_properties_v2', JSON.stringify(properties));
+    } catch {
+      // ignore
+    }
+  }, [properties]);
 
   // Search & Filter state
   const initialFilterState: FilterState = {
@@ -191,9 +126,9 @@ export default function App() {
   const [savedPropertyIds, setSavedPropertyIds] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem('royal_agra_saved_v2');
-      return stored ? JSON.parse(stored) : [];
+      return stored ? JSON.parse(stored) : ['prop-1', 'prop-2'];
     } catch {
-      return [];
+      return ['prop-1', 'prop-2'];
     }
   });
 
@@ -204,20 +139,6 @@ export default function App() {
       // ignore
     }
   }, [savedPropertyIds]);
-
-  // Sync user favorites from Cloud Firestore when user is authenticated
-  useEffect(() => {
-    if (user) {
-      const userKey = (user.email || user.id || user.phone || '').trim().toLowerCase();
-      if (userKey) {
-        getUserFavorites(userKey).then(cloudFavs => {
-          if (cloudFavs && cloudFavs.length > 0) {
-            setSavedPropertyIds(prev => Array.from(new Set([...prev, ...cloudFavs])));
-          }
-        }).catch(err => console.warn('Favorites fetch note:', err));
-      }
-    }
-  }, [user]);
 
   // Compare properties state (max 3)
   const [compareList, setCompareList] = useState<Property[]>([]);
@@ -248,32 +169,50 @@ export default function App() {
     setLeadModalOpen(true);
   };
 
-  const handleLeadSubmitted = async (newLead: LeadSubmission) => {
+  const handleLeadSubmitted = (newLead: LeadSubmission) => {
     setLeads(prev => [newLead, ...prev]);
-    await saveFirestoreLead(newLead);
   };
 
-  const handleDeleteLead = async (leadId: string) => {
+  const handleDeleteLead = (leadId: string) => {
     setLeads(prev => prev.filter(l => l.id !== leadId));
-    await deleteFirestoreLead(leadId);
   };
 
-  // Projects State (fetched directly from Firebase Firestore via real-time onSnapshot)
-  const [projectsList, setProjectsList] = useState<Project[]>([]);
+  // Projects State
+  const [projectsList, setProjectsList] = useState<Project[]>(() => {
+    try {
+      const stored = localStorage.getItem('royal_agra_projects_v2');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map(p => ({
+            ...p,
+            locality: formatAgraLocality(p.locality)
+          }));
+        }
+      }
+    } catch {}
+    return PROJECTS_DATA.map(p => ({
+      ...p,
+      locality: formatAgraLocality(p.locality)
+    }));
+  });
 
-  const handleAddProject = async (newProj: Project) => {
+  useEffect(() => {
+    try {
+      localStorage.setItem('royal_agra_projects_v2', JSON.stringify(projectsList));
+    } catch {}
+  }, [projectsList]);
+
+  const handleAddProject = (newProj: Project) => {
     setProjectsList(prev => [newProj, ...prev]);
-    await saveFirestoreProject(newProj);
   };
 
-  const handleEditProject = async (updatedProj: Project) => {
+  const handleEditProject = (updatedProj: Project) => {
     setProjectsList(prev => prev.map(p => p.id === updatedProj.id ? updatedProj : p));
-    await saveFirestoreProject(updatedProj);
   };
 
-  const handleDeleteProject = async (projId: string) => {
+  const handleDeleteProject = (projId: string) => {
     setProjectsList(prev => prev.filter(p => p.id !== projId));
-    await deleteFirestoreProject(projId);
   };
 
   // Modals state
@@ -289,37 +228,14 @@ export default function App() {
   const [savedDrawerOpen, setSavedDrawerOpen] = useState(false);
 
   // Scroll to top on screen change
-  const navigateTo = (
-    screen: ActiveScreen, 
-    propertyId: string | null = null, 
-    addToHistoryOrTargetTab: boolean | UserDashboardTab = true, 
-    maybeTargetTab?: UserDashboardTab
-  ) => {
-    let addToHistory = true;
-    let targetTab: UserDashboardTab | undefined;
-
-    if (typeof addToHistoryOrTargetTab === 'boolean') {
-      addToHistory = addToHistoryOrTargetTab;
-      targetTab = maybeTargetTab;
-    } else if (typeof addToHistoryOrTargetTab === 'string') {
-      targetTab = addToHistoryOrTargetTab;
-      addToHistory = true;
+  const navigateTo = (screen: ActiveScreen, propertyId: string | null = null, addToHistory: boolean = true) => {
+    if (screen === 'sell-rent' && !user) {
+      handleInitiatePostProperty();
+      return;
     }
-
-    if (targetTab) {
-      setDashboardTab(targetTab);
-    }
-
     if (screen === 'dashboard' && !user) {
       setLoginPromptMessage('Please log in or create an account to view your dashboard.');
       setPendingDashboardRedirect(true);
-      setLoginModalOpen(true);
-      return;
-    }
-
-    if (screen === 'sell-rent' && !user) {
-      setLoginPromptMessage('Please sign in or create an account to list your property on Royal Agra Estate.');
-      setPendingPostRedirect(true);
       setLoginModalOpen(true);
       return;
     }
@@ -396,32 +312,27 @@ export default function App() {
     
     // Set initial state without adding to history (it's already the current state)
     setActiveScreen(screen);
+    if (propertyId) {
+      const found = properties.find(p => p.id === propertyId);
+      if (found) setSelectedProperty(found);
+    }
     
     // Replace current state with correct state object so popstate works for the first entry
     window.history.replaceState({ screen, propertyId }, '', window.location.pathname + window.location.search);
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []); 
+  }, [properties, user]); 
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const propertyId = params.get('property');
-    if (propertyId && properties.length > 0) {
-      const found = properties.find(p => p.id === propertyId);
-      if (found) setSelectedProperty(found);
-    }
-  }, [properties]);
-
-  // Protected Post Property trigger - directly navigates to Sell/Rent or prompts login
+  // Protected Post Property trigger
   const handleInitiatePostProperty = () => {
     if (!user) {
-      setLoginPromptMessage('Please sign in or create an account to list your property on Royal Agra Estate.');
+      setLoginPromptMessage('Please log in or create an account to post a property listing in Agra.');
       setPendingPostRedirect(true);
       setLoginModalOpen(true);
-      return;
+    } else {
+      navigateTo('sell-rent');
     }
-    navigateTo('sell-rent');
   };
 
   const handleLoginSuccess = (authenticatedUser: UserProfile) => {
@@ -446,126 +357,61 @@ export default function App() {
   };
 
   // Property Management Handlers
-  const handlePropertyCreated = async (newProp: Property): Promise<boolean> => {
-    const isPosterAdmin = isAdmin(user);
-    const propToSave: Property = {
-      ...newProp,
-      isDeleted: false,
-      status: isPosterAdmin ? 'Active' : (newProp.status || 'pending_verification'),
-      isApproved: isPosterAdmin ? true : (newProp.isApproved || false),
-      verificationStatus: isPosterAdmin ? 'Verified' : newProp.verificationStatus,
-      isUserListing: true
-    };
-    setProperties(prev => {
-      const exists = prev.some(p => p.id === propToSave.id);
-      const updated = exists ? prev.map(p => p.id === propToSave.id ? propToSave : p) : [propToSave, ...prev];
-      setPropertiesCache(updated);
-      return updated;
-    });
-    try {
-      const success = await saveFirestoreProperty(propToSave);
-      return success;
-    } catch (e) {
-      console.warn("Remote Firestore write error (saved locally):", e);
-      return true;
+  const handlePropertyCreated = (newProp: Property) => {
+    const normalized = normalizeProperty(newProp);
+    setProperties(prev => [normalized, ...prev]);
+  };
+
+  const handleSavePropertyEdit = (updatedProperty: Property) => {
+    const normalized = normalizeProperty(updatedProperty);
+    setProperties(prev => prev.map(p => (p.id === normalized.id ? normalized : p)));
+    if (selectedProperty && selectedProperty.id === normalized.id) {
+      setSelectedProperty(normalized);
     }
   };
 
-  const handleSavePropertyEdit = async (updatedProperty: Property) => {
-    const cleanUpdated: Property = {
-      ...updatedProperty,
-      isDeleted: false
-    };
-    setProperties(prev => {
-      const nextList = prev.map(p => p.id === cleanUpdated.id ? cleanUpdated : p);
-      setPropertiesCache(nextList);
-      return nextList;
-    });
-    if (selectedProperty && selectedProperty.id === cleanUpdated.id) {
-      setSelectedProperty(cleanUpdated);
-    }
-    await saveFirestoreProperty(cleanUpdated);
-  };
-
-  const handleDeleteProperty = async (propertyId: string) => {
-    // 1. Mark in persistent storage so page reloads or seed arrays never bring it back
-    markPropertyAsDeletedLocally(propertyId);
-
-    // 2. Remove immediately from local state and update local cache
-    setProperties(prev => {
-      const nextList = prev.filter(p => p.id !== propertyId);
-      setPropertiesCache(nextList);
-      return nextList;
-    });
-
-    // 3. Remove from favorites, compare list, and active modal
+  const handleDeleteProperty = (propertyId: string) => {
+    setProperties(prev => prev.filter(p => p.id !== propertyId));
     setSavedPropertyIds(prev => prev.filter(id => id !== propertyId));
     setCompareList(prev => prev.filter(p => p.id !== propertyId));
     if (selectedProperty && selectedProperty.id === propertyId) {
       setSelectedProperty(null);
     }
-
-    // 4. Trigger persistent soft-delete, cloud tombstone & hard-delete in Firestore
-    await deleteFirestoreProperty(propertyId, user?.email || 'admin');
   };
 
-  const handlePurgeDemoProperties = async () => {
-    const demoIds = Array.from(new Set([
-      'prop-1', 'prop-2', 'prop-3', 'prop-4', 'prop-5', 'prop-6', 'prop-7', 'prop-8',
-      'prop-fatehabad-sovereign-01', 'prop-dayalbagh-heritage-02', 'prop-tajganj-kohinoor-03', 'prop-sikandra-greens-04',
-      ...PROPERTIES_DATA.map(p => p.id)
-    ]));
-    demoIds.forEach(id => markPropertyAsDeletedLocally(id));
-
-    setProperties(prev => {
-      const nextList = prev.filter(p => !demoIds.includes(p.id));
-      setPropertiesCache(nextList);
-      return nextList;
-    });
-
-    for (const id of demoIds) {
-      await deleteFirestoreProperty(id, user?.email || 'admin');
-    }
-  };
-
-  const handleRestoreDefaultProperties = async () => {
-    const demoIds = Array.from(new Set([
-      'prop-1', 'prop-2', 'prop-3', 'prop-4', 'prop-5', 'prop-6', 'prop-7', 'prop-8',
-      'prop-fatehabad-sovereign-01', 'prop-dayalbagh-heritage-02', 'prop-tajganj-kohinoor-03', 'prop-sikandra-greens-04',
-      ...PROPERTIES_DATA.map(p => p.id)
-    ]));
-    await clearFirestoreDeletedPropertyIds(demoIds);
-    clearDeletedPropertyIdsLocally();
-    const seeded = (PROPERTIES_DATA as Property[]).map((p, idx) => ({
-      ...p,
-      status: p.status || (idx === 3 ? 'Sold' : 'Active'),
-      isApproved: true,
-      isDeleted: false,
-      isUserListing: idx === 0 || idx === 2,
-      ownerId: (idx === 0 || idx === 2) ? 'RAE-OWNER-01' : 'RAE-PARTNER-02',
-      ownerName: (idx === 0 || idx === 2) ? 'Shrey Gupta' : p.agent?.name || 'Managing Partner'
+  const handleApproveProperty = (propertyId: string) => {
+    setProperties(prev => prev.map(p => {
+      if (p.id === propertyId) {
+        return {
+          ...p,
+          status: 'Active',
+          verified: true,
+          verificationStatus: 'Verified'
+        };
+      }
+      return p;
     }));
-    setProperties(seeded);
-    setPropertiesCache(seeded);
-    for (const prop of seeded) {
-      await saveFirestoreProperty(prop);
+    if (selectedProperty && selectedProperty.id === propertyId) {
+      setSelectedProperty(prev => prev ? {
+        ...prev,
+        status: 'Active',
+        verified: true,
+        verificationStatus: 'Verified'
+      } : null);
     }
   };
 
-  const handleTogglePropertyStatus = async (propertyId: string) => {
-    const prop = properties.find(p => p.id === propertyId);
-    if (!prop) return;
-    const current = prop.status || 'Active';
-    const nextStatus = current === 'Active' 
-      ? (prop.listingType === 'Rent' ? 'Rented' : 'Sold')
-      : 'Active';
-    const updated: Property = { ...prop, status: nextStatus, isApproved: true };
-    setProperties(prev => {
-      const nextList = prev.map(p => p.id === propertyId ? updated : p);
-      setPropertiesCache(nextList);
-      return nextList;
-    });
-    await saveFirestoreProperty(updated);
+  const handleTogglePropertyStatus = (propertyId: string) => {
+    setProperties(prev => prev.map(p => {
+      if (p.id === propertyId) {
+        const current = p.status || 'Active';
+        const nextStatus = current === 'Active' 
+          ? (p.listingType === 'Rent' ? 'Rented' : 'Sold')
+          : 'Active';
+        return { ...p, status: nextStatus };
+      }
+      return p;
+    }));
   };
 
   const handleHeroSearch = (newFilters: Partial<FilterState>) => {
@@ -578,29 +424,18 @@ export default function App() {
     navigateTo('properties');
   };
 
-  const handleToggleSave = async (id: string) => {
+  const handleToggleSave = (id: string) => {
     if (!user) {
       setLoginPromptMessage('Please log in or create an account to save properties to your favorites.');
       setLoginModalOpen(true);
       return;
     }
-    const isSaved = savedPropertyIds.includes(id);
-    const userKey = (user.email || user.id || user.phone || '').trim().toLowerCase();
-
     setSavedPropertyIds(prev =>
-      isSaved ? prev.filter(item => item !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );
-
-    if (userKey) {
-      if (isSaved) {
-        await deleteUserFavorite(userKey, id);
-      } else {
-        await saveUserFavorite(userKey, id);
-      }
-    }
   };
 
-  const handleInquireContact = async (property: Property) => {
+  const handleInquireContact = (property: Property) => {
     const newLead: LeadSubmission = {
       id: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
       propertyId: property.id,
@@ -612,7 +447,6 @@ export default function App() {
       timestamp: new Date().toLocaleString()
     };
     setLeads(prev => [newLead, ...prev]);
-    await saveFirestoreLead(newLead);
   };
 
   const handleToggleCompare = (prop: Property) => {
@@ -637,100 +471,22 @@ export default function App() {
     handleOpenLeadModal(prop);
   };
 
-  const handleApproveProperty = async (propertyId: string) => {
-    const prop = properties.find(p => p.id === propertyId);
-    if (!prop) return;
-    const updated: Property = { 
-      ...prop, 
-      status: 'Active',
-      isApproved: true,
-      verificationStatus: 'Verified'
-    };
-    // 1. Immediately update React state and persistent cache
-    setProperties(prev => {
-      const nextList = prev.map(p => p.id === propertyId ? updated : p);
-      setPropertiesCache(nextList);
-      return nextList;
-    });
-    if (selectedProperty && selectedProperty.id === propertyId) {
-      setSelectedProperty(updated);
-    }
-    // 2. Persist to Firestore database
-    await saveFirestoreProperty(updated);
-  };
+  // Public / non-admin users only see active/sold/rented or their own listings, strictly masked
+  const displayedProperties = properties
+    .filter(p => {
+      if (isAdmin(user)) return true;
+      return p.status !== 'Pending Approval' || (user && p.ownerId === user.id) || p.isUserListing;
+    })
+    .map(p => getMaskedProperty(p, user));
 
-  const handleRejectProperty = async (propertyId: string) => {
-    const prop = properties.find(p => p.id === propertyId);
-    if (!prop) return;
-    const updated: Property = { 
-      ...prop, 
-      status: 'rejected',
-      isApproved: false
-    };
-    setProperties(prev => {
-      const nextList = prev.map(p => p.id === propertyId ? updated : p);
-      setPropertiesCache(nextList);
-      return nextList;
-    });
-    if (selectedProperty && selectedProperty.id === propertyId) {
-      setSelectedProperty(updated);
-    }
-    await saveFirestoreProperty(updated);
-  };
-
-  const publicProperties = properties.filter(p => {
-    if (!p || p.isDeleted || p.id === 'prop-harish-nagar-89' || p.title?.toLowerCase().includes('harish nagar')) return false;
-
-    // Admin can see all non-deleted properties
-    if (isAdmin(user)) return true;
-
-    // For public visitors on browse/buy/rent pages:
-    // Only show active, published, approved properties (exclude pending verification and rejected)
-    const isLive = p.status === 'Active' || p.status === 'published' || p.status === 'Sold' || p.status === 'Rented';
-    const isExplicitlyPending = p.status === 'pending_verification' || p.status === 'Pending Approval' || p.isApproved === false;
-    const isExplicitlyRejected = p.status === 'rejected';
-
-    return isLive && !isExplicitlyPending && !isExplicitlyRejected;
-  });
-  const displayedProperties = publicProperties.map(p => getMaskedProperty(p, user));
   const savedProperties = displayedProperties.filter(p => savedPropertyIds.includes(p.id));
 
   // Properties belonging to current user or all properties if admin
   const userProperties = isAdmin(user)
-    ? properties.filter(p => !p.isDeleted && p.id !== 'prop-harish-nagar-89' && !p.title?.toLowerCase().includes('harish nagar'))
-    : properties.filter(p => {
-        if (!p || p.isDeleted || p.id === 'prop-harish-nagar-89' || p.title?.toLowerCase().includes('harish nagar') || !user) return false;
-        const uId = user.id?.trim();
-        const uEmail = user.email?.trim().toLowerCase();
-        const uPhone = user.phone ? user.phone.replace(/[^0-9]/g, '') : '';
-        const uName = user.name?.trim().toLowerCase();
-
-        const pOwnerId = p.ownerId?.trim();
-        const pUserId = p.userId?.trim();
-        const pPostedById = p.postedBy?.id?.trim();
-        const pEmail = p.ownerEmail?.trim().toLowerCase();
-        const pPostedByEmail = p.postedBy?.email?.trim().toLowerCase();
-        const pPhone = p.ownerContact ? p.ownerContact.replace(/[^0-9]/g, '') : '';
-        const pOwnerName = p.ownerName?.trim().toLowerCase();
-        const pPostedByName = p.postedBy?.name?.trim().toLowerCase();
-
-        const matchId = Boolean(uId && (pOwnerId === uId || pUserId === uId || pPostedById === uId));
-        const matchEmail = Boolean(
-          (uEmail && pEmail && pEmail === uEmail) || 
-          (uEmail && pPostedByEmail && pPostedByEmail === uEmail)
-        );
-        const matchPhone = Boolean(
-          uPhone && pPhone && 
-          (pPhone === uPhone || pPhone.endsWith(uPhone) || uPhone.endsWith(pPhone))
-        );
-        const matchName = Boolean(
-          uName && pOwnerName && uName === pOwnerName && uName.length > 2
-        ) || Boolean(
-          uName && pPostedByName && uName === pPostedByName && uName.length > 2
-        );
-
-        return matchId || matchEmail || matchPhone || matchName;
-      });
+    ? properties
+    : properties.filter(p => 
+        p.isUserListing || (user && p.ownerId === user.id) || (user && user.role === 'owner' && (p.isUserListing || p.id === 'prop-1' || p.id === 'prop-3'))
+      );
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-[#1A2E26] selection:bg-[#0F382C] selection:text-white">
@@ -774,6 +530,7 @@ export default function App() {
               onInquireContact={handleInquireContact}
               isAdminUser={isAdmin(user)}
               onDeleteProperty={handleDeleteProperty}
+              onApproveProperty={handleApproveProperty}
             />
 
             <NeighborhoodExplorer
@@ -803,35 +560,27 @@ export default function App() {
             onInquireContact={handleInquireContact}
             isAdminUser={isAdmin(user)}
             onDeleteProperty={handleDeleteProperty}
+            onApproveProperty={handleApproveProperty}
           />
         )}
 
         {/* SCREEN: User Dashboard */}
         {activeScreen === 'dashboard' && (
           <UserDashboardScreen
-            key={`${dashboardTab}-${user?.id || 'guest'}`}
-            initialTab={dashboardTab}
             user={user}
             userProperties={userProperties}
             savedProperties={savedProperties}
             leads={leads}
-            allProperties={properties}
-            onUpdateProfile={async (updated) => {
-              setUser(updated);
-              await saveFirestoreAccount(updated);
-            }}
+            onUpdateProfile={(updated) => setUser(updated)}
             onEditProperty={(prop) => setEditingProperty(prop)}
             onDeleteProperty={handleDeleteProperty}
             onTogglePropertyStatus={handleTogglePropertyStatus}
-            onApproveProperty={handleApproveProperty}
-            onRejectProperty={handleRejectProperty}
             onViewProperty={(prop) => navigateTo('properties', prop.id)}
             onNavigatePostProperty={handleInitiatePostProperty}
             onNavigateProperties={() => navigateTo('properties')}
             onLogout={handleLogout}
             onDeleteLead={handleDeleteLead}
-            onPurgeDemoProperties={handlePurgeDemoProperties}
-            onRestoreDefaultProperties={handleRestoreDefaultProperties}
+            onApproveProperty={handleApproveProperty}
           />
         )}
 
@@ -842,11 +591,6 @@ export default function App() {
             onSuccessNavigate={() => navigateTo('home')}
             onPropertyCreated={handlePropertyCreated}
             onNavigateDashboard={() => navigateTo('dashboard')}
-            onOpenLogin={(msg) => {
-              setLoginPromptMessage(msg || 'Please sign in or create an account to list your property on Royal Agra Estate.');
-              setPendingPostRedirect(true);
-              setLoginModalOpen(true);
-            }}
           />
         )}
 
@@ -886,13 +630,14 @@ export default function App() {
       
       {/* Property Detail Modal */}
       <PropertyDetailModal
-        property={selectedProperty}
+        property={selectedProperty ? (isAdmin(user) ? selectedProperty : getMaskedProperty(selectedProperty, user)) : null}
         onClose={() => navigateTo(activeScreen, null)}
         onBookVisit={handleBookVisit}
         onOpenEmiCalc={(price) => handleOpenEmiCalculator(price)}
         onToggleSave={handleToggleSave}
         isSaved={selectedProperty ? savedPropertyIds.includes(selectedProperty.id) : false}
-        user={user}
+        isAdminUser={isAdmin(user)}
+        onApproveProperty={handleApproveProperty}
       />
 
       {/* Unified Login & Sign Up Modal */}
@@ -915,7 +660,6 @@ export default function App() {
         isOpen={Boolean(editingProperty)}
         onClose={() => setEditingProperty(null)}
         onSave={handleSavePropertyEdit}
-        user={user}
       />
 
       {/* Mortgage EMI Calculator Modal */}
@@ -929,7 +673,7 @@ export default function App() {
       <CompareModal
         isOpen={compareModalOpen}
         onClose={() => setCompareModalOpen(false)}
-        compareList={compareList}
+        compareList={compareList.map(p => getMaskedProperty(p, user))}
         onRemoveFromCompare={(id) => setCompareList(prev => prev.filter(p => p.id !== id))}
         onSelectProperty={(prop) => {
           navigateTo(activeScreen, prop.id);
@@ -937,43 +681,11 @@ export default function App() {
         }}
       />
 
-      {/* Floating Compare Bar */}
-      {compareList.length > 0 && (
-        <div className="fixed bottom-6 right-6 z-40 bg-[#0F382C] text-white p-3 sm:px-5 sm:py-3.5 rounded-2xl shadow-2xl border border-[#C5A869]/40 flex items-center gap-3.5">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-[#E4D5B7] text-[#0F382C] text-xs font-bold flex items-center justify-center">
-              {compareList.length}
-            </div>
-            <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline">
-              Estates Selected
-            </span>
-          </div>
-
-          <button
-            type="button"
-            id="open-compare-modal-btn"
-            onClick={() => setCompareModalOpen(true)}
-            className="px-4 py-1.5 bg-[#E4D5B7] hover:bg-[#d8c59f] text-[#0F382C] text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-colors"
-          >
-            Compare Now
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setCompareList([])}
-            className="text-gray-300 hover:text-white text-xs p-1"
-            title="Clear compare selection"
-          >
-            ✕
-          </button>
-        </div>
-      )}
-
       {/* Lead Generation & Tour Booking Modal */}
       <LeadInquiryModal
         isOpen={leadModalOpen}
         onClose={() => setLeadModalOpen(false)}
-        property={leadModalProperty}
+        property={leadModalProperty ? getMaskedProperty(leadModalProperty, user) : null}
         onLeadSubmitted={handleLeadSubmitted}
       />
       <SavedPropertiesDrawer

@@ -1,4 +1,11 @@
-export type PropertyType = string;
+export type PropertyType = 
+  | 'All'
+  | 'Luxury Villa'
+  | 'Penthouse'
+  | 'Heritage Haveli'
+  | 'Apartment'
+  | 'Gated Township Plot'
+  | 'Commercial / Retail';
 
 export type ListingType = 'Buy' | 'Rent' | 'Commercial' | 'Projects' | 'Plots';
 
@@ -13,19 +20,24 @@ export interface Property {
   pricePerSqFt: number; // e.g., 8500
   location: string;
   locality: string;
-  address: string;
+  primaryAgraLocality?: string; // Standard public Agra locality (e.g. 'Fatehabad Road, Agra')
+  address: string; // Publicly displays primary locality only
+  fullAddress?: string; // Exact full street address & landmarks (Admin only)
+  buildingName?: string; // Building / Estate Name (Admin only)
+  plotNumber?: string; // Plot / Suite Number (Admin only)
   bedrooms: number;
   bathrooms: number;
   balconies: number;
   superAreaSqFt: number;
   carpetAreaSqFt: number;
   furnishing: 'Fully Furnished' | 'Semi-Furnished' | 'Unfurnished' | 'Designer Fitted';
-  facing: 'North-East (Morning Sun)' | 'East' | 'North' | 'Taj View (South-East)' | 'Park Facing';
+  facing: 'North-East (Vastu)' | 'North-East (Morning Sun)' | 'East' | 'North' | 'Taj View (South-East)' | 'Park Facing' | 'West' | 'South' | string;
   reraId: string;
   possession: 'Ready to Move' | 'Immediate' | 'Dec 2025' | 'Under Construction';
   featured: boolean;
   isExclusive: boolean;
   verified: boolean;
+  isApproved?: boolean;
   verificationStatus?: 'Verified' | 'Not Verified' | 'In Process';
   verifiedBy?: string;
   verificationNumber?: string;
@@ -49,29 +61,16 @@ export interface Property {
   gatedSecurity: boolean;
   powerBackup: boolean;
   coordinates: { lat: number; lng: number };
-  status?: 'Active' | 'Sold' | 'Rented' | 'pending_verification' | 'Pending Approval' | 'published' | 'rejected';
-  isApproved?: boolean;
-  isDeleted?: boolean;
+  status?: 'Active' | 'Pending Approval' | 'Sold' | 'Rented';
   isUserListing?: boolean;
-  editPendingApproval?: boolean;
-  privateLocationNote?: string;
-  locationLink?: string; // Google Maps share link or GPS pin URL (Confidential - Admin/CEO only)
   ownerId?: string;
-  userId?: string;
   ownerName?: string;
   ownerContact?: string;
   ownerEmail?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  approvedAt?: string;
-  postedBy?: {
-    id?: string;
-    name?: string;
-    email?: string;
-    phone?: string;
-    role?: string;
-    avatar?: string;
-  };
+  userId?: string;
+  postedBy?: { id?: string; name?: string; email?: string; phone?: string };
+  postedDate?: string; // Formatted date e.g. "09 Oct 2024"
+  createdAt?: string; // ISO or formatted timestamp
 }
 
 export interface UserProfile {
@@ -79,12 +78,7 @@ export interface UserProfile {
   name: string;
   email: string;
   phone: string;
-  role: 'buyer' | 'owner' | 'admin' | 'ceo' | 'agent' | 'staff';
-  status?: 'active' | 'suspended' | 'disabled';
-  disabledReason?: string;
-  disabledAt?: string;
-  permissions?: string[];
-  unlockedPropertyIds?: string[];
+  role: 'buyer' | 'owner' | 'admin';
   avatar?: string;
   memberSince: string;
   city?: string;
@@ -94,9 +88,12 @@ export interface UserProfile {
   address?: string;
   dob?: string;
   profession?: string;
+  status?: string;
+  permissions?: string[];
+  unlockedPropertyIds?: string[];
 }
 
-export type UserDashboardTab = 'listings' | 'profile' | 'saved' | 'inquiries' | 'leads' | 'approvals' | 'ceo-access';
+export type UserDashboardTab = 'listings' | 'profile' | 'saved' | 'inquiries' | 'leads';
 
 export interface Project {
   id: string;

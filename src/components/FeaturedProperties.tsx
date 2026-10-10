@@ -17,6 +17,7 @@ interface FeaturedPropertiesProps {
   onInquireContact?: (property: Property) => void;
   isAdminUser?: boolean;
   onDeleteProperty?: (id: string) => void;
+  onApproveProperty?: (id: string) => void;
 }
 
 export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
@@ -30,7 +31,8 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
   compareList = [],
   onInquireContact,
   isAdminUser,
-  onDeleteProperty
+  onDeleteProperty,
+  onApproveProperty
 }) => {
   const [selectedFilter, setSelectedFilter] = useState<PropertyType>('All');
   const [isLoading, setIsLoading] = useState(false);
@@ -48,10 +50,9 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
     }, 240);
   };
 
-  const filteredProperties = (selectedFilter === 'All'
+  const filteredProperties = selectedFilter === 'All'
     ? properties
-    : properties.filter(p => p.propertyType === selectedFilter)
-  ).filter(p => !p.isDeleted);
+    : properties.filter(p => p.propertyType === selectedFilter);
 
   return (
     <section className="py-16 sm:py-24 bg-[#FAF8F5]">
@@ -124,6 +125,7 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
                     onInquireContact={onInquireContact}
                     isAdminUser={isAdminUser}
                     onDeleteProperty={onDeleteProperty}
+                    onApproveProperty={onApproveProperty}
                   />
                 </motion.div>
               ))}
@@ -158,19 +160,14 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
             </p>
           </div>
 
-          <a
-            href="?screen=contact"
+          <button
+            type="button"
             id="featured-vip-advisory-btn"
-            onClick={(e) => {
-              if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
-                e.preventDefault();
-                onExploreAll();
-              }
-            }}
-            className="bg-[#E4D5B7] hover:bg-[#FAF8F5] text-[#0F382C] px-6 py-3 rounded-full font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all shrink-0 inline-block text-center"
+            onClick={onExploreAll}
+            className="bg-[#E4D5B7] hover:bg-[#FAF8F5] text-[#0F382C] px-6 py-3 rounded-full font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all shrink-0"
           >
             Request Private Advisory
-          </a>
+          </button>
         </div>
 
       </div>

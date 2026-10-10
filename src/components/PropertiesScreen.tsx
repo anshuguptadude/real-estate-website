@@ -34,6 +34,7 @@ interface PropertiesScreenProps {
   onInquireContact?: (property: Property) => void;
   isAdminUser?: boolean;
   onDeleteProperty?: (id: string) => void;
+  onApproveProperty?: (id: string) => void;
 }
 
 export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
@@ -50,7 +51,8 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
   onOpenCompareModal,
   onInquireContact,
   isAdminUser,
-  onDeleteProperty
+  onDeleteProperty,
+  onApproveProperty
 }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -79,22 +81,13 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
   // Filtered properties computation
   const filteredProperties = useMemo(() => {
     return properties.filter((item) => {
-      // 0. Deletion & Live Status Guard
-      if (item.isDeleted) return false;
-      if (!isAdminUser) {
-        const isLive = item.status === 'Active' || item.status === 'published' || item.status === 'Sold' || item.status === 'Rented';
-        const isExplicitlyPending = item.status === 'pending_verification' || item.status === 'Pending Approval' || item.isApproved === false;
-        const isExplicitlyRejected = item.status === 'rejected';
-        if (!isLive || isExplicitlyPending || isExplicitlyRejected) return false;
-      }
-
       // 1. Search Query
       if (filterState.searchQuery) {
-        const query = (filterState.searchQuery || '').toLowerCase();
-        const matchTitle = (item.title || '').toLowerCase().includes(query);
-        const matchLocation = (item.location || '').toLowerCase().includes(query);
-        const matchLocality = (item.locality || '').toLowerCase().includes(query);
-        const matchDesc = (item.description || '').toLowerCase().includes(query);
+        const query = filterState.searchQuery.toLowerCase();
+        const matchTitle = item.title.toLowerCase().includes(query);
+        const matchLocation = item.location.toLowerCase().includes(query);
+        const matchLocality = item.locality.toLowerCase().includes(query);
+        const matchDesc = item.description.toLowerCase().includes(query);
         if (!matchTitle && !matchLocation && !matchLocality && !matchDesc) return false;
       }
 
@@ -106,9 +99,8 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
 
       // 3. Locality
       if (filterState.locality && filterState.locality !== 'All Localities') {
-        const filterLoc = (filterState.locality || '').toLowerCase();
-        if (!(item.locality || '').toLowerCase().includes(filterLoc) &&
-            !(item.location || '').toLowerCase().includes(filterLoc)) {
+        if (!item.locality.toLowerCase().includes(filterState.locality.toLowerCase()) &&
+            !item.location.toLowerCase().includes(filterState.locality.toLowerCase())) {
           return false;
         }
       }
@@ -121,22 +113,20 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
       // 5. Price Range
       if (filterState.priceRange) {
         const [min, max] = filterState.priceRange;
-        const pPrice = item.price || 0;
-        if (pPrice < min || pPrice > max) return false;
+        if (item.price < min || item.price > max) return false;
       }
 
       // 6. BHK
       if (filterState.bhk) {
         const bhkNum = parseInt(filterState.bhk, 10);
         if (!isNaN(bhkNum)) {
-          const pBeds = item.bedrooms || 0;
-          if (bhkNum >= 5 ? pBeds < 5 : pBeds !== bhkNum) return false;
+          if (bhkNum >= 5 ? item.bedrooms < 5 : item.bedrooms !== bhkNum) return false;
         }
       }
 
       // 7. Possession
       if (filterState.possession && filterState.possession !== 'all') {
-        if (!(item.possession || '').toLowerCase().includes((filterState.possession || '').toLowerCase())) return false;
+        if (!item.possession.toLowerCase().includes(filterState.possession.toLowerCase())) return false;
       }
 
       // 8. Furnishing
@@ -146,10 +136,10 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
 
       return true;
     }).sort((a, b) => {
-      if (filterState.sortBy === 'price-asc') return (a.price || 0) - (b.price || 0);
-      if (filterState.sortBy === 'price-desc') return (b.price || 0) - (a.price || 0);
-      if (filterState.sortBy === 'area-desc') return (b.superAreaSqFt || 0) - (a.superAreaSqFt || 0);
-      if (filterState.sortBy === 'newest') return (b.yearBuilt || 0) - (a.yearBuilt || 0);
+      if (filterState.sortBy === 'price-asc') return a.price - b.price;
+      if (filterState.sortBy === 'price-desc') return b.price - a.price;
+      if (filterState.sortBy === 'area-desc') return b.superAreaSqFt - a.superAreaSqFt;
+      if (filterState.sortBy === 'newest') return b.yearBuilt - a.yearBuilt;
       return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
     });
   }, [properties, filterState]);
@@ -494,6 +484,7 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
                         onInquireContact={onInquireContact}
                         isAdminUser={isAdminUser}
                         onDeleteProperty={onDeleteProperty}
+                        onApproveProperty={onApproveProperty}
                       />
                     </motion.div>
                   ))}
