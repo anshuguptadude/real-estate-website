@@ -7,7 +7,12 @@ import {
   saveFirestoreProperty, 
   deleteFirestoreProperty, 
   saveFirestoreLead, 
-  deleteFirestoreLead 
+  deleteFirestoreLead,
+  saveFirestoreProject,
+  deleteFirestoreProject,
+  subscribeFirestoreProperties,
+  subscribeFirestoreProjects,
+  subscribeFirestoreLeads
 } from './services/firebaseService';
 import { LeadInquiryModal } from './components/LeadInquiryModal';
 import { Navbar } from './components/Navbar';
@@ -113,6 +118,17 @@ export default function App() {
     }
   }, [properties]);
 
+  // Real-time Properties Synchronization with Cloud Firestore
+  useEffect(() => {
+    const unsubscribe = subscribeFirestoreProperties((firestoreProperties) => {
+      if (Array.isArray(firestoreProperties) && firestoreProperties.length > 0) {
+        const normalized = firestoreProperties.map((p, idx) => normalizeProperty(p, idx));
+        setProperties(normalized);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   // Search & Filter state
   const initialFilterState: FilterState = {
     searchQuery: '',
@@ -168,6 +184,16 @@ export default function App() {
     }
   }, [leads]);
 
+  // Real-time Leads Synchronization with Cloud Firestore
+  useEffect(() => {
+    const unsubscribe = subscribeFirestoreLeads((firestoreLeads) => {
+      if (Array.isArray(firestoreLeads)) {
+        setLeads(firestoreLeads);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [leadModalProperty, setLeadModalProperty] = useState<Property | null>(null);
 
@@ -212,16 +238,33 @@ export default function App() {
     } catch {}
   }, [projectsList]);
 
-  const handleAddProject = (newProj: Project) => {
+  // Real-time Projects Synchronization with Cloud Firestore
+  useEffect(() => {
+    const unsubscribe = subscribeFirestoreProjects((firestoreProjects) => {
+      if (Array.isArray(firestoreProjects) && firestoreProjects.length > 0) {
+        const normalized = firestoreProjects.map(p => ({
+          ...p,
+          locality: formatAgraLocality(p.locality)
+        }));
+        setProjectsList(normalized);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleAddProject = async (newProj: Project) => {
     setProjectsList(prev => [newProj, ...prev]);
+    await saveFirestoreProject(newProj);
   };
 
-  const handleEditProject = (updatedProj: Project) => {
+  const handleEditProject = async (updatedProj: Project) => {
     setProjectsList(prev => prev.map(p => p.id === updatedProj.id ? updatedProj : p));
+    await saveFirestoreProject(updatedProj);
   };
 
-  const handleDeleteProject = (projId: string) => {
+  const handleDeleteProject = async (projId: string) => {
     setProjectsList(prev => prev.filter(p => p.id !== projId));
+    await deleteFirestoreProject(projId);
   };
 
   // Modals state
@@ -439,17 +482,25 @@ export default function App() {
     }
   };
 
-  const handleTogglePropertyStatus = (propertyId: string) => {
+  const handleTogglePropertyStatus = async (propertyId: string) => {
+    let toggledProp: Property | null = null;
     setProperties(prev => prev.map(p => {
       if (p.id === propertyId) {
         const current = p.status || 'Active';
         const nextStatus = current === 'Active' 
           ? (p.listingType === 'Rent' ? 'Rented' : 'Sold')
           : 'Active';
-        return { ...p, status: nextStatus };
+        toggledProp = { ...p, status: nextStatus };
+        return toggledProp;
       }
       return p;
     }));
+    if (selectedProperty && selectedProperty.id === propertyId && toggledProp) {
+      setSelectedProperty(toggledProp);
+    }
+    if (toggledProp) {
+      await saveFirestoreProperty(toggledProp);
+    }
   };
 
   const handleHeroSearch = (newFilters: Partial<FilterState>) => {
@@ -473,7 +524,7 @@ export default function App() {
     );
   };
 
-  const handleInquireContact = (property: Property) => {
+  const handleInquireContact = async (property: Property) => {
     const newLead: LeadSubmission = {
       id: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
       propertyId: property.id,
@@ -482,9 +533,12 @@ export default function App() {
       phone: user?.phone || '+91 9149079913',
       email: user?.email || 'buyer@royalagraestate.in',
       preferredTime: 'Direct WhatsApp Inquire / Contact',
-      timestamp: new Date().toLocaleString()
+      timestamp: new Date().toLocaleString(),
+      createdAt: new Date().toISOString(),
+      status: 'new'
     };
     setLeads(prev => [newLead, ...prev]);
+    await saveFirestoreLead(newLead);
   };
 
   const handleToggleCompare = (prop: Property) => {

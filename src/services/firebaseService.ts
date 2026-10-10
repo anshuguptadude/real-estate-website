@@ -1,5 +1,6 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { 
+  initializeFirestore,
   getFirestore, 
   doc, 
   setDoc, 
@@ -15,21 +16,19 @@ import {
 } from 'firebase/firestore';
 import { Property, UserProfile, Project } from '../types';
 import { LeadSubmission } from '../utils/security';
+import firebaseConfig from '../../firebase-applet-config.json';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAJx-9nbDWgUkABdgwjKuz554JTewboCP0",
-  authDomain: "gen-lang-client-0202460050.firebaseapp.com",
-  projectId: "gen-lang-client-0202460050",
-  storageBucket: "gen-lang-client-0202460050.firebasestorage.app",
-  messagingSenderId: "860963033562",
-  appId: "1:860963033562:web:b9eb943d92fb7bfc1030e3"
-};
+// Initialize Firebase App
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+const databaseId = (firebaseConfig as any).databaseId || '(default)';
 
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+// Initialize Cloud Firestore on active database
+export const db = initializeFirestore(app, {
+  ignoreUndefinedProperties: true
+}, databaseId);
 
 // -------------------------------------------------------------
-// 1. LEADS CAPTURE (Direct Cloud Firestore Writes)
+// 1. LEADS CAPTURE & REAL-TIME CRM STREAM
 // -------------------------------------------------------------
 export const saveFirestoreLead = async (lead: LeadSubmission): Promise<boolean> => {
   try {
@@ -38,8 +37,9 @@ export const saveFirestoreLead = async (lead: LeadSubmission): Promise<boolean> 
     await setDoc(docRef, {
       ...lead,
       id: leadId,
-      createdAt: new Date().toISOString(),
-      status: 'new'
+      createdAt: lead.createdAt || new Date().toISOString(),
+      timestamp: lead.timestamp || new Date().toLocaleString(),
+      status: lead.status || 'new'
     }, { merge: true });
     return true;
   } catch (error) {
@@ -48,12 +48,39 @@ export const saveFirestoreLead = async (lead: LeadSubmission): Promise<boolean> 
   }
 };
 
+export const subscribeFirestoreLeads = (callback: (leads: LeadSubmission[]) => void): () => void => {
+  try {
+    const colRef = collection(db, 'leads');
+    const q = query(colRef, limit(100));
+    return onSnapshot(q, (snapshot) => {
+      const leads = snapshot.docs.map(d => d.data() as LeadSubmission);
+      leads.sort((a, b) => {
+        const timeA = new Date(a.createdAt || a.timestamp || 0).getTime();
+        const timeB = new Date(b.createdAt || b.timestamp || 0).getTime();
+        return timeB - timeA;
+      });
+      callback(leads);
+    }, (error) => {
+      console.warn("Error in real-time leads listener:", error);
+    });
+  } catch (error) {
+    console.warn("Failed to subscribe to leads:", error);
+    return () => {};
+  }
+};
+
 export const fetchFirestoreLeads = async (): Promise<LeadSubmission[]> => {
   try {
     const colRef = collection(db, 'leads');
-    const q = query(colRef, orderBy('timestamp', 'desc'), limit(100));
+    const q = query(colRef, limit(100));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(d => d.data() as LeadSubmission);
+    const leads = snapshot.docs.map(d => d.data() as LeadSubmission);
+    leads.sort((a, b) => {
+      const timeA = new Date(a.createdAt || a.timestamp || 0).getTime();
+      const timeB = new Date(b.createdAt || b.timestamp || 0).getTime();
+      return timeB - timeA;
+    });
+    return leads;
   } catch (error) {
     console.warn("Error fetching leads from Firestore:", error);
     return [];
@@ -72,7 +99,7 @@ export const deleteFirestoreLead = async (leadId: string): Promise<boolean> => {
 };
 
 // -------------------------------------------------------------
-// 2. USER ACCOUNTS & RBAC PROFILES
+// 2. USER ACCOUNTS & RBAC PROFILES (Cloud Sync & CEO Master)
 // -------------------------------------------------------------
 export const saveFirestoreAccount = async (account: any): Promise<boolean> => {
   try {
@@ -173,8 +200,61 @@ export const deleteFirestoreAccount = async (accountEmailOrId: string): Promise<
 };
 
 // -------------------------------------------------------------
-// 3. PROPERTIES CRUD & CLOUD PERSISTENCE
+// 3. PROPERTIES REAL-TIME SYNC & PERSISTENCE
 // -------------------------------------------------------------
+export const subscribeFirestoreProperties = (callback: (properties: Property[]) => void): () => void => {
+  try {
+    const unsub = onSnapshot(collection(db, 'properties'), async (snapshot) => {
+      try {
+        let deletedIds = new Set<string>();
+        try {
+          const tombSnap = await getDocs(collection(db, 'deleted_properties'));
+          deletedIds = new Set(tombSnap.docs.map(d => d.id));
+        } catch (e) {
+          console.warn("Error fetching deleted properties tombstone:", e);
+        }
+
+        const activeProps: Property[] = [];
+        snapshot.docs.forEach(docSnap => {
+          if (!deletedIds.has(docSnap.id)) {
+            activeProps.push(docSnap.data() as Property);
+          }
+        });
+        callback(activeProps);
+      } catch (err) {
+        console.warn("Error processing properties real-time snapshot:", err);
+      }
+    }, (error) => {
+      console.warn("Error in properties real-time listener:", error);
+    });
+    return unsub;
+  } catch (error) {
+    console.warn("Failed to subscribe to properties:", error);
+    return () => {};
+  }
+};
+
+export const fetchFirestoreProperties = async (): Promise<Property[]> => {
+  try {
+    const colRef = collection(db, 'properties');
+    const snapshot = await getDocs(colRef);
+    if (snapshot.empty) return [];
+
+    let deletedIds = new Set<string>();
+    try {
+      const tombSnap = await getDocs(collection(db, 'deleted_properties'));
+      deletedIds = new Set(tombSnap.docs.map(d => d.id));
+    } catch {}
+
+    return snapshot.docs
+      .filter(d => !deletedIds.has(d.id))
+      .map(d => d.data() as Property);
+  } catch (error) {
+    console.warn("Error fetching properties from Firestore:", error);
+    return [];
+  }
+};
+
 export const saveFirestoreProperty = async (property: Property): Promise<boolean> => {
   try {
     const docId = property.id || `prop-${Date.now()}`;
@@ -184,6 +264,12 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
       id: docId,
       updatedAt: new Date().toISOString()
     }, { merge: true });
+
+    // Clean up any old tombstone if property is re-added
+    try {
+      await deleteDoc(doc(db, 'deleted_properties', docId));
+    } catch {}
+
     return true;
   } catch (error) {
     console.error("Error saving property to Firestore:", error);
@@ -191,25 +277,14 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
   }
 };
 
-export const fetchFirestoreProperties = async (): Promise<Property[]> => {
-  try {
-    const colRef = collection(db, 'properties');
-    const snapshot = await getDocs(colRef);
-    if (snapshot.empty) return [];
-    return snapshot.docs.map(d => d.data() as Property);
-  } catch (error) {
-    console.warn("Error fetching properties from Firestore:", error);
-    return [];
-  }
-};
-
 export const deleteFirestoreProperty = async (id: string): Promise<boolean> => {
   try {
+    if (!id) return false;
     const docRef = doc(db, 'properties', id);
     await deleteDoc(docRef);
     // Write tombstone to prevent resync
     const tombRef = doc(db, 'deleted_properties', id);
-    await setDoc(tombRef, { deletedAt: new Date().toISOString() });
+    await setDoc(tombRef, { id, deletedAt: new Date().toISOString() });
     return true;
   } catch (error) {
     console.error("Error deleting property from Firestore:", error);
@@ -218,8 +293,34 @@ export const deleteFirestoreProperty = async (id: string): Promise<boolean> => {
 };
 
 // -------------------------------------------------------------
-// 4. PROJECTS CRUD
+// 4. PROJECTS REAL-TIME SYNC & CMS
 // -------------------------------------------------------------
+export const subscribeFirestoreProjects = (callback: (projects: Project[]) => void): () => void => {
+  try {
+    return onSnapshot(collection(db, 'projects'), (snapshot) => {
+      if (!snapshot.empty) {
+        callback(snapshot.docs.map(d => d.data() as Project));
+      }
+    }, (error) => {
+      console.warn("Error in projects real-time listener:", error);
+    });
+  } catch (error) {
+    console.warn("Failed to subscribe to projects:", error);
+    return () => {};
+  }
+};
+
+export const fetchFirestoreProjects = async (): Promise<Project[]> => {
+  try {
+    const colRef = collection(db, 'projects');
+    const snapshot = await getDocs(colRef);
+    return snapshot.docs.map(d => d.data() as Project);
+  } catch (error) {
+    console.warn("Error fetching projects from Firestore:", error);
+    return [];
+  }
+};
+
 export const saveFirestoreProject = async (project: Project): Promise<boolean> => {
   try {
     const docId = project.id || `proj-${Date.now()}`;
@@ -236,14 +337,14 @@ export const saveFirestoreProject = async (project: Project): Promise<boolean> =
   }
 };
 
-export const fetchFirestoreProjects = async (): Promise<Project[]> => {
+export const deleteFirestoreProject = async (id: string): Promise<boolean> => {
   try {
-    const colRef = collection(db, 'projects');
-    const snapshot = await getDocs(colRef);
-    return snapshot.docs.map(d => d.data() as Project);
+    if (!id) return false;
+    await deleteDoc(doc(db, 'projects', id));
+    return true;
   } catch (error) {
-    console.warn("Error fetching projects from Firestore:", error);
-    return [];
+    console.error("Error deleting project from Firestore:", error);
+    return false;
   }
 };
 
@@ -271,6 +372,3 @@ export const getUserFavorites = async (userId: string): Promise<string[]> => {
     return [];
   }
 };
-
-
-

@@ -9,6 +9,8 @@ export interface LeadSubmission {
   email: string;
   preferredTime: string;
   timestamp: string;
+  createdAt?: string;
+  status?: string;
 }
 
 // UNIFIED SUPER ADMIN PERMISSIONS SET
