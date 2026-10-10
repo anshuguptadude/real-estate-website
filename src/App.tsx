@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ActiveScreen, Property, FilterState, PropertyType, ListingType, UserProfile, Project } from './types';
+import { ActiveScreen, Property, FilterState, PropertyType, ListingType, UserProfile, Project, UserDashboardTab } from './types';
 import { PROPERTIES_DATA, PROJECTS_DATA } from './data/mockData';
 import { isAdmin, getMaskedProperty, formatAgraLocality, LeadSubmission } from './utils/security';
 import { LeadInquiryModal } from './components/LeadInquiryModal';
@@ -227,8 +227,27 @@ export default function App() {
   const [compareModalOpen, setCompareModalOpen] = useState(false);
   const [savedDrawerOpen, setSavedDrawerOpen] = useState(false);
 
+  const [dashboardInitialTab, setDashboardInitialTab] = useState<UserDashboardTab>('listings');
+
   // Scroll to top on screen change
-  const navigateTo = (screen: ActiveScreen, propertyId: string | null = null, addToHistory: boolean = true) => {
+  const navigateTo = (
+    screen: ActiveScreen, 
+    propertyId: string | null = null, 
+    targetTabOrAddToHistory?: UserDashboardTab | boolean | null,
+    maybeAddToHistory: boolean = true
+  ) => {
+    let targetTab: UserDashboardTab | undefined;
+    let addToHistory = true;
+    if (typeof targetTabOrAddToHistory === 'boolean') {
+      addToHistory = targetTabOrAddToHistory;
+    } else if (typeof targetTabOrAddToHistory === 'string') {
+      targetTab = targetTabOrAddToHistory;
+      addToHistory = maybeAddToHistory;
+    }
+    if (targetTab) {
+      setDashboardInitialTab(targetTab);
+    }
+
     if (screen === 'sell-rent' && !user) {
       handleInitiatePostProperty();
       return;

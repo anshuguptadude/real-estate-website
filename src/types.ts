@@ -61,13 +61,20 @@ export interface Property {
   gatedSecurity: boolean;
   powerBackup: boolean;
   coordinates: { lat: number; lng: number };
-  status?: 'Active' | 'Pending Approval' | 'Sold' | 'Rented';
+  status?: 'Active' | 'Pending Approval' | 'Sold' | 'Rented' | 'published' | 'pending_verification';
   isUserListing?: boolean;
   ownerId?: string;
   ownerName?: string;
   ownerContact?: string;
   ownerEmail?: string;
   userId?: string;
+  locationLink?: string;
+  privateLocationNote?: string;
+  editPendingApproval?: boolean;
+  isDeleted?: boolean;
+  lastEditedAt?: string;
+  lastEditedBy?: string;
+  priceGuide?: string;
   postedBy?: { id?: string; name?: string; email?: string; phone?: string };
   postedDate?: string; // Formatted date e.g. "09 Oct 2024"
   createdAt?: string; // ISO or formatted timestamp
@@ -93,7 +100,7 @@ export interface UserProfile {
   unlockedPropertyIds?: string[];
 }
 
-export type UserDashboardTab = 'listings' | 'profile' | 'saved' | 'inquiries' | 'leads';
+export type UserDashboardTab = 'listings' | 'profile' | 'saved' | 'inquiries' | 'leads' | 'approvals' | 'ceo-access';
 
 export interface Project {
   id: string;
