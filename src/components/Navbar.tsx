@@ -155,7 +155,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       {user.name.split(' ')[0]}
                     </span>
                     <span className="block text-[10px] text-[#E4D5B7] uppercase font-semibold leading-none">
-                      {user.role === 'owner' ? 'Owner' : 'Buyer'}
+                      {isCEO(user) ? '👑 CEO' : isAdmin(user) ? 'Admin' : user.role === 'owner' ? 'Owner' : 'Buyer'}
                     </span>
                   </div>
                   <ChevronDown className={`w-3.5 h-3.5 text-[#E4D5B7] transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
@@ -386,6 +386,26 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <span>My Dashboard</span>
               <LayoutDashboard className="w-4 h-4 text-[#E4D5B7]" />
+            </a>
+          )}
+
+          {isCEO(user) && (
+            <a
+              href="?screen=dashboard&tab=ceo-access"
+              id="mobile-nav-ceo-access"
+              onClick={(e) => {
+                if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+                  e.preventDefault();
+                  onNavigate('dashboard', null, 'ceo-access');
+                  setMobileMenuOpen(false);
+                }
+              }}
+              className="w-full text-left px-4 py-3 rounded-lg text-base font-bold flex items-center justify-between text-amber-300 bg-amber-950/40 border border-amber-500/30"
+            >
+              <div className="flex items-center gap-2">
+                <Crown className="w-4 h-4 text-amber-400" />
+                <span>👑 CEO Access & RBAC Master</span>
+              </div>
             </a>
           )}
 

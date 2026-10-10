@@ -85,7 +85,7 @@ export interface UserProfile {
   name: string;
   email: string;
   phone: string;
-  role: 'buyer' | 'owner' | 'admin';
+  role: 'buyer' | 'owner' | 'admin' | 'ceo' | 'agent' | 'staff';
   avatar?: string;
   memberSince: string;
   city?: string;
@@ -98,6 +98,8 @@ export interface UserProfile {
   status?: string;
   permissions?: string[];
   unlockedPropertyIds?: string[];
+  disabledAt?: string;
+  disabledReason?: string;
 }
 
 export type UserDashboardTab = 'listings' | 'profile' | 'saved' | 'inquiries' | 'leads' | 'approvals' | 'ceo-access';

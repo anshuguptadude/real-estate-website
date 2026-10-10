@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ActiveScreen, Property, FilterState, PropertyType, ListingType, UserProfile, Project, UserDashboardTab } from './types';
 import { PROPERTIES_DATA, PROJECTS_DATA } from './data/mockData';
-import { isAdmin, getMaskedProperty, formatAgraLocality, LeadSubmission } from './utils/security';
+import { isAdmin, isCEO, canViewFullAddress, getMaskedProperty, formatAgraLocality, LeadSubmission } from './utils/security';
+import { 
+  saveFirestoreAccount, 
+  saveFirestoreProperty, 
+  deleteFirestoreProperty, 
+  saveFirestoreLead, 
+  deleteFirestoreLead 
+} from './services/firebaseService';
 import { LeadInquiryModal } from './components/LeadInquiryModal';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
@@ -169,12 +176,14 @@ export default function App() {
     setLeadModalOpen(true);
   };
 
-  const handleLeadSubmitted = (newLead: LeadSubmission) => {
+  const handleLeadSubmitted = async (newLead: LeadSubmission) => {
     setLeads(prev => [newLead, ...prev]);
+    await saveFirestoreLead(newLead);
   };
 
-  const handleDeleteLead = (leadId: string) => {
+  const handleDeleteLead = async (leadId: string) => {
     setLeads(prev => prev.filter(l => l.id !== leadId));
+    await deleteFirestoreLead(leadId);
   };
 
   // Projects State
@@ -376,37 +385,43 @@ export default function App() {
   };
 
   // Property Management Handlers
-  const handlePropertyCreated = (newProp: Property) => {
+  const handlePropertyCreated = async (newProp: Property) => {
     const normalized = normalizeProperty(newProp);
     setProperties(prev => [normalized, ...prev]);
+    await saveFirestoreProperty(normalized);
   };
 
-  const handleSavePropertyEdit = (updatedProperty: Property) => {
+  const handleSavePropertyEdit = async (updatedProperty: Property) => {
     const normalized = normalizeProperty(updatedProperty);
     setProperties(prev => prev.map(p => (p.id === normalized.id ? normalized : p)));
     if (selectedProperty && selectedProperty.id === normalized.id) {
       setSelectedProperty(normalized);
     }
+    await saveFirestoreProperty(normalized);
   };
 
-  const handleDeleteProperty = (propertyId: string) => {
+  const handleDeleteProperty = async (propertyId: string) => {
     setProperties(prev => prev.filter(p => p.id !== propertyId));
     setSavedPropertyIds(prev => prev.filter(id => id !== propertyId));
     setCompareList(prev => prev.filter(p => p.id !== propertyId));
     if (selectedProperty && selectedProperty.id === propertyId) {
       setSelectedProperty(null);
     }
+    await deleteFirestoreProperty(propertyId);
   };
 
-  const handleApproveProperty = (propertyId: string) => {
+  const handleApproveProperty = async (propertyId: string) => {
+    let approvedProp: Property | null = null;
     setProperties(prev => prev.map(p => {
       if (p.id === propertyId) {
-        return {
+        approvedProp = {
           ...p,
           status: 'Active',
           verified: true,
-          verificationStatus: 'Verified'
+          verificationStatus: 'Verified',
+          isApproved: true
         };
+        return approvedProp;
       }
       return p;
     }));
@@ -415,8 +430,12 @@ export default function App() {
         ...prev,
         status: 'Active',
         verified: true,
-        verificationStatus: 'Verified'
+        verificationStatus: 'Verified',
+        isApproved: true
       } : null);
+    }
+    if (approvedProp) {
+      await saveFirestoreProperty(approvedProp);
     }
   };
 
@@ -586,11 +605,17 @@ export default function App() {
         {/* SCREEN: User Dashboard */}
         {activeScreen === 'dashboard' && (
           <UserDashboardScreen
+            key={`${dashboardInitialTab}-${user?.id || 'guest'}`}
+            initialTab={dashboardInitialTab}
             user={user}
             userProperties={userProperties}
             savedProperties={savedProperties}
             leads={leads}
-            onUpdateProfile={(updated) => setUser(updated)}
+            allProperties={properties}
+            onUpdateProfile={async (updated) => {
+              setUser(updated);
+              await saveFirestoreAccount(updated);
+            }}
             onEditProperty={(prop) => setEditingProperty(prop)}
             onDeleteProperty={handleDeleteProperty}
             onTogglePropertyStatus={handleTogglePropertyStatus}
@@ -649,13 +674,13 @@ export default function App() {
       
       {/* Property Detail Modal */}
       <PropertyDetailModal
-        property={selectedProperty ? (isAdmin(user) ? selectedProperty : getMaskedProperty(selectedProperty, user)) : null}
+        property={selectedProperty ? (canViewFullAddress(selectedProperty, user) ? selectedProperty : getMaskedProperty(selectedProperty, user)) : null}
         onClose={() => navigateTo(activeScreen, null)}
         onBookVisit={handleBookVisit}
         onOpenEmiCalc={(price) => handleOpenEmiCalculator(price)}
         onToggleSave={handleToggleSave}
         isSaved={selectedProperty ? savedPropertyIds.includes(selectedProperty.id) : false}
-        isAdminUser={isAdmin(user)}
+        isAdminUser={canViewFullAddress(selectedProperty, user)}
         onApproveProperty={handleApproveProperty}
       />
 

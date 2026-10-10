@@ -10,7 +10,8 @@ import {
   query, 
   where,
   orderBy,
-  limit
+  limit,
+  onSnapshot
 } from 'firebase/firestore';
 import { Property, UserProfile, Project } from '../types';
 import { LeadSubmission } from '../utils/security';
@@ -59,18 +60,36 @@ export const fetchFirestoreLeads = async (): Promise<LeadSubmission[]> => {
   }
 };
 
-// -------------------------------------------------------------
-// 2. USER ACCOUNTS & PROFILES
-// -------------------------------------------------------------
-export const saveFirestoreAccount = async (account: UserProfile): Promise<boolean> => {
+export const deleteFirestoreLead = async (leadId: string): Promise<boolean> => {
   try {
-    const docId = account.id || `USER-${Date.now()}`;
-    const docRef = doc(db, 'users', docId);
-    await setDoc(docRef, {
+    if (!leadId) return false;
+    await deleteDoc(doc(db, 'leads', leadId));
+    return true;
+  } catch (error) {
+    console.error("Error deleting lead from Firestore:", error);
+    return false;
+  }
+};
+
+// -------------------------------------------------------------
+// 2. USER ACCOUNTS & RBAC PROFILES
+// -------------------------------------------------------------
+export const saveFirestoreAccount = async (account: any): Promise<boolean> => {
+  try {
+    if (!account) return false;
+    const docId = account.email ? account.email.toLowerCase().trim() : account.id;
+    if (!docId) return false;
+    await setDoc(doc(db, 'accounts', docId), {
       ...account,
-      id: docId,
+      email: account.email ? account.email.toLowerCase().trim() : '',
       updatedAt: new Date().toISOString()
     }, { merge: true });
+    if (account.id) {
+      await setDoc(doc(db, 'users', account.id), {
+        ...account,
+        updatedAt: new Date().toISOString()
+      }, { merge: true }).catch(() => {});
+    }
     return true;
   } catch (error) {
     console.error("Error saving account to Firestore:", error);
@@ -78,34 +97,78 @@ export const saveFirestoreAccount = async (account: UserProfile): Promise<boolea
   }
 };
 
-export const fetchFirestoreAccounts = async (): Promise<UserProfile[]> => {
+export const subscribeFirestoreAccounts = (callback: (accounts: any[]) => void): () => void => {
   try {
-    const colRef = collection(db, 'users');
-    const snapshot = await getDocs(colRef);
-    return snapshot.docs.map(d => d.data() as UserProfile);
+    const unsubscribe = onSnapshot(collection(db, 'accounts'), (snapshot) => {
+      const accounts = snapshot.docs.map(doc => doc.data());
+      callback(accounts);
+    }, (error) => {
+      console.warn("Error in real-time accounts listener:", error);
+    });
+    return unsubscribe;
+  } catch (error) {
+    console.warn("Failed to subscribe to accounts:", error);
+    return () => {};
+  }
+};
+
+export const fetchFirestoreAccounts = async (): Promise<any[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'accounts'));
+    return querySnapshot.docs.map(doc => doc.data());
   } catch (error) {
     console.warn("Error fetching accounts from Firestore:", error);
     return [];
   }
 };
 
-export const getFirestoreAccount = async (idOrEmail: string): Promise<UserProfile | null> => {
+export const getFirestoreAccount = async (identifier: string): Promise<any | null> => {
+  if (!identifier) return null;
+  const clean = identifier.trim().toLowerCase();
   try {
-    const docRef = doc(db, 'users', idOrEmail);
-    const snap = await getDoc(docRef);
-    if (snap.exists()) {
-      return snap.data() as UserProfile;
+    // 1. Direct document check
+    const directDoc = await getDoc(doc(db, 'accounts', clean));
+    if (directDoc.exists()) {
+      return directDoc.data();
     }
-    // Query by email
-    const q = query(collection(db, 'users'), where('email', '==', idOrEmail.toLowerCase().trim()), limit(1));
-    const querySnap = await getDocs(q);
-    if (!querySnap.empty) {
-      return querySnap.docs[0].data() as UserProfile;
+    
+    // 2. Query by email
+    const qEmail = query(collection(db, 'accounts'), where('email', '==', clean));
+    const snapEmail = await getDocs(qEmail);
+    if (!snapEmail.empty) {
+      return snapEmail.docs[0].data();
     }
+    
+    // 3. Query by phone
+    const qPhone = query(collection(db, 'accounts'), where('phone', '==', identifier.trim()));
+    const snapPhone = await getDocs(qPhone);
+    if (!snapPhone.empty) {
+      return snapPhone.docs[0].data();
+    }
+
+    // 4. Fallback check in users
+    const userDoc = await getDoc(doc(db, 'users', clean));
+    if (userDoc.exists()) {
+      return userDoc.data();
+    }
+    
     return null;
   } catch (error) {
-    console.warn("Error retrieving account:", error);
+    console.warn("Error getting firestore account:", error);
     return null;
+  }
+};
+
+export const deleteFirestoreAccount = async (accountEmailOrId: string): Promise<boolean> => {
+  try {
+    if (!accountEmailOrId) return false;
+    const docId = accountEmailOrId.trim().toLowerCase();
+    await deleteDoc(doc(db, 'accounts', docId));
+    await deleteDoc(doc(db, 'users', docId)).catch(() => {});
+    return true;
+  } catch (error) {
+    console.error("Error deleting account from Firestore:", error);
+    return false;
   }
 };
 
@@ -208,3 +271,6 @@ export const getUserFavorites = async (userId: string): Promise<string[]> => {
     return [];
   }
 };
+
+
+

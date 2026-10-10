@@ -186,6 +186,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
                 24/7 Gated
               </span>
             )}
+            <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200 flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-amber-700" />
+              <span>{property.postedDate || '09 Oct 2024'}</span>
+            </span>
           </div>
         </div>
 
