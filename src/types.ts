@@ -61,7 +61,7 @@ export interface Property {
   gatedSecurity: boolean;
   powerBackup: boolean;
   coordinates: { lat: number; lng: number };
-  status?: 'Active' | 'Pending Approval' | 'Sold' | 'Rented' | 'published' | 'pending_verification';
+  status?: 'Active' | 'Pending Approval' | 'Sold' | 'Rented' | 'published' | 'pending_verification' | 'rejected';
   isUserListing?: boolean;
   ownerId?: string;
   ownerName?: string;
@@ -75,7 +75,7 @@ export interface Property {
   lastEditedAt?: string;
   lastEditedBy?: string;
   priceGuide?: string;
-  postedBy?: { id?: string; name?: string; email?: string; phone?: string };
+  postedBy?: { id?: string; name?: string; email?: string; phone?: string; role?: string };
   postedDate?: string; // Formatted date e.g. "09 Oct 2024"
   createdAt?: string; // ISO or formatted timestamp
 }
