@@ -4,8 +4,20 @@ export type PropertyType =
   | 'Penthouse'
   | 'Heritage Haveli'
   | 'Apartment'
+  | 'Apartment / Flat'
+  | 'Builder Floor'
+  | 'Independent House / Kothi'
+  | 'Duplex Villa'
+  | 'Farmhouse / Estate'
+  | 'Residential Plot / Land'
+  | 'Commercial Showroom'
+  | 'Commercial Office Space'
+  | 'Commercial Plot / Land'
+  | 'Warehouse / Industrial Land'
+  | 'Studio Apartment'
   | 'Gated Township Plot'
-  | 'Commercial / Retail';
+  | 'Commercial / Retail'
+  | string;
 
 export type ListingType = 'Buy' | 'Rent' | 'Commercial' | 'Projects' | 'Plots';
 
@@ -69,6 +81,8 @@ export interface Property {
   ownerEmail?: string;
   userId?: string;
   locationLink?: string;
+  mapUrl?: string;
+  googleMapsPinUrl?: string;
   privateLocationNote?: string;
   editPendingApproval?: boolean;
   isDeleted?: boolean;

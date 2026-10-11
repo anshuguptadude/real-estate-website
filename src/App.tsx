@@ -67,6 +67,10 @@ export default function App() {
       fullAddress: fullAddress || `${primaryAgraLocality}, Uttar Pradesh`,
       buildingName: p.buildingName || undefined,
       plotNumber: p.plotNumber || undefined,
+      mapUrl: p.mapUrl || p.locationLink || p.googleMapsPinUrl || undefined,
+      locationLink: p.locationLink || p.mapUrl || p.googleMapsPinUrl || undefined,
+      googleMapsPinUrl: p.googleMapsPinUrl || p.mapUrl || p.locationLink || undefined,
+      landmarks: p.landmarks || [],
       status: p.status || (idx === 3 ? 'Sold' : 'Active'),
       postedDate: postedDate,
       createdAt: p.createdAt || new Date().toISOString()

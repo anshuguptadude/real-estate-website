@@ -219,8 +219,12 @@ export const getMaskedProperty = (property: Property, user: UserProfile | null):
     fullAddress: undefined,
     buildingName: undefined,
     plotNumber: undefined,
-    landmarks: [], // Masked for non-admins to prevent micro-landmark leakage
+    landmarks: property.landmarks || [], // Nearby areas chosen by owner remain visible in property information
     ownerContact: undefined,
+    locationLink: undefined,
+    mapUrl: undefined,
+    googleMapsPinUrl: undefined,
+    privateLocationNote: undefined,
     coordinates: { lat: 27.1767, lng: 78.0081 },
     agent: {
       name: 'Royal Agra Estate Concierge',
@@ -237,6 +241,10 @@ export const getMaskedProperty = (property: Property, user: UserProfile | null):
   delete (masked as any).buildingName;
   delete (masked as any).plotNumber;
   delete (masked as any).ownerContact;
+  delete (masked as any).locationLink;
+  delete (masked as any).mapUrl;
+  delete (masked as any).googleMapsPinUrl;
+  delete (masked as any).privateLocationNote;
 
   return masked;
 };

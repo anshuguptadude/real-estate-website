@@ -1794,9 +1794,22 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                           <p className="text-[11px]"><strong>Mobile / WhatsApp:</strong> {prop.ownerContact || 'N/A'}</p>
                           <p className="text-[11px]"><strong>User ID:</strong> <span className="font-mono">#{prop.ownerId || prop.userId || 'N/A'}</span></p>
                           <p className="text-[11px]"><strong>Primary Locality:</strong> {prop.locality}</p>
-                          {prop.address && (
+                          {(prop.fullAddress || prop.address) && (
                             <p className="text-amber-950 font-mono text-[11px] pt-1 border-t border-amber-200/60">
-                              <strong>Full Address (Admin View):</strong> {prop.address}
+                              <strong>Full Address (Admin View):</strong> {prop.fullAddress || prop.address}
+                            </p>
+                          )}
+                          {(prop.mapUrl || prop.locationLink || prop.googleMapsPinUrl) && (
+                            <p className="text-amber-950 font-mono text-[11px] pt-1 border-t border-amber-200/60 flex items-center justify-between">
+                              <strong>Google Maps Pin:</strong>
+                              <a
+                                href={prop.mapUrl || prop.locationLink || prop.googleMapsPinUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-2 py-0.5 bg-amber-600 hover:bg-amber-700 text-white rounded text-[10px] font-bold"
+                              >
+                                Open Pin ↗
+                              </a>
                             </p>
                           )}
                         </div>

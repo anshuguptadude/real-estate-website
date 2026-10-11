@@ -19,9 +19,19 @@ export const PROPERTY_TYPES = [
   'Luxury Villa',
   'Penthouse',
   'Heritage Haveli',
-  'Apartment',
+  'Apartment / Flat',
+  'Builder Floor',
+  'Independent House / Kothi',
+  'Duplex Villa',
+  'Farmhouse / Estate',
+  'Residential Plot / Land',
+  'Commercial Showroom',
+  'Commercial Office Space',
+  'Commercial Plot / Land',
+  'Warehouse / Industrial Land',
+  'Studio Apartment',
   'Gated Township Plot',
-  'Commercial / Retail'
+  'Other (Custom Type)'
 ];
 
 export const PROPERTIES_DATA: Property[] = [

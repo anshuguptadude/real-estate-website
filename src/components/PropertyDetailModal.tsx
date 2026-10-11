@@ -410,6 +410,28 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                     <span>{property.postedDate || '09 Oct 2024'}</span>
                   </p>
                 </div>
+
+                {(property.locationLink || property.mapUrl || property.googleMapsPinUrl) && (
+                  <div className="p-3 bg-white rounded-xl border border-amber-200/80 space-y-1 col-span-1 sm:col-span-2 lg:col-span-3">
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
+                      📍 Confidential Google Maps Location Pin
+                    </span>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <p className="font-mono text-xs text-amber-950 truncate">
+                        {property.locationLink || property.mapUrl || property.googleMapsPinUrl}
+                      </p>
+                      <a
+                        href={property.locationLink || property.mapUrl || property.googleMapsPinUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-md text-[11px] font-bold inline-flex items-center gap-1 shrink-0"
+                      >
+                        <MapPin className="w-3.5 h-3.5" />
+                        <span>Open Pin in Google Maps ↗</span>
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
