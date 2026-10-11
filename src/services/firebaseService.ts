@@ -202,22 +202,73 @@ export const deleteFirestoreAccount = async (accountEmailOrId: string): Promise<
 // -------------------------------------------------------------
 // 3. PROPERTIES REAL-TIME SYNC & PERSISTENCE
 // -------------------------------------------------------------
+export const getLocalDeletedPropertyIds = (): Set<string> => {
+  const set = new Set<string>();
+  try {
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('royal_agra_deleted_property_ids_v2') : null;
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        parsed.forEach(id => set.add(id));
+      }
+    }
+  } catch {}
+  return set;
+};
+
+export const markPropertyDeletedLocally = (id: string): void => {
+  try {
+    if (typeof window === 'undefined' || !id) return;
+    const deleted = getLocalDeletedPropertyIds();
+    deleted.add(id);
+    localStorage.setItem('royal_agra_deleted_property_ids_v2', JSON.stringify(Array.from(deleted)));
+    
+    // Also remove from local property stores immediately
+    const storedProps = localStorage.getItem('royal_agra_properties_v2');
+    if (storedProps) {
+      try {
+        const parsed = JSON.parse(storedProps);
+        if (Array.isArray(parsed)) {
+          const filtered = parsed.filter((p: any) => p.id !== id);
+          localStorage.setItem('royal_agra_properties_v2', JSON.stringify(filtered));
+        }
+      } catch {}
+    }
+    localStorage.removeItem('royal_agra_properties_v3');
+    localStorage.removeItem('royal_agra_user_listings_v1');
+  } catch {}
+};
+
 export const subscribeFirestoreProperties = (callback: (properties: Property[]) => void): () => void => {
   try {
-    const unsub = onSnapshot(collection(db, 'properties'), async (snapshot) => {
-      try {
-        let deletedIds = new Set<string>();
-        try {
-          const tombSnap = await getDocs(collection(db, 'deleted_properties'));
-          deletedIds = new Set(tombSnap.docs.map(d => d.id));
-        } catch (e) {
-          console.warn("Error fetching deleted properties tombstone:", e);
-        }
+    const deletedIds = getLocalDeletedPropertyIds();
 
+    // 1. Listen for deleted_properties tombstones in real-time
+    const unsubTombstones = onSnapshot(collection(db, 'deleted_properties'), (tombSnap) => {
+      try {
+        tombSnap.docs.forEach(docSnap => {
+          deletedIds.add(docSnap.id);
+          markPropertyDeletedLocally(docSnap.id);
+        });
+      } catch (err) {
+        console.warn("Error reading deleted_properties tombstones:", err);
+      }
+    }, (error) => {
+      console.warn("Tombstone listener warning:", error);
+    });
+
+    // 2. Listen for properties collection changes
+    const unsubProperties = onSnapshot(collection(db, 'properties'), (snapshot) => {
+      try {
         const activeProps: Property[] = [];
         snapshot.docs.forEach(docSnap => {
-          if (!deletedIds.has(docSnap.id)) {
-            activeProps.push(docSnap.data() as Property);
+          const data = docSnap.data() as Property;
+          const propId = data.id || docSnap.id;
+          if (!deletedIds.has(propId) && !data.isDeleted && data.status !== 'deleted') {
+            activeProps.push({
+              ...data,
+              id: propId
+            });
           }
         });
         callback(activeProps);
@@ -227,7 +278,11 @@ export const subscribeFirestoreProperties = (callback: (properties: Property[]) 
     }, (error) => {
       console.warn("Error in properties real-time listener:", error);
     });
-    return unsub;
+
+    return () => {
+      unsubTombstones();
+      unsubProperties();
+    };
   } catch (error) {
     console.warn("Failed to subscribe to properties:", error);
     return () => {};
@@ -236,19 +291,19 @@ export const subscribeFirestoreProperties = (callback: (properties: Property[]) 
 
 export const fetchFirestoreProperties = async (): Promise<Property[]> => {
   try {
+    const deletedIds = getLocalDeletedPropertyIds();
+    try {
+      const tombSnap = await getDocs(collection(db, 'deleted_properties'));
+      tombSnap.docs.forEach(d => deletedIds.add(d.id));
+    } catch {}
+
     const colRef = collection(db, 'properties');
     const snapshot = await getDocs(colRef);
     if (snapshot.empty) return [];
 
-    let deletedIds = new Set<string>();
-    try {
-      const tombSnap = await getDocs(collection(db, 'deleted_properties'));
-      deletedIds = new Set(tombSnap.docs.map(d => d.id));
-    } catch {}
-
     return snapshot.docs
-      .filter(d => !deletedIds.has(d.id))
-      .map(d => d.data() as Property);
+      .map(d => ({ ...d.data(), id: d.data().id || d.id } as Property))
+      .filter(p => !deletedIds.has(p.id) && !p.isDeleted && p.status !== 'deleted');
   } catch (error) {
     console.warn("Error fetching properties from Firestore:", error);
     return [];
@@ -262,12 +317,18 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
     await setDoc(docRef, {
       ...property,
       id: docId,
+      isDeleted: false,
       updatedAt: new Date().toISOString()
     }, { merge: true });
 
     // Clean up any old tombstone if property is re-added
     try {
       await deleteDoc(doc(db, 'deleted_properties', docId));
+      const deleted = getLocalDeletedPropertyIds();
+      if (deleted.has(docId)) {
+        deleted.delete(docId);
+        localStorage.setItem('royal_agra_deleted_property_ids_v2', JSON.stringify(Array.from(deleted)));
+      }
     } catch {}
 
     return true;
@@ -280,11 +341,19 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
 export const deleteFirestoreProperty = async (id: string): Promise<boolean> => {
   try {
     if (!id) return false;
-    const docRef = doc(db, 'properties', id);
-    await deleteDoc(docRef);
-    // Write tombstone to prevent resync
+    // 1. Mark locally first so no browser reload resurrects it
+    markPropertyDeletedLocally(id);
+
+    // 2. Write tombstone to Firestore to prevent resurrection across all devices
     const tombRef = doc(db, 'deleted_properties', id);
-    await setDoc(tombRef, { id, deletedAt: new Date().toISOString() });
+    await setDoc(tombRef, { id, deletedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
+
+    // 3. Mark soft-delete on the property doc in case deleteDoc takes time
+    const docRef = doc(db, 'properties', id);
+    await setDoc(docRef, { isDeleted: true, status: 'deleted', deletedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
+
+    // 4. Hard-delete document from properties collection
+    await deleteDoc(docRef).catch(() => {});
     return true;
   } catch (error) {
     console.error("Error deleting property from Firestore:", error);

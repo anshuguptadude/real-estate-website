@@ -73,7 +73,7 @@ export interface Property {
   gatedSecurity: boolean;
   powerBackup: boolean;
   coordinates: { lat: number; lng: number };
-  status?: 'Active' | 'Pending Approval' | 'Sold' | 'Rented' | 'published' | 'pending_verification' | 'rejected';
+  status?: 'Active' | 'Pending Approval' | 'Sold' | 'Rented' | 'published' | 'pending_verification' | 'rejected' | 'deleted';
   isUserListing?: boolean;
   ownerId?: string;
   ownerName?: string;

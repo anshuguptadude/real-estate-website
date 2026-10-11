@@ -12,7 +12,9 @@ import {
   deleteFirestoreProject,
   subscribeFirestoreProperties,
   subscribeFirestoreProjects,
-  subscribeFirestoreLeads
+  subscribeFirestoreLeads,
+  getLocalDeletedPropertyIds,
+  markPropertyDeletedLocally
 } from './services/firebaseService';
 import { LeadInquiryModal } from './components/LeadInquiryModal';
 import { Navbar } from './components/Navbar';
@@ -79,25 +81,33 @@ export default function App() {
 
   // Global Properties State (with persistence & user additions/edits)
   const [properties, setProperties] = useState<Property[]>(() => {
+    const deletedIds = getLocalDeletedPropertyIds();
     try {
       const stored = localStorage.getItem('royal_agra_properties_v2');
-      if (stored) {
+      if (stored !== null) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map((p, idx) => normalizeProperty(p, idx));
+        if (Array.isArray(parsed)) {
+          const filtered = parsed.filter(p => !deletedIds.has(p.id) && !p.isDeleted && p.status !== 'deleted');
+          if (filtered.length > 0 || deletedIds.size > 0) {
+            return filtered.map((p, idx) => normalizeProperty(p, idx));
+          }
         }
       }
     } catch {
       // ignore
     }
-    // Seed initial properties with owner listing tags for user's properties
-    return PROPERTIES_DATA.map((p, idx) => normalizeProperty({
-      ...p,
-      status: p.status || (idx === 3 ? 'Sold' : 'Active'),
-      isUserListing: idx === 0 || idx === 2, // First and third properties belong to Shrey Gupta
-      ownerId: (idx === 0 || idx === 2) ? 'RAE-OWNER-01' : undefined,
-      ownerName: (idx === 0 || idx === 2) ? 'Shrey Gupta' : p.agent?.name || 'Managing Partner'
-    }, idx));
+    // Only for brand new visits (no stored list, no deleted IDs) do we seed default template properties
+    if (deletedIds.size > 0) {
+      return [];
+    }
+    return PROPERTIES_DATA
+      .filter(p => !deletedIds.has(p.id))
+      .map((p, idx) => normalizeProperty({
+        ...p,
+        status: p.status || (idx === 3 ? 'Sold' : 'Active'),
+        isUserListing: false, // Default template properties are portfolio showcase, not user listings
+        ownerName: p.agent?.name || 'Managing Partner'
+      }, idx));
   });
 
   // Sync user state to localStorage
@@ -125,9 +135,15 @@ export default function App() {
   // Real-time Properties Synchronization with Cloud Firestore
   useEffect(() => {
     const unsubscribe = subscribeFirestoreProperties((firestoreProperties) => {
-      if (Array.isArray(firestoreProperties) && firestoreProperties.length > 0) {
-        const normalized = firestoreProperties.map((p, idx) => normalizeProperty(p, idx));
-        setProperties(normalized);
+      const deletedIds = getLocalDeletedPropertyIds();
+      if (Array.isArray(firestoreProperties)) {
+        const active = firestoreProperties.filter(p => !deletedIds.has(p.id) && !p.isDeleted && p.status !== 'deleted');
+        if (active.length > 0) {
+          const normalized = active.map((p, idx) => normalizeProperty(p, idx));
+          setProperties(normalized);
+        } else if (firestoreProperties.length === 0) {
+          setProperties(prev => prev.filter(p => !p.id.startsWith('prop-user-') && !deletedIds.has(p.id)));
+        }
       }
     });
     return () => unsubscribe();
@@ -448,12 +464,25 @@ export default function App() {
   };
 
   const handleDeleteProperty = async (propertyId: string) => {
-    setProperties(prev => prev.filter(p => p.id !== propertyId));
+    // 1. Immediately record in persistent local tombstones
+    markPropertyDeletedLocally(propertyId);
+
+    // 2. Remove immediately from React state and localStorage
+    setProperties(prev => {
+      const updated = prev.filter(p => p.id !== propertyId);
+      try {
+        localStorage.setItem('royal_agra_properties_v2', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
     setSavedPropertyIds(prev => prev.filter(id => id !== propertyId));
     setCompareList(prev => prev.filter(p => p.id !== propertyId));
     if (selectedProperty && selectedProperty.id === propertyId) {
       setSelectedProperty(null);
     }
+
+    // 3. Delete from Cloud Firestore and record permanent cloud tombstone
     await deleteFirestoreProperty(propertyId);
   };
 

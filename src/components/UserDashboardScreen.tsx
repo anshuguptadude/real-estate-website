@@ -992,7 +992,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {userProperties.map((prop) => {
                   const isSoldOrRented = prop.status === 'Sold' || prop.status === 'Rented';
-                  const isDemoListing = /^prop-[1-8]$/.test(prop.id);
+                  const isDemoListing = /^prop-[1-8]$/.test(prop.id) || ['prop-fatehabad-sovereign-01', 'prop-dayalbagh-heritage-02', 'prop-tajganj-kohinoor-03', 'prop-sikandra-greens-04'].includes(prop.id);
                   return (
                     <div
                       key={prop.id}
