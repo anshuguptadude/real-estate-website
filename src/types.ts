@@ -41,6 +41,9 @@ export interface Property {
   bathrooms: number;
   balconies: number;
   superAreaSqFt: number;
+  superAreaSqYards?: number;
+  areaUnit?: 'Sq.Ft' | 'Sq.Yards';
+  customLocality?: string;
   carpetAreaSqFt: number;
   furnishing: 'Fully Furnished' | 'Semi-Furnished' | 'Unfurnished' | 'Designer Fitted';
   facing: 'North-East (Vastu)' | 'North-East (Morning Sun)' | 'East' | 'North' | 'Taj View (South-East)' | 'Park Facing' | 'West' | 'South' | string;

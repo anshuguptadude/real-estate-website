@@ -596,11 +596,16 @@ export default function App() {
     handleOpenLeadModal(prop);
   };
 
-  // Public / non-admin users only see active/sold/rented or their own listings, strictly masked
+  // Public / non-admin users only see approved active, sold, or rented properties, strictly masked.
+  // Properties pending admin approval must never appear on public screens.
   const displayedProperties = properties
     .filter(p => {
+      if (p.isDeleted || p.status === 'deleted' || p.status === 'rejected') return false;
       if (isAdmin(user)) return true;
-      return p.status !== 'Pending Approval' || (user && p.ownerId === user.id) || p.isUserListing;
+      if (p.status === 'Pending Approval' || p.status === 'pending_verification' || p.isApproved === false) {
+        return false;
+      }
+      return (p.status === 'Active' || p.status === 'published' || p.status === 'Sold' || p.status === 'Rented');
     })
     .map(p => getMaskedProperty(p, user));
 

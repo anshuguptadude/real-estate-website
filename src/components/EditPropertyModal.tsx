@@ -56,6 +56,8 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
     property?.landmarks && property.landmarks.length > 0 ? property.landmarks : []
   );
   const [superAreaSqFt, setSuperAreaSqFt] = useState(property?.superAreaSqFt || 0);
+  const [areaUnit, setAreaUnit] = useState<'Sq.Ft' | 'Sq.Yards'>(property?.areaUnit || 'Sq.Ft');
+  const [customLocality, setCustomLocality] = useState(property?.customLocality || '');
   const [bedrooms, setBedrooms] = useState(property?.bedrooms || 0);
   const [bathrooms, setBathrooms] = useState(property?.bathrooms || 0);
   const [furnishing, setFurnishing] = useState(property?.furnishing || 'Fully Furnished');
@@ -129,6 +131,8 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
       setParsedCoordinates(extractCoordinatesFromInput(property.locationLink || ''));
       setLandmarks(property.landmarks && property.landmarks.length > 0 ? property.landmarks : []);
       setSuperAreaSqFt(property.superAreaSqFt);
+      setAreaUnit(property.areaUnit || 'Sq.Ft');
+      setCustomLocality(property.customLocality || '');
       setBedrooms(property.bedrooms);
       setBathrooms(property.bathrooms);
       setFurnishing(property.furnishing);
@@ -342,6 +346,9 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
     const extractedCoords = extractCoordinatesFromInput(locationLink);
     const updatedCoordinates = extractedCoords || property.coordinates || (AGRA_LOCALITY_COORDINATES[locality] || { lat: 27.1767, lng: 78.0081 });
 
+    const resolvedLocality = locality === 'Other' ? (customLocality.trim() || 'Agra') : locality;
+    const numSqYards = areaUnit === 'Sq.Yards' ? Math.round(superAreaSqFt / 9) : (property.superAreaSqYards || Math.round(superAreaSqFt / 9));
+
     const updated: Property = {
       ...property,
       title,
@@ -350,14 +357,17 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
       priceDisplay: formatPriceDisplay(price, property.listingType),
       pricePerSqFt: superAreaSqFt > 0 ? Math.round(price / superAreaSqFt) : property.pricePerSqFt,
       propertyType,
-      locality,
-      location: `${locality}, Agra`,
-      address: address.trim() || property.address || `${locality}, Agra`,
+      locality: resolvedLocality,
+      customLocality: locality === 'Other' ? customLocality.trim() : undefined,
+      location: `${resolvedLocality}, Agra`,
+      address: address.trim() || property.address || `${resolvedLocality}, Agra`,
       privateLocationNote: privateLocationNote.trim() || undefined,
       locationLink: locationLink.trim() || undefined,
       coordinates: updatedCoordinates,
       landmarks: landmarks.length > 0 ? landmarks : (property.landmarks || []),
       superAreaSqFt,
+      superAreaSqYards: numSqYards,
+      areaUnit,
       bedrooms,
       bathrooms,
       furnishing,
@@ -497,9 +507,37 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                Super Area (Sq.Ft)
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-bold text-gray-700 uppercase">
+                  Super Area ({areaUnit === 'Sq.Yards' ? 'Sq. Yards / Gaj' : 'Sq. Ft.'})
+                </label>
+                <div className="inline-flex bg-gray-100 p-0.5 rounded-lg border border-gray-200 text-[10px] font-bold">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (areaUnit === 'Sq.Yards') {
+                        setSuperAreaSqFt(Math.round(superAreaSqFt * 9));
+                      }
+                      setAreaUnit('Sq.Ft');
+                    }}
+                    className={`px-2 py-0.5 rounded ${areaUnit === 'Sq.Ft' ? 'bg-[#0F382C] text-white' : 'text-gray-600'}`}
+                  >
+                    Sq. Ft.
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (areaUnit === 'Sq.Ft') {
+                        setSuperAreaSqFt(Math.round(superAreaSqFt / 9));
+                      }
+                      setAreaUnit('Sq.Yards');
+                    }}
+                    className={`px-2 py-0.5 rounded ${areaUnit === 'Sq.Yards' ? 'bg-[#0F382C] text-white' : 'text-gray-600'}`}
+                  >
+                    Sq. Yards
+                  </button>
+                </div>
+              </div>
               <input
                 type="number"
                 required
@@ -507,6 +545,11 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
                 onChange={(e) => setSuperAreaSqFt(Number(e.target.value))}
                 className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
               />
+              <span className="text-[11px] text-gray-500 font-mono mt-1 block">
+                {areaUnit === 'Sq.Yards'
+                  ? `≈ ${superAreaSqFt * 9} Sq. Ft.`
+                  : `≈ ${Math.round(superAreaSqFt / 9)} Sq. Yards (Gaj)`}
+              </span>
             </div>
           </div>
 
@@ -539,7 +582,21 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
                 {AGRA_LOCALITIES.filter(l => l !== 'All Localities').map(l => (
                   <option key={l} value={l}>{l}</option>
                 ))}
+                <option value="Other">Other (Write Custom Locality)</option>
               </select>
+
+              {locality === 'Other' && (
+                <div className="mt-2 space-y-1">
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter custom locality in Agra"
+                    value={customLocality}
+                    onChange={(e) => setCustomLocality(e.target.value)}
+                    className="w-full p-2 text-xs bg-white border border-emerald-300 rounded-lg text-gray-900 focus:outline-none focus:ring-1 focus:ring-emerald-700"
+                  />
+                </div>
+              )}
             </div>
           </div>
 

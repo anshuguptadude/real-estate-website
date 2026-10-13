@@ -41,12 +41,14 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const [propertyType, setPropertyType] = useState<string>('Luxury Villa');
   const [customPropertyType, setCustomPropertyType] = useState<string>('');
   const [locality, setLocality] = useState<string>('Fatehabad Road');
+  const [customLocality, setCustomLocality] = useState<string>('');
   const [projectTitle, setProjectTitle] = useState('');
   const [address, setAddress] = useState('');
   const [mapUrl, setMapUrl] = useState('');
   
   // Specifications
   const [superArea, setSuperArea] = useState<string>('3500');
+  const [areaUnit, setAreaUnit] = useState<'Sq.Ft' | 'Sq.Yards'>('Sq.Ft');
   const [bedrooms, setBedrooms] = useState<string>('4');
   const [bathrooms, setBathrooms] = useState<string>('4');
   const [askingPrice, setAskingPrice] = useState<string>('28500000');
@@ -76,12 +78,8 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const [customLandmarkDist, setCustomLandmarkDist] = useState('');
   const [customLandmarkTime, setCustomLandmarkTime] = useState('');
 
-  // Multi-Image Upload & Display Cover selection
-  const [images, setImages] = useState<string[]>([
-    'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80'
-  ]);
+  // Multi-Image Upload & Display Cover selection (starts clean with 0 images)
+  const [images, setImages] = useState<string[]>([]);
   const [selectedDisplayIndex, setSelectedDisplayIndex] = useState<number>(0);
   const [isUploading, setIsUploading] = useState(false);
   const [imageError, setImageError] = useState('');
@@ -292,7 +290,9 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const numPrice = Number(askingPrice) || 25000000;
-    const numSuperArea = Number(superArea) || 3000;
+    const numInputArea = Number(superArea) || (areaUnit === 'Sq.Yards' ? 300 : 3000);
+    const numSuperAreaSqFt = areaUnit === 'Sq.Yards' ? Math.round(numInputArea * 9) : numInputArea;
+    const numSuperAreaSqYards = areaUnit === 'Sq.Yards' ? numInputArea : Math.round(numSuperAreaSqFt / 9);
     const generatedId = `prop-user-${Date.now()}`;
     const refCode = `RAE-${Math.floor(100000 + Math.random() * 900000)}`;
     setCreatedPropertyRef(refCode);
@@ -316,22 +316,32 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       ? (customPropertyType.trim() || 'Custom Property')
       : propertyType;
 
-    const primaryCoverPhoto = images[selectedDisplayIndex] || images[0] || 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80';
+    const resolvedLocality = locality === 'Other'
+      ? (customLocality.trim() || 'Agra')
+      : locality;
+
+    const defaultPlaceholder = 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80';
+    const propertyImages = images.length > 0 ? images : [defaultPlaceholder];
+    const validDisplayIndex = (selectedDisplayIndex >= 0 && selectedDisplayIndex < propertyImages.length)
+      ? selectedDisplayIndex
+      : 0;
+    const primaryCoverPhoto = propertyImages[validDisplayIndex] || propertyImages[0];
 
     const newProperty: Property = {
       id: generatedId,
-      title: projectTitle.trim() || `Luxury ${resolvedPropertyType} in ${locality}`,
-      tagline: `Exclusive ${furnishing} estate with prime connectivity on ${locality}, Agra.`,
+      title: projectTitle.trim() || `Luxury ${resolvedPropertyType} in ${resolvedLocality}`,
+      tagline: `Exclusive ${furnishing} estate with prime connectivity on ${resolvedLocality}, Agra.`,
       propertyType: resolvedPropertyType,
       listingType: listingIntent,
       price: numPrice,
       priceDisplay: formatPriceDisplay(numPrice, listingIntent),
-      pricePerSqFt: Math.round(numPrice / numSuperArea),
-      location: `${locality}, Agra`,
-      locality,
-      primaryAgraLocality: `${locality}, Agra`,
-      address: `${locality}, Agra`,
-      fullAddress: address.trim() || `${projectTitle ? projectTitle + ', ' : ''}${locality}, Agra`,
+      pricePerSqFt: Math.round(numPrice / numSuperAreaSqFt),
+      location: `${resolvedLocality}, Agra`,
+      locality: resolvedLocality,
+      customLocality: locality === 'Other' ? customLocality.trim() : undefined,
+      primaryAgraLocality: `${resolvedLocality}, Agra`,
+      address: `${resolvedLocality}, Agra`,
+      fullAddress: address.trim() || `${projectTitle ? projectTitle + ', ' : ''}${resolvedLocality}, Agra`,
       buildingName: projectTitle.trim() || undefined,
       plotNumber: undefined,
       mapUrl: mapUrl.trim() || undefined,
@@ -340,8 +350,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       bedrooms: Number(bedrooms) || 4,
       bathrooms: Number(bathrooms) || 4,
       balconies: 2,
-      superAreaSqFt: numSuperArea,
-      carpetAreaSqFt: Math.round(numSuperArea * 0.78),
+      superAreaSqFt: numSuperAreaSqFt,
+      superAreaSqYards: numSuperAreaSqYards,
+      areaUnit: areaUnit,
+      carpetAreaSqFt: Math.round(numSuperAreaSqFt * 0.78),
       furnishing: furnishing as any,
       facing: 'North-East (Vastu)',
       reraId: verificationDocNumber.trim() || (isLegallyVerified ? `UPRERA-AGR-${Math.floor(1000 + Math.random() * 9000)}` : 'N/A'),
@@ -349,6 +361,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       featured: true,
       isExclusive: true,
       verified: isLegallyVerified,
+      isApproved: isAdmin(user),
       verificationStatus: isAdmin(user) ? resolvedVerificationStatus : 'In Process',
       verifiedBy: resolvedAuthorityName,
       verificationNumber: verificationDocNumber.trim() || undefined,
@@ -358,9 +371,9 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       ownerName: ownerName || user?.name || 'Property Owner',
       ownerContact: ownerPhone || user?.phone || '+91 91490 79913',
       ownerEmail: ownerEmail || user?.email || 'owner@royalagraestate.in',
-      images: images,
+      images: propertyImages,
       coverImage: primaryCoverPhoto,
-      description: `Spectacular ${resolvedPropertyType} situated in the prestigious enclave of ${locality}, Agra. Designed for distinguished living with spacious layouts, high ceilings, premium fittings, and comprehensive security infrastructure.`,
+      description: `Spectacular ${resolvedPropertyType} situated in the prestigious enclave of ${resolvedLocality}, Agra. Designed for distinguished living with spacious layouts, high ceilings, premium fittings, and comprehensive security infrastructure.`,
       highlights: [
         `${furnishing} with bespoke craftsmanship`,
         '100% Vastu Compliant Orientation',
@@ -564,10 +577,33 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       {AGRA_LOCALITIES.filter(l => l !== 'All Localities').map(l => (
                         <option key={l} value={l}>{l}</option>
                       ))}
+                      <option value="Other">Other (Write Custom Locality)</option>
                     </select>
+
+                    {/* Dynamic custom locality text box */}
+                    {locality === 'Other' && (
+                      <div className="p-3 bg-emerald-50/60 border border-emerald-300 rounded-xl space-y-1.5 mt-2 animate-fadeIn">
+                        <label className="block text-xs font-bold text-emerald-950 uppercase flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-emerald-700" />
+                          <span>Write Your Custom Agra Locality / Sector:</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Khandari, Runakta, Kuberpur, Rohta Gwalior Road, Balkeshwar"
+                          value={customLocality}
+                          onChange={(e) => setCustomLocality(e.target.value)}
+                          className="w-full p-2.5 text-xs sm:text-sm bg-white border border-emerald-300 rounded-lg text-gray-900 focus:outline-none focus:ring-1 focus:ring-emerald-700"
+                        />
+                        <p className="text-[11px] text-emerald-800">
+                          This custom locality will be displayed on your listing card and detail dossier.
+                        </p>
+                      </div>
+                    )}
+
                     <p className="text-[11px] text-emerald-700 flex items-center gap-1">
                       <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Public Privacy: Regular website visitors will only see <strong>{locality}, Agra</strong>.</span>
+                      <span>Public Privacy: Regular website visitors will only see <strong>{locality === 'Other' ? (customLocality.trim() || 'Custom Locality') : locality}, Agra</strong>.</span>
                     </p>
                   </div>
 
@@ -651,23 +687,71 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Area with Unit Selector (Sq. Ft vs Sq. Yards) */}
                     <div className="space-y-2">
-                      <label className="block text-xs font-bold text-gray-700 uppercase">Super Area (Sq.Ft)</label>
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-bold text-gray-700 uppercase">
+                          Super Area ({areaUnit === 'Sq.Yards' ? 'Sq. Yards / Gaj' : 'Sq. Ft.'})
+                        </label>
+                        <div className="inline-flex bg-gray-100 p-0.5 rounded-lg border border-gray-200 text-[11px] font-bold">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (areaUnit === 'Sq.Yards') {
+                                const current = Number(superArea) || 0;
+                                setSuperArea(current ? String(Math.round(current * 9)) : '3500');
+                              }
+                              setAreaUnit('Sq.Ft');
+                            }}
+                            className={`px-2.5 py-1 rounded-md transition-all ${
+                              areaUnit === 'Sq.Ft' 
+                                ? 'bg-[#0F382C] text-white shadow-xs' 
+                                : 'text-gray-600 hover:text-black'
+                            }`}
+                          >
+                            Sq. Ft.
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (areaUnit === 'Sq.Ft') {
+                                const current = Number(superArea) || 0;
+                                setSuperArea(current ? String(Math.round(current / 9)) : '388');
+                              }
+                              setAreaUnit('Sq.Yards');
+                            }}
+                            className={`px-2.5 py-1 rounded-md transition-all ${
+                              areaUnit === 'Sq.Yards' 
+                                ? 'bg-[#0F382C] text-white shadow-xs' 
+                                : 'text-gray-600 hover:text-black'
+                            }`}
+                          >
+                            Sq. Yards (Gaj)
+                          </button>
+                        </div>
+                      </div>
                       <input
                         type="number"
                         required
                         value={superArea}
                         onChange={(e) => setSuperArea(e.target.value)}
-                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"
+                        placeholder={areaUnit === 'Sq.Yards' ? 'e.g. 350' : 'e.g. 3150'}
+                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
                       />
+                      <span className="text-[11px] text-gray-500 font-mono block">
+                        {areaUnit === 'Sq.Yards'
+                          ? `≈ ${(Number(superArea) || 0) * 9} Sq. Ft.`
+                          : `≈ ${Math.round((Number(superArea) || 0) / 9)} Sq. Yards (Gaj)`}
+                      </span>
                     </div>
 
+                    {/* Bedrooms (BHK) */}
                     <div className="space-y-2">
                       <label className="block text-xs font-bold text-gray-700 uppercase">Bedrooms (BHK)</label>
                       <select
                         value={bedrooms}
                         onChange={(e) => setBedrooms(e.target.value)}
-                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"
+                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
                       >
                         <option value="1">1 BHK</option>
                         <option value="2">2 BHK</option>
@@ -678,6 +762,24 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       </select>
                     </div>
 
+                    {/* Bathrooms */}
+                    <div className="space-y-2">
+                      <label className="block text-xs font-bold text-gray-700 uppercase">Bathrooms</label>
+                      <select
+                        value={bathrooms}
+                        onChange={(e) => setBathrooms(e.target.value)}
+                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
+                      >
+                        <option value="1">1 Bathroom</option>
+                        <option value="2">2 Bathrooms</option>
+                        <option value="3">3 Bathrooms</option>
+                        <option value="4">4 Bathrooms</option>
+                        <option value="5">5+ Luxury Baths</option>
+                        <option value="0">Commercial Washroom / Common</option>
+                      </select>
+                    </div>
+
+                    {/* Price */}
                     <div className="space-y-2">
                       <label className="block text-xs font-bold text-gray-700 uppercase">
                         {listingIntent === 'Sale' ? 'Expected Sale Price (₹ INR)' : 'Expected Monthly Rent (₹ INR)'}
@@ -687,19 +789,20 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         required
                         value={askingPrice}
                         onChange={(e) => setAskingPrice(e.target.value)}
-                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-mono"
+                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-mono focus:bg-white focus:border-[#0F382C]"
                       />
-                      <span className="text-[11px] text-gray-500 font-mono">
+                      <span className="text-[11px] text-gray-500 font-mono block">
                         ≈ {formatPriceDisplay(Number(askingPrice) || 0, listingIntent)}
                       </span>
                     </div>
 
-                    <div className="space-y-2">
+                    {/* Furnishing Status */}
+                    <div className="space-y-2 sm:col-span-2">
                       <label className="block text-xs font-bold text-gray-700 uppercase">Furnishing Status</label>
                       <select
                         value={furnishing}
                         onChange={(e) => setFurnishing(e.target.value)}
-                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800"
+                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
                       >
                         <option value="Designer Fitted">Designer Fitted</option>
                         <option value="Fully Furnished">Fully Furnished</option>
@@ -917,6 +1020,18 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                         JPEG, PNG, WebP supported. High-resolution images are automatically compressed for cloud storage safety.
                       </p>
                     </div>
+
+                    {/* Empty state notice */}
+                    {images.length === 0 && (
+                      <div className="p-4 bg-emerald-50/60 border border-dashed border-emerald-300 rounded-xl text-center space-y-1 animate-fadeIn">
+                        <p className="text-xs font-bold text-[#0F382C]">
+                          📸 No property photos uploaded yet
+                        </p>
+                        <p className="text-[11px] text-gray-600">
+                          Click the box above to choose photos from your phone or computer. You can upload up to 10 photos and pick any photo as the main display cover image.
+                        </p>
+                      </div>
+                    )}
 
                     {/* Uploaded Photos Grid with Primary Display Selector */}
                     {images.length > 0 && (

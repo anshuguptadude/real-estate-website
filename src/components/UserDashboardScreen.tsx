@@ -1992,6 +1992,20 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
 
                   const unlockedCount = activeData.unlockedPropertyIds?.length || 0;
 
+                  const userListedProperties = (allProperties || []).filter(
+                    p => p && !p.isDeleted && (
+                      (p.ownerId && p.ownerId === activeData.id) ||
+                      (p.ownerEmail && activeData.email && p.ownerEmail.toLowerCase() === activeData.email.toLowerCase()) ||
+                      (p.userId && p.userId === activeData.id)
+                    )
+                  );
+                  const userLeads = (leads || []).filter(
+                    l => l && (
+                      (l.email && activeData.email && l.email.toLowerCase() === activeData.email.toLowerCase()) ||
+                      (l.phone && activeData.phone && l.phone.includes(activeData.phone.replace(/[^0-9]/g, '').slice(-10)))
+                    )
+                  );
+
                   return (
                     <div
                       key={acc.email}
@@ -2038,7 +2052,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                               )}
                             </div>
 
-                            <div className="flex items-center gap-4 text-xs text-gray-500 mt-1 flex-wrap font-mono">
+                            <div className="flex items-center gap-3 text-xs text-gray-500 mt-1 flex-wrap font-mono">
                               <span className="flex items-center gap-1">
                                 <Mail className="w-3.5 h-3.5 text-gray-400" />
                                 {activeData.email}
@@ -2050,6 +2064,17 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                                 </span>
                               )}
                               <span>ID: #{activeData.id}</span>
+                              {activeData.profession && (
+                                <span className="text-gray-700 font-sans font-semibold">
+                                  • {activeData.profession}
+                                </span>
+                              )}
+                              {(activeData.preferredLocality || activeData.city) && (
+                                <span className="text-[#0F382C] font-sans font-medium flex items-center gap-0.5">
+                                  <MapPin className="w-3 h-3 text-[#0F382C]" />
+                                  {activeData.preferredLocality || activeData.city}
+                                </span>
+                              )}
                             </div>
 
                             {/* Quick Badges */}
@@ -2107,6 +2132,148 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                       {/* Expanded RBAC Configuration Panel */}
                       {isExpanded && (
                         <div className="border-t border-gray-200 bg-[#FAF8F5] p-5 sm:p-6 space-y-6 animate-fadeIn">
+                          {/* 0. Full Account Registration Dossier & Contact Details */}
+                          <div className="bg-white p-4 sm:p-5 rounded-xl border border-gray-200 shadow-2xs space-y-3.5">
+                            <div className="flex items-center justify-between pb-3 border-b border-gray-100 flex-wrap gap-2">
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-[#0F382C] text-[#C5A869] flex items-center justify-center font-bold text-xs">
+                                  <UserCheck className="w-4 h-4" />
+                                </div>
+                                <div>
+                                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#0F382C]">
+                                    User Registration & Profile Details
+                                  </h4>
+                                  <p className="text-[11px] text-gray-500">
+                                    Complete profile submitted during account creation & property inquiries
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                {activeData.phone && (
+                                  <>
+                                    <a
+                                      href={`tel:${activeData.phone}`}
+                                      className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors"
+                                    >
+                                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                                      <span>Call User</span>
+                                    </a>
+                                    <a
+                                      href={`https://wa.me/${activeData.phone.replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(activeData.name || 'there')}%2C%20this%20is%20Royal%20Agra%20Estate%20Management.`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs"
+                                    >
+                                      <MessageSquare className="w-3.5 h-3.5" />
+                                      <span>WhatsApp</span>
+                                    </a>
+                                  </>
+                                )}
+                                {activeData.email && (
+                                  <a
+                                    href={`mailto:${activeData.email}?subject=Royal%20Agra%20Estate%20Executive%20Support`}
+                                    className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors"
+                                  >
+                                    <Mail className="w-3.5 h-3.5 text-gray-500" />
+                                    <span>Email</span>
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Detailed Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                              <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Profession / Occupation</span>
+                                <span className="font-semibold text-gray-900 mt-1 block">
+                                  {activeData.profession || 'Not Specified'}
+                                </span>
+                              </div>
+
+                              <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Primary Property Interest</span>
+                                <span className="font-semibold text-gray-900 mt-1 block">
+                                  {activeData.primaryInterest || 'Buying Luxury Property'}
+                                </span>
+                              </div>
+
+                              <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Preferred Budget</span>
+                                <span className="font-semibold text-gray-900 mt-1 block">
+                                  {activeData.preferredBudget || '₹2 Cr - ₹5 Cr'}
+                                </span>
+                              </div>
+
+                              <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Preferred Agra Locality</span>
+                                <span className="font-semibold text-gray-900 mt-1 block truncate">
+                                  {activeData.preferredLocality || activeData.city || 'Fatehabad Road, Agra'}
+                                </span>
+                              </div>
+
+                              <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 sm:col-span-2">
+                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Current Residential / Office Address</span>
+                                <span className="font-semibold text-gray-900 mt-1 block leading-snug">
+                                  {activeData.address || 'Address not provided on registration'}
+                                </span>
+                              </div>
+
+                              <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Date of Birth (DOB)</span>
+                                <span className="font-semibold text-gray-900 mt-1 block font-mono">
+                                  {activeData.dob || 'Not specified'}
+                                </span>
+                              </div>
+
+                              <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Account Member Since</span>
+                                <span className="font-semibold text-gray-900 mt-1 block font-mono">
+                                  {activeData.memberSince || '2024'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Platform Engagement Stats */}
+                            <div className="pt-2.5 border-t border-gray-100 flex items-center justify-between text-xs flex-wrap gap-2">
+                              <div className="flex items-center gap-3">
+                                <span className="text-gray-600 font-medium">
+                                  Properties Listed: <strong className="text-[#0F382C] font-bold">{userListedProperties.length}</strong>
+                                </span>
+                                <span className="text-gray-300">|</span>
+                                <span className="text-gray-600 font-medium">
+                                  Inquiries & Leads: <strong className="text-[#0F382C] font-bold">{userLeads.length}</strong>
+                                </span>
+                              </div>
+
+                              {userListedProperties.length > 0 && (
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="text-[11px] text-gray-500 font-medium">Listings:</span>
+                                  {userListedProperties.slice(0, 4).map((p) => (
+                                    <span
+                                      key={p.id}
+                                      className={`px-2 py-0.5 rounded text-[10px] font-mono border ${
+                                        p.status === 'Active'
+                                          ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                                          : p.status === 'Pending Approval'
+                                          ? 'bg-amber-50 border-amber-200 text-amber-800'
+                                          : 'bg-gray-100 border-gray-200 text-gray-800'
+                                      }`}
+                                      title={p.title}
+                                    >
+                                      {p.title.length > 20 ? p.title.slice(0, 20) + '...' : p.title} ({p.status || 'Active'})
+                                    </span>
+                                  ))}
+                                  {userListedProperties.length > 4 && (
+                                    <span className="text-[10px] text-gray-400 font-mono">
+                                      +{userListedProperties.length - 4} more
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
                           {/* 1. Role Assignment */}
                           <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
                             <div className="flex items-center justify-between">

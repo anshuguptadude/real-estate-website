@@ -296,18 +296,32 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
           )}
 
           {/* Quick Specs Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 p-5 bg-[#FAF8F5] rounded-xl border border-gray-200/80">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 p-5 bg-[#FAF8F5] rounded-xl border border-gray-200/80">
             <div>
               <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Configuration</span>
               <span className="text-sm font-bold text-[#0F382C] mt-0.5 block">
-                {property.bedrooms > 0 ? `${property.bedrooms} BHK (${property.bathrooms} Baths)` : 'Commercial Suite'}
+                {property.bedrooms > 0 ? `${property.bedrooms} BHK` : 'Commercial Suite'}
+              </span>
+            </div>
+            <div>
+              <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Bathrooms</span>
+              <span className="text-sm font-bold text-[#0F382C] mt-0.5 flex items-center gap-1">
+                <Bath className="w-3.5 h-3.5 text-[#C5A869]" />
+                <span>{property.bathrooms > 0 ? `${property.bathrooms} Baths` : '1+ Baths'}</span>
               </span>
             </div>
             <div>
               <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Super Built-up Area</span>
               <span className="text-sm font-bold text-[#0F382C] mt-0.5 block">
-                {property.superAreaSqFt.toLocaleString('en-IN')} sq.ft
+                {property.areaUnit === 'Sq.Yards' && property.superAreaSqYards
+                  ? `${property.superAreaSqYards.toLocaleString('en-IN')} Sq. Yards`
+                  : `${property.superAreaSqFt.toLocaleString('en-IN')} sq.ft`}
               </span>
+              {property.areaUnit === 'Sq.Yards' && (
+                <span className="text-[10px] text-gray-500 font-mono block">
+                  (≈ {property.superAreaSqFt.toLocaleString('en-IN')} sq.ft)
+                </span>
+              )}
             </div>
             <div>
               <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Facing / Orientation</span>
