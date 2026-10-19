@@ -1,7 +1,7 @@
 import React from 'react';
 import { Property } from '../types';
-import { Bed, Bath, Maximize, MapPin, ShieldCheck, Heart, Sparkles, Eye, Calendar, ArrowRight, MessageSquare, Trash2 } from 'lucide-react';
-import { formatAgraLocality } from '../utils/security';
+import { Bed, Bath, Maximize, MapPin, ShieldCheck, Heart, Sparkles, Eye, Calendar, ArrowRight, MessageSquare, Trash2, Compass } from 'lucide-react';
+import { formatAgraLocality, isPlotOrLand } from '../utils/security';
 
 interface PropertyCardProps {
   property: Property;
@@ -148,43 +148,72 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 
           {/* Key Specs Strip */}
           <div className="grid grid-cols-3 gap-2 py-3 my-3 border-y border-gray-100 text-gray-700">
-            {property.bedrooms > 0 ? (
-              <div className="flex items-center gap-1.5 text-xs font-medium truncate">
-                <Bed className="w-4 h-4 text-gray-400 shrink-0" />
-                <span className="truncate">{property.bedrooms} Beds</span>
-              </div>
+            {isPlotOrLand(property.propertyType) ? (
+              <>
+                <div className="flex items-center gap-1.5 text-xs font-medium truncate">
+                  <Maximize className="w-4 h-4 text-emerald-700 shrink-0" />
+                  <span className="truncate" title={`${property.superAreaSqFt.toLocaleString('en-IN')} sq.ft`}>
+                    {property.areaUnit === 'Sq.Yards' && property.superAreaSqYards
+                      ? `${property.superAreaSqYards.toLocaleString('en-IN')} sq.yd`
+                      : `${property.superAreaSqFt.toLocaleString('en-IN')} sq.ft`}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs font-medium truncate">
+                  <Compass className="w-4 h-4 text-[#C5A869] shrink-0" />
+                  <span className="truncate" title={property.facing || 'East Facing'}>
+                    {property.facing || 'East Facing'}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs font-medium truncate">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span className="truncate">Plot / Land</span>
+                </div>
+              </>
             ) : (
-              <div className="flex items-center gap-1.5 text-xs font-medium truncate">
-                <ShieldCheck className="w-4 h-4 text-gray-400 shrink-0" />
-                <span className="truncate">Commercial</span>
-              </div>
+              <>
+                {property.bedrooms > 0 ? (
+                  <div className="flex items-center gap-1.5 text-xs font-medium truncate">
+                    <Bed className="w-4 h-4 text-gray-400 shrink-0" />
+                    <span className="truncate">{property.bedrooms} Beds</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-xs font-medium truncate">
+                    <ShieldCheck className="w-4 h-4 text-gray-400 shrink-0" />
+                    <span className="truncate">Commercial</span>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-1.5 text-xs font-medium truncate">
+                  <Bath className="w-4 h-4 text-gray-400 shrink-0" />
+                  <span className="truncate">
+                    {property.bathrooms > 0 ? `${property.bathrooms} Baths` : '1+ Baths'}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs font-medium truncate">
+                  <Maximize className="w-4 h-4 text-gray-400 shrink-0" />
+                  <span className="truncate" title={`${property.superAreaSqFt.toLocaleString('en-IN')} sq.ft`}>
+                    {property.areaUnit === 'Sq.Yards' && property.superAreaSqYards
+                      ? `${property.superAreaSqYards.toLocaleString('en-IN')} sq.yd`
+                      : `${property.superAreaSqFt.toLocaleString('en-IN')} sq.ft`}
+                  </span>
+                </div>
+              </>
             )}
-
-            <div className="flex items-center gap-1.5 text-xs font-medium truncate">
-              <Bath className="w-4 h-4 text-gray-400 shrink-0" />
-              <span className="truncate">
-                {property.bathrooms > 0 ? `${property.bathrooms} Baths` : '1+ Baths'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1.5 text-xs font-medium truncate">
-              <Maximize className="w-4 h-4 text-gray-400 shrink-0" />
-              <span className="truncate" title={`${property.superAreaSqFt.toLocaleString('en-IN')} sq.ft`}>
-                {property.areaUnit === 'Sq.Yards' && property.superAreaSqYards
-                  ? `${property.superAreaSqYards.toLocaleString('en-IN')} sq.yd`
-                  : `${property.superAreaSqFt.toLocaleString('en-IN')} sq.ft`}
-              </span>
-            </div>
           </div>
 
           {/* Highlights Mini Pills */}
           <div className="flex items-center gap-1.5 flex-wrap mb-2">
             <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-[#FAF8F5] text-[#0F382C] border border-[#0F382C]/10">
-              {property.possession}
+              {property.possession || 'Ready to Move'}
             </span>
-            <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-gray-50 text-gray-600 border border-gray-200">
-              {property.furnishing}
-            </span>
+            {!isPlotOrLand(property.propertyType) && (
+              <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-gray-50 text-gray-600 border border-gray-200">
+                {property.furnishing}
+              </span>
+            )}
             {property.gatedSecurity && (
               <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-100">
                 24/7 Gated

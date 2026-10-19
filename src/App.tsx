@@ -796,6 +796,7 @@ export default function App() {
         isOpen={Boolean(editingProperty)}
         onClose={() => setEditingProperty(null)}
         onSave={handleSavePropertyEdit}
+        user={user}
       />
 
       {/* Mortgage EMI Calculator Modal */}

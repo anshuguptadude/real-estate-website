@@ -21,6 +21,8 @@ import {
   Bath, 
   Maximize, 
   Eye, 
+  EyeOff, 
+  Copy, 
   Camera, 
   Save, 
   Clock, 
@@ -122,6 +124,21 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   const [expandedAccountEmail, setExpandedAccountEmail] = useState<string | null>(null);
   const [savingAccountEmail, setSavingAccountEmail] = useState<string | null>(null);
   const [saveAccountSuccessMsg, setSaveAccountSuccessMsg] = useState<string | null>(null);
+  const [revealedPasswords, setRevealedPasswords] = useState<Record<string, boolean>>({});
+  const [copiedPasswordEmail, setCopiedPasswordEmail] = useState<string | null>(null);
+
+  const togglePasswordReveal = (email: string) => {
+    setRevealedPasswords(prev => ({
+      ...prev,
+      [email]: !prev[email]
+    }));
+  };
+
+  const handleCopyPassword = (email: string, passwordText: string) => {
+    navigator.clipboard.writeText(passwordText);
+    setCopiedPasswordEmail(email);
+    setTimeout(() => setCopiedPasswordEmail(null), 2000);
+  };
 
   // Sync state with user when user changes
   useEffect(() => {
@@ -162,9 +179,15 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
           email: admin.email,
           phone: admin.phone,
           role: admin.role,
+          password: admin.password,
           memberSince: '2024',
           permissions: [...admin.permissions]
         });
+      } else {
+        const found = initialAccounts.find(acc => acc.email && acc.email.toLowerCase() === admin.email.toLowerCase());
+        if (found && !found.password) {
+          found.password = admin.password;
+        }
       }
     });
 
@@ -181,13 +204,19 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
             email: admin.email,
             phone: admin.phone,
             role: admin.role,
+            password: admin.password,
             memberSince: '2024',
             permissions: [...admin.permissions]
           });
         });
         firestoreAccounts.forEach(acc => {
           if (acc.email) {
-            mergedMap.set(acc.email.toLowerCase(), acc);
+            const adminMatch = ADMIN_CREDENTIALS.find(a => a.email.toLowerCase() === acc.email.toLowerCase());
+            const pass = acc.password || adminMatch?.password;
+            mergedMap.set(acc.email.toLowerCase(), {
+              ...acc,
+              ...(pass ? { password: pass } : {})
+            });
           }
         });
         setAllAccounts(Array.from(mergedMap.values()));
@@ -1493,6 +1522,57 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                     Password updated successfully!
                   </div>
                 )}
+
+                {isCEO(user) && (
+                  <div className="p-3.5 bg-amber-50/80 border border-amber-200 rounded-xl">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                        <Key className="w-3.5 h-3.5 text-amber-700" />
+                        <span>CEO Account Registered Password</span>
+                      </span>
+                      <span className="text-[9px] font-bold px-2 py-0.5 bg-amber-200/80 text-amber-900 rounded">
+                        CEO Confidential
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between gap-2 bg-white px-3 py-2 rounded-lg border border-amber-200">
+                      <span className="font-mono font-bold text-gray-900 text-xs tracking-wider select-all">
+                        {revealedPasswords['self-ceo']
+                          ? (user?.password || 'shrey123@gmail.com')
+                          : '••••••••••••'}
+                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => togglePasswordReveal('self-ceo')}
+                          title={revealedPasswords['self-ceo'] ? "Hide Password" : "Show Password"}
+                          className="p-1 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
+                        >
+                          {revealedPasswords['self-ceo'] ? (
+                            <EyeOff className="w-3.5 h-3.5 text-gray-700" />
+                          ) : (
+                            <Eye className="w-3.5 h-3.5 text-gray-700" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const pass = user?.password || 'shrey123@gmail.com';
+                            handleCopyPassword('self-ceo', pass);
+                          }}
+                          title="Copy Password"
+                          className="p-1 text-gray-500 hover:text-amber-800 hover:bg-amber-100 rounded transition-colors"
+                        >
+                          {copiedPasswordEmail === 'self-ceo' ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5 text-gray-700" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Current Password</label>
                   <input
@@ -2232,6 +2312,57 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                                   {activeData.memberSince || '2024'}
                                 </span>
                               </div>
+
+                              {/* Account Password Card (CEO Access Only) */}
+                              {isCEO(user) && (
+                                <div className="p-3 bg-amber-50/80 rounded-xl border border-amber-200 sm:col-span-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[10px] text-amber-900 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                      <Key className="w-3.5 h-3.5 text-amber-700" />
+                                      <span>Account Password (CEO Confidential)</span>
+                                    </span>
+                                    <span className="text-[9px] font-bold px-1.5 py-0.5 bg-amber-200/80 text-amber-900 rounded">
+                                      CEO Access Only
+                                    </span>
+                                  </div>
+                                  <div className="mt-1.5 flex items-center justify-between gap-2 bg-white px-3 py-2 rounded-lg border border-amber-200 shadow-2xs">
+                                    <span className="font-mono font-bold text-gray-900 text-xs tracking-wider select-all">
+                                      {revealedPasswords[activeData.email]
+                                        ? (activeData.password || (ADMIN_CREDENTIALS.find(c => c.email.toLowerCase() === activeData.email?.toLowerCase())?.password) || 'RoyalAgra@2024')
+                                        : '••••••••••••'}
+                                    </span>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <button
+                                        type="button"
+                                        onClick={() => togglePasswordReveal(activeData.email)}
+                                        title={revealedPasswords[activeData.email] ? "Hide Password" : "Show Password"}
+                                        className="p-1 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
+                                      >
+                                        {revealedPasswords[activeData.email] ? (
+                                          <EyeOff className="w-3.5 h-3.5 text-gray-700" />
+                                        ) : (
+                                          <Eye className="w-3.5 h-3.5 text-gray-700" />
+                                        )}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const pass = activeData.password || (ADMIN_CREDENTIALS.find(c => c.email.toLowerCase() === activeData.email?.toLowerCase())?.password) || 'RoyalAgra@2024';
+                                          handleCopyPassword(activeData.email, pass);
+                                        }}
+                                        title="Copy Password"
+                                        className="p-1 text-gray-500 hover:text-amber-800 hover:bg-amber-100 rounded transition-colors"
+                                      >
+                                        {copiedPasswordEmail === activeData.email ? (
+                                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                        ) : (
+                                          <Copy className="w-3.5 h-3.5 text-gray-700" />
+                                        )}
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
                             {/* Platform Engagement Stats */}

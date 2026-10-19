@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Property, PropertyType, UserProfile } from '../types';
 import { AGRA_LOCALITIES, PROPERTY_TYPES } from '../data/mockData';
-import { isAdmin } from '../utils/security';
+import { isAdmin, isPlotOrLand } from '../utils/security';
 import { 
   Building, 
   MapPin, 
@@ -19,7 +19,8 @@ import {
   Plus,
   Compass,
   Lock,
-  ExternalLink
+  ExternalLink,
+  Clock
 } from 'lucide-react';
 
 interface PostPropertyScreenProps {
@@ -53,6 +54,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
   const [bathrooms, setBathrooms] = useState<string>('4');
   const [askingPrice, setAskingPrice] = useState<string>('28500000');
   const [furnishing, setFurnishing] = useState('Fully Furnished');
+  const [facing, setFacing] = useState('North-East (Vastu)');
   const [possession, setPossession] = useState('Ready to Move');
   
   // Owner info
@@ -325,12 +327,19 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
     const validDisplayIndex = (selectedDisplayIndex >= 0 && selectedDisplayIndex < propertyImages.length)
       ? selectedDisplayIndex
       : 0;
-    const primaryCoverPhoto = propertyImages[validDisplayIndex] || propertyImages[0];
+    const primaryCoverPhoto = propertyImages[validDisplayIndex];
+    const isPlot = isPlotOrLand(resolvedPropertyType);
+    const finalBedrooms = isPlot ? 0 : (Number(bedrooms) || 0);
+    const finalBathrooms = isPlot ? 0 : (Number(bathrooms) || 0);
+    const finalFurnishing = isPlot ? 'Unfurnished' : furnishing;
+    const finalFacing = facing.trim() || 'North-East (Vastu)';
 
     const newProperty: Property = {
       id: generatedId,
       title: projectTitle.trim() || `Luxury ${resolvedPropertyType} in ${resolvedLocality}`,
-      tagline: `Exclusive ${furnishing} estate with prime connectivity on ${resolvedLocality}, Agra.`,
+      tagline: isPlot 
+        ? `Prime ${resolvedPropertyType} with exceptional road connectivity in ${resolvedLocality}, Agra.` 
+        : `Exclusive ${finalFurnishing} estate with prime connectivity on ${resolvedLocality}, Agra.`,
       propertyType: resolvedPropertyType,
       listingType: listingIntent,
       price: numPrice,
@@ -347,15 +356,15 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
       mapUrl: mapUrl.trim() || undefined,
       locationLink: mapUrl.trim() || undefined,
       googleMapsPinUrl: mapUrl.trim() || undefined,
-      bedrooms: Number(bedrooms) || 4,
-      bathrooms: Number(bathrooms) || 4,
-      balconies: 2,
+      bedrooms: finalBedrooms,
+      bathrooms: finalBathrooms,
+      balconies: isPlot ? 0 : 2,
       superAreaSqFt: numSuperAreaSqFt,
       superAreaSqYards: numSuperAreaSqYards,
       areaUnit: areaUnit,
       carpetAreaSqFt: Math.round(numSuperAreaSqFt * 0.78),
-      furnishing: furnishing as any,
-      facing: 'North-East (Vastu)',
+      furnishing: finalFurnishing as any,
+      facing: finalFacing,
       reraId: verificationDocNumber.trim() || (isLegallyVerified ? `UPRERA-AGR-${Math.floor(1000 + Math.random() * 9000)}` : 'N/A'),
       possession: possession as any,
       featured: true,
@@ -745,42 +754,109 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       </span>
                     </div>
 
-                    {/* Bedrooms (BHK) */}
+                    {/* Conditional: For Non-Plots, ask Bedrooms, Bathrooms, Furnishing */}
+                    {!isPlotOrLand(propertyType === 'Other (Custom Type)' ? customPropertyType : propertyType) ? (
+                      <>
+                        {/* Bedrooms (BHK) */}
+                        <div className="space-y-2">
+                          <label className="block text-xs font-bold text-gray-700 uppercase">Bedrooms (BHK)</label>
+                          <select
+                            value={bedrooms}
+                            onChange={(e) => setBedrooms(e.target.value)}
+                            className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
+                          >
+                            <option value="1">1 BHK</option>
+                            <option value="2">2 BHK</option>
+                            <option value="3">3 BHK</option>
+                            <option value="4">4 BHK</option>
+                            <option value="5">5+ BHK Mansion</option>
+                          </select>
+                        </div>
+
+                        {/* Bathrooms */}
+                        <div className="space-y-2">
+                          <label className="block text-xs font-bold text-gray-700 uppercase">Bathrooms</label>
+                          <select
+                            value={bathrooms}
+                            onChange={(e) => setBathrooms(e.target.value)}
+                            className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
+                          >
+                            <option value="1">1 Bathroom</option>
+                            <option value="2">2 Bathrooms</option>
+                            <option value="3">3 Bathrooms</option>
+                            <option value="4">4 Bathrooms</option>
+                            <option value="5">5+ Luxury Baths</option>
+                          </select>
+                        </div>
+
+                        {/* Furnishing Status */}
+                        <div className="space-y-2">
+                          <label className="block text-xs font-bold text-gray-700 uppercase">Furnishing Status</label>
+                          <select
+                            value={furnishing}
+                            onChange={(e) => setFurnishing(e.target.value)}
+                            className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
+                          >
+                            <option value="Designer Fitted">Designer Fitted</option>
+                            <option value="Fully Furnished">Fully Furnished</option>
+                            <option value="Semi-Furnished">Semi-Furnished</option>
+                            <option value="Unfurnished">Unfurnished</option>
+                          </select>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="space-y-2 sm:col-span-2 p-3.5 bg-emerald-50/80 border border-emerald-200 rounded-xl flex items-center gap-2.5 text-xs text-emerald-900">
+                        <Check className="w-4 h-4 text-emerald-700 shrink-0" />
+                        <span><strong>Plot / Land Detected:</strong> Room, washroom, and furnishing fields are automatically omitted for plots.</span>
+                      </div>
+                    )}
+
+                    {/* Property Facing */}
                     <div className="space-y-2">
-                      <label className="block text-xs font-bold text-gray-700 uppercase">Bedrooms (BHK)</label>
+                      <label className="block text-xs font-bold text-gray-700 uppercase flex items-center gap-1.5">
+                        <Compass className="w-3.5 h-3.5 text-[#0F382C]" />
+                        <span>Property Facing</span>
+                      </label>
                       <select
-                        value={bedrooms}
-                        onChange={(e) => setBedrooms(e.target.value)}
+                        value={facing}
+                        onChange={(e) => setFacing(e.target.value)}
                         className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
                       >
-                        <option value="1">1 BHK</option>
-                        <option value="2">2 BHK</option>
-                        <option value="3">3 BHK</option>
-                        <option value="4">4 BHK</option>
-                        <option value="5">5+ BHK Mansion</option>
-                        <option value="0">Commercial Plot / Floor / Retail</option>
+                        <option value="North-East (Vastu)">North-East (Vastu)</option>
+                        <option value="East">East</option>
+                        <option value="North">North</option>
+                        <option value="North-West">North-West</option>
+                        <option value="South">South</option>
+                        <option value="South-East">South-East</option>
+                        <option value="South-West">South-West</option>
+                        <option value="West">West</option>
+                        <option value="Park Facing">Park Facing</option>
+                        <option value="Taj View (South-East)">Taj View (South-East)</option>
                       </select>
                     </div>
 
-                    {/* Bathrooms */}
+                    {/* Construction / Possession Status */}
                     <div className="space-y-2">
-                      <label className="block text-xs font-bold text-gray-700 uppercase">Bathrooms</label>
+                      <label className="block text-xs font-bold text-gray-700 uppercase flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-[#0F382C]" />
+                        <span>Construction / Possession Status</span>
+                      </label>
                       <select
-                        value={bathrooms}
-                        onChange={(e) => setBathrooms(e.target.value)}
+                        value={possession}
+                        onChange={(e) => setPossession(e.target.value)}
                         className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
                       >
-                        <option value="1">1 Bathroom</option>
-                        <option value="2">2 Bathrooms</option>
-                        <option value="3">3 Bathrooms</option>
-                        <option value="4">4 Bathrooms</option>
-                        <option value="5">5+ Luxury Baths</option>
-                        <option value="0">Commercial Washroom / Common</option>
+                        <option value="Ready to Move">Ready to Move</option>
+                        <option value="Under Construction">Under Construction</option>
+                        <option value="Newly Launched">Newly Launched</option>
+                        <option value="Immediate Possession">Immediate Possession</option>
+                        <option value="Ready for Construction / Registry">Ready for Construction / Registry</option>
+                        <option value="Immediate Registry">Immediate Registry</option>
                       </select>
                     </div>
 
                     {/* Price */}
-                    <div className="space-y-2">
+                    <div className="space-y-2 sm:col-span-2">
                       <label className="block text-xs font-bold text-gray-700 uppercase">
                         {listingIntent === 'Sale' ? 'Expected Sale Price (₹ INR)' : 'Expected Monthly Rent (₹ INR)'}
                       </label>
@@ -794,21 +870,6 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       <span className="text-[11px] text-gray-500 font-mono block">
                         ≈ {formatPriceDisplay(Number(askingPrice) || 0, listingIntent)}
                       </span>
-                    </div>
-
-                    {/* Furnishing Status */}
-                    <div className="space-y-2 sm:col-span-2">
-                      <label className="block text-xs font-bold text-gray-700 uppercase">Furnishing Status</label>
-                      <select
-                        value={furnishing}
-                        onChange={(e) => setFurnishing(e.target.value)}
-                        className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
-                      >
-                        <option value="Designer Fitted">Designer Fitted</option>
-                        <option value="Fully Furnished">Fully Furnished</option>
-                        <option value="Semi-Furnished">Semi-Furnished</option>
-                        <option value="Unfurnished">Unfurnished</option>
-                      </select>
                     </div>
                   </div>
 

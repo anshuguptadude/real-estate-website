@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Property } from '../types';
+import { isPlotOrLand } from '../utils/security';
 import { 
   X, Check, Minus, Bed, Bath, Maximize, MapPin, IndianRupee, 
   Trash2, ShieldCheck, Sparkles, Navigation, Layers, Compass, 
@@ -421,7 +422,9 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                       <span className="font-bold text-gray-600 px-2">Configuration</span>
                       {compareList.map(p => (
                         <span key={p.id} className="text-gray-900 font-semibold px-2">
-                          {p.bedrooms} BHK ({p.bathrooms} Baths, {p.balconies} Balconies)
+                          {isPlotOrLand(p.propertyType)
+                            ? 'Plot / Land Parcel'
+                            : `${p.bedrooms} BHK (${p.bathrooms} Baths, ${p.balconies} Balconies)`}
                         </span>
                       ))}
                     </div>
@@ -433,7 +436,9 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                     }`}>
                       <span className="font-bold text-gray-600 px-2">Furnishing Status</span>
                       {compareList.map(p => (
-                        <span key={p.id} className="text-gray-800 px-2">{p.furnishing}</span>
+                        <span key={p.id} className="text-gray-800 px-2">
+                          {isPlotOrLand(p.propertyType) ? 'N/A (Plot/Land)' : p.furnishing}
+                        </span>
                       ))}
                     </div>
 

@@ -113,6 +113,7 @@ export interface UserProfile {
   dob?: string;
   profession?: string;
   status?: string;
+  password?: string;
   permissions?: string[];
   unlockedPropertyIds?: string[];
   disabledAt?: string;

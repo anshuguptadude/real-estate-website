@@ -190,7 +190,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           unlockedPropertyIds: matchedAccount.unlockedPropertyIds,
           avatar: matchedAccount.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
           memberSince: matchedAccount.memberSince || '2024',
-          preferredLocality: matchedAccount.preferredLocality || 'Agra'
+          preferredLocality: matchedAccount.preferredLocality || 'Agra',
+          password: matchedAccount.password
         };
         onLoginSuccess(userToAuth);
         onClose();
@@ -295,7 +296,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       preferredBudget: newUserAccount.preferredBudget,
       address: newUserAccount.address,
       dob: newUserAccount.dob,
-      profession: newUserAccount.profession
+      profession: newUserAccount.profession,
+      password: newUserAccount.password
     };
 
     onLoginSuccess(newUserProfile);

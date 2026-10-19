@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Property } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapComponent } from './MapComponent';
-import { formatAgraLocality } from '../utils/security';
+import { formatAgraLocality, isPlotOrLand } from '../utils/security';
 import {
   X,
 
@@ -300,18 +300,22 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
             <div>
               <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Configuration</span>
               <span className="text-sm font-bold text-[#0F382C] mt-0.5 block">
-                {property.bedrooms > 0 ? `${property.bedrooms} BHK` : 'Commercial Suite'}
+                {isPlotOrLand(property.propertyType) ? 'Plot / Land Parcel' : (property.bedrooms > 0 ? `${property.bedrooms} BHK` : 'Commercial Suite')}
               </span>
             </div>
+            {!isPlotOrLand(property.propertyType) && (
+              <div>
+                <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Bathrooms</span>
+                <span className="text-sm font-bold text-[#0F382C] mt-0.5 flex items-center gap-1">
+                  <Bath className="w-3.5 h-3.5 text-[#C5A869]" />
+                  <span>{property.bathrooms > 0 ? `${property.bathrooms} Baths` : '1+ Baths'}</span>
+                </span>
+              </div>
+            )}
             <div>
-              <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Bathrooms</span>
-              <span className="text-sm font-bold text-[#0F382C] mt-0.5 flex items-center gap-1">
-                <Bath className="w-3.5 h-3.5 text-[#C5A869]" />
-                <span>{property.bathrooms > 0 ? `${property.bathrooms} Baths` : '1+ Baths'}</span>
+              <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">
+                {isPlotOrLand(property.propertyType) ? 'Plot / Land Area' : 'Super Built-up Area'}
               </span>
-            </div>
-            <div>
-              <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Super Built-up Area</span>
               <span className="text-sm font-bold text-[#0F382C] mt-0.5 block">
                 {property.areaUnit === 'Sq.Yards' && property.superAreaSqYards
                   ? `${property.superAreaSqYards.toLocaleString('en-IN')} Sq. Yards`
@@ -326,15 +330,23 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
             <div>
               <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Facing / Orientation</span>
               <span className="text-sm font-bold text-[#0F382C] mt-0.5 block">
-                {property.facing}
+                {property.facing || 'East Facing'}
               </span>
             </div>
             <div>
-              <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Furnishing Status</span>
+              <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Construction / Possession</span>
               <span className="text-sm font-bold text-[#0F382C] mt-0.5 block">
-                {property.furnishing}
+                {property.possession || 'Ready to Move'}
               </span>
             </div>
+            {!isPlotOrLand(property.propertyType) && (
+              <div>
+                <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Furnishing Status</span>
+                <span className="text-sm font-bold text-[#0F382C] mt-0.5 block">
+                  {property.furnishing}
+                </span>
+              </div>
+            )}
             <div>
               <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold block">Posted / Listed On</span>
               <span className="text-sm font-bold text-[#0F382C] mt-0.5 flex items-center gap-1">
@@ -344,7 +356,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
             </div>
           </div>
 
-          {/* Admin View Dossier Box (ADMIN ONLY) */}
+          {/* CEO View Dossier Box (CEO ONLY) */}
           {isAdminUser ? (
             <div className="p-6 bg-amber-50/80 border-2 border-amber-300 rounded-2xl space-y-4 shadow-sm">
               <div className="flex items-center justify-between pb-3 border-b border-amber-200">
@@ -354,15 +366,15 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                   </div>
                   <div>
                     <h3 className="font-serif-luxury font-bold text-base text-amber-950">
-                      Admin View: Full Address & Confidential Dossier
+                      CEO View: Full Address & Confidential Dossier
                     </h3>
                     <p className="text-[11px] text-amber-800">
-                      This private section is visible only to authenticated Royal Agra Estate administrators.
+                      This private section is visible exclusively to the authenticated Royal Agra Estate CEO.
                     </p>
                   </div>
                 </div>
                 <span className="px-2.5 py-1 bg-amber-200 text-amber-900 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                  Admin Only
+                  CEO Access Only
                 </span>
               </div>
 

@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Property, PropertyType, UserProfile } from '../types';
 import { AGRA_LOCALITIES, PROPERTY_TYPES } from '../data/mockData';
 import { AGRA_LOCALITY_COORDINATES } from './LocationPickerMap';
-import { isAdmin } from '../utils/security';
-import { X, Building2, Image as ImageIcon, IndianRupee, Save, Trash2, Plus, Upload, Star, Loader2, Check, Lock, ShieldCheck, MapPin, PlusCircle, AlertTriangle, ExternalLink } from 'lucide-react';
+import { isAdmin, isPlotOrLand } from '../utils/security';
+import { X, Building2, Image as ImageIcon, IndianRupee, Save, Trash2, Plus, Upload, Star, Loader2, Check, Lock, ShieldCheck, MapPin, PlusCircle, AlertTriangle, ExternalLink, Compass, Clock } from 'lucide-react';
 
 interface EditPropertyModalProps {
   property: Property | null;
@@ -25,7 +25,8 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
   const [price, setPrice] = useState<number>(property?.price || 0);
   const [propertyType, setPropertyType] = useState<PropertyType>(property?.propertyType || 'Luxury Villa');
   const [locality, setLocality] = useState(property?.locality || 'Fatehabad Road');
-  const [address, setAddress] = useState(property?.address || '');
+  const [address, setAddress] = useState(property?.fullAddress || property?.address || '');
+  const [facing, setFacing] = useState(property?.facing || 'North-East (Vastu)');
   const [privateLocationNote, setPrivateLocationNote] = useState(property?.privateLocationNote || '');
   const [locationLink, setLocationLink] = useState(property?.locationLink || '');
   const [parsedCoordinates, setParsedCoordinates] = useState<{ lat: number; lng: number } | null>(null);
@@ -125,7 +126,8 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
       setPrice(property.price);
       setPropertyType(property.propertyType);
       setLocality(property.locality);
-      setAddress(property.address);
+      setAddress(property.fullAddress || property.address || '');
+      setFacing(property.facing || 'North-East (Vastu)');
       setPrivateLocationNote(property.privateLocationNote || '');
       setLocationLink(property.locationLink || '');
       setParsedCoordinates(extractCoordinatesFromInput(property.locationLink || ''));
@@ -348,6 +350,13 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
 
     const resolvedLocality = locality === 'Other' ? (customLocality.trim() || 'Agra') : locality;
     const numSqYards = areaUnit === 'Sq.Yards' ? Math.round(superAreaSqFt / 9) : (property.superAreaSqYards || Math.round(superAreaSqFt / 9));
+    const isPlot = isPlotOrLand(propertyType);
+    const finalBedrooms = isPlot ? 0 : bedrooms;
+    const finalBathrooms = isPlot ? 0 : bathrooms;
+    const finalFurnishing = isPlot ? 'Unfurnished' : furnishing;
+    const finalAddress = isUserAdmin 
+      ? (address.trim() || property.fullAddress || property.address || `${resolvedLocality}, Agra`)
+      : (property.fullAddress || property.address || `${resolvedLocality}, Agra`);
 
     const updated: Property = {
       ...property,
@@ -360,7 +369,8 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
       locality: resolvedLocality,
       customLocality: locality === 'Other' ? customLocality.trim() : undefined,
       location: `${resolvedLocality}, Agra`,
-      address: address.trim() || property.address || `${resolvedLocality}, Agra`,
+      address: finalAddress,
+      fullAddress: finalAddress,
       privateLocationNote: privateLocationNote.trim() || undefined,
       locationLink: locationLink.trim() || undefined,
       coordinates: updatedCoordinates,
@@ -368,10 +378,11 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
       superAreaSqFt,
       superAreaSqYards: numSqYards,
       areaUnit,
-      bedrooms,
-      bathrooms,
-      furnishing,
-      possession,
+      bedrooms: finalBedrooms,
+      bathrooms: finalBathrooms,
+      furnishing: finalFurnishing as any,
+      facing: facing || property.facing || 'North-East (Vastu)',
+      possession: possession as any,
       coverImage: finalCover,
       images: finalImages,
       status: finalStatus,
@@ -789,41 +800,87 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
             )}
           </div>
 
-          {/* Bedrooms, Bathrooms, Furnishing */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Bedrooms</label>
-              <input
-                type="number"
-                min="0"
-                max="20"
-                value={bedrooms}
-                onChange={(e) => setBedrooms(Number(e.target.value))}
-                className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
-              />
+          {/* Bedrooms, Bathrooms, Furnishing (Hidden for Plots / Land) */}
+          {!isPlotOrLand(propertyType) && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Bedrooms</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="20"
+                  value={bedrooms}
+                  onChange={(e) => setBedrooms(Number(e.target.value))}
+                  className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Bathrooms</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="20"
+                  value={bathrooms}
+                  onChange={(e) => setBathrooms(Number(e.target.value))}
+                  className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Furnishing</label>
+                <select
+                  value={furnishing}
+                  onChange={(e) => setFurnishing(e.target.value as any)}
+                  className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
+                >
+                  <option value="Designer Fitted">Designer Fitted</option>
+                  <option value="Fully Furnished">Fully Furnished</option>
+                  <option value="Semi-Furnished">Semi-Furnished</option>
+                  <option value="Unfurnished">Unfurnished</option>
+                </select>
+              </div>
             </div>
+          )}
+
+          {/* Property Facing & Construction/Possession Status */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Bathrooms</label>
-              <input
-                type="number"
-                min="0"
-                max="20"
-                value={bathrooms}
-                onChange={(e) => setBathrooms(Number(e.target.value))}
-                className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Furnishing</label>
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center gap-1.5">
+                <Compass className="w-3.5 h-3.5 text-[#0F382C]" />
+                <span>Property Facing</span>
+              </label>
               <select
-                value={furnishing}
-                onChange={(e) => setFurnishing(e.target.value as any)}
-                className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
+                value={facing}
+                onChange={(e) => setFacing(e.target.value)}
+                className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white"
               >
-                <option value="Designer Fitted">Designer Fitted</option>
-                <option value="Fully Furnished">Fully Furnished</option>
-                <option value="Semi-Furnished">Semi-Furnished</option>
-                <option value="Unfurnished">Unfurnished</option>
+                <option value="North-East (Vastu)">North-East (Vastu)</option>
+                <option value="East">East</option>
+                <option value="North">North</option>
+                <option value="North-West">North-West</option>
+                <option value="South">South</option>
+                <option value="South-East">South-East</option>
+                <option value="South-West">South-West</option>
+                <option value="West">West</option>
+                <option value="Park Facing">Park Facing</option>
+                <option value="Taj View (South-East)">Taj View (South-East)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-[#0F382C]" />
+                <span>Construction / Possession Status</span>
+              </label>
+              <select
+                value={possession}
+                onChange={(e) => setPossession(e.target.value as any)}
+                className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white"
+              >
+                <option value="Ready to Move">Ready to Move</option>
+                <option value="Under Construction">Under Construction</option>
+                <option value="Newly Launched">Newly Launched</option>
+                <option value="Immediate Possession">Immediate Possession</option>
+                <option value="Ready for Construction / Registry">Ready for Construction / Registry</option>
               </select>
             </div>
           </div>

@@ -88,16 +88,16 @@ export const hasAdminPermission = (user: UserProfile | null, permission: string)
   return Boolean(user.permissions && user.permissions.includes(permission));
 };
 
+export const isPlotOrLand = (propertyType?: string): boolean => {
+  if (!propertyType) return false;
+  const lower = propertyType.toLowerCase();
+  return lower.includes('plot') || lower.includes('land');
+};
+
 export const canViewFullAddress = (property: Property | null, user: UserProfile | null): boolean => {
   if (!user) return false;
-  // 1. CEO always has supreme access
+  // Supreme access: Only the CEO account can view full unmasked address on the website
   if (isCEO(user)) return true;
-  // 2. Co-founder Admin has full access
-  if (isAdmin(user)) return true;
-  // 3. Explicit FULL_ADDRESS_ACCESS permission granted by CEO
-  if (user.permissions?.includes('FULL_ADDRESS_ACCESS') || user.permissions?.includes('FULL_ADMIN_DOSSIER')) return true;
-  // 4. Specific unlocked property permission granted by CEO
-  if (property && user.unlockedPropertyIds && user.unlockedPropertyIds.includes(property.id)) return true;
   return false;
 };
 
