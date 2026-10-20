@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Phone, Mail, MessageSquare, Clock, Send, CheckCircle2, Landmark, Compass } from 'lucide-react';
+import { MapPin, Phone, Mail, MessageSquare, Clock, Send, CheckCircle2, Landmark, Compass, AlertTriangle, Loader2 } from 'lucide-react';
 import { saveFirestoreLead } from '../services/firebaseService';
 import { LeadSubmission } from '../utils/security';
 
@@ -10,31 +10,70 @@ export const ContactScreen: React.FC = () => {
   const [service, setService] = useState('Luxury Property Search');
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !phone || !email) return;
+    setErrorMessage(null);
 
-    const contactLead: LeadSubmission = {
-      id: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
-      propertyId: 'contact-desk',
-      propertyTitle: service ? `Concierge: ${service}` : 'Concierge Desk Inquiry',
-      buyerName: name.trim(),
-      phone: phone.trim(),
-      email: email.trim().toLowerCase(),
-      preferredTime: message ? `Notes: ${message.slice(0, 80)}` : 'General Contact Desk Form',
-      timestamp: new Date().toLocaleString()
-    };
+    // Strict validation: every detail is mandatory
+    if (!name.trim() || name.trim().length < 2) {
+      setErrorMessage('Please enter your full name (at least 2 characters).');
+      return;
+    }
 
-    await saveFirestoreLead(contactLead);
-    setSent(true);
-    setTimeout(() => {
-      setSent(false);
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    if (!cleanPhone || cleanPhone.length < 10) {
+      setErrorMessage('Please enter a valid 10-digit Phone or WhatsApp number.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.trim() || !emailRegex.test(email.trim())) {
+      setErrorMessage('Please enter a valid email address (e.g. name@example.com).');
+      return;
+    }
+
+    if (!service.trim()) {
+      setErrorMessage('Please select an inquiry purpose.');
+      return;
+    }
+
+    if (!message.trim() || message.trim().length < 5) {
+      setErrorMessage('Please fill in your specific requirements or message (minimum 5 characters).');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const contactLead: LeadSubmission = {
+        id: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
+        propertyId: 'contact-desk',
+        propertyTitle: service ? `Concierge: ${service}` : 'Concierge Desk Inquiry',
+        buyerName: name.trim(),
+        phone: phone.trim(),
+        email: email.trim().toLowerCase(),
+        preferredTime: `Requirements: ${message.trim().slice(0, 150)}`,
+        timestamp: new Date().toLocaleString()
+      };
+
+      await saveFirestoreLead(contactLead);
+      setSent(true);
       setName('');
       setEmail('');
       setPhone('');
       setMessage('');
-    }, 4000);
+      setService('Luxury Property Search');
+      setTimeout(() => {
+        setSent(false);
+      }, 5000);
+    } catch (err) {
+      console.error('Failed to submit contact request:', err);
+      setErrorMessage('Failed to send request. Please check your internet connection or try WhatsApp directly.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -151,27 +190,44 @@ export const ContactScreen: React.FC = () => {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {errorMessage && (
+                    <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
+                      <span className="font-medium">{errorMessage}</span>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Your Full Name</label>
+                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                        Your Full Name <span className="text-red-500 font-bold">*</span>
+                      </label>
                       <input
                         type="text"
                         required
                         placeholder="e.g. Seth Shanti Prasad"
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={(e) => {
+                          setName(e.target.value);
+                          if (errorMessage) setErrorMessage(null);
+                        }}
                         className="w-full p-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-[#0F382C]"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Phone / WhatsApp</label>
+                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                        Phone / WhatsApp <span className="text-red-500 font-bold">*</span>
+                      </label>
                       <input
                         type="tel"
                         required
                         placeholder="+91 98765 43210"
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
+                        onChange={(e) => {
+                          setPhone(e.target.value);
+                          if (errorMessage) setErrorMessage(null);
+                        }}
                         className="w-full p-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-[#0F382C]"
                       />
                     </div>
@@ -179,22 +235,33 @@ export const ContactScreen: React.FC = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address</label>
+                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                        Email Address <span className="text-red-500 font-bold">*</span>
+                      </label>
                       <input
                         type="email"
                         required
                         placeholder="vip@example.com"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          if (errorMessage) setErrorMessage(null);
+                        }}
                         className="w-full p-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-[#0F382C]"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Inquiry Purpose</label>
+                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                        Inquiry Purpose <span className="text-red-500 font-bold">*</span>
+                      </label>
                       <select
+                        required
                         value={service}
-                        onChange={(e) => setService(e.target.value)}
+                        onChange={(e) => {
+                          setService(e.target.value);
+                          if (errorMessage) setErrorMessage(null);
+                        }}
                         className="w-full p-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-[#0F382C]"
                       >
                         <option value="Luxury Property Search">Buying a Luxury Villa / Home</option>
@@ -207,12 +274,19 @@ export const ContactScreen: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Specific Requirements / Message</label>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                      Specific Requirements / Message <span className="text-red-500 font-bold">*</span>
+                    </label>
                     <textarea
                       rows={3}
+                      required
+                      minLength={5}
                       placeholder="Please mention preferred Agra localities (e.g. Fatehabad Rd, Dayalbagh), budget, or questions..."
                       value={message}
-                      onChange={(e) => setMessage(e.target.value)}
+                      onChange={(e) => {
+                        setMessage(e.target.value);
+                        if (errorMessage) setErrorMessage(null);
+                      }}
                       className="w-full p-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-[#0F382C]"
                     />
                   </div>
@@ -220,10 +294,22 @@ export const ContactScreen: React.FC = () => {
                   <button
                     type="submit"
                     id="submit-contact-form-btn"
-                    className="w-full py-3 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                    disabled={isSubmitting}
+                    className={`w-full py-3 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 ${
+                      isSubmitting ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'
+                    }`}
                   >
-                    <Send className="w-4 h-4" />
-                    <span>Send Consultation Request</span>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Sending Request...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        <span>Send Consultation Request</span>
+                      </>
+                    )}
                   </button>
                 </form>
               )}

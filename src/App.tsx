@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ActiveScreen, Property, FilterState, PropertyType, ListingType, UserProfile, Project, UserDashboardTab } from './types';
 import { PROPERTIES_DATA, PROJECTS_DATA } from './data/mockData';
-import { isAdmin, isCEO, canViewFullAddress, getMaskedProperty, formatAgraLocality, LeadSubmission } from './utils/security';
+import { isAdmin, isCEO, canViewFullAddress, getMaskedProperty, formatAgraLocality, LeadSubmission, canEditProperty, canDeleteProperty } from './utils/security';
 import { 
   saveFirestoreAccount, 
   saveFirestoreProperty, 
@@ -20,7 +20,6 @@ import { LeadInquiryModal } from './components/LeadInquiryModal';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { FeaturedProperties } from './components/FeaturedProperties';
-import { NeighborhoodExplorer } from './components/NeighborhoodExplorer';
 import { WhyRoyalAgra } from './components/WhyRoyalAgra';
 import { PropertiesScreen } from './components/PropertiesScreen';
 import { PropertyDetailModal } from './components/PropertyDetailModal';
@@ -464,6 +463,12 @@ export default function App() {
   };
 
   const handleDeleteProperty = async (propertyId: string) => {
+    const targetProp = properties.find(p => p.id === propertyId);
+    if (targetProp && !canDeleteProperty(user, targetProp)) {
+      alert("Unauthorized: You can only delete properties that you personally posted.");
+      return;
+    }
+
     // 1. Immediately record in persistent local tombstones
     markPropertyDeletedLocally(propertyId);
 
@@ -611,12 +616,17 @@ export default function App() {
 
   const savedProperties = displayedProperties.filter(p => savedPropertyIds.includes(p.id));
 
-  // Properties belonging to current user or all properties if admin
-  const userProperties = isAdmin(user)
+  // Properties belonging to current user or all properties if admin or CEO
+  const userProperties = (isAdmin(user) || isCEO(user))
     ? properties
-    : properties.filter(p => 
-        p.isUserListing || (user && p.ownerId === user.id) || (user && user.role === 'owner' && (p.isUserListing || p.id === 'prop-1' || p.id === 'prop-3'))
-      );
+    : properties.filter(p => {
+        if (!user) return false;
+        const userEmail = user.email?.toLowerCase().trim();
+        const ownerEmail = p.ownerEmail?.toLowerCase().trim();
+        const userId = user.id?.trim();
+        const ownerId = p.ownerId?.trim();
+        return Boolean((userId && ownerId && userId === ownerId) || (userEmail && ownerEmail && userEmail === ownerEmail));
+      });
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-[#1A2E26] selection:bg-[#0F382C] selection:text-white">
@@ -663,10 +673,6 @@ export default function App() {
               onApproveProperty={handleApproveProperty}
             />
 
-            <NeighborhoodExplorer
-              onSelectLocality={handleSelectLocality}
-            />
-
             <WhyRoyalAgra
               onContactAdvisory={() => navigateTo('contact')}
             />
@@ -708,7 +714,13 @@ export default function App() {
               setUser(updated);
               await saveFirestoreAccount(updated);
             }}
-            onEditProperty={(prop) => setEditingProperty(prop)}
+            onEditProperty={(prop) => {
+              if (!canEditProperty(user, prop)) {
+                alert("Unauthorized: You can only edit properties that you personally posted.");
+                return;
+              }
+              setEditingProperty(prop);
+            }}
             onDeleteProperty={handleDeleteProperty}
             onTogglePropertyStatus={handleTogglePropertyStatus}
             onViewProperty={(prop) => navigateTo('properties', prop.id)}

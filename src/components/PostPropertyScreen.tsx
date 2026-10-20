@@ -396,7 +396,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
         role: 'Managing Partner & Co-Founder',
         phone: '+91 91490 79913',
         email: 'shrey@royalagraestate.in',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+        avatar: '/team/shrey-gupta.jpg',
         experience: 'Luxury Residential & HNI Advisory'
       },
       yearBuilt: new Date().getFullYear(),

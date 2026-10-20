@@ -34,6 +34,7 @@ export const ADMIN_CREDENTIALS = [
     phone: '+91 9149079913',
     id: 'RAE-ADMIN-01',
     role: 'ceo' as const,
+    avatar: '/team/shrey-gupta.jpg',
     permissions: [...SUPER_ADMIN_PERMISSIONS]
   },
   {
@@ -43,6 +44,7 @@ export const ADMIN_CREDENTIALS = [
     phone: '+91 9557138449',
     id: 'RAE-ADMIN-02',
     role: 'admin' as const,
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
     permissions: [...SUPER_ADMIN_PERMISSIONS]
   },
   {
@@ -52,6 +54,7 @@ export const ADMIN_CREDENTIALS = [
     phone: '+91 9149079913',
     id: 'RAE-ADMIN-03',
     role: 'ceo' as const,
+    avatar: '/team/shrey-gupta.jpg',
     permissions: [...SUPER_ADMIN_PERMISSIONS]
   }
 ];
@@ -98,6 +101,40 @@ export const canViewFullAddress = (property: Property | null, user: UserProfile 
   if (!user) return false;
   // Supreme access: Only the CEO account can view full unmasked address on the website
   if (isCEO(user)) return true;
+  return false;
+};
+
+export const canEditProperty = (user: UserProfile | null, property: Property | null): boolean => {
+  if (!user || !property) return false;
+  // CEO and Admins have supreme rights to edit any property
+  if (isCEO(user) || isAdmin(user)) return true;
+
+  // Regular users can ONLY edit properties they personally posted
+  const userEmail = user.email?.toLowerCase().trim();
+  const ownerEmail = property.ownerEmail?.toLowerCase().trim();
+  const userId = user.id?.trim();
+  const ownerId = property.ownerId?.trim();
+
+  if (userId && ownerId && userId === ownerId) return true;
+  if (userEmail && ownerEmail && userEmail === ownerEmail) return true;
+
+  return false;
+};
+
+export const canDeleteProperty = (user: UserProfile | null, property: Property | null): boolean => {
+  if (!user || !property) return false;
+  // CEO and Admins have supreme rights to delete any property
+  if (isCEO(user) || isAdmin(user)) return true;
+
+  // Regular users can ONLY delete properties they personally posted
+  const userEmail = user.email?.toLowerCase().trim();
+  const ownerEmail = property.ownerEmail?.toLowerCase().trim();
+  const userId = user.id?.trim();
+  const ownerId = property.ownerId?.trim();
+
+  if (userId && ownerId && userId === ownerId) return true;
+  if (userEmail && ownerEmail && userEmail === ownerEmail) return true;
+
   return false;
 };
 
@@ -231,7 +268,7 @@ export const getMaskedProperty = (property: Property, user: UserProfile | null):
       role: 'Senior Advisory Desk',
       phone: '+91 91490 79913',
       email: 'contact@royalagraestate.in',
-      avatar: property.agent?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      avatar: property.agent?.avatar || '/team/shrey-gupta.jpg',
       experience: 'Verified Luxury Advisory'
     }
   };

@@ -112,9 +112,12 @@ export const AboutScreen: React.FC = () => {
             {/* Card 1: Shrey Gupta */}
             <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm text-center flex flex-col items-center hover:border-[#C5A869]/60 transition-all">
               <div className="relative mb-5 group">
-                <div className="w-28 h-28 rounded-full bg-[#0F382C]/5 border-2 border-[#C5A869] flex flex-col items-center justify-center text-[#0F382C] overflow-hidden shadow-inner">
-                  <Users className="w-10 h-10 text-[#0F382C]/40 mb-1" />
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-[#C5A869]">Photo</span>
+                <div className="w-28 h-28 rounded-full border-2 border-[#C5A869] overflow-hidden shadow-md">
+                  <img
+                    src="/team/shrey-gupta.jpg"
+                    alt="Shrey Gupta"
+                    className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
               </div>
               <h4 className="text-xl font-serif-luxury font-bold text-[#0F382C]">Shrey Gupta</h4>

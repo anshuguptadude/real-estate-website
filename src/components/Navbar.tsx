@@ -146,7 +146,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   className="flex items-center gap-2.5 bg-[#0B2B22] hover:bg-[#164E3D] text-white px-3 py-2 rounded-full border border-[#164E3D] transition-all shadow-sm group focus:outline-none"
                 >
                   <img
-                    src={user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
+                    src={(isCEO(user) && (!user.avatar || user.avatar.includes('unsplash'))) ? '/team/shrey-gupta.jpg' : (user.avatar || '/team/shrey-gupta.jpg')}
                     alt={user.name}
                     className="w-7 h-7 rounded-full object-cover border border-[#C5A869]"
                   />
@@ -318,7 +318,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="p-3 bg-[#0F382C] rounded-xl flex items-center justify-between border border-[#164E3D] mb-3">
               <div className="flex items-center gap-3">
                 <img
-                  src={user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
+                  src={(isCEO(user) && (!user.avatar || user.avatar.includes('unsplash'))) ? '/team/shrey-gupta.jpg' : (user.avatar || '/team/shrey-gupta.jpg')}
                   alt={user.name}
                   className="w-10 h-10 rounded-full object-cover border border-[#C5A869]"
                 />

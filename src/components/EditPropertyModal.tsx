@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Property, PropertyType, UserProfile } from '../types';
 import { AGRA_LOCALITIES, PROPERTY_TYPES } from '../data/mockData';
 import { AGRA_LOCALITY_COORDINATES } from './LocationPickerMap';
-import { isAdmin, isPlotOrLand } from '../utils/security';
+import { isAdmin, isPlotOrLand, canEditProperty } from '../utils/security';
 import { X, Building2, Image as ImageIcon, IndianRupee, Save, Trash2, Plus, Upload, Star, Loader2, Check, Lock, ShieldCheck, MapPin, PlusCircle, AlertTriangle, ExternalLink, Compass, Clock } from 'lucide-react';
 
 interface EditPropertyModalProps {
@@ -77,6 +77,7 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
   const [verifiedBy, setVerifiedBy] = useState<string>(property?.verifiedBy || 'Agra Development Authority (ADA)');
   const [verificationNumber, setVerificationNumber] = useState<string>(property?.verificationNumber || '');
   const isUserAdmin = isAdmin(user);
+  const canEdit = canEditProperty(user, property);
 
   const AGRA_LANDMARK_PRESETS = [
     { name: 'Taj Mahal (East Gate)', distance: '4.5 km', travelTime: '10 mins' },
@@ -334,6 +335,11 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canEdit) {
+      alert("Unauthorized: You do not have permission to edit this property. Only the property owner, Admin, or CEO can make changes.");
+      onClose();
+      return;
+    }
     const finalCover = coverImage || images[0] || property.coverImage || '';
     const finalImages = images.length > 0 ? images : (finalCover ? [finalCover] : []);
 
@@ -431,6 +437,21 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6 max-h-[75vh] overflow-y-auto">
           
+          {/* Authorization Warning Banner */}
+          {!canEdit && (
+            <div className="p-4 bg-rose-50 border border-rose-300 rounded-xl text-xs text-rose-950 flex items-start gap-3 shadow-xs">
+              <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <p className="font-bold text-rose-900">
+                  Access Restricted: Unauthorized Action
+                </p>
+                <p className="text-[11px] text-rose-800 leading-relaxed">
+                  You are not authorized to edit this listing. Only the verified property owner, Admin, or CEO accounts can modify posted properties.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Seller Re-Verification Warning Banner */}
           {!isUserAdmin && (property.isApproved || property.status === 'Active' || property.status === 'published') && (
             <div className="p-4 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-950 flex items-start gap-3 shadow-xs">
@@ -1133,7 +1154,12 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
             <button
               type="submit"
               id="save-property-edit-btn"
-              className="bg-[#0F382C] hover:bg-[#164E3D] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+              disabled={!canEdit}
+              className={`px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider shadow-md transition-all flex items-center gap-2 ${
+                canEdit 
+                  ? 'bg-[#0F382C] hover:bg-[#164E3D] text-white hover:shadow-lg cursor-pointer' 
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'
+              }`}
             >
               <Save className="w-4 h-4" />
               <span>Save & Update Listing</span>

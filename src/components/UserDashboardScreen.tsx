@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { UserProfile, Property, UserDashboardTab } from '../types';
-import { isAdmin, isCEO, LeadSubmission, ADMIN_CREDENTIALS, SUPER_ADMIN_PERMISSIONS } from '../utils/security';
+import { isAdmin, isCEO, LeadSubmission, ADMIN_CREDENTIALS, SUPER_ADMIN_PERMISSIONS, canEditProperty, canDeleteProperty } from '../utils/security';
 import { saveFirestoreAccount, getFirestoreAccount, subscribeFirestoreAccounts, deleteFirestoreAccount } from '../services/firebaseService';
 import { 
   Building2, 
@@ -100,7 +100,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   const [phone, setPhone] = useState(user?.phone || '+91 91490 79913');
   const [email, setEmail] = useState(user?.email || 'client@royalagraestate.in');
   const [role, setRole] = useState<UserProfile['role']>(user?.role || 'owner');
-  const [avatar, setAvatar] = useState(user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80');
+  const [avatar, setAvatar] = useState((isCEO(user) && (!user?.avatar || user.avatar.includes('unsplash'))) ? '/team/shrey-gupta.jpg' : (user?.avatar || '/team/shrey-gupta.jpg'));
   const [preferredLocality, setPreferredLocality] = useState(user?.preferredLocality || 'Fatehabad Road, Agra');
   const [primaryInterest, setPrimaryInterest] = useState(user?.primaryInterest || 'Buying');
   const [preferredBudget, setPreferredBudget] = useState(user?.preferredBudget || '');
@@ -147,7 +147,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
       setPhone(user.phone);
       setEmail(user.email);
       setRole(user.role as any);
-      setAvatar(user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80');
+      setAvatar((isCEO(user) && (!user.avatar || user.avatar.includes('unsplash'))) ? '/team/shrey-gupta.jpg' : (user.avatar || '/team/shrey-gupta.jpg'));
       setPreferredLocality(user.preferredLocality || 'Fatehabad Road, Agra');
       setPrimaryInterest(user.primaryInterest || 'Buying');
       setPreferredBudget(user.preferredBudget || '');
@@ -628,7 +628,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
             <div className="flex items-center gap-5">
               <div className="relative">
                 <img
-                  src={user?.avatar || avatar}
+                  src={(isCEO(user) && (!user?.avatar || user.avatar.includes('unsplash'))) ? '/team/shrey-gupta.jpg' : (user?.avatar || avatar || '/team/shrey-gupta.jpg')}
                   alt={user?.name || 'User'}
                   className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-[#C5A869] shadow-md"
                 />
@@ -1224,28 +1224,30 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                             </div>
                           )}
 
-                          {/* Row 2: Edit Property + Delete Listing */}
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              type="button"
-                              id={`edit-property-btn-${prop.id}`}
-                              onClick={() => onEditProperty(prop)}
-                              className="py-2 px-3 rounded-lg text-xs font-bold bg-[#0F382C] hover:bg-[#164E3D] text-white flex items-center justify-center gap-1.5 shadow-xs transition-all"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                              <span>Edit Property</span>
-                            </button>
+                          {/* Row 2: Edit Property + Delete Listing (Authorized owner, Admin, or CEO only) */}
+                          {canEditProperty(user, prop) && (
+                            <div className="grid grid-cols-2 gap-2">
+                              <button
+                                type="button"
+                                id={`edit-property-btn-${prop.id}`}
+                                onClick={() => onEditProperty(prop)}
+                                className="py-2 px-3 rounded-lg text-xs font-bold bg-[#0F382C] hover:bg-[#164E3D] text-white flex items-center justify-center gap-1.5 shadow-xs transition-all"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                                <span>Edit Property</span>
+                              </button>
 
-                            <button
-                              type="button"
-                              id={`delete-listing-btn-${prop.id}`}
-                              onClick={() => setDeleteConfirmId(prop.id)}
-                              className="py-2 px-3 rounded-lg text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center gap-1.5 transition-all"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                              <span>Delete</span>
-                            </button>
-                          </div>
+                              <button
+                                type="button"
+                                id={`delete-listing-btn-${prop.id}`}
+                                onClick={() => setDeleteConfirmId(prop.id)}
+                                className="py-2 px-3 rounded-lg text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center gap-1.5 transition-all"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Delete</span>
+                              </button>
+                            </div>
+                          )}
 
                         </div>
                       </div>
@@ -2097,7 +2099,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                       <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
                           <img
-                            src={activeData.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
+                            src={(isCEO(activeData) && (!activeData.avatar || activeData.avatar.includes('unsplash'))) ? '/team/shrey-gupta.jpg' : (activeData.avatar || '/team/shrey-gupta.jpg')}
                             alt={activeData.name}
                             className="w-14 h-14 rounded-2xl object-cover border-2 border-gray-200 shadow-xs shrink-0"
                           />

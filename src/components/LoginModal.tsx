@@ -116,7 +116,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         role: foundAdmin.role as any,
         permissions: (foundAdmin as any).permissions ? [...(foundAdmin as any).permissions] : undefined,
         avatar: foundAdmin.email.includes('shrey')
-          ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
+          ? '/team/shrey-gupta.jpg'
           : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
         memberSince: '2023',
         preferredLocality: 'Fatehabad Road, Agra'
@@ -210,7 +210,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         email: 'shrey@royalagraestate.in',
         phone: '+91 91490 79913',
         role: role,
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+        avatar: '/team/shrey-gupta.jpg',
         memberSince: '2023',
         preferredLocality: 'Fatehabad Road, Agra'
       };
