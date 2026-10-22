@@ -134,8 +134,29 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
     }));
   };
 
-  const handleCopyPassword = (email: string, passwordText: string) => {
-    navigator.clipboard.writeText(passwordText);
+  const handleCopyPassword = async (email: string, passwordText: string) => {
+    let success = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(passwordText);
+        success = true;
+      }
+    } catch {}
+
+    if (!success) {
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = passwordText;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        success = true;
+      } catch {}
+    }
+
     setCopiedPasswordEmail(email);
     setTimeout(() => setCopiedPasswordEmail(null), 2000);
   };

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Property } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapComponent } from './MapComponent';
-import { formatAgraLocality, isPlotOrLand } from '../utils/security';
+import { formatAgraLocality, isPlotOrLand, LeadSubmission } from '../utils/security';
+import { saveFirestoreLead } from '../services/firebaseService';
 import {
   X,
 
@@ -69,16 +70,60 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
 
   if (!property) return null;
 
-  const handleCopyLink = () => {
+  const handleCopyLink = async () => {
     const shareUrl = `${window.location.origin}?property=${property.id}`;
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    let success = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        success = true;
+      }
+    } catch {}
+
+    if (!success) {
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = shareUrl;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        success = true;
+      } catch {}
+    }
+
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleInquirySubmit = (e: React.FormEvent) => {
+  const handleInquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!inquiryName.trim() || !inquiryPhone.trim()) return;
+
+    const newLead: LeadSubmission = {
+      id: `LEAD-TOUR-${Date.now()}`,
+      propertyId: property.id,
+      propertyTitle: property.title,
+      buyerName: inquiryName.trim(),
+      phone: inquiryPhone.trim(),
+      email: '',
+      preferredTime: `${inquiryDate || 'Earliest Slot'} (${chauffeurReq ? 'Chauffeur Requested' : 'Direct Visit'})`,
+      timestamp: new Date().toLocaleString(),
+      createdAt: new Date().toISOString(),
+      status: 'new'
+    };
+
+    try {
+      await saveFirestoreLead(newLead);
+      if (onBookVisit) {
+        onBookVisit(property);
+      }
+    } catch (err) {
+      console.warn("Failed to save site tour lead to Firestore:", err);
+    }
+
     setInquirySubmitted(true);
     setTimeout(() => {
       setInquirySubmitted(false);

@@ -13,7 +13,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onSearch,
 }) => {
   const [locality, setLocality] = useState<string>('All Localities');
-  const [propertyType, setPropertyType] = useState<PropertyType>('Luxury Villa');
+  const [propertyType, setPropertyType] = useState<PropertyType>('All');
   const [budgetRange, setBudgetRange] = useState<string>('all');
 
   const handleExecuteSearch = (e?: React.FormEvent) => {

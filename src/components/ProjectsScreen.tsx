@@ -190,7 +190,7 @@ Official Portal:       https://royalagraestate.in
               {/* Media Col (5 cols) */}
               <div className="lg:col-span-5 relative aspect-[16/10] lg:aspect-auto bg-gray-900 overflow-hidden">
                 <img
-                  src={project.coverImage}
+                  src={project.coverImage || (project as any).image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80'}
                   alt={project.name}
                   className="w-full h-full object-cover"
                 />
@@ -298,7 +298,7 @@ Official Portal:       https://royalagraestate.in
                       Available Unit Typologies:
                     </span>
                     <div className="flex flex-wrap gap-2">
-                      {project.unitConfigurations.map((config, idx) => (
+                      {(project.unitConfigurations || (project as any).typologies || ['Luxury Residences', 'Bespoke Typologies']).map((config, idx) => (
                         <span
                           key={idx}
                           className="px-2.5 py-1 bg-gray-100 border border-gray-200 text-gray-800 text-xs font-medium rounded-md"
@@ -311,7 +311,7 @@ Official Portal:       https://royalagraestate.in
 
                   {/* Highlights */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-6">
-                    {project.highlights.map((h, idx) => (
+                    {(project.highlights || (project as any).features || ['Prime Agra Location', 'Clear Legal Verification', 'Modern Architectural Design']).map((h, idx) => (
                       <div key={idx} className="flex items-center gap-2 text-xs text-gray-600">
                         <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         <span>{h}</span>

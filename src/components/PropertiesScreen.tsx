@@ -4,6 +4,7 @@ import { Property, FilterState, PropertyType, ListingType } from '../types';
 import { PropertyCard } from './PropertyCard';
 import { PropertySkeletonGrid } from './PropertyCardSkeleton';
 import { AGRA_LOCALITIES, PROPERTY_TYPES } from '../data/mockData';
+import { isPlotOrLand } from '../utils/security';
 import { 
   Search, 
   SlidersHorizontal, 
@@ -94,8 +95,8 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
       // 2. Listing Type
       if (filterState.listingType === 'Rent' && item.listingType !== 'Rent') return false;
       if (filterState.listingType === 'Buy' && item.listingType !== 'Sale') return false;
-      if (filterState.listingType === 'Commercial' && item.propertyType !== 'Commercial / Retail') return false;
-      if (filterState.listingType === 'Plots' && item.propertyType !== 'Gated Township Plot') return false;
+      if (filterState.listingType === 'Commercial' && !(item.propertyType?.toLowerCase().includes('commercial') || item.propertyType === 'Commercial / Retail')) return false;
+      if (filterState.listingType === 'Plots' && !isPlotOrLand(item.propertyType)) return false;
 
       // 3. Locality
       if (filterState.locality && filterState.locality !== 'All Localities') {

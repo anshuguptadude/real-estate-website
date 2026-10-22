@@ -240,14 +240,19 @@ export default function App() {
         if (Array.isArray(parsed) && parsed.length > 0) {
           return parsed.map(p => ({
             ...p,
-            locality: formatAgraLocality(p.locality)
+            locality: formatAgraLocality(p.locality),
+            unitConfigurations: Array.isArray(p.unitConfigurations) ? p.unitConfigurations : (p as any).typologies || ['Bespoke Residences'],
+            highlights: Array.isArray(p.highlights) ? p.highlights : (p as any).features || ['Prime Agra Location', 'Clear Title Documentation', 'UP RERA Approved'],
+            coverImage: p.coverImage || (p as any).image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80'
           }));
         }
       }
     } catch {}
     return PROJECTS_DATA.map(p => ({
       ...p,
-      locality: formatAgraLocality(p.locality)
+      locality: formatAgraLocality(p.locality),
+      unitConfigurations: Array.isArray(p.unitConfigurations) ? p.unitConfigurations : ['Bespoke Residences'],
+      highlights: Array.isArray(p.highlights) ? p.highlights : ['Prime Agra Location', 'Clear Title Documentation', 'UP RERA Approved']
     }));
   });
 
@@ -263,7 +268,10 @@ export default function App() {
       if (Array.isArray(firestoreProjects) && firestoreProjects.length > 0) {
         const normalized = firestoreProjects.map(p => ({
           ...p,
-          locality: formatAgraLocality(p.locality)
+          locality: formatAgraLocality(p.locality),
+          unitConfigurations: Array.isArray(p.unitConfigurations) ? p.unitConfigurations : (p as any).typologies || ['Bespoke Residences'],
+          highlights: Array.isArray(p.highlights) ? p.highlights : (p as any).features || ['Prime Agra Location', 'Clear Title Documentation', 'UP RERA Approved'],
+          coverImage: p.coverImage || (p as any).image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80'
         }));
         setProjectsList(normalized);
       }
@@ -847,6 +855,31 @@ export default function App() {
           setSavedDrawerOpen(false);
         }}
       />
+
+      {/* Global Floating Comparison Indicator / Trigger */}
+      {compareList.length > 0 && (
+        <div className="fixed bottom-6 right-6 z-40 bg-[#0F382C] text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-[#E4D5B7]/40 transition-all">
+          <span className="text-xs font-semibold text-[#E4D5B7]">
+            Comparing ({compareList.length}/3)
+          </span>
+          <button
+            type="button"
+            id="floating-compare-btn"
+            onClick={() => setCompareModalOpen(true)}
+            className="px-3.5 py-1.5 bg-[#C5A869] hover:bg-[#d6ba7b] text-[#0F382C] text-xs font-bold rounded-full transition-all shadow-sm"
+          >
+            Compare Now
+          </button>
+          <button
+            type="button"
+            onClick={() => setCompareList([])}
+            className="text-gray-300 hover:text-white text-xs px-1"
+            title="Clear Comparison"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
     </div>
   );
