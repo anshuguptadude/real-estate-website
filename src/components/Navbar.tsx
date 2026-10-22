@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ActiveScreen, UserProfile, UserDashboardTab } from '../types';
-import { isCEO, isAdmin } from '../utils/security';
+import { isCEO, isAdmin, getUserAvatar } from '../utils/security';
 import { Landmark, Menu, X, Building2, User, LogOut, LayoutDashboard, ChevronDown, Crown, ShieldCheck, Heart } from 'lucide-react';
 
 interface NavbarProps {
@@ -146,7 +146,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   className="flex items-center gap-2.5 bg-[#0B2B22] hover:bg-[#164E3D] text-white px-3 py-2 rounded-full border border-[#164E3D] transition-all shadow-sm group focus:outline-none"
                 >
                   <img
-                    src={(isCEO(user) && (!user.avatar || user.avatar.includes('unsplash'))) ? '/team/shrey-gupta.jpg' : (user.avatar || '/team/shrey-gupta.jpg')}
+                    src={getUserAvatar(user)}
                     alt={user.name}
                     className="w-7 h-7 rounded-full object-cover border border-[#C5A869]"
                   />
@@ -318,7 +318,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="p-3 bg-[#0F382C] rounded-xl flex items-center justify-between border border-[#164E3D] mb-3">
               <div className="flex items-center gap-3">
                 <img
-                  src={(isCEO(user) && (!user.avatar || user.avatar.includes('unsplash'))) ? '/team/shrey-gupta.jpg' : (user.avatar || '/team/shrey-gupta.jpg')}
+                  src={getUserAvatar(user)}
                   alt={user.name}
                   className="w-10 h-10 rounded-full object-cover border border-[#C5A869]"
                 />

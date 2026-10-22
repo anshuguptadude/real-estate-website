@@ -93,13 +93,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               
               {/* Field 1: Location */}
               <div className="w-full sm:flex-1 px-4 py-3 sm:py-2">
-                <label className="block text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
+                <label htmlFor="hero-locality-select" className="block text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-0.5 flex items-center gap-1.5 cursor-pointer">
                   <MapPin className="w-3.5 h-3.5 text-[#0F382C]" />
                   <span>Location</span>
                 </label>
                 <div className="relative">
                   <select
                     id="hero-locality-select"
+                    name="locality"
+                    aria-label="Filter by Agra Locality"
                     value={locality}
                     onChange={(e) => setLocality(e.target.value)}
                     className="w-full bg-transparent text-sm font-semibold text-gray-900 focus:outline-none appearance-none cursor-pointer pr-5"
@@ -117,13 +119,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
               {/* Field 2: Property Type */}
               <div className="w-full sm:flex-1 px-4 py-3 sm:py-2">
-                <label className="block text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
+                <label htmlFor="hero-type-select" className="block text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-0.5 flex items-center gap-1.5 cursor-pointer">
                   <Home className="w-3.5 h-3.5 text-[#0F382C]" />
                   <span>Property Type</span>
                 </label>
                 <div className="relative">
                   <select
                     id="hero-type-select"
+                    name="propertyType"
+                    aria-label="Filter by Property Type"
                     value={propertyType}
                     onChange={(e) => setPropertyType(e.target.value as PropertyType)}
                     className="w-full bg-transparent text-sm font-semibold text-gray-900 focus:outline-none appearance-none cursor-pointer pr-5"
@@ -140,13 +144,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
               {/* Field 3: Budget */}
               <div className="w-full sm:flex-1 px-4 py-3 sm:py-2">
-                <label className="block text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
+                <label htmlFor="hero-budget-select" className="block text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-0.5 flex items-center gap-1.5 cursor-pointer">
                   <IndianRupee className="w-3.5 h-3.5 text-[#0F382C]" />
                   <span>Budget</span>
                 </label>
                 <div className="relative">
                   <select
                     id="hero-budget-select"
+                    name="budgetRange"
+                    aria-label="Filter by Budget Range"
                     value={budgetRange}
                     onChange={(e) => setBudgetRange(e.target.value)}
                     className="w-full bg-transparent text-sm font-semibold text-gray-900 focus:outline-none appearance-none cursor-pointer pr-5"

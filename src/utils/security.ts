@@ -71,6 +71,23 @@ export const isCEO = (user: UserProfile | null): boolean => {
   );
 };
 
+export const getUserAvatar = (user?: UserProfile | null): string => {
+  if (!user) return 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+  if (isCEO(user)) {
+    return '/team/shrey-gupta.jpg';
+  }
+  const emailLower = (user.email || '').toLowerCase().trim();
+  if (emailLower === 'abhi9557138449@gmail.com' || user.role === 'admin') {
+    return (user.avatar && !user.avatar.includes('shrey-gupta'))
+      ? user.avatar
+      : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80';
+  }
+  if (user.avatar && !user.avatar.includes('shrey-gupta')) {
+    return user.avatar;
+  }
+  return 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+};
+
 export const isAdmin = (user: UserProfile | null): boolean => {
   if (!user) return false;
   if (isCEO(user)) return true;

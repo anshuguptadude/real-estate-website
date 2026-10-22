@@ -203,15 +203,16 @@ export default function App() {
     }
   }, [leads]);
 
-  // Real-time Leads Synchronization with Cloud Firestore
+  // Real-time Leads Synchronization with Cloud Firestore (Restricted strictly to CEO and Admins)
   useEffect(() => {
+    if (!user || (!isAdmin(user) && !isCEO(user))) return;
     const unsubscribe = subscribeFirestoreLeads((firestoreLeads) => {
       if (Array.isArray(firestoreLeads)) {
         setLeads(firestoreLeads);
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [leadModalProperty, setLeadModalProperty] = useState<Property | null>(null);
@@ -384,6 +385,23 @@ export default function App() {
     }
   };
 
+  // Helper: Safely normalize screen aliases and prevent blank screens
+  const normalizeScreenName = (s: string | null): ActiveScreen => {
+    if (!s) return 'home';
+    const clean = s.trim().toLowerCase();
+    if (['sell-rent', 'sell', 'rent', 'post-property', 'post', 'postproperty', 'post_property'].includes(clean)) {
+      return 'sell-rent';
+    }
+    if (['properties', 'property', 'buy', 'listings', 'search'].includes(clean)) {
+      return 'properties';
+    }
+    if (clean === 'projects' || clean === 'project') return 'projects';
+    if (clean === 'about' || clean === 'contact' || clean === 'dashboard' || clean === 'home') {
+      return clean as ActiveScreen;
+    }
+    return 'home';
+  };
+
   // Handle browser back button and initial load
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
@@ -392,11 +410,11 @@ export default function App() {
         if (!propertyId) {
           hasOpenedModalInApp.current = false;
         }
-        navigateTo(screen, propertyId, false);
+        navigateTo(normalizeScreenName(screen), propertyId, false);
       } else {
         // Handle case where state is null (initial load or browser default)
         const params = new URLSearchParams(window.location.search);
-        const screen = (params.get('screen') as ActiveScreen) || 'home';
+        const screen = normalizeScreenName(params.get('screen'));
         const propertyId = params.get('property');
         hasOpenedModalInApp.current = false;
         navigateTo(screen, propertyId, false);
@@ -405,7 +423,7 @@ export default function App() {
 
     // Initialize state on load
     const params = new URLSearchParams(window.location.search);
-    const screen = (params.get('screen') as ActiveScreen) || 'home';
+    const screen = normalizeScreenName(params.get('screen'));
     const propertyId = params.get('property');
     
     // Set initial state without adding to history (it's already the current state)

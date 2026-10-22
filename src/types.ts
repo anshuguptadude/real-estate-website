@@ -91,6 +91,7 @@ export interface Property {
   isDeleted?: boolean;
   lastEditedAt?: string;
   lastEditedBy?: string;
+  updatedAt?: string;
   priceGuide?: string;
   postedBy?: { id?: string; name?: string; email?: string; phone?: string; role?: string };
   postedDate?: string; // Formatted date e.g. "09 Oct 2024"

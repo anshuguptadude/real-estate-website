@@ -255,9 +255,13 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
 
             {/* Sort Dropdown */}
             <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-              <span className="text-xs text-gray-500 font-medium whitespace-nowrap">Sort:</span>
+              <label htmlFor="properties-sort-select" className="text-xs text-gray-500 font-medium whitespace-nowrap cursor-pointer">
+                Sort:
+              </label>
               <select
                 id="properties-sort-select"
+                name="sortBy"
+                aria-label="Sort Properties"
                 value={filterState.sortBy}
                 onChange={(e) => onUpdateFilters({ sortBy: e.target.value as any })}
                 className="text-xs font-semibold bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-2 text-gray-800 focus:ring-1 focus:ring-[#0F382C]"
@@ -298,10 +302,13 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
 
               {/* 1. Locality in Agra */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                <label htmlFor="filter-locality-select" className="block text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer">
                   Agra Locality
                 </label>
                 <select
+                  id="filter-locality-select"
+                  name="locality"
+                  aria-label="Filter by Agra Locality"
                   value={filterState.locality}
                   onChange={(e) => onUpdateFilters({ locality: e.target.value })}
                   className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-lg font-medium text-gray-800 focus:bg-white focus:border-[#0F382C]"
@@ -364,10 +371,13 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
 
               {/* 4. Possession Status */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                <label htmlFor="filter-possession-select" className="block text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer">
                   Possession
                 </label>
                 <select
+                  id="filter-possession-select"
+                  name="possession"
+                  aria-label="Filter by Possession Status"
                   value={filterState.possession}
                   onChange={(e) => onUpdateFilters({ possession: e.target.value })}
                   className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-lg font-medium text-gray-800 focus:bg-white"
@@ -381,10 +391,13 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
 
               {/* 5. Furnishing */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                <label htmlFor="filter-furnishing-select" className="block text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer">
                   Furnishing
                 </label>
                 <select
+                  id="filter-furnishing-select"
+                  name="furnishing"
+                  aria-label="Filter by Furnishing Status"
                   value={filterState.furnishing}
                   onChange={(e) => onUpdateFilters({ furnishing: e.target.value })}
                   className="w-full p-2.5 text-xs bg-gray-50 border border-gray-200 rounded-lg font-medium text-gray-800 focus:bg-white"

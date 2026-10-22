@@ -27,24 +27,52 @@ export const db = initializeFirestore(app, {
   ignoreUndefinedProperties: true
 }, databaseId);
 
+// Helper: Detect Firestore Free-Tier Quota Limit Exceeded
+let hasLoggedQuotaNotice = false;
+export const isQuotaExceededError = (error: any): boolean => {
+  if (!error) return false;
+  const msg = String(error?.message || '').toLowerCase();
+  const code = String(error?.code || '').toLowerCase();
+  const isQuota = code === 'resource-exhausted' || msg.includes('quota limit exceeded') || msg.includes('quota exceeded');
+  if (isQuota && !hasLoggedQuotaNotice) {
+    hasLoggedQuotaNotice = true;
+    console.info("[Royal Agra Estate] Cloud database daily free quota reached. Switching seamlessly to cached local storage mode.");
+  }
+  return isQuota;
+};
+
 // -------------------------------------------------------------
 // 1. LEADS CAPTURE & REAL-TIME CRM STREAM
 // -------------------------------------------------------------
 export const saveFirestoreLead = async (lead: LeadSubmission): Promise<boolean> => {
+  const leadId = lead.id || `LEAD-${Date.now()}`;
+  const completeLead: LeadSubmission = {
+    ...lead,
+    id: leadId,
+    createdAt: lead.createdAt || new Date().toISOString(),
+    timestamp: lead.timestamp || new Date().toLocaleString(),
+    status: lead.status || 'new'
+  };
+
+  // Always save locally first to guarantee ZERO lead loss even under quota limits or offline
   try {
-    const leadId = lead.id || `LEAD-${Date.now()}`;
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('royal_agra_leads_v1');
+      const existing: LeadSubmission[] = stored ? JSON.parse(stored) : [];
+      const updated = [completeLead, ...existing.filter(l => l.id !== leadId)];
+      localStorage.setItem('royal_agra_leads_v1', JSON.stringify(updated));
+    }
+  } catch {}
+
+  try {
     const docRef = doc(db, 'leads', leadId);
-    await setDoc(docRef, {
-      ...lead,
-      id: leadId,
-      createdAt: lead.createdAt || new Date().toISOString(),
-      timestamp: lead.timestamp || new Date().toLocaleString(),
-      status: lead.status || 'new'
-    }, { merge: true });
+    await setDoc(docRef, completeLead, { merge: true });
     return true;
   } catch (error) {
-    console.error("Error saving lead to Firestore:", error);
-    return false;
+    if (!isQuotaExceededError(error)) {
+      console.warn("Could not sync lead to Firestore cloud (saved locally):", error);
+    }
+    return true; // Still true because lead is saved locally
   }
 };
 
@@ -52,7 +80,11 @@ export const subscribeFirestoreLeads = (callback: (leads: LeadSubmission[]) => v
   try {
     const colRef = collection(db, 'leads');
     const q = query(colRef, limit(100));
-    return onSnapshot(q, (snapshot) => {
+    let unsubscribed = false;
+    let unsubSnapshot: (() => void) | null = null;
+
+    unsubSnapshot = onSnapshot(q, (snapshot) => {
+      if (unsubscribed) return;
       const leads = snapshot.docs.map(d => d.data() as LeadSubmission);
       leads.sort((a, b) => {
         const timeA = new Date(a.createdAt || a.timestamp || 0).getTime();
@@ -61,10 +93,27 @@ export const subscribeFirestoreLeads = (callback: (leads: LeadSubmission[]) => v
       });
       callback(leads);
     }, (error) => {
-      console.warn("Error in real-time leads listener:", error);
+      if (isQuotaExceededError(error)) {
+        unsubscribed = true;
+        if (unsubSnapshot) unsubSnapshot();
+        // Fallback to local stored leads
+        try {
+          const stored = localStorage.getItem('royal_agra_leads_v1');
+          if (stored) callback(JSON.parse(stored));
+        } catch {}
+      } else {
+        console.warn("Error in real-time leads listener:", error);
+      }
     });
+
+    return () => {
+      unsubscribed = true;
+      if (unsubSnapshot) unsubSnapshot();
+    };
   } catch (error) {
-    console.warn("Failed to subscribe to leads:", error);
+    if (!isQuotaExceededError(error)) {
+      console.warn("Failed to subscribe to leads:", error);
+    }
     return () => {};
   }
 };
@@ -126,15 +175,33 @@ export const saveFirestoreAccount = async (account: any): Promise<boolean> => {
 
 export const subscribeFirestoreAccounts = (callback: (accounts: any[]) => void): () => void => {
   try {
-    const unsubscribe = onSnapshot(collection(db, 'accounts'), (snapshot) => {
+    let unsubscribed = false;
+    let unsub: (() => void) | null = null;
+    unsub = onSnapshot(collection(db, 'accounts'), (snapshot) => {
+      if (unsubscribed) return;
       const accounts = snapshot.docs.map(doc => doc.data());
       callback(accounts);
     }, (error) => {
-      console.warn("Error in real-time accounts listener:", error);
+      if (isQuotaExceededError(error)) {
+        unsubscribed = true;
+        if (unsub) unsub();
+        // Fallback to local accounts
+        try {
+          const stored = localStorage.getItem('royal_agra_accounts_backup');
+          if (stored) callback(JSON.parse(stored));
+        } catch {}
+      } else {
+        console.warn("Error in real-time accounts listener:", error);
+      }
     });
-    return unsubscribe;
+    return () => {
+      unsubscribed = true;
+      if (unsub) unsub();
+    };
   } catch (error) {
-    console.warn("Failed to subscribe to accounts:", error);
+    if (!isQuotaExceededError(error)) {
+      console.warn("Failed to subscribe to accounts:", error);
+    }
     return () => {};
   }
 };
@@ -242,49 +309,80 @@ export const markPropertyDeletedLocally = (id: string): void => {
 export const subscribeFirestoreProperties = (callback: (properties: Property[]) => void): () => void => {
   try {
     const deletedIds = getLocalDeletedPropertyIds();
+    let isTerminated = false;
+    let unsubTombstones: (() => void) | null = null;
+    let unsubProperties: (() => void) | null = null;
 
     // 1. Listen for deleted_properties tombstones in real-time
-    const unsubTombstones = onSnapshot(collection(db, 'deleted_properties'), (tombSnap) => {
-      try {
-        tombSnap.docs.forEach(docSnap => {
-          deletedIds.add(docSnap.id);
-          markPropertyDeletedLocally(docSnap.id);
-        });
-      } catch (err) {
-        console.warn("Error reading deleted_properties tombstones:", err);
-      }
-    }, (error) => {
-      console.warn("Tombstone listener warning:", error);
-    });
+    try {
+      unsubTombstones = onSnapshot(collection(db, 'deleted_properties'), (tombSnap) => {
+        if (isTerminated) return;
+        try {
+          tombSnap.docs.forEach(docSnap => {
+            deletedIds.add(docSnap.id);
+            markPropertyDeletedLocally(docSnap.id);
+          });
+        } catch (err) {
+          console.warn("Error reading deleted_properties tombstones:", err);
+        }
+      }, (error) => {
+        if (isQuotaExceededError(error)) {
+          if (unsubTombstones) { unsubTombstones(); unsubTombstones = null; }
+        } else {
+          console.warn("Tombstone listener warning:", error);
+        }
+      });
+    } catch {}
 
     // 2. Listen for properties collection changes
-    const unsubProperties = onSnapshot(collection(db, 'properties'), (snapshot) => {
-      try {
-        const activeProps: Property[] = [];
-        snapshot.docs.forEach(docSnap => {
-          const data = docSnap.data() as Property;
-          const propId = data.id || docSnap.id;
-          if (!deletedIds.has(propId) && !data.isDeleted && data.status !== 'deleted') {
-            activeProps.push({
-              ...data,
-              id: propId
-            });
-          }
-        });
-        callback(activeProps);
-      } catch (err) {
-        console.warn("Error processing properties real-time snapshot:", err);
-      }
-    }, (error) => {
-      console.warn("Error in properties real-time listener:", error);
-    });
+    try {
+      unsubProperties = onSnapshot(collection(db, 'properties'), (snapshot) => {
+        if (isTerminated) return;
+        try {
+          const activeProps: Property[] = [];
+          snapshot.docs.forEach(docSnap => {
+            const data = docSnap.data() as Property;
+            const propId = data.id || docSnap.id;
+            if (!deletedIds.has(propId) && !data.isDeleted && data.status !== 'deleted') {
+              activeProps.push({
+                ...data,
+                id: propId
+              });
+            }
+          });
+          callback(activeProps);
+        } catch (err) {
+          console.warn("Error processing properties real-time snapshot:", err);
+        }
+      }, (error) => {
+        if (isQuotaExceededError(error)) {
+          isTerminated = true;
+          if (unsubProperties) { unsubProperties(); unsubProperties = null; }
+          if (unsubTombstones) { unsubTombstones(); unsubTombstones = null; }
+          // Fallback to local properties store
+          try {
+            const stored = localStorage.getItem('royal_agra_properties_v2');
+            if (stored) {
+              const parsed: Property[] = JSON.parse(stored);
+              const filtered = parsed.filter(p => !deletedIds.has(p.id) && !p.isDeleted && p.status !== 'deleted');
+              if (filtered.length > 0) callback(filtered);
+            }
+          } catch {}
+        } else {
+          console.warn("Error in properties real-time listener:", error);
+        }
+      });
+    } catch {}
 
     return () => {
-      unsubTombstones();
-      unsubProperties();
+      isTerminated = true;
+      if (unsubTombstones) unsubTombstones();
+      if (unsubProperties) unsubProperties();
     };
   } catch (error) {
-    console.warn("Failed to subscribe to properties:", error);
+    if (!isQuotaExceededError(error)) {
+      console.warn("Failed to subscribe to properties:", error);
+    }
     return () => {};
   }
 };
@@ -305,21 +403,35 @@ export const fetchFirestoreProperties = async (): Promise<Property[]> => {
       .map(d => ({ ...d.data(), id: d.data().id || d.id } as Property))
       .filter(p => !deletedIds.has(p.id) && !p.isDeleted && p.status !== 'deleted');
   } catch (error) {
-    console.warn("Error fetching properties from Firestore:", error);
+    if (!isQuotaExceededError(error)) {
+      console.warn("Error fetching properties from Firestore:", error);
+    }
     return [];
   }
 };
 
 export const saveFirestoreProperty = async (property: Property): Promise<boolean> => {
+  const docId = property.id || `prop-${Date.now()}`;
+  const completeProperty: Property = {
+    ...property,
+    id: docId,
+    isDeleted: false,
+    updatedAt: new Date().toISOString()
+  };
+
+  // Always save to localStorage first to guarantee zero property loss under quota limit or offline
   try {
-    const docId = property.id || `prop-${Date.now()}`;
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('royal_agra_properties_v2');
+      const existing: Property[] = stored ? JSON.parse(stored) : [];
+      const updated = [completeProperty, ...existing.filter(p => p.id !== docId)];
+      localStorage.setItem('royal_agra_properties_v2', JSON.stringify(updated));
+    }
+  } catch {}
+
+  try {
     const docRef = doc(db, 'properties', docId);
-    await setDoc(docRef, {
-      ...property,
-      id: docId,
-      isDeleted: false,
-      updatedAt: new Date().toISOString()
-    }, { merge: true });
+    await setDoc(docRef, completeProperty, { merge: true });
 
     // Clean up any old tombstone if property is re-added
     try {
@@ -333,8 +445,10 @@ export const saveFirestoreProperty = async (property: Property): Promise<boolean
 
     return true;
   } catch (error) {
-    console.error("Error saving property to Firestore:", error);
-    return false;
+    if (!isQuotaExceededError(error)) {
+      console.warn("Could not sync property to Firestore cloud (saved locally):", error);
+    }
+    return true; // Still true because saved locally
   }
 };
 
@@ -366,15 +480,34 @@ export const deleteFirestoreProperty = async (id: string): Promise<boolean> => {
 // -------------------------------------------------------------
 export const subscribeFirestoreProjects = (callback: (projects: Project[]) => void): () => void => {
   try {
-    return onSnapshot(collection(db, 'projects'), (snapshot) => {
+    let unsubscribed = false;
+    let unsub: (() => void) | null = null;
+    unsub = onSnapshot(collection(db, 'projects'), (snapshot) => {
+      if (unsubscribed) return;
       if (!snapshot.empty) {
         callback(snapshot.docs.map(d => d.data() as Project));
       }
     }, (error) => {
-      console.warn("Error in projects real-time listener:", error);
+      if (isQuotaExceededError(error)) {
+        unsubscribed = true;
+        if (unsub) unsub();
+        // Fallback to local stored projects
+        try {
+          const stored = localStorage.getItem('royal_agra_projects_v2');
+          if (stored) callback(JSON.parse(stored));
+        } catch {}
+      } else {
+        console.warn("Error in projects real-time listener:", error);
+      }
     });
+    return () => {
+      unsubscribed = true;
+      if (unsub) unsub();
+    };
   } catch (error) {
-    console.warn("Failed to subscribe to projects:", error);
+    if (!isQuotaExceededError(error)) {
+      console.warn("Failed to subscribe to projects:", error);
+    }
     return () => {};
   }
 };

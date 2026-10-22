@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { UserProfile, Property, UserDashboardTab } from '../types';
-import { isAdmin, isCEO, LeadSubmission, ADMIN_CREDENTIALS, SUPER_ADMIN_PERMISSIONS, canEditProperty, canDeleteProperty } from '../utils/security';
+import { isAdmin, isCEO, getUserAvatar, LeadSubmission, ADMIN_CREDENTIALS, SUPER_ADMIN_PERMISSIONS, canEditProperty, canDeleteProperty } from '../utils/security';
 import { saveFirestoreAccount, getFirestoreAccount, subscribeFirestoreAccounts, deleteFirestoreAccount } from '../services/firebaseService';
 import { 
   Building2, 
@@ -100,7 +100,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   const [phone, setPhone] = useState(user?.phone || '+91 91490 79913');
   const [email, setEmail] = useState(user?.email || 'client@royalagraestate.in');
   const [role, setRole] = useState<UserProfile['role']>(user?.role || 'owner');
-  const [avatar, setAvatar] = useState((isCEO(user) && (!user?.avatar || user.avatar.includes('unsplash'))) ? '/team/shrey-gupta.jpg' : (user?.avatar || '/team/shrey-gupta.jpg'));
+  const [avatar, setAvatar] = useState(getUserAvatar(user));
   const [preferredLocality, setPreferredLocality] = useState(user?.preferredLocality || 'Fatehabad Road, Agra');
   const [primaryInterest, setPrimaryInterest] = useState(user?.primaryInterest || 'Buying');
   const [preferredBudget, setPreferredBudget] = useState(user?.preferredBudget || '');
@@ -168,7 +168,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
       setPhone(user.phone);
       setEmail(user.email);
       setRole(user.role as any);
-      setAvatar((isCEO(user) && (!user.avatar || user.avatar.includes('unsplash'))) ? '/team/shrey-gupta.jpg' : (user.avatar || '/team/shrey-gupta.jpg'));
+      setAvatar(getUserAvatar(user));
       setPreferredLocality(user.preferredLocality || 'Fatehabad Road, Agra');
       setPrimaryInterest(user.primaryInterest || 'Buying');
       setPreferredBudget(user.preferredBudget || '');
@@ -649,7 +649,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
             <div className="flex items-center gap-5">
               <div className="relative">
                 <img
-                  src={(isCEO(user) && (!user?.avatar || user.avatar.includes('unsplash'))) ? '/team/shrey-gupta.jpg' : (user?.avatar || avatar || '/team/shrey-gupta.jpg')}
+                  src={getUserAvatar(user)}
                   alt={user?.name || 'User'}
                   className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-[#C5A869] shadow-md"
                 />
@@ -2120,7 +2120,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                       <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
                           <img
-                            src={(isCEO(activeData) && (!activeData.avatar || activeData.avatar.includes('unsplash'))) ? '/team/shrey-gupta.jpg' : (activeData.avatar || '/team/shrey-gupta.jpg')}
+                            src={getUserAvatar(activeData)}
                             alt={activeData.name}
                             className="w-14 h-14 rounded-2xl object-cover border-2 border-gray-200 shadow-xs shrink-0"
                           />
