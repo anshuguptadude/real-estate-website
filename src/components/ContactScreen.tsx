@@ -199,11 +199,14 @@ export const ContactScreen: React.FC = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                      <label htmlFor="contact-full-name" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                         Your Full Name <span className="text-red-500 font-bold">*</span>
                       </label>
                       <input
+                        id="contact-full-name"
+                        name="name"
                         type="text"
+                        autoComplete="name"
                         required
                         placeholder="e.g. Seth Shanti Prasad"
                         value={name}
@@ -216,11 +219,14 @@ export const ContactScreen: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                      <label htmlFor="contact-phone" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                         Phone / WhatsApp <span className="text-red-500 font-bold">*</span>
                       </label>
                       <input
+                        id="contact-phone"
+                        name="phone"
                         type="tel"
+                        autoComplete="tel"
                         required
                         placeholder="+91 98765 43210"
                         value={phone}
@@ -235,11 +241,14 @@ export const ContactScreen: React.FC = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                      <label htmlFor="contact-email" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                         Email Address <span className="text-red-500 font-bold">*</span>
                       </label>
                       <input
+                        id="contact-email"
+                        name="email"
                         type="email"
+                        autoComplete="email"
                         required
                         placeholder="vip@example.com"
                         value={email}
@@ -252,10 +261,12 @@ export const ContactScreen: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                      <label htmlFor="contact-purpose" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                         Inquiry Purpose <span className="text-red-500 font-bold">*</span>
                       </label>
                       <select
+                        id="contact-purpose"
+                        name="service"
                         required
                         value={service}
                         onChange={(e) => {
@@ -274,10 +285,12 @@ export const ContactScreen: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    <label htmlFor="contact-message" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                       Specific Requirements / Message <span className="text-red-500 font-bold">*</span>
                     </label>
                     <textarea
+                      id="contact-message"
+                      name="message"
                       rows={3}
                       required
                       minLength={5}
