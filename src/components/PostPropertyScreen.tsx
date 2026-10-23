@@ -500,7 +500,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-6">
+            <form onSubmit={handleSubmit} autoComplete="off" className="p-6 sm:p-10 space-y-6">
               
               {/* STEP 1: Basic Info & Location */}
               {step === 1 && (

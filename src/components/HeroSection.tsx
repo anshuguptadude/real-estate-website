@@ -89,7 +89,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         {/* HERO SEARCH CONTAINER: Crisp, clean inline fields with dark emerald Search button */}
         <div className="max-w-4xl mx-auto w-full">
           <div className="bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-full shadow-2xl p-2 sm:p-2.5 border border-white/40 transition-all">
-            <form onSubmit={handleExecuteSearch} className="flex flex-col sm:flex-row items-center divide-y sm:divide-y-0 sm:divide-x divide-gray-200">
+            <form onSubmit={handleExecuteSearch} autoComplete="off" className="flex flex-col sm:flex-row items-center divide-y sm:divide-y-0 sm:divide-x divide-gray-200">
               
               {/* Field 1: Location */}
               <div className="w-full sm:flex-1 px-4 py-3 sm:py-2">

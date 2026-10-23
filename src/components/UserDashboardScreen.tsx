@@ -1368,10 +1368,13 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
 
               {/* Full Name */}
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                <label htmlFor="profile-display-name" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                   Full Display Name
                 </label>
                 <input
+                  id="profile-display-name"
+                  name="name"
+                  autoComplete="name"
                   type="text"
                   required
                   value={name}
@@ -1383,10 +1386,13 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
               {/* Phone & Email */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  <label htmlFor="profile-phone" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                     Phone Number
                   </label>
                   <input
+                    id="profile-phone"
+                    name="phone"
+                    autoComplete="tel"
                     type="tel"
                     required
                     value={phone}
@@ -1396,10 +1402,13 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  <label htmlFor="profile-email" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                     Email Address
                   </label>
                   <input
+                    id="profile-email"
+                    name="email"
+                    autoComplete="email"
                     type="email"
                     required
                     value={email}

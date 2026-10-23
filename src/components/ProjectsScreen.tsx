@@ -367,7 +367,7 @@ Official Portal:       https://royalagraestate.in
               {editingProject ? 'Edit Luxury Project' : 'Add New Luxury Project'}
             </h3>
 
-            <form onSubmit={handleSaveProject} className="space-y-4 text-xs">
+            <form onSubmit={handleSaveProject} autoComplete="off" className="space-y-4 text-xs">
               <div>
                 <label className="block font-bold text-gray-700 uppercase mb-1">Project Name</label>
                 <input
