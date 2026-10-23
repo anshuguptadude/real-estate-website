@@ -433,9 +433,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           {/* Role Selection */}
           {authMode !== 'forgot' && (
             <div className="mb-5">
-              <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+              <span className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                 Select Your Account Role
-              </label>
+              </span>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"

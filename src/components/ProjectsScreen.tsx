@@ -369,8 +369,10 @@ Official Portal:       https://royalagraestate.in
 
             <form onSubmit={handleSaveProject} autoComplete="off" className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-gray-700 uppercase mb-1">Project Name</label>
+                <label htmlFor="project-form-name" className="block font-bold text-gray-700 uppercase mb-1 cursor-pointer">Project Name</label>
                 <input
+                  id="project-form-name"
+                  name="projectName"
                   type="text"
                   required
                   value={formName}
@@ -380,8 +382,10 @@ Official Portal:       https://royalagraestate.in
               </div>
 
               <div>
-                <label className="block font-bold text-gray-700 uppercase mb-1">Developer Name</label>
+                <label htmlFor="project-form-developer" className="block font-bold text-gray-700 uppercase mb-1 cursor-pointer">Developer Name</label>
                 <input
+                  id="project-form-developer"
+                  name="developer"
                   type="text"
                   required
                   value={formDeveloper}
@@ -391,8 +395,10 @@ Official Portal:       https://royalagraestate.in
               </div>
 
               <div>
-                <label className="block font-bold text-gray-700 uppercase mb-1">Locality / Location</label>
+                <label htmlFor="project-form-locality" className="block font-bold text-gray-700 uppercase mb-1 cursor-pointer">Locality / Location</label>
                 <input
+                  id="project-form-locality"
+                  name="locality"
                   type="text"
                   required
                   value={formLocality}
@@ -403,8 +409,10 @@ Official Portal:       https://royalagraestate.in
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-gray-700 uppercase mb-1">Price Starting</label>
+                  <label htmlFor="project-form-price" className="block font-bold text-gray-700 uppercase mb-1 cursor-pointer">Price Starting</label>
                   <input
+                    id="project-form-price"
+                    name="priceStarting"
                     type="text"
                     required
                     value={formPriceStarting}
@@ -413,8 +421,10 @@ Official Portal:       https://royalagraestate.in
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-gray-700 uppercase mb-1">Status</label>
+                  <label htmlFor="project-form-status" className="block font-bold text-gray-700 uppercase mb-1 cursor-pointer">Status</label>
                   <select
+                    id="project-form-status"
+                    name="status"
                     value={formStatus}
                     onChange={(e) => setFormStatus(e.target.value as any)}
                     className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
@@ -428,8 +438,10 @@ Official Portal:       https://royalagraestate.in
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-gray-700 uppercase mb-1">UP RERA Reg. ID</label>
+                  <label htmlFor="project-form-rera" className="block font-bold text-gray-700 uppercase mb-1 cursor-pointer">UP RERA Reg. ID</label>
                   <input
+                    id="project-form-rera"
+                    name="reraNumber"
                     type="text"
                     required
                     value={formReraNumber}
@@ -439,8 +451,10 @@ Official Portal:       https://royalagraestate.in
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-gray-700 uppercase mb-1">Possession Date</label>
+                  <label htmlFor="project-form-possession" className="block font-bold text-gray-700 uppercase mb-1 cursor-pointer">Possession Date</label>
                   <input
+                    id="project-form-possession"
+                    name="possession"
                     type="text"
                     required
                     value={formPossession}
@@ -452,8 +466,10 @@ Official Portal:       https://royalagraestate.in
               </div>
 
               <div>
-                <label className="block font-bold text-gray-700 uppercase mb-1">Cover Image URL</label>
+                <label htmlFor="project-form-cover-image" className="block font-bold text-gray-700 uppercase mb-1 cursor-pointer">Cover Image URL</label>
                 <input
+                  id="project-form-cover-image"
+                  name="coverImage"
                   type="url"
                   required
                   value={formCoverImage}
@@ -463,8 +479,10 @@ Official Portal:       https://royalagraestate.in
               </div>
 
               <div>
-                <label className="block font-bold text-gray-700 uppercase mb-1">Description</label>
+                <label htmlFor="project-form-description" className="block font-bold text-gray-700 uppercase mb-1 cursor-pointer">Description</label>
                 <textarea
+                  id="project-form-description"
+                  name="description"
                   rows={3}
                   required
                   value={formDescription}

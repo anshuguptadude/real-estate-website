@@ -511,7 +511,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
                   {/* Intent Switcher */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-gray-700 uppercase">Listing Intent</label>
+                    <span className="block text-xs font-bold text-gray-700 uppercase">Listing Intent</span>
                     <div className="grid grid-cols-2 gap-4">
                       <button
                         type="button"
@@ -540,9 +540,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
                   {/* Property Type Dropdown + Custom Input Option */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-gray-700 uppercase">Property Type</label>
+                    <label htmlFor="property-type-select" className="block text-xs font-bold text-gray-700 uppercase cursor-pointer">Property Type</label>
                     <select
                       id="property-type-select"
+                      name="propertyType"
                       value={propertyType}
                       onChange={(e) => setPropertyType(e.target.value)}
                       className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-medium focus:bg-white focus:border-[#0F382C]"
@@ -555,13 +556,14 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     {/* Dynamic custom property type text box */}
                     {propertyType === 'Other (Custom Type)' && (
                       <div className="p-3 bg-emerald-50/60 border border-emerald-300 rounded-xl space-y-1.5 mt-2 animate-fadeIn">
-                        <label className="block text-xs font-bold text-emerald-950 uppercase flex items-center gap-1.5">
+                        <label htmlFor="custom-property-type-input" className="block text-xs font-bold text-emerald-950 uppercase flex items-center gap-1.5 cursor-pointer">
                           <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
                           <span>Write Your Custom Property Type:</span>
                         </label>
                         <input
                           type="text"
                           id="custom-property-type-input"
+                          name="customPropertyType"
                           required
                           placeholder="e.g. Colonial Heritage Bungalow, Triplex Villa, Agricultural Farmland, Executive Suite"
                           value={customPropertyType}
@@ -577,8 +579,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
                   {/* Locality */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-gray-700 uppercase">Agra Locality</label>
+                    <label htmlFor="post-locality-select" className="block text-xs font-bold text-gray-700 uppercase cursor-pointer">Agra Locality</label>
                     <select
+                      id="post-locality-select"
+                      name="locality"
                       value={locality}
                       onChange={(e) => setLocality(e.target.value)}
                       className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-medium focus:bg-white"
@@ -592,12 +596,14 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     {/* Dynamic custom locality text box */}
                     {locality === 'Other' && (
                       <div className="p-3 bg-emerald-50/60 border border-emerald-300 rounded-xl space-y-1.5 mt-2 animate-fadeIn">
-                        <label className="block text-xs font-bold text-emerald-950 uppercase flex items-center gap-1.5">
+                        <label htmlFor="post-custom-locality-input" className="block text-xs font-bold text-emerald-950 uppercase flex items-center gap-1.5 cursor-pointer">
                           <MapPin className="w-3.5 h-3.5 text-emerald-700" />
                           <span>Write Your Custom Agra Locality / Sector:</span>
                         </label>
                         <input
                           type="text"
+                          id="post-custom-locality-input"
+                          name="customLocality"
                           required
                           placeholder="e.g. Khandari, Runakta, Kuberpur, Rohta Gwalior Road, Balkeshwar"
                           value={customLocality}
@@ -618,8 +624,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
                   {/* Property / Project Name */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-gray-700 uppercase">Building / House / Project Name</label>
+                    <label htmlFor="post-project-title" className="block text-xs font-bold text-gray-700 uppercase cursor-pointer">Building / House / Project Name</label>
                     <input
+                      id="post-project-title"
+                      name="projectTitle"
                       type="text"
                       required
                       placeholder="e.g. The Taj Sovereign Villa or Royal Palms"
@@ -632,12 +640,14 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                   {/* Detailed Address */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="block text-xs font-bold text-gray-700 uppercase">Full Exact Address (Confidential)</label>
+                      <label htmlFor="post-confidential-address" className="block text-xs font-bold text-gray-700 uppercase cursor-pointer">Full Exact Address (Confidential)</label>
                       <span className="text-[10px] bg-amber-100 text-amber-900 font-bold px-2 py-0.5 rounded-full">
                         🔒 CEO & Admin Only
                       </span>
                     </div>
                     <textarea
+                      id="post-confidential-address"
+                      name="address"
                       rows={2}
                       required
                       placeholder="e.g. Plot 14, Royal Enclave, Near ITC Mughal, Fatehabad Road, Agra"
@@ -653,7 +663,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                   {/* Confidential Google Maps Share Pin / URL Box */}
                   <div className="p-4 bg-amber-50/90 border-2 border-amber-300 rounded-xl space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <label className="block text-xs font-bold text-amber-950 uppercase flex items-center gap-1.5">
+                      <label htmlFor="property-map-url-input" className="block text-xs font-bold text-amber-950 uppercase flex items-center gap-1.5 cursor-pointer">
                         <MapPin className="w-4 h-4 text-amber-700" />
                         <span>Property Location Pin (Google Maps Share Link)</span>
                       </label>
@@ -665,6 +675,7 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     <input
                       type="url"
                       id="property-map-url-input"
+                      name="mapUrl"
                       placeholder="e.g. https://maps.app.goo.gl/... or paste your Google Maps location pin"
                       value={mapUrl}
                       onChange={(e) => setMapUrl(e.target.value)}
@@ -759,8 +770,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       <>
                         {/* Bedrooms (BHK) */}
                         <div className="space-y-2">
-                          <label className="block text-xs font-bold text-gray-700 uppercase">Bedrooms (BHK)</label>
+                          <label htmlFor="post-bedrooms-select" className="block text-xs font-bold text-gray-700 uppercase cursor-pointer">Bedrooms (BHK)</label>
                           <select
+                            id="post-bedrooms-select"
+                            name="bedrooms"
                             value={bedrooms}
                             onChange={(e) => setBedrooms(e.target.value)}
                             className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
@@ -775,8 +788,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
                         {/* Bathrooms */}
                         <div className="space-y-2">
-                          <label className="block text-xs font-bold text-gray-700 uppercase">Bathrooms</label>
+                          <label htmlFor="post-bathrooms-select" className="block text-xs font-bold text-gray-700 uppercase cursor-pointer">Bathrooms</label>
                           <select
+                            id="post-bathrooms-select"
+                            name="bathrooms"
                             value={bathrooms}
                             onChange={(e) => setBathrooms(e.target.value)}
                             className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
@@ -791,8 +806,10 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
                         {/* Furnishing Status */}
                         <div className="space-y-2">
-                          <label className="block text-xs font-bold text-gray-700 uppercase">Furnishing Status</label>
+                          <label htmlFor="post-furnishing-select" className="block text-xs font-bold text-gray-700 uppercase cursor-pointer">Furnishing Status</label>
                           <select
+                            id="post-furnishing-select"
+                            name="furnishing"
                             value={furnishing}
                             onChange={(e) => setFurnishing(e.target.value)}
                             className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-[#0F382C]"
@@ -908,9 +925,9 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
                   {/* 1. Amenities */}
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
+                    <span className="block text-xs font-bold text-gray-700 uppercase mb-2">
                       Select Property Amenities:
-                    </label>
+                    </span>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                       {amenityOptions.map((opt) => {
                         const isChecked = selectedAmenities.includes(opt);
@@ -1038,9 +1055,9 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <label className="block text-xs font-bold text-[#0F382C] uppercase tracking-wider">
+                        <span className="block text-xs font-bold text-[#0F382C] uppercase tracking-wider">
                           Upload Property Photos & Select Display Cover
-                        </label>
+                        </span>
                         <p className="text-[11px] text-gray-600 mt-0.5">
                           Upload photos from your computer or phone. Choose which image is the main display photo shown on search cards.
                         </p>
@@ -1195,9 +1212,9 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
                   {/* 1. Verification Status Toggle */}
                   <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-4">
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <span className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
                       Is this property verified / approved by any authority?
-                    </label>
+                    </span>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <button

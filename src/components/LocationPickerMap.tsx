@@ -151,10 +151,10 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
       {/* Header & Geolocation CTA */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <label className="block text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+          <span className="block text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
             <MapPin className="w-4 h-4 text-[#0F382C]" />
             <span>Select Exact Location On Google Map</span>
-          </label>
+          </span>
           <p className="text-[11px] text-gray-500 mt-0.5">
             Position the pin on your exact plot, villa, or building in {selectedLocality || 'Agra'}.
           </p>
@@ -291,6 +291,9 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
       <div className="bg-gray-50/80 p-3 rounded-lg border border-gray-200 flex flex-col sm:flex-row items-center gap-2">
         <div className="relative flex-1 w-full">
           <input
+            id="map-paste-input"
+            name="mapPasteInput"
+            aria-label="Paste Google Maps URL or Coordinates"
             type="text"
             placeholder="Paste Google Maps URL or Coordinates (e.g. 27.1585, 78.0494)"
             value={pasteInput}
@@ -329,8 +332,10 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
         {showCoordinateInputs && (
           <div className="grid grid-cols-2 gap-3 pt-2">
             <div>
-              <label className="block text-[10px] font-bold text-gray-600 uppercase mb-0.5">Latitude (°N)</label>
+              <label htmlFor="map-coord-lat" className="block text-[10px] font-bold text-gray-600 uppercase mb-0.5 cursor-pointer">Latitude (°N)</label>
               <input
+                id="map-coord-lat"
+                name="latitude"
                 type="number"
                 step="0.000001"
                 value={coordinates.lat}
@@ -339,8 +344,10 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-gray-600 uppercase mb-0.5">Longitude (°E)</label>
+              <label htmlFor="map-coord-lng" className="block text-[10px] font-bold text-gray-600 uppercase mb-0.5 cursor-pointer">Longitude (°E)</label>
               <input
+                id="map-coord-lng"
+                name="longitude"
                 type="number"
                 step="0.000001"
                 value={coordinates.lng}

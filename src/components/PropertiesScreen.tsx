@@ -224,10 +224,14 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
             
             {/* Search input */}
             <div className="relative w-full md:max-w-md">
+              <label htmlFor="properties-search-input" className="sr-only">
+                Search properties by title, location, or landmark
+              </label>
               <input
                 type="text"
                 id="properties-search-input"
                 name="search"
+                autoComplete="off"
                 aria-label="Search properties by title, location, or landmark"
                 placeholder="Search by title, location, landmark (e.g. Fatehabad, Pool, Taj)..."
                 value={filterState.searchQuery}
@@ -325,9 +329,9 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
 
               {/* 2. Property Type */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                <span className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
                   Property Type
-                </label>
+                </span>
                 <div className="space-y-1">
                   {PROPERTY_TYPES.map((type) => {
                     const isChecked = (type === 'All' && filterState.propertyType === 'All') || filterState.propertyType === type;
@@ -350,9 +354,9 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
 
               {/* 3. BHK Bedrooms */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                <span className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
                   Bedrooms / BHK
-                </label>
+                </span>
                 <div className="grid grid-cols-4 gap-1.5">
                   {['', '2', '3', '4', '5'].map((b) => (
                     <button

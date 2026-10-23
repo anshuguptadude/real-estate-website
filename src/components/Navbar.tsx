@@ -297,6 +297,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Mobile menu trigger */}
           <div className="flex md:hidden items-center space-x-2">
             <button
+              type="button"
               id="mobile-menu-toggle"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-white hover:text-[#C5A869] focus:outline-none"

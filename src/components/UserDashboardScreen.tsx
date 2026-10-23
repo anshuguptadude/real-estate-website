@@ -1303,9 +1303,9 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
               
               {/* Avatar Selector */}
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
+                <span className="block text-xs font-bold text-gray-700 uppercase mb-2">
                   Profile Photo
-                </label>
+                </span>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-5 p-4 bg-gray-50/80 rounded-2xl border border-gray-200">
                   <div className="relative shrink-0">
                     <img
@@ -1420,9 +1420,9 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
 
               {/* Role Selection */}
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
+                <span className="block text-xs font-bold text-gray-700 uppercase mb-2">
                   Account Type / Role
-                </label>
+                </span>
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     type="button"

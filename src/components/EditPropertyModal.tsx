@@ -469,9 +469,9 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
 
           {/* Status Selection */}
           <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
+            <span className="block text-xs font-bold text-gray-700 uppercase mb-2">
               Listing Status
-            </label>
+            </span>
             <div className="grid grid-cols-3 gap-3">
               {(['Active', 'Sold', 'Rented'] as const).map((st) => (
                 <button
@@ -495,10 +495,12 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           {/* Title & Tagline */}
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+              <label htmlFor="edit-property-title" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                 Property Title
               </label>
               <input
+                id="edit-property-title"
+                name="title"
                 type="text"
                 required
                 value={title}
@@ -508,10 +510,12 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+              <label htmlFor="edit-property-tagline" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                 Tagline / Short Highlights
               </label>
               <textarea
+                id="edit-property-tagline"
+                name="tagline"
                 rows={2}
                 value={tagline}
                 onChange={(e) => setTagline(e.target.value)}
@@ -523,10 +527,12 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           {/* Pricing & Area */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+              <label htmlFor="edit-property-price" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                 Asking Price (₹ INR)
               </label>
               <input
+                id="edit-property-price"
+                name="price"
                 type="number"
                 required
                 value={price}
@@ -540,7 +546,7 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-bold text-gray-700 uppercase">
+                <label htmlFor="edit-property-area" className="block text-xs font-bold text-gray-700 uppercase cursor-pointer">
                   Super Area ({areaUnit === 'Sq.Yards' ? 'Sq. Yards / Gaj' : 'Sq. Ft.'})
                 </label>
                 <div className="inline-flex bg-gray-100 p-0.5 rounded-lg border border-gray-200 text-[10px] font-bold">
@@ -571,6 +577,8 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
                 </div>
               </div>
               <input
+                id="edit-property-area"
+                name="superArea"
                 type="number"
                 required
                 value={superAreaSqFt}
@@ -588,10 +596,12 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           {/* Property Type & Locality */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+              <label htmlFor="edit-property-type" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                 Property Type
               </label>
               <select
+                id="edit-property-type"
+                name="propertyType"
                 value={propertyType}
                 onChange={(e) => setPropertyType(e.target.value as PropertyType)}
                 className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white"
@@ -603,10 +613,12 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+              <label htmlFor="edit-property-locality" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                 Agra Locality
               </label>
               <select
+                id="edit-property-locality"
+                name="locality"
                 value={locality}
                 onChange={(e) => setLocality(e.target.value)}
                 className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white"
@@ -620,6 +632,8 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
               {locality === 'Other' && (
                 <div className="mt-2 space-y-1">
                   <input
+                    id="edit-custom-locality"
+                    name="customLocality"
                     type="text"
                     required
                     placeholder="Enter custom locality in Agra"
@@ -634,7 +648,7 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
 
           {/* Complete Exact Address (Admin Editable) */}
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center justify-between">
+            <label htmlFor="edit-property-address" className="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center justify-between cursor-pointer">
               <span>Complete Exact Address / House No. & Plot *</span>
               {isUserAdmin ? (
                 <span className="text-[10px] text-emerald-800 font-semibold bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
@@ -649,6 +663,8 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
               )}
             </label>
             <textarea
+              id="edit-property-address"
+              name="address"
               rows={2}
               required
               disabled={!isUserAdmin}
@@ -671,10 +687,10 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           {/* Confidential Private Location & Navigation Box */}
           <div className="p-4 bg-amber-50/70 border border-amber-300/80 rounded-xl space-y-3">
             <div className="flex items-center justify-between">
-              <label className="block text-xs font-bold text-amber-950 uppercase tracking-wider flex items-center gap-1.5">
+              <span className="block text-xs font-bold text-amber-950 uppercase tracking-wider flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5 text-amber-700" />
                 <span>Confidential Private Location & Navigation (Admin & CEO Eyes Only)</span>
-              </label>
+              </span>
               <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
                 Admin & CEO Only
               </span>
@@ -683,7 +699,7 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
             {/* Google Maps Location Link / GPS Pin URL */}
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                <label htmlFor="edit-location-link" className="block text-xs font-bold text-amber-900 flex items-center gap-1.5 cursor-pointer">
                   <MapPin className="w-3.5 h-3.5 text-amber-700" />
                   <span>Google Maps Location Link / GPS Pin URL</span>
                 </label>
@@ -695,6 +711,8 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
                 )}
               </div>
               <input
+                id="edit-location-link"
+                name="locationLink"
                 type="url"
                 placeholder="Paste Google Maps share link or GPS pin URL (e.g. https://maps.app.goo.gl/... or https://maps.google.com/?q=...)"
                 value={locationLink}
@@ -713,10 +731,12 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
 
             {/* Landmark Directions & Caretaker Note */}
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-amber-900">
+              <label htmlFor="edit-private-location-note" className="block text-xs font-bold text-amber-900 cursor-pointer">
                 Private Directions & Caretaker Instructions
               </label>
               <textarea
+                id="edit-private-location-note"
+                name="privateLocationNote"
                 rows={2}
                 placeholder="e.g. Turn right after Gate 3 of Imperial Towers, property is second villa on the left. Key with caretaker Mr. Munna Lal."
                 value={privateLocationNote}
@@ -734,10 +754,10 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <label className="block text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="block text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
                   <MapPin className="w-4 h-4 text-[#0F382C]" />
                   <span>Agra Connectivity & Major Landmarks ({landmarks.length} Selected)</span>
-                </label>
+                </span>
                 <p className="text-[11px] text-gray-500 mt-0.5">
                   Manage nearby Agra connectivity points, metro lines, and expressway links.
                 </p>
@@ -825,8 +845,10 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           {!isPlotOrLand(propertyType) && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Bedrooms</label>
+                <label htmlFor="edit-bedrooms" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">Bedrooms</label>
                 <input
+                  id="edit-bedrooms"
+                  name="bedrooms"
                   type="number"
                   min="0"
                   max="20"
@@ -836,8 +858,10 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Bathrooms</label>
+                <label htmlFor="edit-bathrooms" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">Bathrooms</label>
                 <input
+                  id="edit-bathrooms"
+                  name="bathrooms"
                   type="number"
                   min="0"
                   max="20"
@@ -847,8 +871,10 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Furnishing</label>
+                <label htmlFor="edit-furnishing" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">Furnishing</label>
                 <select
+                  id="edit-furnishing"
+                  name="furnishing"
                   value={furnishing}
                   onChange={(e) => setFurnishing(e.target.value as any)}
                   className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
@@ -865,11 +891,13 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           {/* Property Facing & Construction/Possession Status */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center gap-1.5">
+              <label htmlFor="edit-property-facing" className="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center gap-1.5 cursor-pointer">
                 <Compass className="w-3.5 h-3.5 text-[#0F382C]" />
                 <span>Property Facing</span>
               </label>
               <select
+                id="edit-property-facing"
+                name="facing"
                 value={facing}
                 onChange={(e) => setFacing(e.target.value)}
                 className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white"
@@ -888,11 +916,13 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center gap-1.5">
+              <label htmlFor="edit-property-possession" className="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center gap-1.5 cursor-pointer">
                 <Clock className="w-3.5 h-3.5 text-[#0F382C]" />
                 <span>Construction / Possession Status</span>
               </label>
               <select
+                id="edit-property-possession"
+                name="possession"
                 value={possession}
                 onChange={(e) => setPossession(e.target.value as any)}
                 className="w-full p-3 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white"
@@ -910,9 +940,9 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase">
+                <span className="block text-xs font-bold text-gray-700 uppercase">
                   Legal & Authority Approval Status
-                </label>
+                </span>
                 {!isUserAdmin && (
                   <span className="text-[10px] text-amber-700 font-medium block">
                     🔒 Verified clearance locked by administrator
@@ -950,10 +980,12 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
             {verified && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                  <label htmlFor="edit-verified-by" className="block text-[11px] font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                     Approved / Verified By
                   </label>
                   <select
+                    id="edit-verified-by"
+                    name="verifiedBy"
                     disabled={!isUserAdmin}
                     value={verifiedBy}
                     onChange={(e) => setVerifiedBy(e.target.value)}
@@ -971,10 +1003,12 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-700 uppercase mb-1">
+                  <label htmlFor="edit-verification-doc" className="block text-[11px] font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                     Approval / Sanction / RERA Reference No.
                   </label>
                   <input
+                    id="edit-verification-doc"
+                    name="verificationDocNumber"
                     type="text"
                     disabled={!isUserAdmin}
                     placeholder="e.g. ADA/2024/782 or UPRERA"
@@ -993,10 +1027,10 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           <div className="space-y-3 bg-gray-50/80 p-4 sm:p-5 rounded-xl border border-gray-200">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <label className="block text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="block text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
                   <ImageIcon className="w-4 h-4 text-[#0F382C]" />
                   <span>Property Photo Gallery ({images.length}/{MAX_PHOTOS})</span>
-                </label>
+                </span>
                 <p className="text-[11px] text-gray-500 mt-0.5">
                   HD Quality • Max 10 Photos, up to 25 MB each. Click any thumbnail to set it as cover.
                 </p>
