@@ -96,11 +96,14 @@ export const LeadInquiryModal: React.FC<LeadInquiryModalProps> = ({
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                <label htmlFor="lead-buyer-name" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                   Full Name
                 </label>
                 <div className="relative">
                   <input
+                    id="lead-buyer-name"
+                    name="name"
+                    autoComplete="name"
                     type="text"
                     required
                     placeholder="e.g. Vikram Singhania"
@@ -113,11 +116,14 @@ export const LeadInquiryModal: React.FC<LeadInquiryModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                <label htmlFor="lead-buyer-phone" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                   Phone Number
                 </label>
                 <div className="relative">
                   <input
+                    id="lead-buyer-phone"
+                    name="phone"
+                    autoComplete="tel"
                     type="tel"
                     required
                     placeholder="+91 98765 43210"
@@ -130,11 +136,14 @@ export const LeadInquiryModal: React.FC<LeadInquiryModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                <label htmlFor="lead-buyer-email" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                   Email Address
                 </label>
                 <div className="relative">
                   <input
+                    id="lead-buyer-email"
+                    name="email"
+                    autoComplete="email"
                     type="email"
                     required
                     placeholder="vikram@example.com"
@@ -147,11 +156,13 @@ export const LeadInquiryModal: React.FC<LeadInquiryModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                <label htmlFor="lead-preferred-time" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                   Preferred Visit Time
                 </label>
                 <div className="relative">
                   <input
+                    id="lead-preferred-time"
+                    name="preferredTime"
                     type="datetime-local"
                     required
                     value={preferredTime}

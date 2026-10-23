@@ -70,6 +70,9 @@ export const EmiCalculatorModal: React.FC<EmiCalculatorModalProps> = ({
                 </span>
               </div>
               <input
+                id="emi-loan-amount"
+                name="loanAmount"
+                aria-label="Loan Amount in Rupees"
                 type="range"
                 min="1000000"
                 max="100000000"
@@ -94,6 +97,9 @@ export const EmiCalculatorModal: React.FC<EmiCalculatorModalProps> = ({
                 </span>
               </div>
               <input
+                id="emi-interest-rate"
+                name="interestRate"
+                aria-label="Interest Rate Percentage"
                 type="range"
                 min="6.5"
                 max="12.0"
@@ -118,6 +124,9 @@ export const EmiCalculatorModal: React.FC<EmiCalculatorModalProps> = ({
                 </span>
               </div>
               <input
+                id="emi-tenure-years"
+                name="tenureYears"
+                aria-label="Loan Tenure in Years"
                 type="range"
                 min="1"
                 max="30"

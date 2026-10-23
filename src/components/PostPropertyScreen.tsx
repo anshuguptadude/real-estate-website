@@ -1323,8 +1323,11 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     </h4>
 
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Owner / Trustee Full Name</label>
+                      <label htmlFor="post-owner-name" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">Owner / Trustee Full Name</label>
                       <input
+                        id="post-owner-name"
+                        name="name"
+                        autoComplete="name"
                         type="text"
                         required
                         placeholder="e.g. Seth Shanti Prasad"
@@ -1336,8 +1339,11 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Mobile Number</label>
+                        <label htmlFor="post-owner-phone" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">Mobile Number</label>
                         <input
+                          id="post-owner-phone"
+                          name="phone"
+                          autoComplete="tel"
                           type="tel"
                           required
                           placeholder="+91 91490 79913"
@@ -1348,8 +1354,11 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address</label>
+                        <label htmlFor="post-owner-email" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">Email Address</label>
                         <input
+                          id="post-owner-email"
+                          name="email"
+                          autoComplete="email"
                           type="email"
                           required
                           placeholder="owner@royalagraestate.in"

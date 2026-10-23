@@ -481,11 +481,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           {authMode === 'login' && (
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                <label htmlFor="login-identifier" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                   Mobile Number or Email
                 </label>
                 <div className="relative">
                   <input
+                    id="login-identifier"
+                    name="username"
+                    autoComplete="username"
                     type="text"
                     required
                     placeholder="Enter your mobile number or email"
@@ -499,7 +502,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-gray-700 uppercase">
+                  <label htmlFor="login-password" className="block text-xs font-bold text-gray-700 uppercase cursor-pointer">
                     Password
                   </label>
                   <button
@@ -516,6 +519,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 </div>
                 <div className="relative">
                   <input
+                    id="login-password"
+                    name="password"
+                    autoComplete="current-password"
                     type="password"
                     required
                     placeholder="Enter your password"
@@ -549,11 +555,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               
               {/* 1. Full Name & Phone Number at the top */}
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                <label htmlFor="signup-name" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                   Full Name
                 </label>
                 <div className="relative">
                   <input
+                    id="signup-name"
+                    name="name"
+                    autoComplete="name"
                     type="text"
                     required
                     placeholder="e.g. Shrey Gupta"
@@ -566,11 +575,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                <label htmlFor="signup-phone" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                   Mobile Number
                 </label>
                 <div className="relative">
                   <input
+                    id="signup-phone"
+                    name="tel"
+                    autoComplete="tel"
                     type="tel"
                     required
                     placeholder="+91 9149079913"
@@ -584,11 +596,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
               {/* 2. Security Question dropdown & Answer field in the middle */}
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                <label htmlFor="signup-security-question" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                   Security Question (For Password Recovery)
                 </label>
                 <div className="relative">
                   <select
+                    id="signup-security-question"
+                    name="securityQuestion"
                     value={signupSecurityQuestion}
                     onChange={(e) => setSignupSecurityQuestion(e.target.value)}
                     className="w-full pl-10 pr-3 py-2.5 text-base sm:text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:border-[#0F382C]"
@@ -602,10 +616,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                <label htmlFor="signup-security-answer" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                   Security Answer
                 </label>
                 <input
+                  id="signup-security-answer"
+                  name="securityAnswer"
                   type="text"
                   required
                   placeholder="e.g. Taj Mahal"
@@ -618,8 +634,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               {/* Additional optional fields */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">Primary Interest</label>
+                  <label htmlFor="signup-interest" className="block text-[11px] font-bold text-gray-600 uppercase mb-1 cursor-pointer">Primary Interest</label>
                   <select
+                    id="signup-interest"
+                    name="interest"
                     value={signupInterest}
                     onChange={(e) => setSignupInterest(e.target.value)}
                     className="w-full px-2.5 py-2 text-base sm:text-xs bg-gray-50 border border-gray-200 rounded-xl text-gray-900"
@@ -630,8 +648,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">Target Budget</label>
+                  <label htmlFor="signup-budget" className="block text-[11px] font-bold text-gray-600 uppercase mb-1 cursor-pointer">Target Budget</label>
                   <input
+                    id="signup-budget"
+                    name="budget"
                     type="text"
                     placeholder="e.g. ₹2.5 Cr+"
                     value={signupBudgetType}
@@ -644,11 +664,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               {/* 3. Email, Password, and Confirm Password fields at the very bottom */}
               <div className="pt-2 border-t border-gray-100 space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  <label htmlFor="signup-email" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                     Email Address
                   </label>
                   <div className="relative">
                     <input
+                      id="signup-email"
+                      name="email"
+                      autoComplete="email"
                       type="email"
                       required
                       placeholder="shrey@royalagraestate.in"
@@ -661,11 +684,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  <label htmlFor="signup-password" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                     Create Password
                   </label>
                   <div className="relative">
                     <input
+                      id="signup-password"
+                      name="password"
+                      autoComplete="new-password"
                       type="password"
                       required
                       placeholder="Create password"
@@ -681,11 +707,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  <label htmlFor="signup-confirm-password" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
                     Confirm Password
                   </label>
                   <div className="relative">
                     <input
+                      id="signup-confirm-password"
+                      name="confirmPassword"
+                      autoComplete="new-password"
                       type="password"
                       required
                       placeholder="Confirm password"
@@ -730,8 +759,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               {forgotStep === 1 ? (
                 <>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Registered Email</label>
+                    <label htmlFor="forgot-email" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">Registered Email</label>
                     <input
+                      id="forgot-email"
+                      name="email"
+                      autoComplete="email"
                       type="email"
                       required
                       placeholder="e.g. shrey123@gmail.com"
@@ -741,8 +773,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Security Question Answer</label>
+                    <label htmlFor="forgot-answer" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">Security Question Answer</label>
                     <input
+                      id="forgot-answer"
+                      name="securityAnswer"
                       type="text"
                       required
                       placeholder="Answer provided during signup"
@@ -761,8 +795,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               ) : (
                 <>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">New Password</label>
+                    <label htmlFor="forgot-new-password" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">New Password</label>
                     <input
+                      id="forgot-new-password"
+                      name="newPassword"
+                      autoComplete="new-password"
                       type="password"
                       required
                       placeholder="Enter new password"

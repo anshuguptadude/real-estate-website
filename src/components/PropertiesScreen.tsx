@@ -227,6 +227,8 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
               <input
                 type="text"
                 id="properties-search-input"
+                name="search"
+                aria-label="Search properties by title, location, or landmark"
                 placeholder="Search by title, location, landmark (e.g. Fatehabad, Pool, Taj)..."
                 value={filterState.searchQuery}
                 onChange={(e) => onUpdateFilters({ searchQuery: e.target.value })}

@@ -622,8 +622,11 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 ) : (
                   <form onSubmit={handleInquirySubmit} className="space-y-3">
                     <div>
-                      <label className="block text-[11px] font-semibold text-gray-600 mb-1">Full Name</label>
+                      <label htmlFor="detail-inquiry-name" className="block text-[11px] font-semibold text-gray-600 mb-1 cursor-pointer">Full Name</label>
                       <input
+                        id="detail-inquiry-name"
+                        name="name"
+                        autoComplete="name"
                         type="text"
                         required
                         placeholder="e.g. Vikram Singhania"
@@ -634,8 +637,11 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-semibold text-gray-600 mb-1">Mobile Number</label>
+                      <label htmlFor="detail-inquiry-phone" className="block text-[11px] font-semibold text-gray-600 mb-1 cursor-pointer">Mobile Number</label>
                       <input
+                        id="detail-inquiry-phone"
+                        name="phone"
+                        autoComplete="tel"
                         type="tel"
                         required
                         placeholder="+91 98765 43210"
@@ -646,8 +652,10 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-semibold text-gray-600 mb-1">Preferred Date</label>
+                      <label htmlFor="detail-inquiry-date" className="block text-[11px] font-semibold text-gray-600 mb-1 cursor-pointer">Preferred Date</label>
                       <input
+                        id="detail-inquiry-date"
+                        name="date"
                         type="date"
                         required
                         value={inquiryDate}
