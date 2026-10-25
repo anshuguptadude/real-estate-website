@@ -287,15 +287,19 @@ export default function App() {
     const unsubscribe = subscribeFirestoreProjects((firestoreProjects) => {
       const deletedProjectIds = getLocalDeletedProjectIds();
       if (Array.isArray(firestoreProjects)) {
-        const active = firestoreProjects.filter(p => !deletedProjectIds.has(p.id) && !(p as any).isDeleted);
-        const normalized = active.map(p => ({
-          ...p,
-          locality: formatAgraLocality(p.locality),
-          unitConfigurations: Array.isArray(p.unitConfigurations) ? p.unitConfigurations : (p as any).typologies || ['Bespoke Residences'],
-          highlights: Array.isArray(p.highlights) ? p.highlights : (p as any).features || ['Prime Agra Location', 'Clear Title Documentation', 'UP RERA Approved'],
-          coverImage: p.coverImage || (p as any).image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80'
-        }));
-        setProjectsList(normalized);
+        if (firestoreProjects.length > 0) {
+          const active = firestoreProjects.filter(p => !deletedProjectIds.has(p.id) && !(p as any).isDeleted);
+          const normalized = active.map(p => ({
+            ...p,
+            locality: formatAgraLocality(p.locality),
+            unitConfigurations: Array.isArray(p.unitConfigurations) ? p.unitConfigurations : (p as any).typologies || ['Bespoke Residences'],
+            highlights: Array.isArray(p.highlights) ? p.highlights : (p as any).features || ['Prime Agra Location', 'Clear Title Documentation', 'UP RERA Approved'],
+            coverImage: p.coverImage || (p as any).image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80'
+          }));
+          setProjectsList(normalized);
+        } else if (deletedProjectIds.size > 0) {
+          setProjectsList([]);
+        }
       }
     });
     return () => unsubscribe();
@@ -317,7 +321,7 @@ export default function App() {
     await deleteFirestoreProject(projId);
   };
 
-  const handleRestoreDefaultProjects = () => {
+  const handleRestoreDefaultProjects = async () => {
     clearDeletedProjectsTombstones();
     const restored = PROJECTS_DATA.map(p => ({
       ...p,
@@ -329,6 +333,9 @@ export default function App() {
     try {
       localStorage.setItem('royal_agra_projects_v2', JSON.stringify(restored));
     } catch {}
+    for (const proj of restored) {
+      await saveFirestoreProject(proj);
+    }
   };
 
   // Modals state
