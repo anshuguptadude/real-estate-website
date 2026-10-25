@@ -88,9 +88,9 @@ export default function App() {
       const stored = localStorage.getItem('royal_agra_properties_v2');
       if (stored !== null) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length >= 5) {
           const filtered = parsed.filter(p => !deletedIds.has(p.id) && !p.isDeleted && p.status !== 'deleted');
-          if (filtered.length > 0 || deletedIds.size > 0 || parsed.length === 0) {
+          if (filtered.length >= 5) {
             return filtered.map((p, idx) => normalizeProperty(p, idx));
           }
         }
@@ -98,16 +98,13 @@ export default function App() {
     } catch {
       // ignore
     }
-    // Only for brand new visits (no stored list, no deleted IDs) do we seed default template properties
-    if (deletedIds.size > 0) {
-      return [];
-    }
+    // Always fall back to PROPERTIES_DATA (which contains all 5 live posted properties)
     return PROPERTIES_DATA
       .filter(p => !deletedIds.has(p.id))
       .map((p, idx) => normalizeProperty({
         ...p,
         status: p.status || (idx === 3 ? 'Sold' : 'Active'),
-        isUserListing: false, // Default template properties are portfolio showcase, not user listings
+        isUserListing: true,
         ownerName: p.agent?.name || 'Managing Partner'
       }, idx));
   });
@@ -125,12 +122,18 @@ export default function App() {
     }
   }, [user]);
 
-  // Sync properties state to localStorage
+  // Sync properties state to localStorage with quota safety
   useEffect(() => {
     try {
       localStorage.setItem('royal_agra_properties_v2', JSON.stringify(properties));
     } catch {
-      // ignore
+      try {
+        const lightweight = properties.map(p => ({
+          ...p,
+          images: (p.images || []).map(img => (typeof img === 'string' && img.length > 500) ? img.slice(0, 100) + '...' : img)
+        }));
+        localStorage.setItem('royal_agra_properties_v2', JSON.stringify(lightweight));
+      } catch {}
     }
   }, [properties]);
 

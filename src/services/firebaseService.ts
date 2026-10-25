@@ -23,6 +23,33 @@ const getApiBase = (): string => {
   return 'https://royalagraestate.in/api';
 };
 
+// Safe localStorage helper to prevent QuotaExceededError in mobile & Safari browsers
+const safeStorageSet = (key: string, data: any): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch {
+    // Quota exceeded: compress and strip heavy base64 strings so metadata persists cleanly
+    try {
+      if (Array.isArray(data)) {
+        const lightweight = data.map((item: any) => {
+          if (item && typeof item === 'object') {
+            const copy = { ...item };
+            if (Array.isArray(copy.images)) {
+              copy.images = copy.images.map((img: string) => 
+                (typeof img === 'string' && img.length > 500) ? img.slice(0, 100) + '...' : img
+              );
+            }
+            return copy;
+          }
+          return item;
+        });
+        localStorage.setItem(key, JSON.stringify(lightweight));
+      }
+    } catch {}
+  }
+};
+
 // Generic type-safe API caller with abort controller timeout
 async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T | null> {
   const url = `${getApiBase()}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
@@ -93,9 +120,7 @@ export const fetchFirestoreLeads = async (): Promise<LeadSubmission[]> => {
   try {
     const data = await apiRequest<LeadSubmission[]>('/leads.php');
     if (Array.isArray(data)) {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('royal_agra_leads_v1', JSON.stringify(data));
-      }
+      safeStorageSet('royal_agra_leads_v1', data);
       return data;
     }
   } catch (error) {
@@ -227,9 +252,7 @@ export const fetchFirestoreAccounts = async (): Promise<any[]> => {
     const data = await apiRequest<any[]>('/accounts.php');
     if (Array.isArray(data)) {
       const filtered = data.filter(a => a.email && !deletedEmails.has(a.email.toLowerCase()));
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('royal_agra_accounts_backup', JSON.stringify(filtered));
-      }
+      safeStorageSet('royal_agra_accounts_backup', filtered);
       return filtered;
     }
   } catch (error) {
@@ -373,9 +396,7 @@ export const fetchFirestoreProperties = async (): Promise<Property[]> => {
     const data = await apiRequest<Property[]>('/properties.php');
     if (Array.isArray(data)) {
       const activeProps = data.filter(p => !deletedIds.has(p.id) && !p.isDeleted && p.status !== 'deleted');
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('royal_agra_properties_v2', JSON.stringify(activeProps));
-      }
+      safeStorageSet('royal_agra_properties_v2', activeProps);
       return activeProps;
     }
   } catch (error) {
@@ -539,9 +560,7 @@ export const fetchFirestoreProjects = async (): Promise<Project[]> => {
     const data = await apiRequest<Project[]>('/projects.php');
     if (Array.isArray(data)) {
       const active = data.filter(p => !deletedIds.has(p.id) && !(p as any).isDeleted);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('royal_agra_projects_v2', JSON.stringify(active));
-      }
+      safeStorageSet('royal_agra_projects_v2', active);
       return active;
     }
   } catch (error) {
