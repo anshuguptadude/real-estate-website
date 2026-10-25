@@ -3,6 +3,7 @@
 
 import { Property, UserProfile, Project } from '../types';
 import { LeadSubmission } from '../utils/security';
+import { PROPERTIES_DATA } from '../data/mockData';
 
 // Dummy Firestore database object for backwards compatibility with any legacy typings
 export const db: any = {};
@@ -24,29 +25,33 @@ const getApiBase = (): string => {
 };
 
 // Safe localStorage helper to prevent QuotaExceededError in mobile & Safari browsers
-const safeStorageSet = (key: string, data: any): void => {
+export const safeStorageSet = (key: string, data: any): void => {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(key, JSON.stringify(data));
-  } catch {
-    // Quota exceeded: compress and strip heavy base64 strings so metadata persists cleanly
-    try {
-      if (Array.isArray(data)) {
-        const lightweight = data.map((item: any) => {
-          if (item && typeof item === 'object') {
-            const copy = { ...item };
-            if (Array.isArray(copy.images)) {
-              copy.images = copy.images.map((img: string) => 
-                (typeof img === 'string' && img.length > 500) ? img.slice(0, 100) + '...' : img
-              );
-            }
-            return copy;
+    let payload = JSON.stringify(data);
+    // If payload exceeds 120 KB, strip large base64 images BEFORE calling localStorage.setItem
+    // This prevents QuotaExceededError and Safari Private Browsing privacy protection warnings
+    if (payload.length > 120000 && Array.isArray(data)) {
+      const lightweight = data.map((item: any) => {
+        if (item && typeof item === 'object') {
+          const copy = { ...item };
+          if (Array.isArray(copy.images)) {
+            copy.images = copy.images.map((img: string) => 
+              (typeof img === 'string' && img.length > 500) ? img.slice(0, 100) + '...' : img
+            );
           }
-          return item;
-        });
-        localStorage.setItem(key, JSON.stringify(lightweight));
-      }
-    } catch {}
+          if (typeof copy.coverImage === 'string' && copy.coverImage.length > 500) {
+            copy.coverImage = copy.coverImage.slice(0, 100) + '...';
+          }
+          return copy;
+        }
+        return item;
+      });
+      payload = JSON.stringify(lightweight);
+    }
+    localStorage.setItem(key, payload);
+  } catch {
+    // Graceful silent fallback if localStorage is disabled in strict private mode
   }
 };
 
@@ -140,12 +145,13 @@ export const subscribeFirestoreLeads = (callback: (leads: LeadSubmission[]) => v
   let isSubscribed = true;
   const poll = async () => {
     if (!isSubscribed) return;
+    if (typeof document !== 'undefined' && document.hidden) return;
     const leads = await fetchFirestoreLeads();
     if (isSubscribed && leads) callback(leads);
   };
 
   poll();
-  const intervalId = setInterval(poll, 8000);
+  const intervalId = setInterval(poll, 30000);
 
   const handleUpdate = () => { poll(); };
   if (typeof window !== 'undefined') {
@@ -394,26 +400,34 @@ export const fetchFirestoreProperties = async (): Promise<Property[]> => {
   const deletedIds = getLocalDeletedPropertyIds();
   try {
     const data = await apiRequest<Property[]>('/properties.php');
-    if (Array.isArray(data)) {
+    if (Array.isArray(data) && data.length > 0) {
       const activeProps = data.filter(p => !deletedIds.has(p.id) && !p.isDeleted && p.status !== 'deleted');
-      safeStorageSet('royal_agra_properties_v2', activeProps);
-      return activeProps;
+      if (activeProps.length > 0) {
+        safeStorageSet('royal_agra_properties_v2', activeProps);
+        return activeProps;
+      }
     }
   } catch (error) {
     console.warn("Error fetching properties from Hostinger API:", error);
   }
 
-  // Fallback to local storage
+  // Fallback to local storage if it has valid properties with full images
   try {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('royal_agra_properties_v2');
       if (stored) {
         const parsed: Property[] = JSON.parse(stored);
-        return parsed.filter(p => !deletedIds.has(p.id) && !p.isDeleted && p.status !== 'deleted');
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const filtered = parsed.filter(p => !deletedIds.has(p.id) && !p.isDeleted && p.status !== 'deleted');
+          const hasImages = filtered.some(p => p.coverImage && p.coverImage.length > 200);
+          if (filtered.length > 0 && hasImages) return filtered;
+        }
       }
     }
   } catch {}
-  return [];
+
+  // Fallback to embedded PROPERTIES_DATA so website NEVER shows 0 properties on any device
+  return PROPERTIES_DATA.filter(p => !deletedIds.has(p.id) && !p.isDeleted && p.status !== 'deleted');
 };
 
 export const saveFirestoreProperty = async (property: Property): Promise<boolean> => {
@@ -477,14 +491,53 @@ export const deleteFirestoreProperty = async (id: string): Promise<boolean> => {
 
 export const subscribeFirestoreProperties = (callback: (properties: Property[]) => void): () => void => {
   let isSubscribed = true;
+  let lastEtag = '';
+
   const poll = async () => {
     if (!isSubscribed) return;
-    const props = await fetchFirestoreProperties();
-    if (isSubscribed && props) callback(props);
+    // Prevent background battery/network burn in private Safari tabs
+    if (typeof document !== 'undefined' && document.hidden) return;
+
+    try {
+      const url = `${getApiBase()}/properties.php`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
+      const headers: Record<string, string> = { 'Accept': 'application/json' };
+      if (lastEtag) {
+        headers['If-None-Match'] = lastEtag;
+      }
+
+      const res = await fetch(url, { signal: controller.signal, headers });
+      clearTimeout(timeoutId);
+
+      if (res.status === 304) {
+        // Data has not changed on server; zero bandwidth & zero re-render overhead
+        return;
+      }
+
+      if (res.ok) {
+        const etag = res.headers.get('ETag');
+        if (etag) lastEtag = etag;
+
+        const data: Property[] = await res.json();
+        if (isSubscribed && Array.isArray(data) && data.length > 0) {
+          const deletedIds = getLocalDeletedPropertyIds();
+          const activeProps = data.filter(p => !deletedIds.has(p.id) && !p.isDeleted && p.status !== 'deleted');
+          if (activeProps.length > 0) {
+            safeStorageSet('royal_agra_properties_v2', activeProps);
+            callback(activeProps);
+          }
+        }
+      }
+    } catch {
+      // Network hiccup: keep currently displayed properties intact without disruptions
+    }
   };
 
+  // Immediate poll on mount
   poll();
-  const intervalId = setInterval(poll, 6000);
+  // Efficient 25-second poll (304 Not Modified ensures 0 bytes payload when unchanged)
+  const intervalId = setInterval(poll, 25000);
 
   const handleUpdate = () => { poll(); };
   if (typeof window !== 'undefined') {
@@ -625,12 +678,13 @@ export const subscribeFirestoreProjects = (callback: (projects: Project[]) => vo
   let isSubscribed = true;
   const poll = async () => {
     if (!isSubscribed) return;
+    if (typeof document !== 'undefined' && document.hidden) return;
     const projects = await fetchFirestoreProjects();
     if (isSubscribed && projects) callback(projects);
   };
 
   poll();
-  const intervalId = setInterval(poll, 8000);
+  const intervalId = setInterval(poll, 30000);
 
   const handleUpdate = () => { poll(); };
   if (typeof window !== 'undefined') {

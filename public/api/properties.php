@@ -5,6 +5,18 @@ $pdo = getDB();
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
+    // Generate an ETag based on count and max updated_at for super-fast 304 response
+    $stmt = $pdo->query("SELECT MAX(updated_at), COUNT(*) FROM properties WHERE is_deleted = 0");
+    $meta = $stmt->fetch(PDO::FETCH_NUM);
+    $etag = '"' . md5(($meta[0] ?? '') . '_' . ($meta[1] ?? '0')) . '"';
+    header('ETag: ' . $etag);
+    header('Cache-Control: public, max-age=15, must-revalidate');
+
+    if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag) {
+        http_response_code(304);
+        exit;
+    }
+
     $stmt = $pdo->query("SELECT data_json FROM properties WHERE is_deleted = 0 ORDER BY updated_at DESC");
     $rows = $stmt->fetchAll(PDO::FETCH_COLUMN);
     $properties = [];

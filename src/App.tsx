@@ -17,7 +17,8 @@ import {
   markPropertyDeletedLocally,
   getLocalDeletedProjectIds,
   markProjectDeletedLocally,
-  clearDeletedProjectsTombstones
+  clearDeletedProjectsTombstones,
+  safeStorageSet
 } from './services/firebaseService';
 import { LeadInquiryModal } from './components/LeadInquiryModal';
 import { Navbar } from './components/Navbar';
@@ -90,7 +91,9 @@ export default function App() {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length >= 5) {
           const filtered = parsed.filter(p => !deletedIds.has(p.id) && !p.isDeleted && p.status !== 'deleted');
-          if (filtered.length >= 5) {
+          // Only use stored cache if it contains full images (> 200 chars), else prefer default PROPERTIES_DATA
+          const hasFullImages = filtered.some(p => typeof p.coverImage === 'string' && p.coverImage.length > 200);
+          if (filtered.length >= 5 && hasFullImages) {
             return filtered.map((p, idx) => normalizeProperty(p, idx));
           }
         }
@@ -98,7 +101,7 @@ export default function App() {
     } catch {
       // ignore
     }
-    // Always fall back to PROPERTIES_DATA (which contains all 5 live posted properties)
+    // Always fall back to PROPERTIES_DATA (which contains all 5 live posted properties with high-res images)
     return PROPERTIES_DATA
       .filter(p => !deletedIds.has(p.id))
       .map((p, idx) => normalizeProperty({
@@ -122,32 +125,20 @@ export default function App() {
     }
   }, [user]);
 
-  // Sync properties state to localStorage with quota safety
+  // Sync properties state to localStorage with quota safety (zero QuotaExceededError in mobile Safari)
   useEffect(() => {
-    try {
-      localStorage.setItem('royal_agra_properties_v2', JSON.stringify(properties));
-    } catch {
-      try {
-        const lightweight = properties.map(p => ({
-          ...p,
-          images: (p.images || []).map(img => (typeof img === 'string' && img.length > 500) ? img.slice(0, 100) + '...' : img)
-        }));
-        localStorage.setItem('royal_agra_properties_v2', JSON.stringify(lightweight));
-      } catch {}
-    }
+    safeStorageSet('royal_agra_properties_v2', properties);
   }, [properties]);
 
-  // Real-time Properties Synchronization with Cloud Firestore
+  // Real-time Properties Synchronization with Hostinger Backend
   useEffect(() => {
     const unsubscribe = subscribeFirestoreProperties((firestoreProperties) => {
       const deletedIds = getLocalDeletedPropertyIds();
-      if (Array.isArray(firestoreProperties)) {
+      if (Array.isArray(firestoreProperties) && firestoreProperties.length > 0) {
         const active = firestoreProperties.filter(p => !deletedIds.has(p.id) && !p.isDeleted && p.status !== 'deleted');
         if (active.length > 0) {
           const normalized = active.map((p, idx) => normalizeProperty(p, idx));
           setProperties(normalized);
-        } else if (firestoreProperties.length === 0) {
-          setProperties(prev => prev.filter(p => !p.id.startsWith('prop-user-') && !deletedIds.has(p.id)));
         }
       }
     });
