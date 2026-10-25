@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
+import { INITIAL_ACCOUNTS } from '../data/mockData';
 import { ADMIN_CREDENTIALS } from '../utils/security';
 import { saveFirestoreAccount, fetchFirestoreAccounts, getFirestoreAccount } from '../services/firebaseService';
 import { 
@@ -130,9 +131,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     let savedAccounts: any[] = [];
     try {
       const stored = localStorage.getItem('royal_agra_accounts_v1');
-      if (stored) savedAccounts = JSON.parse(stored);
+      if (stored) {
+        savedAccounts = JSON.parse(stored);
+      } else {
+        savedAccounts = [...INITIAL_ACCOUNTS];
+        localStorage.setItem('royal_agra_accounts_v1', JSON.stringify(savedAccounts));
+      }
     } catch {
-      savedAccounts = [];
+      savedAccounts = [...INITIAL_ACCOUNTS];
     }
 
     // Find account by email or phone

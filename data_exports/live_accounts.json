@@ -1,0 +1,40 @@
+[
+  {
+    "updatedAt": "2026-09-14T01:21:24.891Z",
+    "preferredLocality": "Taj Ganj, Agra",
+    "id": "RAE-2010",
+    "phone": "9871122334",
+    "name": "Manish Agrawal",
+    "securityQuestion": "What is your favorite Agra monument?",
+    "email": "manish.agrawal88@gmail.com",
+    "password": "ManishPassword123",
+    "dob": "",
+    "address": "",
+    "preferredBudget": "\u20b94.0 Cr",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    "primaryInterest": "Buying",
+    "securityAnswer": "taj mahal",
+    "role": "owner",
+    "memberSince": "2026",
+    "profession": ""
+  },
+  {
+    "name": "Rohit Mehta",
+    "securityAnswer": "agra fort",
+    "preferredBudget": "\u20b95.0 Cr",
+    "securityQuestion": "What is your favorite Agra monument?",
+    "profession": "",
+    "address": "",
+    "password": "RohitPassword123",
+    "phone": "9875566778",
+    "updatedAt": "2026-09-14T01:21:26.865Z",
+    "role": "owner",
+    "email": "rohit.mehta99@gmail.com",
+    "id": "RAE-4481",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    "primaryInterest": "Buying",
+    "memberSince": "2026",
+    "dob": "",
+    "preferredLocality": "Taj Ganj, Agra"
+  }
+]

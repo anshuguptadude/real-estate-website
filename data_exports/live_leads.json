@@ -1,0 +1,38 @@
+[
+  {
+    "preferredTime": "Requirements: Interested in a luxury 4 BHK villa on Fatehabad Road.",
+    "timestamp": "23/10/2026, 05:28:50",
+    "phone": "+91 99999 88888",
+    "buyerName": "Mr. Test Buyer",
+    "status": "new",
+    "id": "LEAD-4523",
+    "email": "buyer@royaltest.com",
+    "propertyId": "contact-desk",
+    "propertyTitle": "Concierge: Luxury Property Search",
+    "createdAt": "2026-10-22T23:58:50.170Z"
+  },
+  {
+    "preferredTime": "2026-11-25 (Chauffeur Requested)",
+    "propertyId": "prop-user-1791755457589",
+    "createdAt": "2026-10-22T11:56:49.003Z",
+    "status": "new",
+    "id": "LEAD-TOUR-1792670208979",
+    "buyerName": "Shrey Direct Verification",
+    "phone": "+91 9149079913",
+    "email": "",
+    "timestamp": "22/10/2026, 17:26:48",
+    "propertyTitle": "88, Harish Nagar"
+  },
+  {
+    "status": "new",
+    "preferredTime": "Direct WhatsApp Inquire / Contact",
+    "phone": "+91 9149079913",
+    "timestamp": "21/10/2026, 01:52:20",
+    "id": "LEAD-7414",
+    "createdAt": "2026-10-20T20:22:20.028Z",
+    "propertyId": "prop-user-1792320738640",
+    "propertyTitle": "Kargil Petrol Pump",
+    "email": "buyer@royalagraestate.in",
+    "buyerName": "Prospective Buyer"
+  }
+]

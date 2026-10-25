@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { UserProfile, Property, UserDashboardTab } from '../types';
+import { INITIAL_ACCOUNTS } from '../data/mockData';
 import { isAdmin, isCEO, getUserAvatar, LeadSubmission, ADMIN_CREDENTIALS, SUPER_ADMIN_PERMISSIONS, canEditProperty, canDeleteProperty } from '../utils/security';
 import { saveFirestoreAccount, getFirestoreAccount, subscribeFirestoreAccounts, deleteFirestoreAccount } from '../services/firebaseService';
 import { 
@@ -182,7 +183,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   useEffect(() => {
     if (!isCEO(user)) return;
 
-    // 1. Initial seed from localStorage + ADMIN_CREDENTIALS
+    // 1. Initial seed from localStorage + ADMIN_CREDENTIALS + INITIAL_ACCOUNTS
     let initialAccounts: UserProfile[] = [];
     try {
       const stored = localStorage.getItem('royal_agra_accounts_v1');
@@ -190,6 +191,16 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
         initialAccounts = JSON.parse(stored);
       }
     } catch {}
+
+    if (initialAccounts.length === 0) {
+      initialAccounts = [...INITIAL_ACCOUNTS];
+    } else {
+      INITIAL_ACCOUNTS.forEach(initAcc => {
+        if (!initialAccounts.some(acc => acc.email?.toLowerCase() === initAcc.email.toLowerCase())) {
+          initialAccounts.push(initAcc);
+        }
+      });
+    }
 
     ADMIN_CREDENTIALS.forEach(admin => {
       const exists = initialAccounts.some(acc => acc.email && acc.email.toLowerCase() === admin.email.toLowerCase());

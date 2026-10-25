@@ -48,7 +48,7 @@ export interface Property {
   furnishing: 'Fully Furnished' | 'Semi-Furnished' | 'Unfurnished' | 'Designer Fitted';
   facing: 'North-East (Vastu)' | 'North-East (Morning Sun)' | 'East' | 'North' | 'Taj View (South-East)' | 'Park Facing' | 'West' | 'South' | string;
   reraId: string;
-  possession: 'Ready to Move' | 'Immediate' | 'Dec 2025' | 'Under Construction';
+  possession: 'Ready to Move' | 'Immediate' | 'Dec 2025' | 'Under Construction' | 'Newly Launched' | string;
   featured: boolean;
   isExclusive: boolean;
   verified: boolean;
@@ -115,6 +115,10 @@ export interface UserProfile {
   profession?: string;
   status?: string;
   password?: string;
+  securityQuestion?: string;
+  securityAnswer?: string;
+  updatedAt?: string;
+  createdAt?: string;
   permissions?: string[];
   unlockedPropertyIds?: string[];
   disabledAt?: string;

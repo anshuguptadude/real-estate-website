@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ActiveScreen, Property, FilterState, PropertyType, ListingType, UserProfile, Project, UserDashboardTab } from './types';
-import { PROPERTIES_DATA, PROJECTS_DATA } from './data/mockData';
+import { PROPERTIES_DATA, PROJECTS_DATA, INITIAL_LEADS } from './data/mockData';
 import { isAdmin, isCEO, canViewFullAddress, getMaskedProperty, formatAgraLocality, LeadSubmission, canEditProperty, canDeleteProperty } from './utils/security';
 import { 
   saveFirestoreAccount, 
@@ -189,9 +189,13 @@ export default function App() {
   const [leads, setLeads] = useState<LeadSubmission[]>(() => {
     try {
       const stored = localStorage.getItem('royal_agra_leads_v1');
-      return stored ? JSON.parse(stored) : [];
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      return INITIAL_LEADS;
     } catch {
-      return [];
+      return INITIAL_LEADS;
     }
   });
 

@@ -1,0 +1,31 @@
+[
+  {
+    "unitsAvailable": 45,
+    "locality": "Tajganj, Agra",
+    "features": [
+      "Helipad",
+      "Infinity Pool",
+      "Private Clubhouse"
+    ],
+    "reraId": "UPRERA-TEST-9999",
+    "possessionDate": "Dec 2027",
+    "location": "Tajganj, Agra",
+    "developer": "Royal Agra Developers Group",
+    "description": "Ultra luxury township overlooking the Taj heritage corridor.",
+    "unitsTotal": 120,
+    "priceRange": "\u20b93.5 Cr - \u20b98.2 Cr",
+    "coverImage": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80",
+    "status": "Under Construction",
+    "images": [],
+    "name": "Royal Mughal Skyline Towers",
+    "id": "proj-audit-1791496723955",
+    "unitConfigurations": [
+      "Bespoke Residences"
+    ],
+    "highlights": [
+      "Helipad",
+      "Infinity Pool",
+      "Private Clubhouse"
+    ]
+  }
+]
