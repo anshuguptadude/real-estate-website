@@ -14,7 +14,10 @@ import {
   subscribeFirestoreProjects,
   subscribeFirestoreLeads,
   getLocalDeletedPropertyIds,
-  markPropertyDeletedLocally
+  markPropertyDeletedLocally,
+  getLocalDeletedProjectIds,
+  markProjectDeletedLocally,
+  clearDeletedProjectsTombstones
 } from './services/firebaseService';
 import { LeadInquiryModal } from './components/LeadInquiryModal';
 import { Navbar } from './components/Navbar';
@@ -87,7 +90,7 @@ export default function App() {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
           const filtered = parsed.filter(p => !deletedIds.has(p.id) && !p.isDeleted && p.status !== 'deleted');
-          if (filtered.length > 0 || deletedIds.size > 0) {
+          if (filtered.length > 0 || deletedIds.size > 0 || parsed.length === 0) {
             return filtered.map((p, idx) => normalizeProperty(p, idx));
           }
         }
@@ -189,9 +192,9 @@ export default function App() {
   const [leads, setLeads] = useState<LeadSubmission[]>(() => {
     try {
       const stored = localStorage.getItem('royal_agra_leads_v1');
-      if (stored) {
+      if (stored !== null) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
       return INITIAL_LEADS;
     } catch {
@@ -238,27 +241,39 @@ export default function App() {
 
   // Projects State
   const [projectsList, setProjectsList] = useState<Project[]>(() => {
+    const deletedProjectIds = getLocalDeletedProjectIds();
     try {
       const stored = localStorage.getItem('royal_agra_projects_v2');
-      if (stored) {
+      if (stored !== null) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map(p => ({
-            ...p,
-            locality: formatAgraLocality(p.locality),
-            unitConfigurations: Array.isArray(p.unitConfigurations) ? p.unitConfigurations : (p as any).typologies || ['Bespoke Residences'],
-            highlights: Array.isArray(p.highlights) ? p.highlights : (p as any).features || ['Prime Agra Location', 'Clear Title Documentation', 'UP RERA Approved'],
-            coverImage: p.coverImage || (p as any).image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80'
-          }));
+        if (Array.isArray(parsed)) {
+          const filtered = parsed.filter(p => !deletedProjectIds.has(p.id));
+          if (filtered.length > 0 || deletedProjectIds.size > 0 || parsed.length === 0) {
+            return filtered.map(p => ({
+              ...p,
+              locality: formatAgraLocality(p.locality),
+              unitConfigurations: Array.isArray(p.unitConfigurations) ? p.unitConfigurations : (p as any).typologies || ['Bespoke Residences'],
+              highlights: Array.isArray(p.highlights) ? p.highlights : (p as any).features || ['Prime Agra Location', 'Clear Title Documentation', 'UP RERA Approved'],
+              coverImage: p.coverImage || (p as any).image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80'
+            }));
+          }
         }
       }
     } catch {}
-    return PROJECTS_DATA.map(p => ({
-      ...p,
-      locality: formatAgraLocality(p.locality),
-      unitConfigurations: Array.isArray(p.unitConfigurations) ? p.unitConfigurations : ['Bespoke Residences'],
-      highlights: Array.isArray(p.highlights) ? p.highlights : ['Prime Agra Location', 'Clear Title Documentation', 'UP RERA Approved']
-    }));
+
+    // If projects were explicitly deleted and none remain, do not restore defaults
+    if (deletedProjectIds.size > 0) {
+      return [];
+    }
+
+    return PROJECTS_DATA
+      .filter(p => !deletedProjectIds.has(p.id))
+      .map(p => ({
+        ...p,
+        locality: formatAgraLocality(p.locality),
+        unitConfigurations: Array.isArray(p.unitConfigurations) ? p.unitConfigurations : ['Bespoke Residences'],
+        highlights: Array.isArray(p.highlights) ? p.highlights : ['Prime Agra Location', 'Clear Title Documentation', 'UP RERA Approved']
+      }));
   });
 
   useEffect(() => {
@@ -270,8 +285,10 @@ export default function App() {
   // Real-time Projects Synchronization with Cloud Firestore
   useEffect(() => {
     const unsubscribe = subscribeFirestoreProjects((firestoreProjects) => {
-      if (Array.isArray(firestoreProjects) && firestoreProjects.length > 0) {
-        const normalized = firestoreProjects.map(p => ({
+      const deletedProjectIds = getLocalDeletedProjectIds();
+      if (Array.isArray(firestoreProjects)) {
+        const active = firestoreProjects.filter(p => !deletedProjectIds.has(p.id) && !(p as any).isDeleted);
+        const normalized = active.map(p => ({
           ...p,
           locality: formatAgraLocality(p.locality),
           unitConfigurations: Array.isArray(p.unitConfigurations) ? p.unitConfigurations : (p as any).typologies || ['Bespoke Residences'],
@@ -295,8 +312,23 @@ export default function App() {
   };
 
   const handleDeleteProject = async (projId: string) => {
+    markProjectDeletedLocally(projId);
     setProjectsList(prev => prev.filter(p => p.id !== projId));
     await deleteFirestoreProject(projId);
+  };
+
+  const handleRestoreDefaultProjects = () => {
+    clearDeletedProjectsTombstones();
+    const restored = PROJECTS_DATA.map(p => ({
+      ...p,
+      locality: formatAgraLocality(p.locality),
+      unitConfigurations: Array.isArray(p.unitConfigurations) ? p.unitConfigurations : ['Bespoke Residences'],
+      highlights: Array.isArray(p.highlights) ? p.highlights : ['Prime Agra Location', 'Clear Title Documentation', 'UP RERA Approved']
+    }));
+    setProjectsList(restored);
+    try {
+      localStorage.setItem('royal_agra_projects_v2', JSON.stringify(restored));
+    } catch {}
   };
 
   // Modals state
@@ -783,6 +815,7 @@ export default function App() {
             onAddProject={handleAddProject}
             onEditProject={handleEditProject}
             onDeleteProject={handleDeleteProject}
+            onRestoreDefaults={handleRestoreDefaultProjects}
           />
         )}
 

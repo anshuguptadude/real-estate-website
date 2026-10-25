@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { UserProfile, Property, UserDashboardTab } from '../types';
 import { INITIAL_ACCOUNTS } from '../data/mockData';
 import { isAdmin, isCEO, getUserAvatar, LeadSubmission, ADMIN_CREDENTIALS, SUPER_ADMIN_PERMISSIONS, canEditProperty, canDeleteProperty } from '../utils/security';
-import { saveFirestoreAccount, getFirestoreAccount, subscribeFirestoreAccounts, deleteFirestoreAccount } from '../services/firebaseService';
+import { saveFirestoreAccount, getFirestoreAccount, subscribeFirestoreAccounts, deleteFirestoreAccount, getLocalDeletedAccountEmails } from '../services/firebaseService';
 import { 
   Building2, 
   User, 
@@ -183,24 +183,22 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   useEffect(() => {
     if (!isCEO(user)) return;
 
-    // 1. Initial seed from localStorage + ADMIN_CREDENTIALS + INITIAL_ACCOUNTS
+    // 1. Initial seed from localStorage + ADMIN_CREDENTIALS + INITIAL_ACCOUNTS (only on first-time visit)
     let initialAccounts: UserProfile[] = [];
+    const deletedEmails = getLocalDeletedAccountEmails();
     try {
       const stored = localStorage.getItem('royal_agra_accounts_v1');
-      if (stored) {
-        initialAccounts = JSON.parse(stored);
+      if (stored !== null) {
+        initialAccounts = JSON.parse(stored) || [];
+      } else {
+        initialAccounts = [...INITIAL_ACCOUNTS];
       }
-    } catch {}
-
-    if (initialAccounts.length === 0) {
+    } catch {
       initialAccounts = [...INITIAL_ACCOUNTS];
-    } else {
-      INITIAL_ACCOUNTS.forEach(initAcc => {
-        if (!initialAccounts.some(acc => acc.email?.toLowerCase() === initAcc.email.toLowerCase())) {
-          initialAccounts.push(initAcc);
-        }
-      });
     }
+
+    // Filter out permanently deleted accounts
+    initialAccounts = initialAccounts.filter(a => a.email && !deletedEmails.has(a.email.toLowerCase()));
 
     ADMIN_CREDENTIALS.forEach(admin => {
       const exists = initialAccounts.some(acc => acc.email && acc.email.toLowerCase() === admin.email.toLowerCase());
@@ -241,8 +239,9 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
             permissions: [...admin.permissions]
           });
         });
+        const currentDeletedEmails = getLocalDeletedAccountEmails();
         firestoreAccounts.forEach(acc => {
-          if (acc.email) {
+          if (acc.email && !currentDeletedEmails.has(acc.email.toLowerCase())) {
             const adminMatch = ADMIN_CREDENTIALS.find(a => a.email.toLowerCase() === acc.email.toLowerCase());
             const pass = acc.password || adminMatch?.password;
             mergedMap.set(acc.email.toLowerCase(), {

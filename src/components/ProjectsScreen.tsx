@@ -9,6 +9,7 @@ interface ProjectsScreenProps {
   onAddProject: (project: Project) => void;
   onEditProject: (project: Project) => void;
   onDeleteProject: (projectId: string) => void;
+  onRestoreDefaults?: () => void;
 }
 
 export const ProjectsScreen: React.FC<ProjectsScreenProps> = ({
@@ -17,7 +18,8 @@ export const ProjectsScreen: React.FC<ProjectsScreenProps> = ({
   onContactProject,
   onAddProject,
   onEditProject,
-  onDeleteProject
+  onDeleteProject,
+  onRestoreDefaults
 }) => {
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -181,8 +183,47 @@ Official Portal:       https://royalagraestate.in
         </div>
 
         {/* Projects List */}
-        <div className="space-y-12">
-          {projects.map((project) => (
+        {projects.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-gray-200/80 shadow-md p-10 sm:p-14 text-center max-w-xl mx-auto my-8">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-[#0F382C] flex items-center justify-center mx-auto mb-4 border border-emerald-100">
+              <Building2 className="w-8 h-8 text-[#0F382C]" />
+            </div>
+            <h3 className="text-xl font-serif-luxury font-bold text-[#0F382C] mb-2">
+              No Active Projects Listed
+            </h3>
+            <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+              All previous projects have been removed or archived. New luxury developments will appear here once listed.
+            </p>
+            {isAdminUser && (
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleOpenCreate}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#0F382C] hover:bg-[#164E3D] text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md transition-all"
+                >
+                  <PlusCircle className="w-4 h-4 text-[#E4D5B7]" />
+                  <span>Add New Luxury Project</span>
+                </button>
+                {onRestoreDefaults && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm("Restore sample luxury projects into the catalogue?")) {
+                        onRestoreDefaults();
+                      }
+                    }}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all"
+                  >
+                    <Sparkles className="w-4 h-4 text-amber-600" />
+                    <span>Restore Sample Projects</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-12">
+            {projects.map((project) => (
             <div
               key={project.id}
               className="bg-white rounded-2xl overflow-hidden border border-gray-200/80 shadow-md hover:shadow-xl transition-all duration-300 grid grid-cols-1 lg:grid-cols-12 relative"
@@ -347,7 +388,8 @@ Official Portal:       https://royalagraestate.in
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
 
       </div>
 
