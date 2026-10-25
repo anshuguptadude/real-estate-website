@@ -1,0 +1,6 @@
+# Deny direct access to SQLite database files
+<Files ~ "\.(db|sqlite|sqlite3|sql)$">
+    Order allow,deny
+    Deny from all
+</Files>
+Require all denied
