@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MapPin, Phone, Mail, MessageSquare, Clock, Send, CheckCircle2, Landmark, Compass, AlertTriangle, Loader2 } from 'lucide-react';
 import { saveFirestoreLead } from '../services/firebaseService';
 import { LeadSubmission } from '../utils/security';
+import { trackWhatsAppClick, trackPhoneClick } from '../utils/analytics';
 
 export const ContactScreen: React.FC = () => {
   const [name, setName] = useState('');
@@ -117,10 +118,10 @@ export const ContactScreen: React.FC = () => {
                   <div>
                     <strong className="block text-white">Co-Owner Direct Lines:</strong>
                     <div className="flex flex-col gap-1 mt-1">
-                      <a href="tel:+919149079913" className="text-gray-300 hover:text-white underline">
+                      <a href="tel:+919149079913" onClick={() => trackPhoneClick()} className="text-gray-300 hover:text-white underline">
                         Shrey Gupta (+91 9149079913)
                       </a>
-                      <a href="tel:+919557138449" className="text-gray-300 hover:text-white underline">
+                      <a href="tel:+919557138449" onClick={() => trackPhoneClick()} className="text-gray-300 hover:text-white underline">
                         Abhishek Singh Jadon (+91 9557138449)
                       </a>
                     </div>
@@ -154,6 +155,7 @@ export const ContactScreen: React.FC = () => {
                   href="https://wa.me/919149079913?text=Hello%20Royal%20Agra%20Estate,%20I%20would%20like%20to%20inquire%20about%20luxury%20properties."
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() => trackWhatsAppClick('Contact Screen Concierge')}
                   className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all"
                 >
                   <MessageSquare className="w-4 h-4" />

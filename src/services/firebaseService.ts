@@ -4,6 +4,7 @@
 import { Property, UserProfile, Project } from '../types';
 import { LeadSubmission } from '../utils/security';
 import { PROPERTIES_DATA } from '../data/mockData';
+import { trackLeadSubmission } from '../utils/analytics';
 
 // Dummy Firestore database object for backwards compatibility with any legacy typings
 export const db: any = {};
@@ -103,6 +104,16 @@ export const saveFirestoreLead = async (lead: LeadSubmission): Promise<boolean> 
       const updated = [completeLead, ...existing.filter(l => l.id !== leadId)];
       localStorage.setItem('royal_agra_leads_v1', JSON.stringify(updated));
     }
+  } catch {}
+
+  // Dispatch Google Ads conversion event for high-intent lead generation
+  try {
+    trackLeadSubmission({
+      buyerName: completeLead.buyerName,
+      phone: completeLead.phone,
+      email: completeLead.email,
+      propertyTitle: completeLead.propertyTitle
+    });
   } catch {}
 
   try {

@@ -2,6 +2,7 @@ import React from 'react';
 import { Property } from '../types';
 import { Bed, Bath, Maximize, MapPin, ShieldCheck, Heart, Sparkles, Eye, Calendar, ArrowRight, MessageSquare, Trash2, Compass } from 'lucide-react';
 import { formatAgraLocality, isPlotOrLand } from '../utils/security';
+import { trackWhatsAppClick } from '../utils/analytics';
 
 interface PropertyCardProps {
   property: Property;
@@ -253,6 +254,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             rel="noreferrer"
             onClick={(e) => {
               e.stopPropagation();
+              trackWhatsAppClick(property.title);
               if (onInquireContact) onInquireContact(property);
             }}
             className="w-full py-2 bg-[#25D366] hover:bg-[#1ebd54] text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all"
