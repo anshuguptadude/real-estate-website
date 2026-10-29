@@ -303,65 +303,9 @@ export const getMaskedProperty = (property: Property, user: UserProfile | null):
   return masked;
 };
 
-export interface SavedContactDetails {
-  name: string;
-  phone: string;
-  email: string;
-}
-
-export const getSavedGuestContact = (): SavedContactDetails | null => {
-  try {
-    if (typeof window === 'undefined') return null;
-    const stored = localStorage.getItem('royal_agra_guest_contact_v1');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed && typeof parsed.name === 'string' && typeof parsed.phone === 'string') {
-        const cleanPhone = parsed.phone.replace(/[^0-9]/g, '');
-        if (cleanPhone.length >= 10 && parsed.name.trim().length >= 2) {
-          return {
-            name: parsed.name.trim(),
-            phone: parsed.phone.trim(),
-            email: (parsed.email || '').trim().toLowerCase()
-          };
-        }
-      }
-    }
-  } catch {}
-  return null;
-};
-
-export const saveGuestContact = (contact: { name?: string; phone?: string; email?: string }): void => {
-  try {
-    if (typeof window === 'undefined') return;
-    if (!contact.name || !contact.phone) return;
-    const cleanPhone = contact.phone.replace(/[^0-9]/g, '');
-    if (cleanPhone.length < 10 || contact.name.trim().length < 2) return;
-    // Never save dummy placeholders as guest contact
-    if (contact.name.trim().toLowerCase() === 'prospective buyer') return;
-    if (contact.email && contact.email.trim().toLowerCase() === 'buyer@royalagraestate.in') return;
-
-    localStorage.setItem(
-      'royal_agra_guest_contact_v1',
-      JSON.stringify({
-        name: contact.name.trim(),
-        phone: contact.phone.trim(),
-        email: (contact.email || '').trim().toLowerCase()
-      })
-    );
-  } catch {}
-};
-
-export const clearGuestContact = (): void => {
-  try {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('royal_agra_guest_contact_v1');
-    }
-  } catch {}
-};
-
 /**
- * Strict validator to guarantee no dummy or placeholder leads ("Prospective Buyer", "+91 9149079913" dummy, "buyer@royalagraestate.in")
- * ever appear in leads lists or get submitted.
+ * Strict validator to guarantee no dummy or placeholder leads ("Prospective Buyer", "+91 9149079913", "buyer@royalagraestate.in")
+ * ever appear in leads lists or get submitted. Only real external buyer leads are allowed.
  */
 export const isValidClientLead = (lead: Partial<LeadSubmission> | null | undefined): boolean => {
   if (!lead) return false;
@@ -373,17 +317,15 @@ export const isValidClientLead = (lead: Partial<LeadSubmission> | null | undefin
   // Must have a valid mobile number (at least 10 digits)
   if (cleanPhone.length < 10) return false;
 
-  // Must have a real client name (not blank or "Prospective Buyer")
-  if (!name || name.toLowerCase() === 'prospective buyer' || name.length < 2) return false;
+  // Must have a real client name (strictly reject "Prospective Buyer")
+  if (!name || name.toLowerCase().includes('prospective buyer') || name.length < 2) return false;
 
   // Must not have dummy placeholder email
   if (email === 'buyer@royalagraestate.in') return false;
 
-  // Exclude placeholder fallback leads where phone was assigned to admin lines without true client identity
-  if (
-    (cleanPhone.endsWith('9149079913') || cleanPhone.endsWith('9557138449')) &&
-    (lead.propertyId === 'general-inquiry' || name.toLowerCase().includes('prospective'))
-  ) {
+  // Strictly exclude company owner direct lines (+91 9149079913 or +91 9557138449)
+  // as genuine buyer leads come from external clients with their own mobile numbers
+  if (cleanPhone.endsWith('9149079913') || cleanPhone.endsWith('9557138449')) {
     return false;
   }
 

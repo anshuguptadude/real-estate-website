@@ -209,6 +209,9 @@ export default function App() {
   // Leads State
   const [leads, setLeads] = useState<LeadSubmission[]>(() => {
     try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('royal_agra_guest_contact_v1');
+      }
       const stored = localStorage.getItem('royal_agra_leads_v1');
       if (stored !== null) {
         const parsed = JSON.parse(stored);

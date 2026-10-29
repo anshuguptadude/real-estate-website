@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Property, UserProfile } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapComponent } from './MapComponent';
-import { formatAgraLocality, isPlotOrLand, LeadSubmission, getSavedGuestContact, saveGuestContact } from '../utils/security';
+import { formatAgraLocality, isPlotOrLand, LeadSubmission } from '../utils/security';
 import { saveFirestoreLead } from '../services/firebaseService';
 import {
   X,
@@ -41,6 +41,12 @@ interface PropertyDetailModalProps {
   user?: UserProfile | null;
 }
 
+const isCompanyLine = (p?: string) => {
+  if (!p) return false;
+  const digits = p.replace(/[^0-9]/g, '');
+  return digits.endsWith('9149079913') || digits.endsWith('9557138449');
+};
+
 export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   property,
   onClose,
@@ -52,10 +58,9 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   onApproveProperty,
   user
 }) => {
-  const savedGuest = !user ? getSavedGuestContact() : null;
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [inquiryName, setInquiryName] = useState(user?.name || savedGuest?.name || '');
-  const [inquiryPhone, setInquiryPhone] = useState(user?.phone || savedGuest?.phone || '');
+  const [inquiryName, setInquiryName] = useState(user?.name || '');
+  const [inquiryPhone, setInquiryPhone] = useState(user?.phone && !isCompanyLine(user.phone) ? user.phone : '');
   const [inquiryDate, setInquiryDate] = useState('');
   const [chauffeurReq, setChauffeurReq] = useState(true);
   const [inquirySubmitted, setInquirySubmitted] = useState(false);
@@ -64,14 +69,8 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
 
   useEffect(() => {
     if (user) {
-      if (!inquiryName && user.name) setInquiryName(user.name);
-      if (!inquiryPhone && user.phone) setInquiryPhone(user.phone);
-    } else {
-      const guest = getSavedGuestContact();
-      if (guest) {
-        if (!inquiryName && guest.name) setInquiryName(guest.name);
-        if (!inquiryPhone && guest.phone) setInquiryPhone(guest.phone);
-      }
+      if (user.name) setInquiryName(user.name);
+      if (user.phone && !isCompanyLine(user.phone)) setInquiryPhone(user.phone);
     }
   }, [user, property?.id]);
 
@@ -133,9 +132,6 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
 
     try {
       await saveFirestoreLead(newLead);
-      if (!user) {
-        saveGuestContact({ name: inquiryName, phone: inquiryPhone });
-      }
       if (onBookVisit) {
         onBookVisit(property);
       }
