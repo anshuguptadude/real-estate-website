@@ -1,5 +1,5 @@
 // Royal Agra Estate - Google Ads Conversion Tracking & Analytics Engine
-// Official Tag ID: AW-16528829194 (Account: 814-741-2617 Real Estate)
+// Official Tag ID: AW-18528029194 (Account: 814-741-2617 Real Estate)
 
 declare global {
   interface Window {
@@ -35,7 +35,7 @@ export const trackLeadSubmission = (lead: {
     event_category: 'engagement',
     event_label: lead.propertyTitle || 'General Consultation Inquiry',
     inquiry_type: lead.inquiryType || 'General',
-    send_to: 'AW-16528829194'
+    send_to: 'AW-18528029194'
   });
 };
 
@@ -46,7 +46,7 @@ export const trackWhatsAppClick = (propertyTitle?: string): void => {
   trackEvent('contact', {
     method: 'whatsapp',
     event_label: propertyTitle || 'Direct Concierge Chat',
-    send_to: 'AW-16528829194'
+    send_to: 'AW-18528029194'
   });
 };
 
@@ -57,6 +57,6 @@ export const trackPhoneClick = (): void => {
   trackEvent('contact', {
     method: 'phone',
     event_label: '+91 91490 79913',
-    send_to: 'AW-16528829194'
+    send_to: 'AW-18528029194'
   });
 };
