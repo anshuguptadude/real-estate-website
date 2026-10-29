@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Property } from '../types';
+import { Property, UserProfile } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapComponent } from './MapComponent';
 import { formatAgraLocality, isPlotOrLand, LeadSubmission } from '../utils/security';
@@ -38,6 +38,7 @@ interface PropertyDetailModalProps {
   isSaved: boolean;
   isAdminUser?: boolean;
   onApproveProperty?: (id: string) => void;
+  user?: UserProfile | null;
 }
 
 export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
@@ -48,16 +49,24 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   onToggleSave,
   isSaved,
   isAdminUser,
-  onApproveProperty
+  onApproveProperty,
+  user
 }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [inquiryName, setInquiryName] = useState('');
-  const [inquiryPhone, setInquiryPhone] = useState('');
+  const [inquiryName, setInquiryName] = useState(user?.name || '');
+  const [inquiryPhone, setInquiryPhone] = useState(user?.phone || '');
   const [inquiryDate, setInquiryDate] = useState('');
   const [chauffeurReq, setChauffeurReq] = useState(true);
   const [inquirySubmitted, setInquirySubmitted] = useState(false);
   const [copied, setCopied] = useState(false);
   const [approvedSuccess, setApprovedSuccess] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      if (!inquiryName && user.name) setInquiryName(user.name);
+      if (!inquiryPhone && user.phone) setInquiryPhone(user.phone);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (property) {
@@ -680,7 +689,12 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                     <button
                       type="submit"
                       id="submit-tour-inquiry-btn"
-                      className="w-full py-2.5 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-sm transition-all"
+                      disabled={inquiryName.trim().length < 2 || inquiryPhone.replace(/[^0-9]/g, '').length < 10}
+                      className={`w-full py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all ${
+                        inquiryName.trim().length < 2 || inquiryPhone.replace(/[^0-9]/g, '').length < 10
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60 shadow-none'
+                          : 'bg-[#0F382C] hover:bg-[#164E3D] text-white cursor-pointer shadow-sm'
+                      }`}
                     >
                       Book Site Tour
                     </button>

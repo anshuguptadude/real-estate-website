@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Property } from '../types';
-import { X, Calendar, CheckCircle2, ShieldCheck, User, Phone, Mail, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Property, UserProfile } from '../types';
+import { X, Calendar, CheckCircle2, ShieldCheck, User, Phone, Mail, Clock, MessageSquare } from 'lucide-react';
 import { LeadSubmission } from '../utils/security';
 
 interface LeadInquiryModalProps {
@@ -8,26 +8,47 @@ interface LeadInquiryModalProps {
   onClose: () => void;
   property: Property | null;
   onLeadSubmitted: (lead: LeadSubmission) => void;
+  user?: UserProfile | null;
 }
 
 export const LeadInquiryModal: React.FC<LeadInquiryModalProps> = ({
   isOpen,
   onClose,
   property,
-  onLeadSubmitted
+  onLeadSubmitted,
+  user
 }) => {
-  const [buyerName, setBuyerName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
+  const [buyerName, setBuyerName] = useState(user?.name || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [message, setMessage] = useState('');
   const [preferredTime, setPreferredTime] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Sync / Autofill if user profile loads or changes
+  useEffect(() => {
+    if (user) {
+      if (!buyerName && user.name) setBuyerName(user.name);
+      if (!phone && user.phone) setPhone(user.phone);
+      if (!email && user.email) setEmail(user.email);
+    }
+  }, [user, isOpen]);
 
   if (!isOpen) return null;
 
+  const cleanPhone = phone.replace(/[^0-9]/g, '');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isFormValid =
+    buyerName.trim().length >= 2 &&
+    cleanPhone.length >= 10 &&
+    emailRegex.test(email.trim());
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!buyerName || !phone || !email || !preferredTime) return;
+    if (!isFormValid || isSubmitting) return;
 
+    setIsSubmitting(true);
     const newLead: LeadSubmission = {
       id: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
       propertyId: property ? property.id : 'general-inquiry',
@@ -35,17 +56,41 @@ export const LeadInquiryModal: React.FC<LeadInquiryModalProps> = ({
       buyerName: buyerName.trim(),
       phone: phone.trim(),
       email: email.trim().toLowerCase(),
-      preferredTime: preferredTime.trim(),
-      timestamp: new Date().toLocaleString()
+      preferredTime: message.trim()
+        ? `Message: ${message.trim().slice(0, 150)}${preferredTime ? ` | Time: ${preferredTime}` : ''}`
+        : (preferredTime ? `Time: ${preferredTime}` : 'Direct Property Inquiry'),
+      timestamp: new Date().toLocaleString(),
+      createdAt: new Date().toISOString(),
+      status: 'new'
     };
 
     onLeadSubmitted(newLead);
     setSubmitted(true);
+
+    // Connect to WhatsApp with sender details
+    try {
+      const waText = encodeURIComponent(
+        `🏰 *Royal Agra Estate — Property Inquiry*\n\n` +
+        `👤 *Client:* ${newLead.buyerName}\n` +
+        `📱 *Mobile:* ${newLead.phone}\n` +
+        `📧 *Email:* ${newLead.email}\n` +
+        `📍 *Property:* ${newLead.propertyTitle} (ID: #${newLead.propertyId})\n` +
+        (message.trim() ? `💬 *Requirements:* ${message.trim()}\n` : '') +
+        (preferredTime ? `🗓️ *Preferred Slot:* ${preferredTime}\n` : '') +
+        `\nHello Royal Agra Estate, I would like more details on this property.`
+      );
+      window.open(`https://wa.me/919149079913?text=${waText}`, '_blank');
+    } catch {}
+
     setTimeout(() => {
       setSubmitted(false);
-      setBuyerName('');
-      setPhone('');
-      setEmail('');
+      setIsSubmitting(false);
+      if (!user) {
+        setBuyerName('');
+        setPhone('');
+        setEmail('');
+      }
+      setMessage('');
       setPreferredTime('');
       onClose();
     }, 2000);
@@ -90,14 +135,21 @@ export const LeadInquiryModal: React.FC<LeadInquiryModalProps> = ({
                 Inquiry Saved Successfully
               </h4>
               <p className="text-xs text-gray-600">
-                Thank you, <strong>{buyerName}</strong>! Your tour request has been routed to our admin desk. Our co-founders will contact you shortly.
+                Thank you, <strong>{buyerName}</strong>! Your inquiry with mobile <strong>{phone}</strong> has been received. Our advisory desk will reach out shortly.
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3.5">
+              {user && (
+                <div className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-lg text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Autofilled details from your <strong>{user.name}</strong> account.</span>
+                </div>
+              )}
+
               <div>
                 <label htmlFor="lead-buyer-name" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
-                  Full Name
+                  Full Name <span className="text-red-500 font-bold">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -117,7 +169,7 @@ export const LeadInquiryModal: React.FC<LeadInquiryModalProps> = ({
 
               <div>
                 <label htmlFor="lead-buyer-phone" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
-                  Phone Number
+                  Phone / WhatsApp Number <span className="text-red-500 font-bold">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -137,7 +189,7 @@ export const LeadInquiryModal: React.FC<LeadInquiryModalProps> = ({
 
               <div>
                 <label htmlFor="lead-buyer-email" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
-                  Email Address
+                  Email Address <span className="text-red-500 font-bold">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -156,15 +208,35 @@ export const LeadInquiryModal: React.FC<LeadInquiryModalProps> = ({
               </div>
 
               <div>
-                <label htmlFor="lead-preferred-time" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
-                  Preferred Visit Time
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="lead-buyer-message" className="block text-xs font-bold text-gray-700 uppercase cursor-pointer">
+                    Specific Requirements / Message
+                  </label>
+                  <span className="text-[11px] text-gray-400 font-medium">Optional (leave blank if preferred)</span>
+                </div>
+                <textarea
+                  id="lead-buyer-message"
+                  name="message"
+                  rows={2}
+                  placeholder="Mention preferred localities, budget, or questions (optional)..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="w-full p-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="lead-preferred-time" className="block text-xs font-bold text-gray-700 uppercase cursor-pointer">
+                    Preferred Visit Time
+                  </label>
+                  <span className="text-[11px] text-gray-400 font-medium">Optional</span>
+                </div>
                 <div className="relative">
                   <input
                     id="lead-preferred-time"
                     name="preferredTime"
                     type="datetime-local"
-                    required
                     value={preferredTime}
                     onChange={(e) => setPreferredTime(e.target.value)}
                     className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:bg-white focus:border-[#0F382C]"
@@ -173,7 +245,7 @@ export const LeadInquiryModal: React.FC<LeadInquiryModalProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5 text-[11px] text-gray-500 pt-1">
+              <div className="flex items-center gap-1.5 text-[11px] text-gray-500 pt-0.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>Strict confidentiality guaranteed for all HNI buyers</span>
               </div>
@@ -181,9 +253,21 @@ export const LeadInquiryModal: React.FC<LeadInquiryModalProps> = ({
               <button
                 type="submit"
                 id="submit-lead-inquiry-btn"
-                className="w-full py-3 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all"
+                disabled={!isFormValid || isSubmitting}
+                className={`w-full py-3 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                  !isFormValid || isSubmitting
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60 shadow-none'
+                    : 'bg-[#0F382C] hover:bg-[#164E3D] text-white cursor-pointer shadow-md hover:shadow-lg'
+                }`}
               >
-                Submit Inquiry & Book Tour
+                {isSubmitting ? (
+                  <span>Submitting Inquiry...</span>
+                ) : (
+                  <>
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Submit Inquiry & Connect</span>
+                  </>
+                )}
               </button>
             </form>
           )}

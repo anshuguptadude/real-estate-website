@@ -724,21 +724,9 @@ export default function App() {
     );
   };
 
-  const handleInquireContact = async (property: Property) => {
-    const newLead: LeadSubmission = {
-      id: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
-      propertyId: property.id,
-      propertyTitle: property.title,
-      buyerName: user?.name || 'Prospective Buyer',
-      phone: user?.phone || '+91 9149079913',
-      email: user?.email || 'buyer@royalagraestate.in',
-      preferredTime: 'Direct WhatsApp Inquire / Contact',
-      timestamp: new Date().toLocaleString(),
-      createdAt: new Date().toISOString(),
-      status: 'new'
-    };
-    setLeads(prev => [newLead, ...prev]);
-    await saveFirestoreLead(newLead);
+  const handleInquireContact = (property: Property) => {
+    setLeadModalProperty(property);
+    setLeadModalOpen(true);
   };
 
   const handleToggleCompare = (prop: Property) => {
@@ -949,7 +937,7 @@ export default function App() {
 
         {/* SCREEN: Contact */}
         {activeScreen === 'contact' && (
-          <ContactScreen />
+          <ContactScreen user={user} />
         )}
 
       </main>
@@ -972,6 +960,7 @@ export default function App() {
         isSaved={selectedProperty ? savedPropertyIds.includes(selectedProperty.id) : false}
         isAdminUser={canViewFullAddress(selectedProperty, user)}
         onApproveProperty={handleApproveProperty}
+        user={user}
       />
 
       {/* Unified Login & Sign Up Modal */}
@@ -1022,6 +1011,7 @@ export default function App() {
         onClose={() => setLeadModalOpen(false)}
         property={leadModalProperty ? getMaskedProperty(leadModalProperty, user) : null}
         onLeadSubmitted={handleLeadSubmitted}
+        user={user}
       />
       <SavedPropertiesDrawer
         isOpen={savedDrawerOpen}

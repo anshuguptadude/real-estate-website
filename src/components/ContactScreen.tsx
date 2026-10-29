@@ -1,36 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, MessageSquare, Clock, Send, CheckCircle2, Landmark, Compass, AlertTriangle, Loader2 } from 'lucide-react';
 import { saveFirestoreLead } from '../services/firebaseService';
 import { LeadSubmission } from '../utils/security';
 import { trackWhatsAppClick, trackPhoneClick } from '../utils/analytics';
+import { UserProfile } from '../types';
 
-export const ContactScreen: React.FC = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+interface ContactScreenProps {
+  user?: UserProfile | null;
+}
+
+export const ContactScreen: React.FC<ContactScreenProps> = ({ user }) => {
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState(user?.phone || '');
   const [service, setService] = useState('Luxury Property Search');
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Sync / Autofill if user profile loads or updates
+  useEffect(() => {
+    if (user) {
+      if (!name && user.name) setName(user.name);
+      if (!email && user.email) setEmail(user.email);
+      if (!phone && user.phone) setPhone(user.phone);
+    }
+  }, [user]);
+
+  const cleanPhone = phone.replace(/[^0-9]/g, '');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isFormValid =
+    name.trim().length >= 2 &&
+    cleanPhone.length >= 10 &&
+    emailRegex.test(email.trim()) &&
+    service.trim().length > 0;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    // Strict validation: every detail is mandatory
+    // Validation: Name, 10-digit phone, valid email, and purpose are mandatory; Message is optional
     if (!name.trim() || name.trim().length < 2) {
       setErrorMessage('Please enter your full name (at least 2 characters).');
       return;
     }
 
-    const cleanPhone = phone.replace(/[^0-9]/g, '');
     if (!cleanPhone || cleanPhone.length < 10) {
       setErrorMessage('Please enter a valid 10-digit Phone or WhatsApp number.');
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim() || !emailRegex.test(email.trim())) {
       setErrorMessage('Please enter a valid email address (e.g. name@example.com).');
       return;
@@ -38,11 +58,6 @@ export const ContactScreen: React.FC = () => {
 
     if (!service.trim()) {
       setErrorMessage('Please select an inquiry purpose.');
-      return;
-    }
-
-    if (!message.trim() || message.trim().length < 5) {
-      setErrorMessage('Please fill in your specific requirements or message (minimum 5 characters).');
       return;
     }
 
@@ -55,15 +70,17 @@ export const ContactScreen: React.FC = () => {
         buyerName: name.trim(),
         phone: phone.trim(),
         email: email.trim().toLowerCase(),
-        preferredTime: `Requirements: ${message.trim().slice(0, 150)}`,
+        preferredTime: message.trim() ? `Requirements: ${message.trim().slice(0, 150)}` : 'Direct Advisory Consultation',
         timestamp: new Date().toLocaleString()
       };
 
       await saveFirestoreLead(contactLead);
       setSent(true);
-      setName('');
-      setEmail('');
-      setPhone('');
+      if (!user) {
+        setName('');
+        setEmail('');
+        setPhone('');
+      }
       setMessage('');
       setService('Luxury Property Search');
       setTimeout(() => {
@@ -192,6 +209,13 @@ export const ContactScreen: React.FC = () => {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {user && (
+                    <div className="p-3 bg-emerald-50/80 border border-emerald-200 text-emerald-900 rounded-lg text-xs flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>Autofilled contact details from your <strong>{user.name}</strong> account.</span>
+                    </div>
+                  )}
+
                   {errorMessage && (
                     <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
@@ -287,16 +311,17 @@ export const ContactScreen: React.FC = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="contact-message" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
-                      Specific Requirements / Message <span className="text-red-500 font-bold">*</span>
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label htmlFor="contact-message" className="block text-xs font-bold text-gray-700 uppercase cursor-pointer">
+                        Specific Requirements / Message
+                      </label>
+                      <span className="text-[11px] text-gray-400 font-medium">Optional (leave blank if preferred)</span>
+                    </div>
                     <textarea
                       id="contact-message"
                       name="message"
                       rows={3}
-                      required
-                      minLength={5}
-                      placeholder="Please mention preferred Agra localities (e.g. Fatehabad Rd, Dayalbagh), budget, or questions..."
+                      placeholder="Please mention preferred Agra localities (e.g. Fatehabad Rd, Dayalbagh), budget, or questions (optional)..."
                       value={message}
                       onChange={(e) => {
                         setMessage(e.target.value);
@@ -309,9 +334,11 @@ export const ContactScreen: React.FC = () => {
                   <button
                     type="submit"
                     id="submit-contact-form-btn"
-                    disabled={isSubmitting}
-                    className={`w-full py-3 bg-[#0F382C] hover:bg-[#164E3D] text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 ${
-                      isSubmitting ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'
+                    disabled={!isFormValid || isSubmitting}
+                    className={`w-full py-3 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                      !isFormValid || isSubmitting
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60 shadow-none'
+                        : 'bg-[#0F382C] hover:bg-[#164E3D] text-white cursor-pointer shadow-md hover:shadow-lg'
                     }`}
                   >
                     {isSubmitting ? (

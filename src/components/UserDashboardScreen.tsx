@@ -118,6 +118,21 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
   const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   // CEO Master Access & RBAC Console State
+
+  // Filter leads to strictly display only those containing the sender's verified mobile number
+  const validSenderLeads = (leads || []).filter(lead => {
+    if (!lead || !lead.phone) return false;
+    const cleanPhone = lead.phone.replace(/[^0-9]/g, '');
+    if (cleanPhone.length < 10) return false;
+    // Exclude placeholder/fallback entries where phone was defaulted to company admin line without client sender identity
+    if (
+      (cleanPhone.endsWith('9149079913') || cleanPhone.endsWith('9557138449')) &&
+      (lead.buyerName === 'Prospective Buyer' || lead.propertyId === 'general-inquiry' || lead.email === 'buyer@royalagraestate.in')
+    ) {
+      return false;
+    }
+    return true;
+  });
   const [allAccounts, setAllAccounts] = useState<UserProfile[]>([]);
   const [editingAccounts, setEditingAccounts] = useState<Record<string, UserProfile>>({});
   const [accountSearchQuery, setAccountSearchQuery] = useState('');
@@ -888,7 +903,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
               <span className={`px-2 py-0.5 text-[10px] rounded-full ${
                 activeTab === 'leads' ? 'bg-[#E4D5B7] text-[#0F382C]' : 'bg-gray-200 text-gray-700'
               }`}>
-                {leads?.length || 0}
+                {validSenderLeads.length}
               </span>
             </button>
           )}
@@ -1739,18 +1754,18 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
           <div className="space-y-6">
             <div>
               <h2 className="text-xl font-serif-luxury font-bold text-[#0F382C]">
-                Incoming Leads & Tour Inquiries ({leads?.length || 0})
+                Incoming Leads & Tour Inquiries ({validSenderLeads.length})
               </h2>
               <p className="text-xs text-gray-600 mt-0.5">
-                All tour bookings and quick inquiries captured from potential buyers across the platform.
+                All client inquiries and tour bookings captured with verified sender mobile numbers.
               </p>
             </div>
 
-            {(!leads || leads.length === 0) ? (
+            {validSenderLeads.length === 0 ? (
               <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center space-y-3">
                 <Calendar className="w-10 h-10 text-gray-300 mx-auto" />
-                <h4 className="text-base font-bold text-gray-700">No Leads Captured Yet</h4>
-                <p className="text-xs text-gray-500">Inquiries submitted via 'Quick Inquiry' or 'Book Tour' will appear here.</p>
+                <h4 className="text-base font-bold text-gray-700">No Verified Client Leads Yet</h4>
+                <p className="text-xs text-gray-500">Only inquiries submitted with the sender's verified mobile number appear here.</p>
               </div>
             ) : (
               <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
@@ -1766,11 +1781,13 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-gray-800">
-                      {leads.map((lead) => {
+                      {validSenderLeads.map((lead) => {
                         const linkedProp = (allProperties || userProperties).find(p => p.id === lead.propertyId);
+                        const cleanPhoneDigits = lead.phone.replace(/[^0-9]/g, '');
                         const waText = encodeURIComponent(
                           `🏰 *Royal Agra Estate — Client Inquiry Follow-up*\n\n` +
                           `👤 *Client:* ${lead.buyerName} (${lead.phone})\n` +
+                          `📱 *Mobile:* ${lead.phone}\n` +
                           `📧 *Email:* ${lead.email}\n` +
                           `📍 *Property:* ${lead.propertyTitle} (ID: #${lead.propertyId})\n` +
                           (linkedProp ? `💰 *Price:* ${linkedProp.priceDisplay} | *Locality:* ${linkedProp.locality}\n` : '') +
@@ -1807,8 +1824,15 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                             </td>
                             <td className="p-4 align-top">
                               <span className="font-bold text-gray-900 block">{lead.buyerName}</span>
-                              <span className="text-emerald-700 font-medium block">{lead.phone}</span>
-                              <span className="text-gray-500 text-[11px] block">{lead.email}</span>
+                              <a
+                                href={`tel:${cleanPhoneDigits}`}
+                                className="text-emerald-700 font-semibold hover:underline flex items-center gap-1 mt-0.5"
+                                title="Call Client Mobile"
+                              >
+                                <Phone className="w-3 h-3 shrink-0" />
+                                <span>{lead.phone}</span>
+                              </a>
+                              <span className="text-gray-500 text-[11px] block mt-0.5">{lead.email}</span>
                             </td>
                             <td className="p-4 align-top font-medium text-gray-700">
                               <span className="bg-amber-50 border border-amber-200 px-2 py-1 rounded-md text-[11px] text-amber-950 inline-block">
@@ -1818,7 +1842,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                             <td className="p-4 text-right align-top">
                               <div className="flex items-center justify-end gap-2">
                                 <a
-                                  href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}?text=${waText}`}
+                                  href={`https://wa.me/${cleanPhoneDigits}?text=${waText}`}
                                   target="_blank"
                                   rel="noreferrer"
                                   className="px-3 py-1.5 bg-[#25D366] hover:bg-[#1ebd54] text-white rounded-lg font-bold text-[11px] shadow-xs flex items-center gap-1.5 transition-all"

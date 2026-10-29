@@ -246,23 +246,20 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           )}
 
           {/* Unified Clean "Inquire / Contact" Button */}
-          <a
-            href={`https://wa.me/919149079913?text=${encodeURIComponent(
-              `Hi Royal Agra Estate, I am interested in Property ID #${property.id} in ${displayLocality}.`
-            )}`}
-            target="_blank"
-            rel="noreferrer"
+          <button
+            type="button"
+            id={`inquire-contact-btn-${property.id}`}
             onClick={(e) => {
               e.stopPropagation();
               trackWhatsAppClick(property.title);
               if (onInquireContact) onInquireContact(property);
             }}
-            className="w-full py-2 bg-[#25D366] hover:bg-[#1ebd54] text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all"
-            title="Inquire via WhatsApp & Log Inquiry"
+            className="w-full py-2 bg-[#25D366] hover:bg-[#1ebd54] text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
+            title="Inquire & Contact Concierge"
           >
             <MessageSquare className="w-3.5 h-3.5 fill-white" />
             <span>Inquire / Contact</span>
-          </a>
+          </button>
 
           <div className="flex items-center justify-between gap-2 pt-1">
             {onToggleCompare && (
