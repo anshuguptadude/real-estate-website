@@ -2,7 +2,7 @@
 // 100% Self-Hosted on royalagraestate.in with Zero Cloud Quota Limits and Instant NVMe SSD Speeds
 
 import { Property, UserProfile, Project } from '../types';
-import { LeadSubmission } from '../utils/security';
+import { LeadSubmission, isValidClientLead } from '../utils/security';
 import { PROPERTIES_DATA } from '../data/mockData';
 import { trackLeadSubmission } from '../utils/analytics';
 
@@ -87,6 +87,11 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 // 1. LEADS CAPTURE & REAL-TIME CRM STREAM (Hostinger SQLite Engine)
 // -------------------------------------------------------------
 export const saveFirestoreLead = async (lead: LeadSubmission): Promise<boolean> => {
+  if (!isValidClientLead(lead)) {
+    console.warn("[saveFirestoreLead] Rejected invalid/placeholder lead:", lead);
+    return false;
+  }
+
   const leadId = lead.id || `LEAD-${Date.now()}`;
   const completeLead: LeadSubmission = {
     ...lead,
@@ -96,12 +101,12 @@ export const saveFirestoreLead = async (lead: LeadSubmission): Promise<boolean> 
     status: lead.status || 'new'
   };
 
-  // Always save locally first to guarantee zero lead loss offline
+  // Always save locally first to guarantee zero lead loss offline (storing only valid leads)
   try {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('royal_agra_leads_v1');
       const existing: LeadSubmission[] = stored ? JSON.parse(stored) : [];
-      const updated = [completeLead, ...existing.filter(l => l.id !== leadId)];
+      const updated = [completeLead, ...existing.filter(l => l.id !== leadId && isValidClientLead(l))];
       localStorage.setItem('royal_agra_leads_v1', JSON.stringify(updated));
     }
   } catch {}
@@ -136,17 +141,27 @@ export const fetchFirestoreLeads = async (): Promise<LeadSubmission[]> => {
   try {
     const data = await apiRequest<LeadSubmission[]>('/leads.php');
     if (Array.isArray(data)) {
-      safeStorageSet('royal_agra_leads_v1', data);
-      return data;
+      const valid = data.filter(l => isValidClientLead(l));
+      safeStorageSet('royal_agra_leads_v1', valid);
+      return valid;
     }
   } catch (error) {
     console.warn("Error fetching leads from Hostinger API:", error);
   }
-  // Fallback to local storage
+  // Fallback to local storage (strictly sanitizing legacy dummy leads)
   try {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('royal_agra_leads_v1');
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const valid = parsed.filter(l => isValidClientLead(l));
+          if (valid.length !== parsed.length) {
+            safeStorageSet('royal_agra_leads_v1', valid);
+          }
+          return valid;
+        }
+      }
     }
   } catch {}
   return [];

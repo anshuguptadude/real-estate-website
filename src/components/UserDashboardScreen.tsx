@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { UserProfile, Property, UserDashboardTab } from '../types';
 import { INITIAL_ACCOUNTS } from '../data/mockData';
-import { isAdmin, isCEO, getUserAvatar, LeadSubmission, ADMIN_CREDENTIALS, SUPER_ADMIN_PERMISSIONS, canEditProperty, canDeleteProperty } from '../utils/security';
+import { isAdmin, isCEO, getUserAvatar, LeadSubmission, ADMIN_CREDENTIALS, SUPER_ADMIN_PERMISSIONS, canEditProperty, canDeleteProperty, isValidClientLead } from '../utils/security';
 import { saveFirestoreAccount, getFirestoreAccount, subscribeFirestoreAccounts, deleteFirestoreAccount, getLocalDeletedAccountEmails } from '../services/firebaseService';
 import { 
   Building2, 
@@ -119,20 +119,8 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
 
   // CEO Master Access & RBAC Console State
 
-  // Filter leads to strictly display only those containing the sender's verified mobile number
-  const validSenderLeads = (leads || []).filter(lead => {
-    if (!lead || !lead.phone) return false;
-    const cleanPhone = lead.phone.replace(/[^0-9]/g, '');
-    if (cleanPhone.length < 10) return false;
-    // Exclude placeholder/fallback entries where phone was defaulted to company admin line without client sender identity
-    if (
-      (cleanPhone.endsWith('9149079913') || cleanPhone.endsWith('9557138449')) &&
-      (lead.buyerName === 'Prospective Buyer' || lead.propertyId === 'general-inquiry' || lead.email === 'buyer@royalagraestate.in')
-    ) {
-      return false;
-    }
-    return true;
-  });
+  // Filter leads to strictly display only those containing the sender's real details & verified mobile number
+  const validSenderLeads = (leads || []).filter(lead => isValidClientLead(lead));
   const [allAccounts, setAllAccounts] = useState<UserProfile[]>([]);
   const [editingAccounts, setEditingAccounts] = useState<Record<string, UserProfile>>({});
   const [accountSearchQuery, setAccountSearchQuery] = useState('');
@@ -2145,7 +2133,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                       (p.userId && p.userId === activeData.id)
                     )
                   );
-                  const userLeads = (leads || []).filter(
+                  const userLeads = (validSenderLeads || []).filter(
                     l => l && (
                       (l.email && activeData.email && l.email.toLowerCase() === activeData.email.toLowerCase()) ||
                       (l.phone && activeData.phone && l.phone.includes(activeData.phone.replace(/[^0-9]/g, '').slice(-10)))

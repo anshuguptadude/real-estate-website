@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ActiveScreen, Property, FilterState, PropertyType, ListingType, UserProfile, Project, UserDashboardTab } from './types';
 import { PROPERTIES_DATA, PROJECTS_DATA, INITIAL_LEADS } from './data/mockData';
-import { isAdmin, isCEO, canViewFullAddress, getMaskedProperty, formatAgraLocality, LeadSubmission, canEditProperty, canDeleteProperty } from './utils/security';
+import { isAdmin, isCEO, canViewFullAddress, getMaskedProperty, formatAgraLocality, LeadSubmission, canEditProperty, canDeleteProperty, isValidClientLead } from './utils/security';
 import { 
   saveFirestoreAccount, 
   saveFirestoreProperty, 
@@ -212,17 +212,21 @@ export default function App() {
       const stored = localStorage.getItem('royal_agra_leads_v1');
       if (stored !== null) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          const sanitized = parsed.filter(l => isValidClientLead(l));
+          return sanitized;
+        }
       }
-      return INITIAL_LEADS;
+      return INITIAL_LEADS.filter(l => isValidClientLead(l));
     } catch {
-      return INITIAL_LEADS;
+      return INITIAL_LEADS.filter(l => isValidClientLead(l));
     }
   });
 
   useEffect(() => {
     try {
-      localStorage.setItem('royal_agra_leads_v1', JSON.stringify(leads));
+      const validLeads = leads.filter(l => isValidClientLead(l));
+      localStorage.setItem('royal_agra_leads_v1', JSON.stringify(validLeads));
     } catch {
       // ignore
     }
@@ -233,7 +237,7 @@ export default function App() {
     if (!user || (!isAdmin(user) && !isCEO(user))) return;
     const unsubscribe = subscribeFirestoreLeads((firestoreLeads) => {
       if (Array.isArray(firestoreLeads)) {
-        setLeads(firestoreLeads);
+        setLeads(firestoreLeads.filter(l => isValidClientLead(l)));
       }
     });
     return () => unsubscribe();
@@ -248,7 +252,8 @@ export default function App() {
   };
 
   const handleLeadSubmitted = async (newLead: LeadSubmission) => {
-    setLeads(prev => [newLead, ...prev]);
+    if (!isValidClientLead(newLead)) return;
+    setLeads(prev => [newLead, ...prev.filter(l => l.id !== newLead.id && isValidClientLead(l))]);
     await saveFirestoreLead(newLead);
   };
 

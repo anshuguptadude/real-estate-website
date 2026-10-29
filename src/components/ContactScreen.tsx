@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, MessageSquare, Clock, Send, CheckCircle2, Landmark, Compass, AlertTriangle, Loader2 } from 'lucide-react';
 import { saveFirestoreLead } from '../services/firebaseService';
-import { LeadSubmission } from '../utils/security';
+import { LeadSubmission, getSavedGuestContact, saveGuestContact, clearGuestContact } from '../utils/security';
 import { trackWhatsAppClick, trackPhoneClick } from '../utils/analytics';
 import { UserProfile } from '../types';
 
@@ -10,21 +10,32 @@ interface ContactScreenProps {
 }
 
 export const ContactScreen: React.FC<ContactScreenProps> = ({ user }) => {
-  const [name, setName] = useState(user?.name || '');
-  const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState(user?.phone || '');
+  const savedGuest = !user ? getSavedGuestContact() : null;
+  const [name, setName] = useState(user?.name || savedGuest?.name || '');
+  const [email, setEmail] = useState(user?.email || savedGuest?.email || '');
+  const [phone, setPhone] = useState(user?.phone || savedGuest?.phone || '');
   const [service, setService] = useState('Luxury Property Search');
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGuestAutofilled, setIsGuestAutofilled] = useState(Boolean(!user && savedGuest));
 
   // Sync / Autofill if user profile loads or updates
   useEffect(() => {
     if (user) {
-      if (!name && user.name) setName(user.name);
-      if (!email && user.email) setEmail(user.email);
-      if (!phone && user.phone) setPhone(user.phone);
+      if (user.name) setName(user.name);
+      if (user.email) setEmail(user.email);
+      if (user.phone) setPhone(user.phone);
+      setIsGuestAutofilled(false);
+    } else {
+      const guest = getSavedGuestContact();
+      if (guest) {
+        if (!name && guest.name) setName(guest.name);
+        if (!email && guest.email) setEmail(guest.email);
+        if (!phone && guest.phone) setPhone(guest.phone);
+        setIsGuestAutofilled(true);
+      }
     }
   }, [user]);
 
@@ -77,9 +88,8 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ user }) => {
       await saveFirestoreLead(contactLead);
       setSent(true);
       if (!user) {
-        setName('');
-        setEmail('');
-        setPhone('');
+        saveGuestContact({ name, phone, email });
+        setIsGuestAutofilled(true);
       }
       setMessage('');
       setService('Luxury Property Search');
@@ -209,12 +219,32 @@ export const ContactScreen: React.FC<ContactScreenProps> = ({ user }) => {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  {user && (
+                  {user ? (
                     <div className="p-3 bg-emerald-50/80 border border-emerald-200 text-emerald-900 rounded-lg text-xs flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                       <span>Autofilled contact details from your <strong>{user.name}</strong> account.</span>
                     </div>
-                  )}
+                  ) : isGuestAutofilled ? (
+                    <div className="p-3 bg-blue-50/90 border border-blue-200 text-blue-950 rounded-lg text-xs flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+                        <span>Autofilled from your previous inquiry on this device.</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          clearGuestContact();
+                          setName('');
+                          setPhone('');
+                          setEmail('');
+                          setIsGuestAutofilled(false);
+                        }}
+                        className="text-[11px] text-blue-700 underline font-semibold hover:text-blue-900 cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  ) : null}
 
                   {errorMessage && (
                     <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs flex items-center gap-2">

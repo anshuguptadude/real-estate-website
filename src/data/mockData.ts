@@ -567,23 +567,11 @@ export const INITIAL_LEADS: LeadSubmission[] = [
     "createdAt": "2026-10-22T11:56:49.003Z",
     "status": "new",
     "id": "LEAD-TOUR-1792670208979",
-    "buyerName": "Shrey Direct Verification",
-    "phone": "+91 9149079913",
-    "email": "",
+    "buyerName": "Kabir Singhania",
+    "phone": "+91 98201 54321",
+    "email": "kabir.singhania@example.com",
     "timestamp": "22/10/2026, 17:26:48",
     "propertyTitle": "88, Harish Nagar"
-  },
-  {
-    "status": "new",
-    "preferredTime": "Direct WhatsApp Inquire / Contact",
-    "phone": "+91 9149079913",
-    "timestamp": "21/10/2026, 01:52:20",
-    "id": "LEAD-7414",
-    "createdAt": "2026-10-20T20:22:20.028Z",
-    "propertyId": "prop-user-1792320738640",
-    "propertyTitle": "Kargil Petrol Pump",
-    "email": "buyer@royalagraestate.in",
-    "buyerName": "Prospective Buyer"
   }
 ];
 

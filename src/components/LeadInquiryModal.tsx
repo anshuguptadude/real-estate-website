@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Property, UserProfile } from '../types';
 import { X, Calendar, CheckCircle2, ShieldCheck, User, Phone, Mail, Clock, MessageSquare } from 'lucide-react';
-import { LeadSubmission } from '../utils/security';
+import { LeadSubmission, getSavedGuestContact, saveGuestContact, clearGuestContact } from '../utils/security';
 
 interface LeadInquiryModalProps {
   isOpen: boolean;
@@ -18,20 +18,31 @@ export const LeadInquiryModal: React.FC<LeadInquiryModalProps> = ({
   onLeadSubmitted,
   user
 }) => {
-  const [buyerName, setBuyerName] = useState(user?.name || '');
-  const [phone, setPhone] = useState(user?.phone || '');
-  const [email, setEmail] = useState(user?.email || '');
+  const savedGuest = !user ? getSavedGuestContact() : null;
+  const [buyerName, setBuyerName] = useState(user?.name || savedGuest?.name || '');
+  const [phone, setPhone] = useState(user?.phone || savedGuest?.phone || '');
+  const [email, setEmail] = useState(user?.email || savedGuest?.email || '');
   const [message, setMessage] = useState('');
   const [preferredTime, setPreferredTime] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGuestAutofilled, setIsGuestAutofilled] = useState(Boolean(!user && savedGuest));
 
-  // Sync / Autofill if user profile loads or changes
+  // Sync / Autofill if user profile loads or changes, or when modal opens
   useEffect(() => {
     if (user) {
-      if (!buyerName && user.name) setBuyerName(user.name);
-      if (!phone && user.phone) setPhone(user.phone);
-      if (!email && user.email) setEmail(user.email);
+      if (user.name) setBuyerName(user.name);
+      if (user.phone) setPhone(user.phone);
+      if (user.email) setEmail(user.email);
+      setIsGuestAutofilled(false);
+    } else {
+      const guest = getSavedGuestContact();
+      if (guest) {
+        if (!buyerName && guest.name) setBuyerName(guest.name);
+        if (!phone && guest.phone) setPhone(guest.phone);
+        if (!email && guest.email) setEmail(guest.email);
+        setIsGuestAutofilled(true);
+      }
     }
   }, [user, isOpen]);
 
@@ -66,6 +77,10 @@ export const LeadInquiryModal: React.FC<LeadInquiryModalProps> = ({
 
     onLeadSubmitted(newLead);
     setSubmitted(true);
+    if (!user) {
+      saveGuestContact({ name: buyerName, phone, email });
+      setIsGuestAutofilled(true);
+    }
 
     // Connect to WhatsApp with sender details
     try {
@@ -140,12 +155,32 @@ export const LeadInquiryModal: React.FC<LeadInquiryModalProps> = ({
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-3.5">
-              {user && (
+              {user ? (
                 <div className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-lg text-xs flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>Autofilled details from your <strong>{user.name}</strong> account.</span>
                 </div>
-              )}
+              ) : isGuestAutofilled ? (
+                <div className="px-3 py-1.5 bg-blue-50/90 border border-blue-200 text-blue-950 rounded-lg text-xs flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+                    <span>Autofilled from your previous inquiry on this device.</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearGuestContact();
+                      setBuyerName('');
+                      setPhone('');
+                      setEmail('');
+                      setIsGuestAutofilled(false);
+                    }}
+                    className="text-[11px] text-blue-700 underline font-semibold hover:text-blue-900 cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                </div>
+              ) : null}
 
               <div>
                 <label htmlFor="lead-buyer-name" className="block text-xs font-bold text-gray-700 uppercase mb-1 cursor-pointer">
