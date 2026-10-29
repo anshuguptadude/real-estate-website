@@ -36,6 +36,11 @@ interface PropertiesScreenProps {
   isAdminUser?: boolean;
   onDeleteProperty?: (id: string) => void;
   onApproveProperty?: (id: string) => void;
+  seoHeader?: {
+    title: string;
+    subtitle: string;
+    onClear: () => void;
+  };
 }
 
 export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
@@ -53,7 +58,8 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
   onInquireContact,
   isAdminUser,
   onDeleteProperty,
-  onApproveProperty
+  onApproveProperty,
+  seoHeader
 }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -149,12 +155,51 @@ export const PropertiesScreen: React.FC<PropertiesScreenProps> = ({
     <div className="bg-[#FAF8F5] min-h-screen py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
+        {/* SEO Contextual Banner */}
+        {seoHeader && (
+          <div className="bg-gradient-to-r from-[#0F382C]/5 via-[#0F382C]/10 to-[#C5A869]/10 border border-[#0F382C]/15 rounded-2xl p-5 sm:p-6 mb-6 shadow-xs">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0F382C] text-[#E4D5B7] text-xs font-semibold uppercase tracking-wider mb-2.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#C5A869]" />
+                  <span>Verified Agra SEO Collection</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-serif-luxury font-bold text-[#0F382C]">
+                  {seoHeader.title}
+                </h2>
+                <p className="text-sm text-gray-700 mt-1.5 max-w-2xl leading-relaxed">
+                  {seoHeader.subtitle}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                <a
+                  href={`https://wa.me/919149079913?text=${encodeURIComponent(`Hello Royal Agra Estate, I am inquiring about ${seoHeader.title}. Please share available verified options.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all hover:shadow-sm"
+                >
+                  <span>WhatsApp Concierge</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={seoHeader.onClear}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl text-xs font-semibold shadow-2xs transition-colors"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-gray-500" />
+                  <span>View All Agra</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-4xl font-serif-luxury font-bold text-[#0F382C]">
-                Exclusive Agra Property Portfolio
+                {seoHeader ? seoHeader.title : 'Exclusive Agra Property Portfolio'}
               </h1>
               <p className="text-sm text-gray-600 mt-1">
                 Showing <strong className="text-[#0F382C]">{filteredProperties.length}</strong> luxury properties in Agra with verified clear titles.

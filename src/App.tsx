@@ -38,10 +38,36 @@ import { EmiCalculatorModal } from './components/EmiCalculatorModal';
 import { CompareModal } from './components/CompareModal';
 import { SavedPropertiesDrawer } from './components/SavedPropertiesDrawer';
 import { Footer } from './components/Footer';
+import { getSeoRouteConfig, applySeoMetadata, SeoRouteConfig } from './utils/seoRoutes';
+
+const INITIAL_FILTER_STATE: FilterState = {
+  searchQuery: '',
+  listingType: 'Buy',
+  locality: '',
+  propertyType: 'All',
+  priceRange: [0, 200000000],
+  bhk: '',
+  possession: 'all',
+  furnishing: 'all',
+  facing: 'all',
+  sortBy: 'featured'
+};
 
 export default function App() {
+  // SEO Route Configuration & Dynamic Metadata
+  const [currentSeoConfig, setCurrentSeoConfig] = useState<SeoRouteConfig | null>(() => {
+    return getSeoRouteConfig(window.location.pathname);
+  });
+
   // Navigation & Screen state
-  const [activeScreen, setActiveScreen] = useState<ActiveScreen>('home');
+  const [activeScreen, setActiveScreen] = useState<ActiveScreen>(() => {
+    const seo = getSeoRouteConfig(window.location.pathname);
+    if (seo) return seo.screen;
+    const params = new URLSearchParams(window.location.search);
+    const scr = params.get('screen');
+    return scr ? (scr as ActiveScreen) : 'home';
+  });
+
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const hasOpenedModalInApp = useRef(false);
 
@@ -146,20 +172,18 @@ export default function App() {
   }, []);
 
   // Search & Filter state
-  const initialFilterState: FilterState = {
-    searchQuery: '',
-    listingType: 'Buy',
-    locality: '',
-    propertyType: 'All',
-    priceRange: [0, 200000000],
-    bhk: '',
-    possession: 'all',
-    furnishing: 'all',
-    facing: 'all',
-    sortBy: 'featured'
-  };
+  const initialFilterState: FilterState = INITIAL_FILTER_STATE;
 
-  const [filterState, setFilterState] = useState<FilterState>(initialFilterState);
+  const [filterState, setFilterState] = useState<FilterState>(() => {
+    const seo = getSeoRouteConfig(window.location.pathname);
+    if (seo && seo.filterOverrides) {
+      return {
+        ...INITIAL_FILTER_STATE,
+        ...seo.filterOverrides
+      };
+    }
+    return INITIAL_FILTER_STATE;
+  });
 
   // Saved / Favorite properties state
   const [savedPropertyIds, setSavedPropertyIds] = useState<string[]>(() => {
@@ -376,11 +400,17 @@ export default function App() {
       return;
     }
 
+    // Reset SEO state when navigating away to another screen
+    if (currentSeoConfig) {
+      setCurrentSeoConfig(null);
+      applySeoMetadata(null);
+    }
+
     // Avoid pushing duplicate states into browser history
     const currentParams = new URLSearchParams(window.location.search);
     const currentScreen = currentParams.get('screen') || 'home';
     const currentProperty = currentParams.get('property');
-    if (addToHistory && screen === currentScreen && propertyId === currentProperty) {
+    if (addToHistory && screen === currentScreen && propertyId === currentProperty && window.location.pathname === '/') {
       return;
     }
 
@@ -401,6 +431,7 @@ export default function App() {
     // Manage browser history
     if (addToHistory) {
       const url = new URL(window.location.href);
+      url.pathname = '/';
       url.searchParams.set('screen', screen);
       if (propertyId) {
         url.searchParams.set('property', propertyId);
@@ -439,9 +470,62 @@ export default function App() {
     return 'home';
   };
 
+  // Intercept clicks on internal SEO links (<a href="/plots-in-fatehabad-road-agra">)
+  useEffect(() => {
+    const handleDocumentClick = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement)?.closest('a');
+      if (!target) return;
+      const href = target.getAttribute('href');
+      if (!href || href.startsWith('http') || href.startsWith('tel:') || href.startsWith('mailto:') || href.startsWith('?')) {
+        return;
+      }
+
+      const seo = getSeoRouteConfig(href);
+      if (seo) {
+        if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+          e.preventDefault();
+          setCurrentSeoConfig(seo);
+          applySeoMetadata(seo);
+          setActiveScreen(seo.screen);
+          if (seo.filterOverrides) {
+            setFilterState({
+              ...INITIAL_FILTER_STATE,
+              ...seo.filterOverrides
+            });
+          }
+          setSelectedProperty(null);
+          window.history.pushState({ screen: seo.screen }, '', seo.path);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+    };
+
+    document.addEventListener('click', handleDocumentClick);
+    return () => document.removeEventListener('click', handleDocumentClick);
+  }, []);
+
   // Handle browser back button and initial load
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
+      const seo = getSeoRouteConfig(window.location.pathname);
+      if (seo) {
+        setCurrentSeoConfig(seo);
+        applySeoMetadata(seo);
+        setActiveScreen(seo.screen);
+        if (seo.filterOverrides) {
+          setFilterState({
+            ...INITIAL_FILTER_STATE,
+            ...seo.filterOverrides
+          });
+        }
+        setSelectedProperty(null);
+        hasOpenedModalInApp.current = false;
+        return;
+      }
+
+      setCurrentSeoConfig(null);
+      applySeoMetadata(null);
+
       if (event.state) {
         const { screen, propertyId } = event.state;
         if (!propertyId) {
@@ -459,8 +543,23 @@ export default function App() {
     };
 
     // Initialize state on load
+    const seo = getSeoRouteConfig(window.location.pathname);
+    if (seo) {
+      setCurrentSeoConfig(seo);
+      applySeoMetadata(seo);
+      setActiveScreen(seo.screen);
+      if (seo.filterOverrides) {
+        setFilterState({
+          ...INITIAL_FILTER_STATE,
+          ...seo.filterOverrides
+        });
+      }
+    } else {
+      applySeoMetadata(null);
+    }
+
     const params = new URLSearchParams(window.location.search);
-    const screen = normalizeScreenName(params.get('screen'));
+    const screen = seo ? seo.screen : normalizeScreenName(params.get('screen'));
     const propertyId = params.get('property');
     
     // Set initial state without adding to history (it's already the current state)
@@ -748,7 +847,30 @@ export default function App() {
             properties={displayedProperties}
             filterState={filterState}
             onUpdateFilters={(patch) => setFilterState(prev => ({ ...prev, ...patch }))}
-            onResetFilters={() => setFilterState(initialFilterState)}
+            onResetFilters={() => {
+              if (currentSeoConfig) {
+                setCurrentSeoConfig(null);
+                applySeoMetadata(null);
+                const url = new URL(window.location.href);
+                url.pathname = '/';
+                url.searchParams.set('screen', 'properties');
+                window.history.pushState({ screen: 'properties' }, '', url.pathname + url.search);
+              }
+              setFilterState(INITIAL_FILTER_STATE);
+            }}
+            seoHeader={currentSeoConfig ? {
+              title: currentSeoConfig.badgeTitle,
+              subtitle: currentSeoConfig.badgeSubtitle,
+              onClear: () => {
+                setCurrentSeoConfig(null);
+                applySeoMetadata(null);
+                setFilterState(INITIAL_FILTER_STATE);
+                const url = new URL(window.location.href);
+                url.pathname = '/';
+                url.searchParams.set('screen', 'properties');
+                window.history.pushState({ screen: 'properties' }, '', url.pathname + url.search);
+              }
+            } : undefined}
             onSelectProperty={(prop) => navigateTo(activeScreen, prop.id)}
             onToggleSave={handleToggleSave}
             savedIds={savedPropertyIds}

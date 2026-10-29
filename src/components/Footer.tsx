@@ -80,6 +80,47 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
         </div>
 
+        {/* Popular Agra Real Estate Searches (Google Crawl Links) */}
+        <div className="py-6 border-b border-[#164E3D]/50 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mb-3">
+            <span className="text-xs font-semibold text-[#E4D5B7] uppercase tracking-wider">
+              Popular Real Estate Searches in Agra
+            </span>
+            <span className="text-[11px] text-gray-400">
+              Verified Title Deeds • Direct Builder Contact
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-xs text-gray-300">
+            <a href="/plots-in-fatehabad-road-agra" className="hover:text-[#E4D5B7] transition-colors">
+              Plots in Fatehabad Road Agra
+            </a>
+            <span className="text-[#164E3D] hidden sm:inline">•</span>
+            <a href="/ada-approved-plots-in-agra" className="hover:text-[#E4D5B7] transition-colors">
+              ADA Approved Plots in Agra
+            </a>
+            <span className="text-[#164E3D] hidden sm:inline">•</span>
+            <a href="/buy-house-in-agra" className="hover:text-[#E4D5B7] transition-colors">
+              House for Sale in Agra
+            </a>
+            <span className="text-[#164E3D] hidden sm:inline">•</span>
+            <a href="/luxury-villas-in-agra" className="hover:text-[#E4D5B7] transition-colors">
+              Luxury Villas in Agra
+            </a>
+            <span className="text-[#164E3D] hidden sm:inline">•</span>
+            <a href="/flats-for-rent-in-agra" className="hover:text-[#E4D5B7] transition-colors">
+              Flats for Rent in Agra
+            </a>
+            <span className="text-[#164E3D] hidden sm:inline">•</span>
+            <a href="/commercial-property-in-agra" className="hover:text-[#E4D5B7] transition-colors">
+              Commercial Property in Agra
+            </a>
+            <span className="text-[#164E3D] hidden sm:inline">•</span>
+            <a href="/sell-property-in-agra" className="hover:text-[#E4D5B7] transition-colors">
+              Sell Property in Agra
+            </a>
+          </div>
+        </div>
+
         {/* Bottom Copyright */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400 gap-3 text-center sm:text-left">
           <span>
