@@ -10,13 +10,41 @@ if ($method === 'GET') {
     $leads = [];
     foreach ($rows as $json) {
         $decoded = json_decode($json, true);
-        if ($decoded) $leads[] = $decoded;
+        if ($decoded) {
+            $p = preg_replace('/[^0-9]/', '', $decoded['phone'] ?? '');
+            $n = trim($decoded['buyerName'] ?? '');
+            $e = strtolower(trim($decoded['email'] ?? ''));
+            // Filter out any legacy dummy leads or owner numbers
+            if (strlen($p) >= 10 && !str_ends_with($p, '9149079913') && !str_ends_with($p, '9557138449') && stripos($n, 'prospective buyer') === false && $e !== 'buyer@royalagraestate.in') {
+                $leads[] = $decoded;
+            }
+        }
     }
     jsonOutput($leads);
 }
 
 if ($method === 'POST') {
     $data = jsonInput();
+
+    // Server-side validation: Strictly reject dummy, placeholder, or company-owner phone numbers
+    $buyerName = trim($data['buyerName'] ?? '');
+    $phone = trim($data['phone'] ?? '');
+    $email = strtolower(trim($data['email'] ?? ''));
+    $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
+
+    if (strlen($cleanPhone) < 10) {
+        jsonOutput(["error" => "Valid 10-digit mobile number required"], 400);
+    }
+    if (str_ends_with($cleanPhone, '9149079913') || str_ends_with($cleanPhone, '9557138449')) {
+        jsonOutput(["error" => "Company owner lines cannot be submitted as buyer leads"], 400);
+    }
+    if (stripos($buyerName, 'prospective buyer') !== false || strlen($buyerName) < 2) {
+        jsonOutput(["error" => "Real buyer name is required"], 400);
+    }
+    if ($email === 'buyer@royalagraestate.in') {
+        jsonOutput(["error" => "Invalid placeholder email"], 400);
+    }
+
     if (empty($data['id'])) {
         $data['id'] = 'LEAD-' . (int)(microtime(true) * 1000);
     }

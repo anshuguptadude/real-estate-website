@@ -198,6 +198,12 @@ function seedInitialData($pdo) {
     if (!empty($seed['leads'])) {
         $stmt = $pdo->prepare("INSERT OR REPLACE INTO leads (id, buyer_name, phone, email, property_title, status, data_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         foreach ($seed['leads'] as $l) {
+            $p = preg_replace('/[^0-9]/', '', $l['phone'] ?? '');
+            $n = trim($l['buyerName'] ?? '');
+            $e = strtolower(trim($l['email'] ?? ''));
+            if (strlen($p) < 10 || str_ends_with($p, '9149079913') || str_ends_with($p, '9557138449') || stripos($n, 'prospective buyer') !== false || $e === 'buyer@royalagraestate.in') {
+                continue;
+            }
             $stmt->execute([
                 $l['id'] ?? ('lead-' . time()),
                 $l['buyerName'] ?? 'Lead',
