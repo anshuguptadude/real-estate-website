@@ -5,6 +5,11 @@ $pdo = getDB();
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
+    // Automatically normalize legacy 'published' status to 'Active' in database
+    try {
+        $pdo->exec("UPDATE properties SET status = 'Active', data_json = replace(data_json, '\"status\":\"published\"', '\"status\":\"Active\"') WHERE status = 'published' OR status = 'Published'");
+    } catch (Exception $e) {}
+
     // Generate an ETag based on count and max updated_at for super-fast 304 response
     $stmt = $pdo->query("SELECT MAX(updated_at), COUNT(*) FROM properties WHERE is_deleted = 0");
     $meta = $stmt->fetch(PDO::FETCH_NUM);
@@ -22,7 +27,12 @@ if ($method === 'GET') {
     $properties = [];
     foreach ($rows as $json) {
         $decoded = json_decode($json, true);
-        if ($decoded) $properties[] = $decoded;
+        if ($decoded) {
+            if (isset($decoded['status']) && strtolower($decoded['status']) === 'published') {
+                $decoded['status'] = 'Active';
+            }
+            $properties[] = $decoded;
+        }
     }
     jsonOutput($properties);
 }
@@ -38,6 +48,10 @@ if ($method === 'POST') {
     $propType = $data['propertyType'] ?? 'Luxury Villa';
     $price = (int)($data['price'] ?? 0);
     $status = $data['status'] ?? 'Active';
+    if (strtolower($status) === 'published') {
+        $status = 'Active';
+        $data['status'] = 'Active';
+    }
     $now = date('Y-m-d H:i:s');
     $data['updatedAt'] = $now;
 

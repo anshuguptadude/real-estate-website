@@ -102,7 +102,7 @@ export default function App() {
       locationLink: p.locationLink || p.mapUrl || p.googleMapsPinUrl || (p.coordinates ? `https://www.google.com/maps?q=${p.coordinates.lat},${p.coordinates.lng}` : undefined),
       googleMapsPinUrl: p.googleMapsPinUrl || p.mapUrl || p.locationLink || (p.coordinates ? `https://www.google.com/maps?q=${p.coordinates.lat},${p.coordinates.lng}` : undefined),
       landmarks: p.landmarks || [],
-      status: p.status || (idx === 3 ? 'Sold' : 'Active'),
+      status: String(p.status || '').toLowerCase() === 'published' ? 'Active' : (p.status || (idx === 3 ? 'Sold' : 'Active')),
       postedDate: postedDate,
       createdAt: p.createdAt || new Date().toISOString()
     };
