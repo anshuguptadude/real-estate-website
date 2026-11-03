@@ -312,7 +312,7 @@ Under the budget framework of ₹10,000–₹15,000/month, ad spend must be appo
 #### 2.5.3 Facebook Marketplace (15% Allocation — The High-Intent Local Deal Board)
 - Unlike passive feed scrollers, users browsing Facebook Marketplace have **active, immediate commercial intent**—they are actively seeking homes to tour this weekend.
 - **Creative Aesthetic**: Overly polished corporate 3D renders perform poorly on Marketplace because users assume they are fake agency spam. Listings must feature **unpolished, high-resolution smartphone photographs** taken in natural sunlight, showing the genuine exterior facade, approach road, and interior rooms.
-- Listing titles must be crystal-clear: *"Independent 3 BHK Kothi in Sikandra Near Guru Ka Taal — 180 Gaj, Ready to Move"*.
+- Listing titles must be crystal-clear and localized across prime corridors: e.g., *"Independent 3 BHK Kothi in Sikandra Near Guru Ka Taal — 180 Gaj, Ready to Move"*, *"3 BHK Luxury Builder Floor in Kamla Nagar / Dayalbagh — Stilt Parking & Lift"*, or *"Gated Villa on Fatehabad Road VIP Corridor — 350 Gaj"*.
 
 #### 2.5.4 Stories (10% Allocation — The Urgency & Event Trigger)
 - Ephemeral 24-hour stories excel at driving immediate tactical action.
@@ -799,9 +799,9 @@ In 2026, **Creative is the Targeting**. Stacking 15 restrictive interest tags ch
   4. *Direct Executive Concierge Connect* (`+91 91490 79913` with one-tap WhatsApp deep link).
 
 - **Headline Variations (Meta Ads Manager Character-Budget Optimized)**:
-  - *Headline 1 (Full)*: `Poore Agra Mein Verified Homes & Plots | 30-Yr Legal Check` (57 chars)
-  - *Headline 2 (Punchy)*: `Verified Kothis & Plots in Agra | Direct Rates | Call Now` (56 chars)
-  - *Headline 3 (High Contrast)*: `100% Verified Agra Properties | Direct Rates | WhatsApp` (54 chars)
+  - *Headline 1 (Full)*: `Poore Agra Mein Verified Homes & Plots | 30-Yr Legal Check` (58 chars)
+  - *Headline 2 (Punchy)*: `Verified Kothis & Plots in Agra | Direct Rates | Call Now` (57 chars)
+  - *Headline 3 (High Contrast)*: `100% Verified Agra Properties | Direct Rates | WhatsApp` (55 chars)
   - *Headline 4 (Mobile Compact < 45 chars)*: `Poore Agra Mein Verified Homes & Plots` (38 chars)
   - *Headline 5 (Trust Hook < 45 chars)*: `30-Yr Title Clear | Agra Kothis & Plots` (39 chars)
 
@@ -816,7 +816,7 @@ In 2026, **Creative is the Targeting**. Stacking 15 restrictive interest tags ch
     *Audio / Caption*: *"Poore Agra mein verified kothi ya plot lena ab hua 100% safe! Swipe up ya tap WhatsApp for direct catalogue."*
 
 - **Recommended Call To Action (CTA)**: `Send WhatsApp Message` (Click-to-WhatsApp) or `Learn More` (Landing Page).
-- **Placement Suitability**: Advantage+ Placements across Instagram Reels/Stories/Feed, Facebook Feed/Reels/Marketplace.
+- **Placement Suitability**: Core High-Intent Placements (Instagram Reels, Stories, Feed & Facebook Feed, Reels, Marketplace via Manual Placements with Audience Network and Messenger Network strictly excluded per Section 2.2 Step 4 to eliminate bot clicks and protect budget).
 
 ---
 
@@ -852,11 +852,11 @@ In 2026, **Creative is the Targeting**. Stacking 15 restrictive interest tags ch
   5. *Direct Concierge Access* (`+91 91490 79913` with immediate WhatsApp response).
 
 - **Headline Variations (Meta Ads Manager Character-Budget Optimized)**:
-  - *Headline 1 (Full)*: `Dayalbagh, Fatehabad Rd, Sikandra | Verified Agra Homes & Plots` (63 chars)
-  - *Headline 2 (Multi-Area)*: `Kamla Nagar se Fatehabad Rd | Verified Kothis | Direct Rates` (59 chars)
+  - *Headline 1 (Full)*: `Dayalbagh, Fatehabad Rd, Sikandra | Verified Agra Homes` (55 chars)
+  - *Headline 2 (Multi-Area)*: `Kamla Nagar se Fatehabad Rd | Verified Kothis | Direct Rates` (60 chars)
   - *Headline 3 (Action-Oriented)*: `Agra Prime Corridors: Verified Properties | 30-Yr Audit` (55 chars)
-  - *Headline 4 (Mobile Compact < 45 chars)*: `Dayalbagh to Fatehabad Rd | Agra Homes` (39 chars)
-  - *Headline 5 (Corridors < 45 chars)*: `Prime Agra Corridors | Verified Plots & Kothis` (46 chars)
+  - *Headline 4 (Mobile Compact < 45 chars)*: `Dayalbagh to Fatehabad Rd | Agra Homes` (38 chars)
+  - *Headline 5 (Corridors < 45 chars)*: `Agra Corridors | Verified Plots & Kothis` (40 chars)
 
 - **Conversational Hinglish Hooks by Placement Format**:
   - **Reels / 9:16 Vertical Video (0–3s Visual & Audio Pattern Interrupt)**:  
@@ -869,7 +869,7 @@ In 2026, **Creative is the Targeting**. Stacking 15 restrictive interest tags ch
     *Audio / Caption*: *"Agra ke kisi bhi prime corridor mein verified property dhoondh rahe hain? Direct WhatsApp karein aur exclusive verified catalogue paayein!"*
 
 - **Recommended Call To Action (CTA)**: `Send WhatsApp Message` or `Learn More`.
-- **Placement Suitability**: Advantage+ Placements across Instagram Reels/Stories/Feed, Facebook Feed/Reels/Marketplace.
+- **Placement Suitability**: Core High-Intent Placements (Instagram Reels, Stories, Feed & Facebook Feed, Reels, Marketplace via Manual Placements with Audience Network and Messenger Network strictly excluded per Section 2.2 Step 4 to eliminate bot clicks and protect budget).
 
 ---
 
@@ -913,7 +913,7 @@ In 2026, **Creative is the Targeting**. Stacking 15 restrictive interest tags ch
   
   👉 Click below to explore floor plans, photos, and book a private family walkthrough.  
   **Royal Agra Estate Concierge: +91 91490 79913**
-- **Headline**: Ready 3/4 BHK Luxury Floors | Prime Agra Corridors | Bank Approved
+- **Headline**: Ready 3/4 BHK Luxury Floors | Prime Agra | Bank Approved
 - **CTA**: Learn More / Book Site Visit
 
 #### 4.7.3 Creative Suite 3: Premium & Heritage Villas (Fatehabad Road & Dayalbagh)
