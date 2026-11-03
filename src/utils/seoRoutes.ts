@@ -133,6 +133,105 @@ export const SEO_ROUTES: Record<string, SeoRouteConfig> = {
       listingType: 'Commercial'
     }
   },
+  '/plots-in-dayalbagh-agra': {
+    path: '/plots-in-dayalbagh-agra',
+    title: 'Plots in Dayalbagh Agra | Freehold Residential Land | Royal Agra Estate',
+    description: 'Verified residential plots for sale in Dayalbagh, Agra. Close to Dayalbagh Educational Institute, clear ownership titles, gated colonies, immediate registry.',
+    keywords: [
+      'plots in dayalbagh agra',
+      'dayalbagh agra property',
+      'residential land dayalbagh',
+      'freehold plots dayalbagh',
+      'buy plot dayalbagh agra'
+    ],
+    canonicalUrl: 'https://royalagraestate.in/plots-in-dayalbagh-agra',
+    screen: 'properties',
+    badgeTitle: 'Plots & Land in Dayalbagh, Agra',
+    badgeSubtitle: "Verified residential plots in Dayalbagh's serene, educational, and high-demand residential sector.",
+    filterOverrides: {
+      listingType: 'Plots',
+      locality: 'Dayalbagh'
+    }
+  },
+  '/property-in-sikandra-agra': {
+    path: '/property-in-sikandra-agra',
+    title: 'Property in Sikandra Agra | Houses, Plots & Commercial Land | Royal Agra Estate',
+    description: 'Explore verified houses, plots, and commercial properties in Sikandra, Agra. Strategic location near NH-19 Delhi-Agra Highway with clear registry papers.',
+    keywords: [
+      'property in sikandra agra',
+      'plots in sikandra agra',
+      'house for sale in sikandra agra',
+      'sikandra real estate',
+      'commercial property sikandra'
+    ],
+    canonicalUrl: 'https://royalagraestate.in/property-in-sikandra-agra',
+    screen: 'properties',
+    badgeTitle: 'Property in Sikandra, Agra',
+    badgeSubtitle: 'Residential and commercial listings across Sikandra and Delhi-Agra Highway corridor.',
+    filterOverrides: {
+      locality: 'Sikandra'
+    }
+  },
+  '/plots-in-shastripuram-agra': {
+    path: '/plots-in-shastripuram-agra',
+    title: 'Plots in Shastri Puram Agra | Verified Residential & Commercial Plots | Royal Agra Estate',
+    description: 'Find verified residential plots and houses in Shastri Puram, Agra. Wide sector roads, clear titles, close to transport hubs and Sanjay Place.',
+    keywords: [
+      'plots in shastripuram agra',
+      'shastri puram property',
+      'house in shastripuram agra',
+      'plots in agra',
+      'freehold land shastripuram'
+    ],
+    canonicalUrl: 'https://royalagraestate.in/plots-in-shastripuram-agra',
+    screen: 'properties',
+    badgeTitle: 'Plots in Shastri Puram, Agra',
+    badgeSubtitle: 'Prime residential and commercial plots in well-planned Shastri Puram sectors.',
+    filterOverrides: {
+      listingType: 'Plots',
+      locality: 'Shastri Puram'
+    }
+  },
+  '/plots-in-shamshabad-road-agra': {
+    path: '/plots-in-shamshabad-road-agra',
+    title: 'Plots in Shamshabad Road Agra | High-Growth Plotted Land | Royal Agra Estate',
+    description: 'Investment-ready residential and commercial plots on Shamshabad Road, Agra. Rapidly developing corridor connecting to Ring Road and Lucknow Expressway.',
+    keywords: [
+      'plots in shamshabad road agra',
+      'shamshabad road property agra',
+      'land for sale shamshabad road',
+      'investment plots agra',
+      'residential land agra'
+    ],
+    canonicalUrl: 'https://royalagraestate.in/plots-in-shamshabad-road-agra',
+    screen: 'properties',
+    badgeTitle: 'Plots on Shamshabad Road, Agra',
+    badgeSubtitle: 'High-appreciation residential plots and investment land on Shamshabad Road growth corridor.',
+    filterOverrides: {
+      listingType: 'Plots',
+      locality: 'Shamshabad Road'
+    }
+  },
+  '/agricultural-land-in-agra': {
+    path: '/agricultural-land-in-agra',
+    title: 'Agricultural Land in Agra | Farmland & Highway Land for Sale | Royal Agra Estate',
+    description: 'Verified agricultural land, farmhouses, and bulk acreage for sale in Agra. Clear Section 143 conversion potential along Agra-Lucknow and Yamuna Expressway.',
+    keywords: [
+      'agricultural land in agra',
+      'farmland in agra',
+      'land for sale in agra',
+      'highway land agra',
+      'farm house in agra'
+    ],
+    canonicalUrl: 'https://royalagraestate.in/agricultural-land-in-agra',
+    screen: 'properties',
+    badgeTitle: 'Agricultural Land & Farmland in Agra',
+    badgeSubtitle: 'Clear-title farmland, agro-investment parcels, and highway frontage land across Agra district.',
+    filterOverrides: {
+      listingType: 'Plots',
+      searchQuery: 'Land'
+    }
+  },
   '/sell-property-in-agra': {
     path: '/sell-property-in-agra',
     title: 'Sell Property in Agra | Free Property Listing | Royal Agra Estate',
@@ -168,8 +267,8 @@ export function applySeoMetadata(config: SeoRouteConfig | null) {
   if (typeof document === 'undefined') return;
 
   const defaultTitle = 'Royal Agra Estate | Luxury Real Estate & Verified Properties in Agra';
-  const defaultDesc = 'Discover luxury villas, independent houses, ADA approved residential plots, and apartments for sale & rent across Agra. 100% verified legal paperwork.';
-  const defaultKeywords = 'real estate agra, property in agra, buy house agra, plots in agra, luxury villa agra';
+  const defaultDesc = 'Discover verified luxury villas, ADA approved plots on Fatehabad Road, independent kothis, and commercial property across Agra with 100% legal title verification.';
+  const defaultKeywords = 'buy house in agra, plots in fatehabad road agra, ada approved plots in agra, luxury villa in agra, flats for rent in agra, real estate agra, property in agra, plots in dayalbagh, plots in shastripuram agra';
   const defaultCanonical = 'https://royalagraestate.in/';
 
   const title = config ? config.title : defaultTitle;
@@ -216,4 +315,14 @@ export function applySeoMetadata(config: SeoRouteConfig | null) {
 
   const ogUrl = document.querySelector('meta[property="og:url"]');
   if (ogUrl) ogUrl.setAttribute('content', canonical);
+
+  // Twitter tags
+  const twTitle = document.querySelector('meta[name="twitter:title"]');
+  if (twTitle) twTitle.setAttribute('content', title);
+
+  const twDesc = document.querySelector('meta[name="twitter:description"]');
+  if (twDesc) twDesc.setAttribute('content', description);
+
+  const twUrl = document.querySelector('meta[name="twitter:url"]');
+  if (twUrl) twUrl.setAttribute('content', canonical);
 }

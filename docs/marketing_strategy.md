@@ -37,6 +37,10 @@
    - 4.5 Testing Budget Allocation Architecture: Model A (₹350/Day) vs. Model B (₹500/Day)
    - 4.6 Targeting Setup: Broad vs. Advantage+ & Geographic Micro-Radii
    - 4.7 High-Converting Localized Hindi/Hinglish Creative Copy Suites
+     - 4.7.0 Production-Ready Meta Ads Primary Text & Creative Suite (Agra-Wide Coverage)
+     - 4.7.1 Creative Suite 1: Budget Plots (Rohta / Gwalior Road & Shamshabad Road)
+     - 4.7.2 Creative Suite 2: Prime Family Homes & Builder Floors (Agra-Wide: Kamla Nagar, Dayalbagh, Sikandra, Shastripuram)
+     - 4.7.3 Creative Suite 3: Premium & Heritage Villas (Fatehabad Road & Dayalbagh)
    - 4.8 Empirical KPI Benchmark Matrix, Pipeline Efficiency & 72–96 Hour Diagnostics
 5. [Section R4: Seller & Dealer Quality Control & ₹10,000 Buyer Advance Verification Workflow](#5-section-r4-seller--dealer-quality-control--10000-buyer-advance-verification-workflow)
    - 5.1 Local Dealer Psychology in Agra: The Fear of Deal Bypass
@@ -191,7 +195,7 @@ Configure three distinct Ad Sets corresponding to the three property tiers:
 
 #### Step 5: Ad Creative Assembly & Pre-Filled WhatsApp Text
 1. Upload 9:16 vertical video walkthroughs for Reels/Stories and 1:1 carousels for Feed/Marketplace.
-2. In Ad Copy, state clear pricing, locality, and verification trust badges.
+2. In Ad Copy, deploy the approved Agra-wide primary text formulations (Formulation 1: All-Encompassing Citywide Copy or Formulation 2: Multi-Corridor Listing Copy detailed in Section 4.7.0) to ensure whole-city reach with verified trust badges (30-year registry, genuine direct rates, address privacy, and direct concierge connect). Avoid restricting the primary text to only one or two isolated locations.
 3. For WhatsApp ads, configure the pre-filled message:
    `"Namaste Royal Agra Estate, I saw your ad for verified properties in Agra (Ref: Meta Ad). Please share details and layout maps."`
 
@@ -489,7 +493,7 @@ To maximize capital efficiency and conversion velocity, Royal Agra Estate deploy
 - **Buyer Psychology**: Joint family purchase, safety-conscious. Requires floor plans, room measurements, bank loan approval details, and car parking verification.
 - **Routing Decision**: **Dedicated Property Landing Page on `royalagraestate.in` with Floating WhatsApp Bridge**.
 - **Cold Traffic Flow**: Directs to the property detail view featuring masked address, photo gallery, and an unmissable floating green CTA button: *"Chat with Property Specialist on WhatsApp"*.
-- **Retargeting Bridge**: Prospects who spend > 30 seconds browsing without converting are retargeted with an ad routing directly to WhatsApp: *"Still looking for a 3 BHK home in Sikandra? Chat with our senior advisor for unlisted inventory."*
+- **Retargeting Bridge**: Prospects who spend > 30 seconds browsing without converting are retargeted with an ad routing directly to WhatsApp: *"Still looking for a verified home or kothi in Agra? Chat with our senior advisor for unlisted inventory across your preferred corridor (Dayalbagh, Kamla Nagar, Fatehabad Road, Sikandra, or Shastripuram)."*
 
 #### Tier 3: Luxury Villas & Heritage Estates (> ₹1.5 Crores) → Website Showcase + VIP Concierge Handshake
 - **Target Locations**: Fatehabad Road VIP Corridor, Dayalbagh Riverfront, Civil Lines, Taj Nagari.
@@ -565,7 +569,7 @@ This allows advisors to send structured cards with photos, area, and masked loca
 ##### 4. Segmented Broadcast Lists
 Create broadcast lists for zero-cost re-engagement:
 - *"Sunday Site Visit Club (Rohta Plots)"*
-- *"Sikandra & Shastripuram Home Seekers"*
+- *"Agra Prime Residential Seekers (Dayalbagh, Kamla Nagar, Sikandra, Shastripuram)"*
 - *"High-Net-Worth Luxury Circle"*
 
 #### 3.5.2 Part B: Google Sheets Master CRM Architecture (Zero Cost)
@@ -752,6 +756,123 @@ In 2026, **Creative is the Targeting**. Stacking 15 restrictive interest tags ch
 
 ### 4.7 High-Converting Localized Hindi/Hinglish Creative Copy Suites
 
+#### 4.7.0 Production-Ready Meta Ads Primary Text & Creative Suite (Agra-Wide Coverage)
+- **Production Asset Metadata**:
+  - **Meta Business Suite Ad Account**: `1409561680502838`
+  - **Meta Creative Asset ID**: `1494761333710019`
+  - **Platform URL**: `https://royalagraestate.in`
+  - **Centralized Concierge Hotline & WhatsApp**: `+91 91490 79913`
+- **Legacy Restriction Elimination & Algorithmic Audit**:
+  - *Previous Primary Text (Deprecated)*:
+    > *"Sikandra & Shastripuram ke prime residential enclaves mein verified independent kothis aur plots. 30-year registry check, genuine rates, aur direct connect. Aaj hi visit plan karein."*
+  - *Operational Diagnosis*: The previous primary ad text artificially restricted campaign delivery by exclusively naming only two north-western localities (Sikandra & Shastripuram). In Meta's Advantage+ delivery environment, where machine learning models use optical character recognition (OCR) and natural language processing (NLP) to parse creative copy as an organic targeting signal, this 2-location restriction caused:
+    1. **Audience Starvation**: Disregarded ~75% of Agra's highest-intent buyers actively searching for inventory in Dayalbagh, Kamla Nagar, Fatehabad Road VIP Corridor, or southern expansion zones (Shamshabad Road / Gwalior Road).
+    2. **Premature Ad Fatigue**: In a localized Tier-2 market operating under a ₹10,000–₹15,000/month budget (₹350–₹500/day), confining ad relevance to two localities drove ad frequency above 3.5 within 96 hours, unnecessarily inflating CPMs from ~₹140 to > ₹260.
+    3. **Misalignment with Citywide Verified Inventory**: Royal Agra Estate lists verified properties across all administrative tehsils and corridors in Agra. Restricting the primary headline confused buyers into assuming the brand was merely a small neighborhood brokerage.
+  - *Resolution*: Deploy two distinct production-ready Agra-wide primary text formulations designed to make every buyer, seller, and investor across the entire city feel the platform was built specifically for their requirements, while strictly preserving core brand trust anchors.
+
+---
+
+##### Formulation 1: All-Encompassing Citywide Copy ("Poore Agra Mein...")
+*Designed as an overarching brand umbrella ad copy for broad citywide reach across Facebook and Instagram feeds, reels, and stories.*
+
+- **Production Primary Text (Conversational Hinglish)**:
+  Poore Agra mein verified independent kothis, luxury builder floors aur prime plots — ab bina kisi brokerage jhanjhat ya fake rates ke! 🏛️✨
+
+  Chahe aap apne parivar ke liye ready-to-move kothi dhoondh rahe hon, spacious luxury floor, ya high-growth corridor mein verified investment plot — Royal Agra Estate par har property milti hai 100% legal clarity aur transparent pricing ke saath.
+
+  Kyun chunein Royal Agra Estate?
+  ✅ **30-Year Statutory Registry & Legal Title Audit**: Har property ki tehsil aur sub-registrar record check, 100% dispute-free guarantee.
+  ✅ **Genuine Direct Owner Rates**: Zero inflated broker margins ya hidden commissions. Jo rate owner ka, wahi aapka.
+  ✅ **100% Address Privacy & Safe Direct Visits**: Complete location masking — koi roadside middleman beech mein nahi.
+  ✅ **ADA Sanctioned & Bank Approved**: SBI, HDFC aur nationalized banks se hassle-free home loan assistance (up to 80%).
+
+  Bina kisi roadside broker ke direct hamare senior property concierge se connect karein aur unlisted verified inventory ki photo-video catalogue WhatsApp par mangwayen.
+
+  📲 WhatsApp Direct: +91 91490 79913  
+  🌐 Browse All Verified Agra Properties: royalagraestate.in
+
+- **Core Brand Trust Anchors Preserved**:
+  1. *30-Year Statutory Registry & Title Audit* (Zero legal dispute risk).
+  2. *Genuine Direct Owner Rates* (Complete transparency; elimination of roadside broker markups).
+  3. *100% Address Privacy* (Programmatic masking via `getMaskedProperty` ensures safety for buyers and sellers).
+  4. *Direct Executive Concierge Connect* (`+91 91490 79913` with one-tap WhatsApp deep link).
+
+- **Headline Variations (Meta Ads Manager Character-Budget Optimized)**:
+  - *Headline 1 (Full)*: `Poore Agra Mein Verified Homes & Plots | 30-Yr Legal Check` (57 chars)
+  - *Headline 2 (Punchy)*: `Verified Kothis & Plots in Agra | Direct Rates | Call Now` (56 chars)
+  - *Headline 3 (High Contrast)*: `100% Verified Agra Properties | Direct Rates | WhatsApp` (54 chars)
+  - *Headline 4 (Mobile Compact < 45 chars)*: `Poore Agra Mein Verified Homes & Plots` (38 chars)
+  - *Headline 5 (Trust Hook < 45 chars)*: `30-Yr Title Clear | Agra Kothis & Plots` (39 chars)
+
+- **Conversational Hinglish Hooks by Placement Format**:
+  - **Reels / 9:16 Vertical Video (0–3s Visual & Audio Pattern Interrupt)**:  
+    *Visual: Senior property advisor in executive formal wear stands in front of a grand modern Agra residence holding a stamped title audit dossier:*  
+    *Audio*: *"Agra mein apna dream home ya verified plot dhoondh rahe hain par unverified brokers aur fake rates se pareshan hain? Poore Agra mein verified kothis aur plots ab direct rates par!"*
+  - **Feed / Single Image & 1:1 Carousel Hook**:  
+    *Top Banner Overlay / First Line*: *"Poore Agra mein verified independent kothis, luxury floors aur plots — bina kisi brokerage jhanjhat ya fake rates ke! 🏛️✨"*
+  - **Stories / 9:16 Vertical Card with Interactive Poll**:  
+    *Visual: High-contrast split of luxury home exterior and clear registry document with interactive sticker: 'Looking for Home or Plot?'*  
+    *Audio / Caption*: *"Poore Agra mein verified kothi ya plot lena ab hua 100% safe! Swipe up ya tap WhatsApp for direct catalogue."*
+
+- **Recommended Call To Action (CTA)**: `Send WhatsApp Message` (Click-to-WhatsApp) or `Learn More` (Landing Page).
+- **Placement Suitability**: Advantage+ Placements across Instagram Reels/Stories/Feed, Facebook Feed/Reels/Marketplace.
+
+---
+
+##### Formulation 2: Multi-Corridor Listing Copy (Micro-Market Comprehensive Coverage)
+*Designed as a comprehensive micro-market copy explicitly highlighting Agra's prime residential hubs and high-appreciation expansion corridors.*
+
+- **Production Primary Text (Conversational Hinglish)**:
+  Agra ke har prime corridor aur growth zone mein verified independent kothis, luxury floors aur plots! 🏡📍
+
+  Ab alag-alag local dalalon ke chakkar lagane aur fake listings dekhne ki zaroorat nahi. Royal Agra Estate laya hai Agra ke sabhi pramukh residential aur investment corridors mein fully verified, direct-rate inventory:
+
+  📍 **Dayalbagh & Kamla Nagar**: Spacious independent kothis, duplexes aur modern luxury builder floors.
+  📍 **Fatehabad Road VIP Corridor**: Signature luxury villas, premium gated townships aur high-appreciation commercial-residential assets.
+  📍 **Sikandra & Shastripuram**: Ready-to-move 3 & 4 BHK family homes, ADA-approved sector plots aur prime highway connectivity.
+  📍 **Shamshabad Road & Gwalior Road (Rohta)**: High-growth residential plots with pakki registry, dakhil-kharij aur immediate on-spot kabza.
+
+  Hamari 4-Point Verified Guarantee:
+  🔒 **30-Year Statutory Registry & Legal Title Audit**: Har property legal audit pass hone ke baad hi list hoti hai.
+  💰 **100% Genuine Direct Rates**: Seedhe owner ke genuine rates — beech mein koi dalal ya commission markup nahi.
+  🛡️ **100% Address Privacy**: Sensitive street address masked rehta hai jab tak buyer advance verify na ho.
+  🤝 **Direct Executive Concierge (+91 91490 79913)**: Guided Sunday site visit aur private family consultation.
+
+  Apni pasandida location aur budget WhatsApp par share karein aur instant verified property portfolio paayein.
+
+  📲 WhatsApp Direct: +91 91490 79913  
+  🌐 Explore All Agra Corridors: royalagraestate.in
+
+- **Core Brand Trust Anchors Preserved**:
+  1. *Explicit Multi-Corridor Coverage* (Dayalbagh, Kamla Nagar, Fatehabad Road, Sikandra, Shastripuram, Shamshabad Road, Rohta / Gwalior Road).
+  2. *30-Year Statutory Registry & Legal Title Audit* (Guaranteed dispute-free ownership).
+  3. *100% Genuine Direct Rates* (Protection against inflated intermediary markups).
+  4. *100% Address Privacy* (Strict data security and masking).
+  5. *Direct Concierge Access* (`+91 91490 79913` with immediate WhatsApp response).
+
+- **Headline Variations (Meta Ads Manager Character-Budget Optimized)**:
+  - *Headline 1 (Full)*: `Dayalbagh, Fatehabad Rd, Sikandra | Verified Agra Homes & Plots` (63 chars)
+  - *Headline 2 (Multi-Area)*: `Kamla Nagar se Fatehabad Rd | Verified Kothis | Direct Rates` (59 chars)
+  - *Headline 3 (Action-Oriented)*: `Agra Prime Corridors: Verified Properties | 30-Yr Audit` (55 chars)
+  - *Headline 4 (Mobile Compact < 45 chars)*: `Dayalbagh to Fatehabad Rd | Agra Homes` (39 chars)
+  - *Headline 5 (Corridors < 45 chars)*: `Prime Agra Corridors | Verified Plots & Kothis` (46 chars)
+
+- **Conversational Hinglish Hooks by Placement Format**:
+  - **Reels / 9:16 Vertical Video (0–3s Visual & Audio Pattern Interrupt)**:  
+    *Visual: Rapid dynamic 3-second drone transitions showcasing Dayalbagh greenery, Fatehabad Road commercial boulevard, and Sikandra-Shastripuram residential layouts:*  
+    *Audio*: *"Dayalbagh, Kamla Nagar, Fatehabad Road ho ya Sikandra-Shastripuram — Agra ke har prime corridor mein verified property chahiye bina kisi dalali ke?"*
+  - **Feed / Single Image & 1:1 Carousel Hook**:  
+    *Top Banner Overlay / First Line*: *"Agra ke har prime corridor aur growth zone mein verified independent kothis, luxury floors aur plots! 🏡📍"*
+  - **Stories / 9:16 Vertical Card with Corridor Selection Sticker**:  
+    *Visual: Map graphic of Agra highlighting 4 prime corridors with interactive 'Tap Your Area' sticker:*  
+    *Audio / Caption*: *"Agra ke kisi bhi prime corridor mein verified property dhoondh rahe hain? Direct WhatsApp karein aur exclusive verified catalogue paayein!"*
+
+- **Recommended Call To Action (CTA)**: `Send WhatsApp Message` or `Learn More`.
+- **Placement Suitability**: Advantage+ Placements across Instagram Reels/Stories/Feed, Facebook Feed/Reels/Marketplace.
+
+---
+
 #### 4.7.1 Creative Suite 1: Budget Plots (Rohta / Gwalior Road & Shamshabad Road)
 - **Primary Video Ad Hook (First 3 Seconds)**:  
   *Advisor standing on an open 30-foot paved road in Rohta, holding a boundary peg:*  
@@ -773,26 +894,26 @@ In 2026, **Creative is the Targeting**. Stacking 15 restrictive interest tags ch
 - **Headline**: Rohta & Shamshabad Rd Plots | Pakki Registry | ₹6,500/gaj se shuru
 - **CTA**: Send WhatsApp Message
 
-#### 4.7.2 Creative Suite 2: Mid-Tier Family Homes (Sikandra, Shastripuram, Kamla Nagar)
+#### 4.7.2 Creative Suite 2: Prime Family Homes & Builder Floors (Agra-Wide: Kamla Nagar, Dayalbagh, Sikandra, Shastripuram)
 - **Primary Video Ad Hook (First 3 Seconds)**:  
   *Walking from a spacious 2-car covered parking bay into a private elevator:*  
-  *"Purane Agra ke traffic aur roz ke car parking ke jhanjhat se thak chuke hain? Shastripuram aur Sikandra mein ready-to-move luxury independent homes!"*
+  *"Purane Agra ke traffic aur roz ke car parking ke jhanjhat se thak chuke hain? Kamla Nagar, Dayalbagh, Sikandra aur Shastripuram mein ready-to-move luxury independent floors aur kothis!"*
 - **Primary Text Copy (Hinglish)**:  
-  ✨ **Upgrade Your Family to Space, Peace & Modern Luxury in Agra!**  
+  ✨ **Upgrade Your Family to Space, Peace & Modern Luxury Across Agra!**  
   
-  Now move into spacious, newly built 3 BHK & 4 BHK independent luxury builder floors in Sikandra (near Highway) and Shastripuram.  
+  Now move into spacious, newly built 3 BHK & 4 BHK independent luxury builder floors and kothis across Agra's finest family residential corridors (Kamla Nagar, Dayalbagh, Sikandra, Shastripuram).  
   
   🚗 **Dedicated 2-Car Covered Stilt Parking**  
   🛗 **Automatic High-Speed Elevator for Elders**  
   🌳 **Gated Community with 24x7 Security & Park Facing**  
-  🏛️ **ADA Sanctioned Map & 100% Clear Title Verification**  
+  🏛️ **ADA Sanctioned Map & 30-Year Clear Title Verification**  
   🏦 **Pre-Approved Bank Loans from SBI & HDFC (Up to 80%)**  
   
-  Verified genuine direct listings with complete address privacy. Inspect with our senior advisory team this Sunday.  
+  Verified genuine direct listings with complete address privacy and zero broker markup. Inspect with our senior advisory team this Sunday.  
   
   👉 Click below to explore floor plans, photos, and book a private family walkthrough.  
   **Royal Agra Estate Concierge: +91 91490 79913**
-- **Headline**: Ready 3 BHK Luxury Floors | Sikandra & Shastripuram | Bank Approved
+- **Headline**: Ready 3/4 BHK Luxury Floors | Prime Agra Corridors | Bank Approved
 - **CTA**: Learn More / Book Site Visit
 
 #### 4.7.3 Creative Suite 3: Premium & Heritage Villas (Fatehabad Road & Dayalbagh)

@@ -1,5 +1,10 @@
+# Robots.txt for Royal Agra Estate (https://royalagraestate.in)
 User-agent: *
 Allow: /
+Disallow: /api/
 
-# Sitemap Index
+# Host
+Host: https://royalagraestate.in
+
+# XML Sitemap
 Sitemap: https://royalagraestate.in/sitemap.xml

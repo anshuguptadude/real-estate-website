@@ -7,7 +7,7 @@
   <!-- Primary Homepage -->
   <url>
     <loc>https://royalagraestate.in/</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -15,49 +15,84 @@
   <!-- Core Agra Real Estate SEO Category Landing Pages -->
   <url>
     <loc>https://royalagraestate.in/plots-in-fatehabad-road-agra</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
 
   <url>
     <loc>https://royalagraestate.in/ada-approved-plots-in-agra</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
 
   <url>
     <loc>https://royalagraestate.in/buy-house-in-agra</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.90</priority>
   </url>
 
   <url>
     <loc>https://royalagraestate.in/luxury-villas-in-agra</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.90</priority>
   </url>
 
   <url>
+    <loc>https://royalagraestate.in/plots-in-dayalbagh-agra</loc>
+    <lastmod>2026-11-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <url>
+    <loc>https://royalagraestate.in/property-in-sikandra-agra</loc>
+    <lastmod>2026-11-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <url>
+    <loc>https://royalagraestate.in/plots-in-shastripuram-agra</loc>
+    <lastmod>2026-11-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <url>
+    <loc>https://royalagraestate.in/plots-in-shamshabad-road-agra</loc>
+    <lastmod>2026-11-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <url>
+    <loc>https://royalagraestate.in/agricultural-land-in-agra</loc>
+    <lastmod>2026-11-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <url>
     <loc>https://royalagraestate.in/flats-for-rent-in-agra</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
 
   <url>
     <loc>https://royalagraestate.in/commercial-property-in-agra</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
 
   <url>
     <loc>https://royalagraestate.in/sell-property-in-agra</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.80</priority>
   </url>
@@ -65,64 +100,64 @@
   <!-- Primary Catalogue & Section URLs -->
   <url>
     <loc>https://royalagraestate.in/?screen=properties</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
 
   <url>
     <loc>https://royalagraestate.in/?screen=projects</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.80</priority>
   </url>
 
   <url>
     <loc>https://royalagraestate.in/?screen=about</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.60</priority>
   </url>
 
   <url>
     <loc>https://royalagraestate.in/?screen=contact</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.60</priority>
   </url>
 
-  <!-- Active Property Listings -->
+  <!-- Active Verified Property Listings -->
   <url>
     <loc>https://royalagraestate.in/?screen=properties&amp;property=prop-1</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
 
   <url>
     <loc>https://royalagraestate.in/?screen=properties&amp;property=prop-2</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
 
   <url>
     <loc>https://royalagraestate.in/?screen=properties&amp;property=prop-3</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
 
   <url>
     <loc>https://royalagraestate.in/?screen=properties&amp;property=prop-4</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
 
   <url>
     <loc>https://royalagraestate.in/?screen=properties&amp;property=prop-5</loc>
-    <lastmod>2026-10-30</lastmod>
+    <lastmod>2026-11-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
