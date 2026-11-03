@@ -1210,6 +1210,17 @@ export const PostPropertyScreen: React.FC<PostPropertyScreenProps> = ({
                     </p>
                   </div>
 
+                  {/* Partner Dealer & Broker Friendly Notice */}
+                  <div className="p-3.5 bg-blue-50/80 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-start gap-2.5 shadow-sm">
+                    <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-blue-950 block">Partner Dealers & Property Consultants:</span>
+                      <p className="text-[11px] text-blue-800 leading-relaxed mt-0.5">
+                        No upfront property ownership documents or deed papers are required to list. Verification documents are requested only after a genuine buyer submits a ₹10,000 refundable advance. Your listing address is 100% masked to protect your client relationship.
+                      </p>
+                    </div>
+                  </div>
+
                   {/* 1. Verification Status Toggle */}
                   <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-4">
                     <span className="block text-xs font-bold text-gray-700 uppercase tracking-wider">

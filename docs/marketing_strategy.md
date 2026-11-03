@@ -1,12 +1,13 @@
 # ROYAL AGRA ESTATE — MASTER STRATEGIC MARKETING CONSULTATION & EXECUTION BLUEPRINT
-## Comprehensive Meta Advertising Architecture, Hybrid Traffic Routing, Inclusive Audience Strategy, Buyer-Only Brokerage Monetization, and Listing Quality Assurance in Agra
+## Comprehensive Meta Advertising Architecture, Hybrid Traffic Routing, Zero-Cost Lead Tracking, Inclusive Multi-Tier Audience Strategy, and Partner Dealer Verification Workflow in Agra
 
 **Brand Authority**: Royal Agra Estate (`https://royalagraestate.in`)  
 **Official Concierge Desk**: `+91 91490 79913` | `contact@royalagraestate.in`  
 **Target Market**: Agra, Uttar Pradesh (Tier-2 Urban Ecosystem & Peripheral Growth Corridors)  
+**Budget Calibration**: Maximum ₹10,000 – ₹15,000/Month (₹350 – ₹500/Day)  
 **Document Classification**: Publication-Grade Strategic Consultation & Implementation Manual  
 **Publication Date**: November 2026  
-**Version**: 1.0.0 (Production-Ready Strategic Architecture)
+**Version**: 2.0.0 (Production-Ready Architecture)
 
 ---
 
@@ -15,57 +16,59 @@
    - 1.1 Brand Identity & Local Market Context
    - 1.2 The Agra Real Estate Dilemma: Portals vs. Roadside Broker Cartels
    - 1.3 Core Strategic Thesis: The Royal Agra Estate Moat
-2. [Section R1: Meta Ads Platform Strategy (Instagram & Facebook Only)](#2-section-r1-meta-ads-platform-strategy-instagram--facebook-only)
-   - 2.1 The Mathematical & Algorithmic Imperative of Meta Exclusivity Under ₹500–₹1,000/Day
-   - 2.2 Strategic Elimination of Google Search Ads & Meta Audience Network
-   - 2.3 Generational Demographic Analysis in Agra: Instagram vs. Facebook
-   - 2.4 Placement Optimization Mix (Reels, In-Feed Carousels, Marketplace, Stories)
-3. [Section R2: Ad Destination Analysis & Hybrid Routing Framework](#3-section-r2-ad-destination-analysis--hybrid-routing-framework)
-   - 3.1 Comprehensive 7-Pillar Comparative Evaluation Matrix
-   - 3.2 In-Depth Evaluation Across Technical, Psychological & Financial Dimensions
+2. [Section R1: Meta Ads Campaign Setup & Social Profile Posting Policy (Instagram & Facebook Only)](#2-section-r1-meta-ads-campaign-setup--social-profile-posting-policy-instagram--facebook-only)
+   - 2.1 The Mathematical & Algorithmic Imperative of Meta Exclusivity Under ₹10,000–₹15,000/Month
+   - 2.2 Step-by-Step Meta Ads Campaign Setup Guide (Ad Set Budget Optimization - ABO)
+   - 2.3 Strategic Elimination of Google Search Ads & Meta Audience Network
+   - 2.4 Generational Demographic Analysis in Agra: Instagram vs. Facebook
+   - 2.5 Placement Optimization Mix (Reels 45%, Feed 30%, Marketplace 15%, Stories 10%)
+   - 2.6 Social Profile Posting Policy: Public Feed vs. Dark Ads & The 6-Post Digital Billboard
+3. [Section R2: Ad Destination Analysis & Free Lead Tracking System](#3-section-r2-ad-destination-analysis--free-lead-tracking-system)
+   - 3.1 Comprehensive 7-Pillar Comparative Evaluation Matrix (WhatsApp vs. Website)
+   - 3.2 In-Depth Evaluation Across Technical, Psychological & Operational Dimensions
    - 3.3 Dynamic 3-Tier Hybrid Routing Decision Architecture
    - 3.4 Technical Tracking Infrastructure & The Meta CAPI Bridge
-4. [Section R3: Inclusive Multi-Tier Audience Strategy & Testing Budget Allocation](#4-section-r3-inclusive-multi-tier-audience-strategy--testing-budget-allocation)
+   - 3.5 Complete Zero-Cost Lead Tracking System (WhatsApp Business & Google Sheets CRM)
+4. [Section R3: Inclusive Multi-Tier Audience Strategy (Calibrated to ₹10,000–₹15,000/Month)](#4-section-r3-inclusive-multi-tier-audience-strategy-calibrated-to-1000015000month)
    - 4.1 Micro-Market Segmentation & Geographies
    - 4.2 Segment 1: Budget Residential Plots & Entry-Level Housing (< ₹45 Lakhs)
    - 4.3 Segment 2: Mid-Tier Family Residences & Builder Floors (₹45 Lakhs – ₹1.5 Crores)
    - 4.4 Segment 3: Premium Luxury Villas, Havelis & Heritage Estates (> ₹1.5 Crores)
-   - 4.5 Testing Budget Allocation Architecture: Conservative (₹500/Day) vs. Growth (₹1,000/Day)
+   - 4.5 Testing Budget Allocation Architecture: Model A (₹350/Day) vs. Model B (₹500/Day)
    - 4.6 Targeting Setup: Broad vs. Advantage+ & Geographic Micro-Radii
-   - 4.7 Empirical KPI Benchmark Matrix, Unit Economics & 72–96 Hour Diagnostics
-5. [Section R4: Buyer-Only Brokerage Business Model Strategy & Anti-Circumvention](#5-section-r4-buyer-only-brokerage-business-model-strategy--anti-circumvention)
-   - 5.1 Disrupting the Legacy 1%–2% Bilateral Broker Cartel
-   - 5.2 Two-Sided Marketplace Dynamics & The Power of "0% Seller Commission"
-   - 5.3 Four Core Buyer Value Deliverables Justifying 1.0%–1.5% Success Fee
-   - 5.4 Risk Mitigation: The 4-Layer Deal Bypass Prevention Architecture
-   - 5.5 Monetization Unit Economics & Ancillary High-Margin Revenue Streams
-6. [Section R5: Seller & Dealer Quality Control & Genuine Listing Acquisition](#6-section-r5-seller--dealer-quality-control--genuine-listing-acquisition)
-   - 6.1 The Plague of National Portals in Agra (99acres / MagicBricks / Housing.com)
-   - 6.2 Dual-Track Acquisition Engine: Direct Owners & Empanelled Dealers
-   - 6.3 The 5-Step Operational Verification Pipeline (Zero Bypass)
-   - 6.4 The 3-Tier Royal Certified Partner Dealer Program
-   - 6.5 The 30-Day Automated WhatsApp Recertification Engine
-7. [Section R6: Phased Execution Roadmap, Playbook & Invariant Compliance](#7-section-r6-phased-execution-roadmap-playbook--invariant-compliance)
-   - 7.1 Phase 1 (Days 1–30): Foundation, Tracking & Initial Acquisition
-   - 7.2 Phase 2 (Days 31–60): Partner Onboarding, Funnel Optimization & Rebalancing
-   - 7.3 Phase 3 (Days 61–90+): Scaling, Institutional Brand Dominance & Ancillary Expansion
-   - 7.4 Absolute Compliance with Royal Agra Estate Architectural Invariants
-   - 7.5 Concluding Strategic Summary
+   - 4.7 High-Converting Localized Hindi/Hinglish Creative Copy Suites
+   - 4.8 Empirical KPI Benchmark Matrix, Pipeline Efficiency & 72–96 Hour Diagnostics
+5. [Section R4: Seller & Dealer Quality Control & ₹10,000 Buyer Advance Verification Workflow](#5-section-r4-seller--dealer-quality-control--10000-buyer-advance-verification-workflow)
+   - 5.1 Local Dealer Psychology in Agra: The Fear of Deal Bypass
+   - 5.2 The Zero-Upfront Document Policy at Listing Time
+   - 5.3 The Exact 6-Step Operational Verification Workflow (From Listing to Settlement)
+   - 5.4 The 5-Point Statutory Legal, Revenue & Master Plan Audit
+   - 5.5 Dual-Path Resolution: 100% Immediate Buyer Refund Guarantee vs. Closing Credit
+   - 5.6 Anti-Bypass & Platform Safeguards: Programmatic Masking (`getMaskedProperty`) & Intake Phone Checks
+   - 5.7 Production-Ready WhatsApp Operational Notification Templates (Buyer & Broker)
+   - 5.8 3-Tier Royal Certified Partner Dealer Program
+   - 5.9 30-Day Automated WhatsApp Recertification Engine & Dual-Safeguard Lifecycle
+6. [Section R5: Phased Execution Roadmap & Architectural Invariant Compliance](#6-section-r5-phased-execution-roadmap--architectural-invariant-compliance)
+   - 6.1 Phase 1 (Days 1–30): Foundation, Setup & Initial Acquisition
+   - 6.2 Phase 2 (Days 31–60): Partner Onboarding, Verification & Lead Tracking Optimization
+   - 6.3 Phase 3 (Days 61–90+): Scaling, Institutional Brand Dominance & Micro-Market Expansion
+   - 6.4 Absolute Compliance with Royal Agra Estate Architectural Invariants
+   - 6.5 Concluding Strategic Summary
 
 ---
 
 # 1. Executive Summary & Strategic Vision
 
 ### 1.1 Brand Identity & Local Market Context
-**Royal Agra Estate** (`royalagraestate.in`) is engineered as Agra’s premier digital-first, fiduciary-driven real estate advisory firm. Situated at the crossroads of historic Mughal heritage and aggressive 21st-century infrastructure development (the Agra Metro Rail Project, Agra Inner Ring Road, Agra-Lucknow Expressway, and the proposed Agra-Gwalior Greenfield Expressway), Agra represents a uniquely complex Tier-2 urban economy:
+**Royal Agra Estate** (`royalagraestate.in`) is engineered as Agra’s premier digital-first, fiduciary-driven real estate advisory platform. Situated at the crossroads of historic Mughal heritage and aggressive 21st-century infrastructure development (the Agra Metro Rail Project, Agra Inner Ring Road, Agra-Lucknow Expressway, and the proposed Agra-Gwalior Greenfield Expressway), Agra represents a uniquely complex Tier-2 urban economy:
 * **Total Urban & Suburban Population**: Over 2.4 million residents across 6 administrative tehsils (Agra Sadar, Kirawali, Fatehabad, Kheragarh, Bah, Etmadpur).
 * **Core Economic Pillars**: Global tourism and hospitality, leather footwear exports (manufacturing over 65% of India's domestic leather footwear and 28% of total footwear exports), cold storage conglomerates, marble inlay handicrafts, foundry engineering, and thriving agro-commodity trading.
-* **Capital Disparity**: Substantial private family wealth concentrated in ancestral merchant enclaves (Rawatpara, Belanganj, Kinari Bazar, Loha Mandi) colliding with an explosive demand for modern living spaces, gated townships, and organized luxury residences.
+* **Capital Disparity**: Substantial private family wealth concentrated in ancestral merchant enclaves (Rawatpara, Belanganj, Kinari Bazar, Loha Mandi) colliding with an explosive demand for modern living spaces, gated townships, and organized residential inventory.
 
-Operating under the executive leadership of Shrey Gupta and Abhishek Singh Jadon, and anchored by the centralized concierge desk (`+91 91490 79913`), Royal Agra Estate rejects the chaotic, unverified, and predatory practices endemic to local brokerage in favor of institutional-grade transparency, statutory legal verification, and cutting-edge digital marketing.
+Operating under the executive leadership of Shrey Gupta and Abhishek Singh Jadon, and anchored by the centralized concierge desk (`+91 91490 79913`), Royal Agra Estate rejects the chaotic, unverified, and predatory practices endemic to traditional roadside agent channels in favor of institutional-grade transparency, statutory legal verification, and high-velocity digital marketing.
 
 ### 1.2 The Agra Real Estate Dilemma: Portals vs. Roadside Broker Cartels
-For prospective real estate buyers and sellers in Agra, the current transaction landscape presents an agonizing dilemma between two broken paradigms:
+For prospective real estate buyers, sellers, and dealers in Agra, the current transaction landscape presents an agonizing dilemma between two broken paradigms:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -74,7 +77,7 @@ For prospective real estate buyers and sellers in Agra, the current transaction 
 │ NATIONAL AGGREGATOR PORTALS          │ UNORGANIZED LOCAL BROKER CARTELS     │
 │ (99acres, MagicBricks, Housing.com)  │ ("Chowk Ke Dalal" & Roadside Agents) │
 ├──────────────────────────────────────┼──────────────────────────────────────┤
-│ • 60%+ Fictitious "Clickbait" Rates  │ • Predatory 2% Bilateral Brokerage   │
+│ • 60%+ Fictitious "Clickbait" Rates  │ • Predatory informal practices       │
 │ • Rampant duplicate listings (10+)   │ • Severe dual-agency conflicts       │
 │ • Zombie inventory (sold months ago) │ • Zero legal title diligence         │
 │ • Zero on-ground physical diligence  │ • High-pressure, uncomfortable tours │
@@ -85,42 +88,42 @@ For prospective real estate buyers and sellers in Agra, the current transaction 
 1. **National Portals (99acres, MagicBricks, Housing.com)**:
    National aggregators operate on a volume-based pay-per-lead and subscription model. They possess no on-ground presence in Agra, conduct zero physical verification, and monetize by allowing unverified agents to post speculative "bait listings." A search for homes in Kamla Nagar or Dayalbagh yields identical properties posted by eight different brokers with conflicting square footages and prices that differ by ₹40 Lakhs. Stale listings remain active for years to artificially inflate portal inventory.
 2. **Unorganized Local Broker Cartels (*Chowk Ke Dalal*)**:
-   Local brokers operate on an informal, bilateral commission model (*dono taraf dalali*), charging 1% to 2% from the seller AND 1% to 2% from the buyer. Because they represent both sides simultaneously, they have a deep structural conflict of interest. They conduct zero legal verification, conceal land disputes, ignore Taj Trapezium Zone (TTZ) and Agra Development Authority (ADA) Master Plan violations, and push buyers into dangerous unauthorized colonies (*kachhi colonies*) to maximize short-term deal velocity.
+   Local roadside dealers operate informally without verified data or documentation. They conduct zero legal verification, conceal land disputes, ignore Taj Trapezium Zone (TTZ) and Agra Development Authority (ADA) Master Plan violations, and push buyers into dangerous unauthorized colonies (*kachhi colonies*) to maximize short-term deal velocity.
 
 ### 1.3 Core Strategic Thesis: The Royal Agra Estate Moat
 Royal Agra Estate dismantles this broken paradigm through a unified strategic flywheel built upon five interlocking pillars:
-1. **Capital-Efficient Meta Ads Exclusivity (R1)**: Bypassing bloated Google Search keyword auctions to dominate Instagram and Facebook visual feeds, capturing high-intent family and investor demographics at ₹7–₹14 per click on an initial flexible budget of **₹500 to ₹1,000/day (₹15,000 to ₹30,000/month)**.
-2. **Frictionless Hybrid Destination Routing (R2)**: Eliminating drop-off by dynamically routing budget plot buyers directly to WhatsApp Concierge (+91 91490 79913) while directing mid-tier and luxury buyers to bespoke, high-performance website landing pages connected to Cloud Firestore.
-3. **Inclusive Three-Tier Audience Architecture (R3)**: Expanding beyond the "pure luxury trap" to serve Budget Plots (< ₹45L), Mid-Tier Family Homes (₹45L–₹1.5Cr), and Heritage Estates (> ₹1.5Cr) with culturally localized Hindi, Hinglish, and English creative campaigns.
-4. **The Buyer-Only Brokerage Model (R4)**: Unlocking vast pent-up direct owner inventory by charging **0% commission to sellers**, while earning a fully justified 1.0%–1.5% success fee from buyers by providing chauffeur-driven tours, 30-year legal searches (Barah Sala), and aggressive price negotiation that saves buyers 5% to 10%.
+1. **Capital-Efficient Meta Ads Exclusivity (R1)**: Bypassing bloated Google Search keyword auctions to dominate Instagram and Facebook visual feeds, capturing high-intent family and investor demographics at ₹7–₹14 per click on a strictly calibrated budget of **maximum ₹10,000 to ₹15,000/month (₹350 to ₹500/day)**.
+2. **Frictionless Hybrid Destination Routing & Zero-Cost CRM (R2)**: Eliminating drop-off by dynamically routing budget plot buyers directly to WhatsApp Concierge (+91 91490 79913) while directing mid-tier and luxury buyers to bespoke, high-performance website landing pages connected to Cloud Firestore, backed by a comprehensive zero-cost lead tracking system using WhatsApp Business and a 16-column Google Sheets Master CRM.
+3. **Inclusive Three-Tier Audience Architecture (R3)**: Expanding beyond the "pure luxury trap" to serve Budget Plots (< ₹45L), Mid-Tier Family Homes (₹45L–₹1.5Cr), and Heritage Estates (> ₹1.5Cr) with culturally localized Hindi, Hinglish, and English creative campaigns calibrated strictly to ₹350–₹500/day.
+4. **Verified Listing Acquisition & ₹10,000 Buyer Advance Due Diligence Workflow (R4)**: Overcoming traditional broker deal-bypass panic by eliminating upfront document demands at listing time. Instead, when a serious buyer emerges, the platform collects a ₹10,000 refundable verification advance first, obtains title documents from the broker, and executes a 5-point statutory audit. If clear, the advance credits toward settlement; if defective, the ₹10,000 is immediately refunded to the buyer in full.
 5. **The 5-Step Verification & Privacy Moat (R5)**: Enforcing 100% physical and statutory document auditing, programmatic address privacy masking via `getMaskedProperty`, an automated 30-day WhatsApp recertification engine, and a tiered Partner Dealer Program.
 
 ---
 
-# 2. Section R1: Meta Ads Platform Strategy (Instagram & Facebook Only)
+# 2. Section R1: Meta Ads Campaign Setup & Social Profile Posting Policy (Instagram & Facebook Only)
 
-### 2.1 The Mathematical & Algorithmic Imperative of Meta Exclusivity Under ₹500–₹1,000/Day
-When launching paid digital acquisition for real estate under an initial testing budget benchmark of **₹500 to ₹1,000/day (₹15,000 to ₹30,000/month)**, capital concentration is an absolute mathematical imperative. Modern advertising platforms utilize complex machine learning models that require a minimum density of conversion signals to exit the "Learning Phase" and achieve stable cost-per-acquisition (CPA). 
+### 2.1 The Mathematical & Algorithmic Imperative of Meta Exclusivity Under ₹10,000–₹15,000/Month
+When launching paid digital acquisition for real estate under a strict budget cap of **₹10,000 to ₹15,000/month (₹350 to ₹500/day)**, capital concentration is an absolute mathematical imperative. Modern advertising platforms utilize machine learning models that require a minimum density of conversion signals to exit the "Learning Phase" and achieve stable cost-per-acquisition (CPA). 
 
-Attempting to distribute ₹500/day across both Google Search and Meta Ads results in **cross-channel budget starvation**, where neither platform gathers enough data to optimize:
+Attempting to distribute ₹350–₹500/day across both Google Search and Meta Ads results in **cross-channel budget starvation**, where neither platform gathers enough data to optimize:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │             MATHEMATICAL COMPARISON: GOOGLE SEARCH VS. META ADS             │
-│                      (Based on ₹600/Day Testing Budget in Agra)             │
+│                 (Based on ₹350–₹500/Day Testing Budget in Agra)             │
 ├─────────────────────────┬──────────────────────┬────────────────────────────┤
 │ METRIC / PARAMETER      │ GOOGLE SEARCH ADS    │ META ADS (FB & IG COMBINED)│
 ├─────────────────────────┼──────────────────────┼────────────────────────────┤
 │ Bidding Dynamic         │ Keyword CPC Auction  │ Visual Discovery CPM       │
 │ Average CPM (1,000 imp) │ N/A (Auction by CPC) │ ₹90 – ₹160 (Tier-2 UP)     │
 │ Average Cost Per Click  │ ₹55 – ₹180+          │ ₹7 – ₹14                   │
-│ Daily Clicks Delivered  │ ~4 to 9 clicks/day   │ ~45 to 85 clicks/day       │
-│ Weekly Clicks Delivered │ 28 to 63 clicks/week │ 315 to 595 clicks/week     │
+│ Daily Clicks Delivered  │ ~2 to 5 clicks/day   │ ~30 to 60 clicks/day       │
+│ Weekly Clicks Delivered │ 14 to 35 clicks/week │ 210 to 420 clicks/week     │
 │ Conversion Rate (Est.)  │ 6% – 10%             │ 8% – 12%                   │
-│ Weekly Inbound Leads    │ 2 to 5 leads/week    │ 25 to 55 leads/week        │
+│ Weekly Inbound Leads    │ 1 to 3 leads/week    │ 18 to 45 leads/week        │
 │ Cost Per Lead (CPL)     │ ₹420 – ₹950+         │ ₹45 – ₹85                  │
 │ Machine Learning Status │ PERMANENTLY TRAPPED  │ EXITS LEARNING PHASE       │
-│                         │ (< 10 events/week)   │ (> 30–50 events/week)      │
+│                         │ (< 5 events/week)    │ (> 25–40 events/week)      │
 └─────────────────────────┴──────────────────────┴────────────────────────────┘
 ```
 
@@ -128,13 +131,80 @@ Attempting to distribute ₹500/day across both Google Search and Meta Ads resul
 Real estate is the highest-consideration purchase an individual or family will make in their lifetime. It is fundamentally an **emotional, aspirational milestone** driven by pride, safety, social status, and family legacy. 
 - A 90-character Google Search text ad cannot communicate the majesty of a 40-foot wide tree-lined avenue, the craftsmanship of Italian Statuario marble in a Dayalbagh duplex, or the security of an ADA-approved gated township perimeter.
 - Meta’s visual ecosystem (9:16 vertical video walkthroughs, drone flyovers, high-resolution lifestyle imagery, and interactive swipe carousels) generates visceral desire and captures users during moments of relaxed, passive content consumption.
-- Meta Ads enables Royal Agra Estate to showcase its core differentiators—**0% Brokerage to Sellers**, verified ADA layout maps, clear title registries, and luxury architectural aesthetics—before the prospect even realizes they are looking at an advertisement.
+- Meta Ads enables Royal Agra Estate to showcase its core differentiators—verified direct inventory, transparent pricing, verified ADA layout maps, clear title registries, and address privacy masking—before the prospect even realizes they are looking at an advertisement.
 
-### 2.2 Strategic Elimination of Google Search Ads & Meta Audience Network
+### 2.2 Step-by-Step Meta Ads Campaign Setup Guide (Ad Set Budget Optimization - ABO)
+To maintain complete control over where every single rupee is spent within the ₹10,000–₹15,000/month envelope, **Ad Set Budget Optimization (ABO)** must be enforced. If Advantage Campaign Budget (CBO) is enabled with a lean ₹350–₹500 daily budget, Meta's algorithm will dump 80%+ of the budget into the lowest-CPM segment (usually cheap peripheral plots), completely starving mid-tier and luxury ad sets.
+
+Follow this exact step-by-step procedure inside **Meta Ads Manager** (`adsmanager.facebook.com`):
+
+#### Step 1: Asset Integration & Foundation
+1. Log into Meta Business Suite and connect the official Facebook Page (`https://www.facebook.com/profile.php?id=61595808915588`) and Instagram Business Profile (`@royalagraestate.in`).
+2. Verify domain ownership for `royalagraestate.in` via DNS TXT record in Business Settings → Brand Safety & Suitability → Domains.
+3. Link the verified WhatsApp Business account (`+91 91490 79913`) to the Facebook Page under Settings → Linked Accounts.
+4. Ensure the Meta Pixel base code and Conversions API (CAPI) are active on `royalagraestate.in`.
+
+#### Step 2: Create Campaign
+1. Click **+ Create** in Ads Manager.
+2. Select Campaign Objective:
+   - For Click-to-WhatsApp campaigns (Budget Plots): Select **Engagement** → Conversion Location: **Messaging Apps** (Select WhatsApp, uncheck Messenger and Instagram Direct).
+   - For Website Landing Page campaigns (Mid-Tier & Luxury): Select **Leads** → Conversion Location: **Website**.
+3. Campaign Name Convention: `RAE_Q4_Agra_MultiTier_ABO`.
+4. Special Ad Categories: Select **Housing** (mandatory in Meta for real estate).
+5. Buying Type: **Auction**.
+6. **Advantage Campaign Budget (CBO)**: Keep **OFF** (This enforces Ad Set Budget Optimization - ABO).
+
+#### Step 3: Configure Ad Sets & Budget Allocation
+Configure three distinct Ad Sets corresponding to the three property tiers:
+
+* **Ad Set 1 (Budget Plots — Click-to-WhatsApp)**:
+  - *Daily Budget*: ₹175/day (under Model A ₹350/day) OR ₹225/day (under Model B ₹500/day).
+  - *Conversion*: Messaging Apps → WhatsApp (`+91 91490 79913`).
+  - *Location*: Agra + 35km radius (including Rohta, Kakua, Shamshabad Road, Kiraoli).
+  - *Age*: 25 – 52.
+  - *Detailed Targeting*: Advantage+ Broad with soft signals (`Land lot`, `Real estate investment`, `Property`). Language: Hindi.
+
+* **Ad Set 2 (Mid-Tier Residences — Website + WhatsApp Bridge)**:
+  - *Daily Budget*: ₹125/day (under Model A ₹350/day) OR ₹175/day (under Model B ₹500/day).
+  - *Conversion*: Website (Optimize for `Lead` or `ViewContent`). Destination: `https://royalagraestate.in/properties`.
+  - *Location*: Agra City + 20km radius (Kamla Nagar, Sikandra, Shastripuram, Dayalbagh).
+  - *Age*: 28 – 55.
+  - *Detailed Targeting*: Advantage+ Broad; Married/Family demographics; Interests: `Apartment`, `Gated community`, `Home loan`.
+
+* **Ad Set 3 (Luxury Collection — Immersive Showcase)**:
+  - *Daily Budget*: ₹50/day (under Model A ₹350/day) OR ₹100/day (under Model B ₹500/day).
+  - *Conversion*: Website (Optimize for `Landing Page Views` to prevent the `Learning Limited` algorithmic trap).
+  - *Location*: Agra Core 15km radius (Fatehabad Road, Civil Lines, Dayalbagh) + Delhi-NCR expat pin codes (South Delhi, Noida Expressway, Golf Course Road).
+  - *Age*: 34 – 65+.
+  - *Device Targeting*: iOS (iPhone) and premium Android devices.
+
+#### Step 4: Configure Placements (Manual Placements Enforced)
+1. Select **Manual Placements** (do NOT use Advantage+ Placements).
+2. Platforms: Check **Facebook** and **Instagram**.
+3. **STRICTLY UNCHECK: Audience Network and Messenger External Placements**.
+4. Specific Placement Checkbox Checklist:
+   - ✅ Instagram Feed, Facebook Feed, Facebook Video Feeds.
+   - ✅ Instagram Reels, Facebook Reels.
+   - ✅ Instagram Stories, Facebook Stories.
+   - ✅ Facebook Marketplace.
+   - ❌ Uncheck all Search Results, In-Article, and Apps & Sites.
+
+#### Step 5: Ad Creative Assembly & Pre-Filled WhatsApp Text
+1. Upload 9:16 vertical video walkthroughs for Reels/Stories and 1:1 carousels for Feed/Marketplace.
+2. In Ad Copy, state clear pricing, locality, and verification trust badges.
+3. For WhatsApp ads, configure the pre-filled message:
+   `"Namaste Royal Agra Estate, I saw your ad for verified properties in Agra (Ref: Meta Ad). Please share details and layout maps."`
+
+#### Step 6: Publish & Enforce 72–96 Hour Learning Stability
+1. Review all ad sets and click **Publish**.
+2. **Strict Rule**: Zero edits to budgets, targeting, or creatives for the first 4 days (72–96 hours) post-launch to allow Meta’s auction pacing to stabilize.
+
+### 2.3 Strategic Elimination of Google Search Ads & Meta Audience Network
 
 ```
                     ┌──────────────────────────────────────────────┐
-                    │     INITIAL TESTING BUDGET: ₹500–₹1,000/DAY   │
+                    │    BUDGET BENCHMARK: ₹10,000–₹15,000/MONTH   │
+                    │               (₹350–₹500/DAY)                │
                     └──────────────────────┬───────────────────────┘
                                            │
                     ┌──────────────────────▼───────────────────────┐
@@ -155,18 +225,18 @@ Real estate is the highest-consideration purchase an individual or family will m
 └─────────────────────────────────┘       └───────────────────────────────────┘
 ```
 
-#### 2.2.1 The Case for Eliminating Google Search Ads During Early Testing:
-1. **Aggregator Auction Dominance**: Multi-billion-dollar venture-funded portals (99acres, MagicBricks, Housing.com) and multi-city developers (Pushpanjali, Nikhil Homes) run automated, uncapped bidding scripts on primary Agra real estate keywords (*"property in agra"*, *"plots in fatehabad road"*, *"flats in shastripuram"*). Competing in this auction forces an emerging agency to pay ₹90 to ₹180 per click. On a ₹500 daily budget, three accidental or competitor clicks consume 80% of the entire day's capital.
+#### 2.3.1 The Case for Eliminating Google Search Ads During Early Testing:
+1. **Aggregator Auction Dominance**: Multi-billion-dollar venture-funded portals (99acres, MagicBricks, Housing.com) and multi-city developers (Pushpanjali, Nikhil Homes) run automated, uncapped bidding scripts on primary Agra real estate keywords (*"property in agra"*, *"plots in fatehabad road"*, *"flats in shastripuram"*). Competing in this auction forces an emerging agency to pay ₹90 to ₹180 per click. On a ₹350 daily budget, two or three accidental or competitor clicks consume the entire day's capital.
 2. **Informational & Non-Commercial Intent**: Over 40% of real estate search queries in Tier-2 UP represent low-commercial intent: searches for circle rate government PDFs, Tehsil land dispute status, Agra Development Authority master plan maps, or house rent agreements. Paying ₹80 for an informational query burns budget without pipeline generation.
 3. **Absence of Inventory Depth**: Google Search works best when an agency has hundreds of ready-to-book units in every sector. Royal Agra Estate focuses on a curated, 100% verified portfolio. Cold search traffic will bounce if the single specific building they searched is not listed.
 
-#### 2.2.2 The Case for Strictly Eliminating Meta Audience Network:
+#### 2.3.2 The Case for Strictly Eliminating Meta Audience Network:
 1. **The Click-Fraud & "Fat-Finger" Epidemic**: Meta Audience Network distributes banner and interstitial ads inside third-party mobile applications: casual games (Ludo King, Candy Crush clones), flashlight utilities, PDF scanners, and battery-saver apps. Industry telemetry indicates that over **70% of Audience Network clicks in Tier-2 India are accidental ("fat-finger" taps)** caused by users attempting to close intrusive full-screen popups.
 2. **Phantom Leads & Inactive Profiles**: Ad traffic routed through Audience Network produces disastrous lead quality: unreachable mobile numbers, single-ring hang-ups, and inquiries from children playing mobile games on their parents' smartphones.
-3. **Operational Directive**: Within Meta Ads Manager, **Manual Placements must be selected** to explicitly uncheck "Audience Network", or an account-level Placement Value Rule must be configured to penalize Audience Network spend to 0%. Advertising delivery must remain strictly within Facebook and Instagram owned-and-operated inventory.
+3. **Operational Directive**: Within Meta Ads Manager, **Manual Placements must be selected** to explicitly uncheck "Audience Network". Advertising delivery must remain strictly within Facebook and Instagram owned-and-operated inventory.
 
-### 2.3 Generational Demographic Analysis in Agra: Instagram vs. Facebook
-The demographic composition of Agra exhibits a sharp generational and socio-economic bifurcation across digital platforms. To maximize conversion efficiency, Royal Agra Estate must tailor creative messaging to match these distinct digital behaviors:
+### 2.4 Generational Demographic Analysis in Agra: Instagram vs. Facebook
+The demographic composition of Agra exhibits a sharp generational and socio-economic bifurcation across digital platforms. To maximize conversion efficiency, Royal Agra Estate tailors creative messaging to match these distinct digital behaviors:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
@@ -186,20 +256,20 @@ The demographic composition of Agra exhibits a sharp generational and socio-econ
 └───────────────────────────────────┴────────────────────────────────────────────────────┘
 ```
 
-#### 2.3.1 The Instagram Persona: The Modern Aspirant, Professional & Next-Gen Heir
+#### 2.4.1 The Instagram Persona: The Modern Aspirant, Professional & Next-Gen Heir
 1. **The Remote Tech & Corporate Professional**: Agra natives earning top-tier metropolitan salaries (₹15L–₹35L/year) working remotely for software and consulting firms in Bengaluru, Gurugram, or Noida. Residing in Agra provides immense savings, but they refuse to live in congested ancestral alleys. They demand modern amenities: 100% power backup, high-speed fiber infrastructure, private gyms, and covered parking.
 2. **The Next-Gen Business Heir**: Millennial and Gen-Z children of Agra’s established business dynasties (leather export houses in Sikandra, foundry owners in Foundry Nagar, marble emporium owners in Tajganj). They seek independence from multi-generational joint households and aspire to signature modern villas on Fatehabad Road or luxury duplex floors in Dayalbagh.
 3. **Young Medical Specialists**: Junior consultants and postgraduates from SN Medical College and private medical enclaves (Delhi Gate, Kamla Nagar) looking for independent builder floors close to clinic hubs.
 4. **Content Consumption Pattern**: Fast visual pacing, vertical 9:16 video walkthroughs, high-production drone reveals, modern interior design trends, and instantaneous one-tap WhatsApp deep links.
 
-#### 2.3.2 The Facebook Persona: The Patriarch, Industrial Titan, Retiree & NRI
+#### 2.4.2 The Facebook Persona: The Patriarch, Industrial Titan, Retiree & NRI
 1. **The Traditional Industrialist & Wholesale Merchant**: Senior business owners operating out of Belanganj, Hing Ki Mandi, Rawatpara, and Sanjay Place. They control family finances and hold final veto power over any major property transaction.
 2. **The Defense & Civil Services Retiree**: Ex-military officers from Agra Cantt, the Air Force Station, and retired state government officers seeking peaceful, secure, low-density residences in Sikandra, Shastripuram, or Dayalbagh.
 3. **The Agra NRI & Out-of-State Expat Diaspora**: Agra natives settled in Delhi-NCR, Mumbai, the UK, the US, or the Gulf who wish to acquire high-value ancestral real estate or commercial plots along the Taj Expressway corridor for retirement or long-term wealth preservation.
 4. **Content Consumption Pattern**: High scrutiny on paperwork. They stop scrolling for detailed multi-slide carousels displaying **sanctioned ADA maps**, Section 80 land conversion certificates, clear 30-year registry documentation, and road width measurements. They are active users of **Facebook Marketplace**, treating it as a modern digital real estate classifieds board.
 
-### 2.4 Placement Optimization Mix (Reels, In-Feed Carousels, Marketplace, Stories)
-Under the flexible testing framework of ₹500–₹1,000/day, ad spend must be apportioned strategically across placements to balance top-of-funnel reach with bottom-of-funnel conversion intent:
+### 2.5 Placement Optimization Mix (Reels 45%, Feed 30%, Marketplace 15%, Stories 10%)
+Under the budget framework of ₹10,000–₹15,000/month, ad spend must be apportioned strategically across placements to balance top-of-funnel reach with bottom-of-funnel conversion intent:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
@@ -208,7 +278,7 @@ Under the flexible testing framework of ₹500–₹1,000/day, ad spend must be 
 │ Placement          │ Budget %  │ Ideal Creative Format    │ Core Objective & Funnel    │
 ├────────────────────┼───────────┼──────────────────────────┼────────────────────────────┤
 │ Instagram & FB     │   45%     │ 9:16 Vertical Video      │ Top-of-Funnel Discovery,   │
-│ Video Reels        │           │ (30s Walkthrough / Drone)│ Hook Capture, Viral Reach  │
+│ Video Reels        │           │ (30s Walkthrough / Drone)│ Hook Capture, Lowest CPM   │
 ├────────────────────┼───────────┼──────────────────────────┼────────────────────────────┤
 │ Instagram & FB     │   30%     │ 1:1 Multi-Image Carousel │ Mid-Funnel Consideration,  │
 │ In-Feed Posts      │           │ or 4:5 High-Contrast Pic │ Plot Maps, Legal Badges    │
@@ -221,35 +291,84 @@ Under the flexible testing framework of ₹500–₹1,000/day, ad spend must be 
 └────────────────────┴───────────┴──────────────────────────┴────────────────────────────┘
 ```
 
-#### 2.4.1 Reels (45% Allocation — The Discovery & Volume Engine)
-- Vertical video reels represent Meta's highest-velocity inventory class, capturing the lowest CPMs (₹90–₹150) in North India.
+#### 2.5.1 Reels (45% Allocation — The Discovery & Volume Engine)
+- Vertical video reels represent Meta's highest-velocity inventory class, capturing the lowest CPMs (₹90–₹160) in North India.
 - **Creative Blueprint**: 30-second walk-and-talk video tours. The advisor steps through the property in one continuous motion, pointing out natural lighting, ceiling heights, road widths, and gated security.
 - Audio tracks must feature crisp lavalier microphone narration in conversational Hindi/Hinglish paired with subtle, elegant background ambient music.
 
-#### 2.4.2 In-Feed Carousels (30% Allocation — The Educational Proof Engine)
+#### 2.5.2 In-Feed Carousels (30% Allocation — The Educational Proof Engine)
 - Carousels achieve the highest dwell time among serious buyers and joint-family decision-makers.
 - **Slide Architecture**:
   - *Slide 1*: High-impact elevation / Grand gated entrance with bold text overlay: *"Gated Villa Living in Dayalbagh | ₹85 Lakhs"*.
   - *Slide 2*: Living room and Italian marble flooring layout.
   - *Slide 3*: Modular kitchen and master bedroom suite.
   - *Slide 4*: Sanctioned architectural layout map showing internal road widths (30 ft/40 ft), park alignments, and plot dimensions.
-  - *Slide 5*: Statutory Compliance Card: *"ADA Approved • Bank Loan Available from SBI & HDFC • 0% Commission to Sellers"*. CTA Button: *"Send WhatsApp Message"*.
+  - *Slide 5*: Statutory Compliance Card: *"ADA Approved • Bank Loan Available from SBI & HDFC • 100% Verified Title"*. CTA Button: *"Send WhatsApp Message"*.
 
-#### 2.4.3 Facebook Marketplace (15% Allocation — The High-Intent Local Deal Board)
+#### 2.5.3 Facebook Marketplace (15% Allocation — The High-Intent Local Deal Board)
 - Unlike passive feed scrollers, users browsing Facebook Marketplace have **active, immediate commercial intent**—they are actively seeking homes to tour this weekend.
 - **Creative Aesthetic**: Overly polished corporate 3D renders perform poorly on Marketplace because users assume they are fake agency spam. Listings must feature **unpolished, high-resolution smartphone photographs** taken in natural sunlight, showing the genuine exterior facade, approach road, and interior rooms.
 - Listing titles must be crystal-clear: *"Independent 3 BHK Kothi in Sikandra Near Guru Ka Taal — 180 Gaj, Ready to Move"*.
 
-#### 2.4.4 Stories (10% Allocation — The Urgency & Event Trigger)
+#### 2.5.4 Stories (10% Allocation — The Urgency & Event Trigger)
 - Ephemeral 24-hour stories excel at driving immediate tactical action.
 - **Messaging Angles**: *"Only 3 Corner Plots Left in Rohta Phase-1"*, *"Price Hike Scheduled for Monday: Save ₹1,200/gaj by Booking a Visit This Weekend"*, or *"Exclusive Open House Sunday at Fatehabad Road Luxury Villa"*.
 - Leverages interactive poll stickers (*"Looking to buy within 30 days? [Yes, ready to visit] / [Exploring for later]"*) to pre-qualify respondents.
 
+### 2.6 Social Profile Posting Policy: Public Feed vs. Dark Ads & The 6-Post Digital Billboard
+A frequent and costly misconception among local business owners is the belief that successful digital marketing requires daily organic posting, creating constant Instagram Reels with trending audio memes, and maintaining high organic page activity.
+
+#### 2.6.1 The Definitive Policy: ZERO Ongoing Organic Posting Required
+* **The Organic Reach Reality**: In 2026, Meta’s organic algorithm delivers less than **1.5% to 2% reach** to followers of unpromoted business pages. A real estate brand with 1,000 followers will reach only 15 to 20 people organically. Spending founder or staff hours scripting, filming, and editing daily social media posts yields virtually zero qualified real estate buyers in Agra.
+* **Dark Ads Architecture**: All advertising campaigns for Royal Agra Estate are executed as **Dark Ads (Unpublished Page Posts)** inside Meta Ads Manager. Dark ads are delivered directly into the personal newsfeeds, reels, and stories of targeted individuals in Agra without ever being published to or cluttering the public Instagram grid or Facebook timeline.
+* **Benefits of Dark Ads**:
+  1. *Hyper-Targeted Delivery*: A budget plot ad in Rohta is seen only by budget plot seekers; an ultra-luxury villa ad on Fatehabad Road is seen only by HNIs. Neither audience sees irrelevant inventory.
+  2. *Feed Cleanliness*: The public brand profile remains uncluttered, professional, and elegant, rather than looking like a spammy classifieds billboard with dozens of disparate daily property listings.
+  3. *Unpublished Testing*: Allows running 10 different creative hooks and price angles simultaneously without confusing existing page followers.
+
+#### 2.6.2 The "6-Post Digital Billboard" Profile Hygiene Model
+While daily organic posting is eliminated, approximately **10% to 15% of prospective buyers** who view a high-performing sponsored ad will tap the profile avatar or page name to verify that Royal Agra Estate is a legitimate, trustworthy local enterprise before sending a WhatsApp inquiry.
+
+To satisfy this scrutiny, Royal Agra Estate maintains a **Static Profile Hygiene** standard—a permanent "Digital Billboard" created once and left permanently in place:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                   THE "6-POST DIGITAL BILLBOARD" PROFILE ARCHITECTURE                  │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ [BIO & CREDENTIALS]                                                                    │
+│ • Bio: Agra's Fiduciary Real Estate Advisory | 100% Title Verified Listings            │
+│ • Head Office: Sanjay Place Commercial Center, Agra                                    │
+│ • Direct Concierge Line: +91 91490 79913                                               │
+│ • Official Portal: https://royalagraestate.in                                          │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ [PINNED STORY HIGHLIGHTS]                                                              │
+│ [ 🏢 About Us ]  [ 🛡️ Verification ]  [ 📐 Plots ]  [ 🏡 Homes ]  [ 🏰 Luxury ]       │
+├──────────────────────────────────────────┬─────────────────────────────────────────────┤
+│ [POST 1: BRAND FOUNDATION & LEADERSHIP]  │ [POST 2: THE 5-POINT VERIFICATION MOAT]     │
+│ High-resolution photo of founders        │ Infographic explaining Sub-Registrar 30-year│
+│ Shrey Gupta & Abhishek Singh Jadon at    │ title search, Bhulekh UP Khatauni, and ADA  │
+│ Sanjay Place office. Vision statement on │ Master Plan 2031 statutory screening.       │
+│ bringing transparent fiduciary advisory. │                                             │
+├──────────────────────────────────────────┼─────────────────────────────────────────────┤
+│ [POST 3: ADDRESS PRIVACY & SAFEGUARDS]   │ [POST 4: BUDGET PERIPHERAL PLOTS SHOWCASE]  │
+│ Graphic detailing how getMaskedProperty  │ Curated carousel of Section 80 freehold     │
+│ protects buyer safety and seller/dealer  │ plots in Rohta and Shamshabad Road starting │
+│ privacy from rogue agents and bypass.    │ at ₹6,500/gaj with pakki registry.          │
+├──────────────────────────────────────────┼─────────────────────────────────────────────┤
+│ [POST 5: MID-TIER FAMILY HOMES SHOWCASE] │ [POST 6: THE PRIVATE LUXURY COLLECTION]     │
+│ Architectural carousel of verified 3 BHK │ Aesthetic architectural showcase of luxury  │
+│ builder floors in Kamla Nagar, Sikandra, │ villas on Fatehabad Road and Dayalbagh with │
+│ and Shastripuram with bank loan status.  │ private chauffeur-escorted tours.           │
+└──────────────────────────────────────────┴─────────────────────────────────────────────┘
+```
+
+**Operating Directive**: Once these 6 evergreen posts and 5 story highlights are published, **all ongoing time and capital must be 100% focused on paid ad execution in Meta Ads Manager and direct lead triage on WhatsApp**. Zero hours should be wasted on daily social media uploading.
+
 ---
 
-# 3. Section R2: Ad Destination Analysis & Hybrid Routing Framework
+# 3. Section R2: Ad Destination Analysis & Free Lead Tracking System
 
-### 3.1 Comprehensive 7-Pillar Comparative Evaluation Matrix
+### 3.1 Comprehensive 7-Pillar Comparative Evaluation Matrix (WhatsApp vs. Website)
 Selecting the destination for ad clicks is the single most critical determinant of Cost Per Lead (CPL) and Cost Per Acquisition (CPA). In a Tier-2 Indian market like Agra, routing cold traffic blindly to a complex corporate website causes high bounce rates; conversely, sending all traffic to WhatsApp without qualification overwhelms concierge staff with tire-kickers and degrades pixel tracking.
 
 ```
@@ -279,7 +398,7 @@ Selecting the destination for ad clicks is the single most critical determinant 
 │    CAPI Retargeting   │ Pixel goes blind inside WhatsApp; │ Full Meta Pixel & CAPI tracking for custom │
 │                       │ cannot track downstream sales.    │ events (`ViewContent`, `Lead`, `Contact`). │
 ├───────────────────────┼───────────────────────────────────┼────────────────────────────────────────────┤
-│ 6. Cost Per Lead      │ VERY LOW (₹25 – ₹65 per chat)     │ HIGHER (₹85 – ₹220 per form submit)        │
+│ 6. Cost Per Lead      │ VERY LOW (₹40 – ₹75 per chat)     │ HIGHER (₹110 – ₹220 per form submit)       │
 │    (Agra Benchmark)   │ Highly cost-effective lead volume.│ Higher cost, but higher contact intent.    │
 ├───────────────────────┼───────────────────────────────────┼────────────────────────────────────────────┤
 │ 7. Operational Sales  │ HIGH OPERATIONAL BURDEN           │ LOW OPERATIONAL BURDEN                     │
@@ -288,10 +407,10 @@ Selecting the destination for ad clicks is the single most critical determinant 
 └───────────────────────┴───────────────────────────────────┴────────────────────────────────────────────┘
 ```
 
-### 3.2 In-Depth Evaluation Across Technical, Psychological & Financial Dimensions
+### 3.2 In-Depth Evaluation Across Technical, Psychological & Operational Dimensions
 
 #### 3.2.1 User Drop-Off & Technical Latency
-- In Tier-2 Indian markets, mobile internet connections regularly fluctuate between 4G and 5G. A website carrying high-resolution property photography, interactive JavaScript components, and custom fonts (such as Cinzel or Playfair Display) can take 3.5 to 5.5 seconds to become interactive on mid-tier Android devices.
+- In Tier-2 Indian markets, mobile internet connections regularly fluctuate between 4G and 5G. A website carrying high-resolution property photography, interactive JavaScript components, and custom fonts can take 3.5 to 5.5 seconds to become interactive on mid-tier Android devices.
 - Every 1-second delay in page load time triggers an estimated **16% to 22% increase in mobile drop-off**.
 - **Click-to-WhatsApp (CTWA)** ads bypass mobile browser latency entirely. A single tap on the ad triggers an operating-system-level intent deep link, instantly opening the WhatsApp application already loaded in device RAM. The user never leaves their most familiar digital interface.
 
@@ -308,24 +427,10 @@ Selecting the destination for ad clicks is the single most critical determinant 
   - Ability to immediately share **real-time Google Map location pins**, **official ADA sanctioned layout PDFs**, and **10-second raw smartphone video clips** of construction progress.
   - Sending polite, dignified **voice notes in Hindi** (*"Namaste sir, main Royal Agra Estate advisory desk se baat kar raha hoon..."*) breaks down barriers 10x faster than cold phone calls.
 
-#### 3.2.4 Automated Lead Qualification
-- **The WhatsApp Concierge Flow**:
-  - When the ad is tapped, WhatsApp opens with pre-populated text: *"Hi Royal Agra Estate, I am interested in [Property Reference #RAE-892140] and would like details."*
-  - An automated WhatsApp Business greeting instantly presents an interactive 3-button menu:
-    1. *Plot / Land Investment*
-    2. *Ready-to-Move House / Villa*
-    3. *Commercial Showroom / Office*
-  - A follow-up quick-reply menu captures the buyer's budget bracket: *[Under ₹40 Lakhs] / [₹40L – ₹1 Crore] / [₹1 Crore+]*.
-  - This conversational sequence pre-qualifies the lead in under 45 seconds without making them feel interrogated.
-- **The Website Portal Flow**:
-  - Built upon the custom `LeadInquiryModal` component in React, writing directly to Cloud Firestore.
-  - Enforces field validation: Full Name (minimum 2 characters), 10-digit Indian mobile number, email address, property ID, and preferred site visit date.
-  - Delivers complete, structured lead records directly into the CRM database, but exhibits higher friction for casual scrollers.
-
-#### 3.2.5 Meta Pixel Tracking, CAPI & Retargeting Data Loss (The WhatsApp Penalty)
+#### 3.2.4 Meta Pixel Tracking & Retargeting Data Loss (The WhatsApp Penalty)
 - **The Fundamental Flaw of WhatsApp Campaigns**:
   - Meta Ads Manager can only optimize for top-of-funnel events: `Link Clicks` or `Messaging Conversations Started`. Once the user transitions into WhatsApp, Meta’s tracking pixel goes completely blind.
-  - Meta has no visibility into whether the prospect sent one message and left, spent 30 minutes discussing plots, attended a Sunday site visit, or completed a ₹1 Crore purchase.
+  - Meta has no visibility into whether the prospect sent one message and left, spent 30 minutes discussing plots, attended a Sunday site visit, or completed a purchase.
   - Consequently, Meta's algorithm cannot train Lookalike Audiences on "high-value closed buyers"—it trains only on "people who tap messaging buttons", which frequently includes serial clickers and tire-kickers.
 - **The Website Tracking Advantage**:
   - The website supports full-funnel tracking: Google Tag (`AW-18528029194`), Meta Pixel, and Meta Conversions API (CAPI).
@@ -333,7 +438,7 @@ Selecting the destination for ad clicks is the single most critical determinant 
   - Enables powerful retargeting workflows: e.g., *Serve a 15-second private invitation video ad exclusively to users who spent > 90 seconds exploring Fatehabad Road luxury villas but did not submit an inquiry form*.
 
 ### 3.3 Dynamic 3-Tier Hybrid Routing Decision Architecture
-To maximize capital efficiency and conversion velocity, Royal Agra Estate must not choose between WhatsApp and the Website. Instead, it must deploy a **Dynamic 3-Tier Hybrid Routing Strategy** governed by property ticket size and buyer intent:
+To maximize capital efficiency and conversion velocity, Royal Agra Estate deploys a **Dynamic 3-Tier Hybrid Routing Strategy** governed by property ticket size and buyer intent:
 
 ```
                                ┌──────────────────────────────────────────────┐
@@ -345,7 +450,7 @@ To maximize capital efficiency and conversion velocity, Royal Agra Estate must n
                        ▼                                                             ▼
          ┌───────────────────────────┐                                 ┌───────────────────────────┐
          │     BUDGET & VOLUME       │                                 │     MID-TIER & LUXURY     │
-         │   (Plots / Affordable)    │                                 │   (Villas / Commercial)   │
+         │   (Plots / Affordable)    │                                 │   (Villas / Independent)  │
          │     Ticket: < ₹45L        │                                 │     Ticket: > ₹45L        │
          └─────────────┬─────────────┘                                 └─────────────┬─────────────┘
                        │                                                             │
@@ -388,7 +493,7 @@ To maximize capital efficiency and conversion velocity, Royal Agra Estate must n
 
 #### Tier 3: Luxury Villas & Heritage Estates (> ₹1.5 Crores) → Website Showcase + VIP Concierge Handshake
 - **Target Locations**: Fatehabad Road VIP Corridor, Dayalbagh Riverfront, Civil Lines, Taj Nagari.
-- **Buyer Psychology**: Ultra-high-net-worth individuals (UHNWIs), industrialists, NRI investors. Values institutional discretion, architectural pedigree, legal perfection, and elite presentation.
+- **Buyer Psychology**: High-net-worth individuals (HNIs), industrialists, NRI investors. Values institutional discretion, architectural pedigree, legal perfection, and elite presentation.
 - **Routing Decision**: **Immersive Website Showcase with VIP Concierge Integration**.
 - **Cold Traffic Flow**: Directs to a high-aesthetic luxury showcase on `royalagraestate.in` featuring architectural specifications, video walkthroughs, and ADA approval seals.
 - **Dual Conversion Handshake**: When the client submits their details via the `LeadInquiryModal`, two actions trigger simultaneously:
@@ -424,12 +529,124 @@ Whenever a user taps the floating WhatsApp concierge button or completes a web i
 1. `fbq('trackCustom', 'WhatsAppChatInitiated', { propertyId, price, locality });`
 2. Server-side event pushed to Meta Conversions API (CAPI) using hashed phone and browser user-agent data, preserving attribution modeling even when the user transitions to WhatsApp.
 
+### 3.5 Complete Zero-Cost Lead Tracking System (WhatsApp Business & Google Sheets CRM)
+Managing leads without expensive monthly CRM software subscriptions (like Salesforce, HubSpot, or LeadSquared which cost ₹5,000–₹15,000/month) is essential to preserve ad spend capital. Royal Agra Estate deploys a **100% Free, Zero-Cost Lead Tracking System** combining the native capabilities of **WhatsApp Business** and a structured **16-Column Google Sheets Master CRM**.
+
+#### 3.5.1 Part A: WhatsApp Business Lead Pipeline Setup (Zero Cost)
+The official concierge smartphone (`+91 91490 79913`) runs the free **WhatsApp Business** application configured as follows:
+
+##### 1. The 6-Stage Color-Coded Labels Pipeline
+Every incoming chat is immediately tagged with one of 6 standardized color-coded labels:
+* 🔵 **Blue**: `01_New_Lead` — Fresh inbound ad click, unvetted.
+* 🟡 **Yellow**: `02_Contacted_Qualifying` — Automated greeting sent, gathering budget & locality.
+* 🟠 **Orange**: `03_Hot_Prospect` — Verified budget, layout PDF shared, high purchase intent.
+* 🟣 **Purple**: `04_Site_Visit_Scheduled` — Date & time confirmed for on-ground inspection.
+* 🟢 **Green**: `05_Advance_Pending` — ₹10,000 refundable advance requested or received in escrow.
+* 🔘 **Grey**: `06_Closed_Won` (Deal completed) OR `00_Cold_Archived` (Non-responsive / budget mismatch).
+
+##### 2. Standardized Quick Replies (Pre-Programmed Shortcuts)
+Concierge staff respond in seconds using native shortcuts:
+* `/greet`:
+  > *"Namaste! Welcome to Royal Agra Estate. I am [Name], Senior Property Advisor. Which area or property configuration are you exploring in Agra today?"*
+* `/plots`:
+  > *"Here are our verified peripheral freehold plots in Rohta (Gwalior Road) and Shamshabad Road starting at ₹6,500/gaj with pakki registry and on-spot kabza. May I share the sanctioned layout map PDF?"*
+* `/visit`:
+  > *"We conduct guided site inspections every Sunday and on weekdays. Would 11:00 AM or 3:30 PM suit your family better for a private pickup?"*
+* `/advance`:
+  > *"To ensure complete safety before booking, we initiate our ₹10,000 refundable advance verification. If title documents have any dispute, the ₹10,000 is immediately refunded to you in full. May I share our official payment details?"*
+
+##### 3. In-App Product Catalogs
+Pre-load 3 visual catalogs inside WhatsApp Business:
+- *Collection 1: Budget Freehold Plots (₹6.5L – ₹35L)*
+- *Collection 2: Mid-Tier Family Homes & Builder Floors (₹45L – ₹1.2Cr)*
+- *Collection 3: Luxury Villas & Heritage Estates (> ₹1.5Cr)*
+This allows advisors to send structured cards with photos, area, and masked location in one tap without spamming clients with 20 loose photos.
+
+##### 4. Segmented Broadcast Lists
+Create broadcast lists for zero-cost re-engagement:
+- *"Sunday Site Visit Club (Rohta Plots)"*
+- *"Sikandra & Shastripuram Home Seekers"*
+- *"High-Net-Worth Luxury Circle"*
+
+#### 3.5.2 Part B: Google Sheets Master CRM Architecture (Zero Cost)
+A standardized, 16-column master spreadsheet titled **`Royal Agra Estate — Master Lead Pipeline 2026`** serves as the central operational database:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                        GOOGLE SHEETS MASTER CRM (16-COLUMN SPECIFICATION)                              │
+├──────┬──────────────────────┬─────────────────────────┬────────────────────────────────────────────────┤
+│ COL  │ FIELD NAME           │ DATA TYPE / VALIDATION  │ DESCRIPTION & OPERATIONAL PURPOSE              │
+├──────┼──────────────────────┼─────────────────────────┼────────────────────────────────────────────────┤
+│ A    │ Lead_ID              │ Text (RAE-L-0101)       │ Unique sequential auto-identifier              │
+│ B    │ Timestamp            │ Date & Time             │ Exact date/time of initial inquiry             │
+│ C    │ Lead_Name            │ Text                    │ Full name from WhatsApp profile or web modal   │
+│ D    │ Phone_Number         │ Number (10 digits)      │ Contact number for WhatsApp and calling        │
+│ E    │ Source_Campaign      │ Dropdown                │ Meta_Plots_Rohta, Meta_MidTier, Meta_Luxury,   │
+│      │                      │                         │ Website_Direct, Referral                       │
+│ F    │ Customer_Segment     │ Dropdown                │ Budget Plots (<₹45L), Mid-Tier (₹45L-₹1.5Cr),  │
+│      │                      │                         │ Luxury Villas (>₹1.5Cr)                        │
+│ G    │ Preferred_Locality   │ Text / Tags             │ Rohta, Shamshabad Rd, Kamla Nagar, Sikandra,   │
+│      │                      │                         │ Shastripuram, Dayalbagh, Fatehabad Rd          │
+│ H    │ Budget_Range         │ Dropdown                │ <₹15L, ₹15L–₹35L, ₹35L–₹75L, ₹75L–₹1.5Cr, >₹1.5Cr│
+│ I    │ Buying_Timeline      │ Dropdown                │ Immediate (<30 days), 1–3 Months, Exploring    │
+│ J    │ Pipeline_Stage       │ Dropdown (Color Coded)  │ 1. New Lead → 2. Contacted → 3. Qualified →    │
+│      │                      │                         │ 4. Visit Booked → 5. Visit Done →              │
+│      │                      │                         │ 6. Advance Collected → 7. Under Verification → │
+│      │                      │                         │ 8. Closed Won → 9. Disqualified                │
+│ K    │ Assigned_Property    │ Text                    │ Property Ref Code (e.g. RAE-892140)            │
+│ L    │ Site_Visit_Date      │ Date (DD/MM/YYYY)       │ Scheduled physical tour date                   │
+│ M    │ Advance_₹10k_Status  │ Dropdown                │ None, Requested, Collected (In Escrow),        │
+│      │                      │                         │ Refunded (Flawed Title), Credited (Closed)     │
+│ N    │ Assigned_Advisor     │ Dropdown                │ Shrey Gupta, Abhishek Jadon, Concierge Desk    │
+│ O    │ Next_Followup_Date   │ Date (DD/MM/YYYY)       │ Conditional formatting: Red if overdue         │
+│ P    │ Notes_Interaction    │ Long Text               │ Summary of conversation, specific preferences  │
+└──────┴──────────────────────┴─────────────────────────┴────────────────────────────────────────────────┘
+```
+
+##### Data Entry & Automation Workflows (100% Free):
+1. **Semi-Automated Daily Log (5 Mins/Day)**: The concierge executive spends 5 minutes at the end of each shift reviewing WhatsApp Business labels and updating columns J, L, M, and O.
+2. **Automated Webhook from Website (Zero-Cost Google Apps Script)**:
+   In Google Sheets, open **Extensions → Apps Script** and deploy this lightweight webhook:
+   ```javascript
+   function doPost(e) {
+     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+     var data = JSON.parse(e.postData.contents);
+     var newId = "RAE-L-" + ("0000" + (sheet.getLastRow())).slice(-4);
+     sheet.appendRow([
+       newId,
+       new Date(),
+       data.name || "WhatsApp Inquirer",
+       data.phone || "",
+       data.source || "Website_Modal",
+       data.segment || "General",
+       data.locality || "",
+       data.budget || "",
+       data.timeline || "Immediate",
+       "1. New Lead",
+       data.propertyId || "",
+       "",
+       "None",
+       "Concierge Desk",
+       new Date(Date.now() + 86400000), // Next follow-up T+24h
+       data.notes || "Automated web intake"
+     ]);
+     return ContentService.createTextOutput(JSON.stringify({"result": "success", "id": newId}))
+       .setMimeType(ContentService.MimeType.JSON);
+   }
+   ```
+   Whenever a user submits the `LeadInquiryModal` on `royalagraestate.in`, the frontend sends an asynchronous `POST` to this Apps Script Web App URL, appending the lead row instantly with zero third-party subscription costs.
+
+##### SLA Response & Follow-up Rules:
+* **Stage 1 (New Lead)**: SLA response time < **5 minutes** during 9 AM – 9 PM.
+* **Stage 4 (Site Visit)**: Confirmation call 24 hours prior; automated WhatsApp reminder with live location pin 2 hours prior.
+* **Overdue Highlights**: Column O (`Next_Followup_Date`) is formatted with a custom formula (`=AND(ISDATE(O2), O2<TODAY(), J2<>"8. Closed Won", J2<>"9. Disqualified")`) to automatically highlight overdue follow-up dates in bold RED.
+
 ---
 
-# 4. Section R3: Inclusive Multi-Tier Audience Strategy & Testing Budget Allocation
+# 4. Section R3: Inclusive Multi-Tier Audience Strategy (Calibrated to ₹10,000–₹15,000/Month)
 
 ### 4.1 Micro-Market Segmentation & Geographies
-A common mistake in Tier-2 real estate advertising is the "Pure Luxury Trap"—spending 100% of marketing budgets on ₹2 Crore+ villas because of high nominal commissions, while ignoring the fact that ultra-luxury buyers represent less than 3% of active market transactions in Agra. This causes soaring CPL (> ₹700), lengthy sales cycles (6–18 months), and cash flow depletion.
+A common mistake in Tier-2 real estate advertising is the "Pure Luxury Trap"—spending 100% of marketing budgets on ₹2 Crore+ villas because of high nominal ticket sizes, while ignoring the fact that ultra-luxury buyers represent less than 3% of active market transactions in Agra. This causes soaring CPL (> ₹700), lengthy sales cycles (6–18 months), and cash flow depletion.
 
 Royal Agra Estate deploys an **Inclusive Three-Tier Strategy** covering all customer segments:
 
@@ -440,268 +657,74 @@ Royal Agra Estate deploys an **Inclusive Three-Tier Strategy** covering all cust
 │ TIER 1: BUDGET PLOTS     │ TIER 2: MID-TIER HOMES   │ TIER 3: LUXURY & HNI  │
 │ (< ₹45 Lakhs)            │ (₹45 Lakhs – ₹1.5 Cr)    │ (> ₹1.5 Crores)       │
 ├──────────────────────────┼──────────────────────────┼───────────────────────┤
-│ • High-velocity pipeline │ • Transactional backbone │ • High-margin jackpot │
-│ • Fast pixel calibration │ • Steady cash flow engine│ • Brand authority     │
-│ • Low CPL (₹45 – ₹85)    │ • Moderate CPL (₹130–220)│ • High CPL (₹380–650) │
+│ • High-velocity pipeline │ • Transactional backbone │ • High-value flagship │
+│ • Fast pixel calibration │ • Steady pipeline engine │ • Brand authority     │
+│ • Low CPL (₹40 – ₹75)    │ • Moderate CPL (₹110–180)│ • Higher CPL (₹300–500│
 │ • Sales cycle: 20–45 days│ • Sales cycle: 45–90 days│ • Sales cycle: 90–180d│
 └──────────────────────────┴──────────────────────────┴───────────────────────┘
 ```
 
----
-
 ### 4.2 Segment 1: Budget Residential Plots & Entry-Level Housing (< ₹45 Lakhs)
-
-#### 4.2.1 Core Micro-Market Geographies:
-1. **Gwalior Road Corridor (Rohta, Kakua, Tehra, Bhandai, Saiyan)**: Rapid growth driven by Gwalior Highway 6-laning, close proximity to Agra Cantt railway hub and Army COD. Land rates: ₹6,000 – ₹13,000 / sq. yard (100 sq. yd plots: ₹6L – ₹14L).
-2. **Shamshabad Road Corridor (Kahrai, Rajpur Chungi extension, Dhandhupura)**: Direct access to Agra Inner Ring Road connecting to Yamuna and Lucknow Expressways. Land rates: ₹7,500 – ₹15,000 / sq. yard (Plots: ₹7.5L – ₹18L).
-3. **Bodla-Bichpuri Road & Shastripuram Extension (Kakarana, Malpura)**: Proximity to educational institutions and industrial zones. Land rates: ₹8,000 – ₹16,000 / sq. yard.
-
-#### 4.2.2 Socio-Economic Personas & Psychology:
-- **Persona 1A: "Kiraye Se Azaadi" (The Escaping Tenant)**:
-  - Age: 26–45. Household Income: ₹25,000 – ₹55,000/month.
-  - Occupations: Retail managers in Sanjay Place, wholesale cloth/hardware store employees in Shahganj, teachers, junior clerks.
-  - Pain Point: Paying ₹6,000–₹10,000/month rent in congested mohallas (Rawatpara, Shahganj) with no wealth accumulation.
-  - Core Fear: Land fraud, unapproved colonies (*kachhi colony*), and non-mutated land (*bina daakhil-kharij*).
-- **Persona 1B: "The Agrarian Rural Investor"**:
-  - Age: 35–55. Farmers and agro-traders from rural tehsils (Fatehabad, Bah, Kiraoli, Shamshabad).
-  - Motivation: Reinvest surplus cash from mustard/potato harvest into an urban fringe plot for family inheritance and children's education.
-
-#### 4.2.3 Positioning Angles & Statutory Zoning Calibration:
-- The "Rent vs. Asset" Math: *"Jitna kiraya dete ho, utne mein apna plot lo."*
-- **Statutory Zoning Calibration (Section 80 vs. ADA Enclaves)**: Peripheral budget plots (e.g., Rohta, Kakua, Shamshabad Road, Bodla-Bichpuri starting at ₹6,500/gaj) operate under **Section 80 of the UP Revenue Code, 2006 (non-agricultural land use declaration)** and **revenue mutation (*Daakhil-Kharij*)**. They are strictly categorized and marketed as **Gram Panchayat / Peripheral Freehold Plots**, clearly distinguished from **ADA Sanctioned Urban Enclaves**. A Section 80 declaration legally confirms conversion from agricultural use and establishes unencumbered transferable tenure (*Bhumidhari*), but does not constitute an Agra Development Authority municipal layout sanction under Sections 14/15 of the UP Urban Planning and Development Act, 1973.
-- **Mandatory UP RERA Layout Screening**: Under Sections 3 and 10 of the Real Estate (Regulation and Development) Act, 2016 (RERA), plotted developments exceeding 500 square meters or more than 8 plots require mandatory UP RERA registration. Royal Agra Estate conducts mandatory pre-onboarding RERA screening on all developer layouts to insulate the agency and buyers from intermediary non-compliance penalties under Section 62 of RERA.
-- 100% Legal Guarantee: Confront fraud fears directly: *Pakki Registry, Turant Daakhil-Kharij, On-Spot Kabza, Verified Non-Encumbrance*.
-- Infrastructure Readiness: 30-ft wide roads, operational electricity transformers, and sweet groundwater (*meetha paani*).
-
-#### 4.2.4 Localized Creative Copy Suite (Segment 1):
-
-**Creative 1.1 — Direct Problem/Agitation (Pure Hindi / Video Reel 9:16)**
-- **Hook (0:00–0:03)**: *(Visual: Close-up of rent receipts burning, cutting to cramped, dark alleyway)*  
-  *"Agra mein har mahine 8,000 rupaye kiraya dekar thak chuke ho? Toh yeh video 30 second dhyan se dekhiye!"*
-- **Agitation (0:03–0:10)**: *(Visual: Moving through cramped mohalla alleys with no parking)*  
-  *"10 saal se kiraya de rahe ho — lekin mahine ke aakhir mein haath mein kya bachta hai? Sirf ek raddi receipt! Na makaan aapka, na zameen aapki."*
-- **Solution & Proof (0:10–0:20)**: *(Visual: Camera pans across a bright, open gated colony with boundary stones, 30-ft wide road, and electricity poles)*  
-  *"Royal Agra Estate laya hai Rohta, Gwalior Road par 100 gaj ke residential plots — maatr ₹6.5 Lakh se shuru! Pakki registry, turant daakhil-kharij, aur on-spot kabza. Meetha paani aur 30-foot sadak tayyar hai."*
-- **Offer & CTA (0:20–0:30)**: *(Visual: Host holding registry document and pointing to screen button)*  
-  *"Bank finance aur aasan kiston ki suvidha uplabdh. Neeche diye 'Send WhatsApp Message' button par click karein aur location pin ke sath free site visit book karein!"*
-- **CTA Button**: Send WhatsApp Message (+91 91490 79913)
-
-**Creative 1.2 — High-Contrast Carousel / Static Ad (Hinglish)**
-- **Headline**: Agra mein Kiraye ke Daldal se Azaadi! 🏡
-- **Primary Text**:  
-  Har saal makaan malik ka kiraya badhana ab band! 🛑  
-  Kyunki ab Agra mein apna 100 Gaj ka plot lena hua behad aasan.  
-  
-  📍 **Prime Peripheral Freehold Corridors**:  
-  ✅ Rohta, Gwalior Road (Highway se maatr 500 meter)  
-  ✅ Shamshabad Road (Inner Ring Road ke paas)  
-  ✅ Bodla-Bichpuri Road  
-  
-  🛡️ **Royal Agra Estate 100% Legal Verification Guarantee**:  
-  ✔️ Section 80 Non-Agricultural Declaration & Verified Freehold Title  
-  ✔️ Gram Panchayat Freehold Mutation & Turant Daakhil-Kharij Guarantee  
-  ✔️ Clear Title Verified (Zero ADA 2031 Greenbelt & ASI Buffer Encroachments)  
-  ✔️ On-Spot Kabza & Physical Boundary Demarcation  
-  ✔️ 30 Feet Wide Internal Roads & Light Connection  
-  
-  💰 **Starting Price**: Sirf ₹6,500/Gaj se shuru. Aasan kistein uplabdh!  
-  
-  👉 Apne parivaar ko surakshit bhavishya dein. Abhi WhatsApp par "PLOT DETAILS" bhejein aur site map paayein.  
-- **CTA Button**: Send WhatsApp Message (+91 91490 79913)
-
----
+- **Target Geography**: Peripheral growth corridors:
+  - *Gwalior Road Corridor*: Rohta, Kakua, Bhandai, Tehra (driven by the proposed Agra-Gwalior Greenfield Expressway).
+  - *Shamshabad Road*: Rajpur Chungi extension, Inner Ring Road junction, Kahrai.
+  - *Bodla-Bichpuri Road*: Mid-income plotted layouts near technical institutions.
+- **Customer Profile**: Middle-income salaried employees (railways, postal, defense, private schools), small shopkeepers, footwear manufacturing supervisors, and rural families investing agricultural land proceeds into suburban residential plots.
+- **Pain Point**: Terrified of unapproved colonies (*kachhi colonies*) where local colonizers sell land without Section 80 non-agricultural conversion, leading to lack of basic utilities or future demolition risks.
+- **Core Value Proposition**: *Kiraye Se Azaadi* (Freedom from Rent). Clear freehold titles, registered *Bainama*, immediate revenue mutation (*Dakhil Kharij*), Section 80 non-agricultural clearance, 30-foot wide internal roads, sweet groundwater (*meetha paani*), and ready on-spot possession (*Kabza*).
 
 ### 4.3 Segment 2: Mid-Tier Family Residences & Builder Floors (₹45 Lakhs – ₹1.5 Crores)
-
-#### 4.3.1 Core Micro-Market Geographies:
-1. **Kamla Nagar & Balkeshwar**: Traditional business community hub. Builder floors (150–250 sq.yd): ₹55L – ₹1.1 Cr.
-2. **Sikandra (NH-19 Highway Corridor)**: Gated high-rise societies (Pushpanjali, Opulent, Runjhun), 2/3 BHK apartments: ₹42L – ₹78L.
-3. **Shastripuram (Sectors A to D)**: Modern planned residential enclave; 3 BHK duplexes and modern flats: ₹50L – ₹95L.
-4. **Dayalbagh Outer Enclaves & Paschimpuri**: Peaceful residential colonies: ₹45L – ₹85L.
-
-#### 4.3.2 Socio-Economic Personas & Psychology:
-- **Persona 2A: "The Joint Family Upgrader"**:
-  - Age: 32–54. Household Income: ₹80,000 – ₹2,50,000/month.
-  - Occupations: Wholesale shoe merchants in Hing Ki Mandi, petha manufacturers, senior doctors, nursing home owners.
-  - Living Condition: Cramped ancestral home in Belanganj or Loha Mandi.
-  - Pain Points: Nightly parking disputes, lack of elevators for aging parents with arthritis, no green spaces for children.
-  - Aspiration: Modern 3 BHK builder floor or gated apartment with dedicated 2-car covered parking, automatic elevator, 24x7 security, and power backup.
-- **Persona 2B: "The Rising Professional Couple"**:
-  - Age: 28–42. Corporate professionals, bank managers at Sanjay Place, IT remote workers. Aspirational, status-conscious.
-
-#### 4.3.3 Positioning Angles:
-- Relief from Inner-City Congestion: *"Purane shahar ki bheed aur parking ke jhanjhat ko alvida kahiye."*
-- Turnkey Ready-to-Move Security: Verified RERA status, immediate *Griha Pravesh* readiness, zero builder delivery risk.
-- 100% Price Transparency: All-inclusive price breakdown (registry, GST, parking) eliminating broker markups.
-
-#### 4.3.4 Localized Creative Copy Suite (Segment 2):
-
-**Creative 2.1 — Video Walkthrough Reel (Hinglish / 9:16)**
-- **Hook (0:00–0:03)**: *(Visual: Drone shot descending into a lush gated society with kids playing, cutting to an expansive living room)*  
-  *"Agra ke Shastripuram mein ek aesa 3 BHK ghar, jahan parking ki chinta khatam aur luxury lifestyle shuru!"*
-- **Problem Agitation (0:03–0:08)**: *(Visual: Host walking through a sunlit balcony overlooking greenery)*  
-  *"Agar aap bhi puraane shahar ke traffic, shor, aur bheed-bhaad se nikal kar apne parivaar ko ek safe aur khuli hawa wala ghar dena chahte hain..."*
-- **Feature Walkthrough (0:08–0:20)**: *(Snappy cuts: Italian tiles, modular chimney kitchen, master bedroom with wooden flooring, children's park, 24x7 security gate)*  
-  *"Toh dekhiye yeh 1650 Sq.Ft ka ready-to-move 3 BHK flat:  
-  ✨ 3 Bada Bedrooms with Attached Designer Bathrooms  
-  ✨ Dedicated Covered Car Parking & Automatic Lift  
-  ✨ 100% Generator Power Backup & 3-Tier Security  
-  ✨ Top CBSE Schools aur Highway se maatr 5 minute door!"*
-- **Offer & CTA (0:20–0:30)**: *(Visual: Host in living room smiling with keys)*  
-  *"Price? Bilkul transparent aur bank-approved! 0% Seller Brokerage ke sath direct family walkthrough ke liye neeche diye WhatsApp link par click karein."*
-- **CTA Button**: Learn More / Send WhatsApp Message
-
-**Creative 2.2 — Direct Benefit Carousel (Feed Post 1:1)**
-- **Headline**: Shastripuram & Sikandra’s Top Ready-to-Move 3 BHK Residences 🔑
-- **Primary Text**:  
-  Kya aapka parivaar purane shahar ke bheed-bhaad wale mohalle se ek modern, safe society mein shift hona chahta hai?  
-  
-  Royal Agra Estate laya hai verified, ready-to-move homes jahan milta hai shanti, suraksha aur luxury!  
-  
-  🏡 **Featured Configurations**:  
-  • Spacious 3 BHK Builder Floors (Kamla Nagar & Shastripuram)  
-  • Gated Community High-Rise Apartments (Sikandra NH-19)  
-  • 100% Vastu-Compliant North-East Facing Layouts  
-  
-  🌟 **Key Highlights**:  
-  🔒 3-Tier Security with Guard Intercom  
-  ⚡ 24x7 Power Backup & Dedicated 2-Car Parking  
-  🏫 Top CBSE Schools & Hospitals within 2–4 KM  
-  📑 100% Bank Approved (SBI, HDFC Home Loans)  
-  
-  💰 **Price Range**: ₹48 Lakh to ₹82 Lakh (All-inclusive pricing breakdown).  
-  
-  📲 Tap "Learn More" to view verified photos, floor plans, and book your private family walkthrough today!  
-- **CTA Button**: Learn More (Routes to Website Property Detail Page with WhatsApp Floating Concierge)
-
----
+- **Target Geography**: Established urban and suburban residential enclaves:
+  - *Kamla Nagar & Balkeshwar*: Dense, affluent mercantile residential areas seeking newer, modern floors with lift and parking.
+  - *Sikandra & NH-19 Highway Enclaves*: Runakta, Bainpur, Guru Ka Taal corridor (popular with professionals and highway commuters).
+  - *Shastripuram (Sectors A through D)*: Well-planned urban sector layouts, proximity to schools and transport.
+  - *Dayalbagh Enclaves*: Nagla Padi, Swamibagh periphery, attractive to families seeking peaceful educational environments.
+- **Customer Profile**: Established business families, doctors, chartered accountants, senior executives, and joint families upgrading from congested old-city quarters (Belanganj, Rawatpara, Loha Mandi).
+- **Pain Point**: Old-city homes lack dedicated car parking, elevators for aging parents, and open green space. Fear buying homes with unapproved building maps or disputed joint-family ownership.
+- **Core Value Proposition**: Ready-to-move luxury, acoustic peace, dedicated 2-car covered parking, automatic private elevator, 24x7 gated security, and 100% pre-approved bank loans from SBI and HDFC.
 
 ### 4.4 Segment 3: Premium Luxury Villas, Havelis & Heritage Estates (> ₹1.5 Crores)
+- **Target Geography**: Prestigious luxury corridors:
+  - *Fatehabad Road VIP Golden Mile*: Taj Nagari Phase 1 & 2, Basai, tourist corridor with 60-meter master plan avenues.
+  - *Dayalbagh Riverfront*: Luxury independent kothis and farmhouses near the Yamuna.
+  - *Civil Lines & MG Road*: Rare central kothis, collectorate vicinity, high-status residential plots.
+- **Customer Profile**: Prominent leather export house owners, footwear industrialists, cold storage magnates, hotel owners, senior specialist doctors, and Agra NRI diaspora residing in Delhi-NCR, Mumbai, and overseas.
+- **Pain Point**: Extreme concern regarding privacy, transaction confidentiality, and legal perfection. Reluctant to deal with roadside brokers who leak financial details to local networks.
+- **Core Value Proposition**: Architectural magnificence, double-height living foyers, Italian marble finishes, private elevators, manicured terrace gardens, absolute transaction discretion, and a comprehensive 5-point legal title dossier.
 
-#### 4.4.1 Core Micro-Market Geographies:
-1. **Fatehabad Road Hospitality Golden Mile**: Taj Nagari Phase 1 & 2, Basai, VIP Road. Agra's most prestigious boulevard; 5-star hotel enclaves (ITC Mughal, Oberoi Amarvilas). Villas: ₹2.5 Cr – ₹7 Cr+.
-2. **Dayalbagh Riverfront & Prime Enclaves**: Low-density green corridor along the Yamuna riverfront. Kothis: ₹1.8 Cr – ₹5.5 Cr.
-3. **Civil Lines & MG Road Prime**: Administrative and judicial epicenter of Agra; colonial-era plots, judges, senior advocates. Bungalows: ₹3 Cr – ₹10 Cr+.
-
-#### 4.4.2 Socio-Economic Personas & Psychology:
-- **Persona 3A: "The Export Magnate & Industrial Titan"**:
-  - Age: 38–65. Net Worth: ₹15 Cr – ₹100+ Cr. Footwear export house owners, cold storage conglomerate directors, high-end marble exporters.
-  - Motivation: Status manifestation (*"Agra ke elite circle mein ek pehchan"*), acoustic isolation, double-height ceilings, private plunge pools, and high physical security. Deep aversion to loud, indiscreet roadside brokers.
-- **Persona 3B: "The NRI & Non-Resident Agraite"**:
-  - Agra natives settled in Dubai, Singapore, London, or senior corporate leaders in Mumbai/Delhi-NCR seeking a prestigious hometown retreat near the Taj corridor.
-
-#### 4.4.3 Positioning Angles:
-- Architectural Legacy & Generational Prestige: *"An Address That Defines Your Legacy."*
-- Discretion & White-Glove Advisory: Total absence of broker spam; managed exclusively by senior advisors under non-disclosure agreements.
-- Global Luxury Specifications: Double-height foyers, Italian Statuario marble, private elevators, EV charging infrastructure, and Vastu compliance.
-
-#### 4.4.4 Localized Creative Copy Suite (Segment 3):
-
-**Creative 3.1 — Cinematic Architectural Showcase (4K Dusk Reel / English & Refined Hindi)**
-- **Visual Treatment**: Cinematic dusk lighting ("Blue Hour"), slow gimbal glide through a grand double-height foyer with a crystal chandelier, panning out to a private landscaped terrace overlooking the lush Taj corridor. Ambient classical sitar/piano fusion score.
-- **Voiceover (Authoritative, Calm, Sophisticated)**:  
-  *"True luxury does not clamor for attention. It commands it in silence.  
-  Welcome to Agra’s most distinguished residential address — private signature villas on the prestigious Fatehabad Road corridor.  
-  Designed for those who have arrived, and need prove nothing to the world.  
-  
-  Featuring 5,500 square feet of crafted perfection:  
-  🏛️ Double-Height Grand Living Foyer & Italian Statuario Flooring  
-  🌿 Private Landscaped Zen Garden & Heated Plunge Pool  
-  🛗 Private OTIS Passenger Elevator & 4-Car Covered Stacking  
-  📍 Minutes from the Taj Mahal and Lucknow Expressway  
-  
-  Offered exclusively through Royal Agra Estate. For a private, confidential walkthrough, connect with our Senior Portfolio Advisor."*
-- **On-Screen Text**: Signature Luxury Residences | Fatehabad Road, Agra | By Confidential Appointment Only.
-- **CTA Button**: Book Private Viewing (+91 91490 79913)
-
-**Creative 3.2 — Editorial Narrative Ad (Feed / Instagram Canvas)**
-- **Headline**: The Art of Refined Living: Bespoke Kothis & Signature Villas in Dayalbagh & Fatehabad Road 🏛️
-- **Primary Text**:  
-  In a city steeped in imperial heritage, only a rare few residences embody true architectural timelessness.  
-  
-  Royal Agra Estate presents an exclusive portfolio of prime residential estates, independent heritage kothis, and luxury villas across Agra’s most coveted pin codes: Fatehabad Road, Dayalbagh Riverfront, and Civil Lines.  
-  
-  ✨ **Portfolio Highlights**:  
-  • Independent Villas & Kothis: 300 to 800 Sq. Yards  
-  • Expansive 4 & 5 BHK Configurations with Servant Enclaves  
-  • Unobstructed Green Views & Yamuna Promenade Connectivity  
-  • 100% Freehold Title, Clear Mutation & ADA Compliant Approvals  
-  
-  We understand that acquiring high-value real estate demands discretion, impeccable documentation, and zero friction. Our senior advisory desk provides complete legal title verification, circle rate consultation, and private bespoke viewings tailored to your schedule.  
-  
-  Direct Inquiries: +91 91490 79913  
-  Discover the Private Collection at royalagraestate.in  
-- **CTA Button**: Contact Us / Request Private Brochure
-
----
-
-### 4.5 Testing Budget Allocation Architecture: Conservative (₹500/Day) vs. Growth (₹1,000/Day)
-To operate within Meta’s 2026 auction dynamics, ad campaigns must generate **25 to 50 optimization events per week** to exit the "Learning Phase". Dividing a small budget across too many ad sets causes algorithmic starvation.
+### 4.5 Testing Budget Allocation Architecture: Model A (₹350/Day) vs. Model B (₹500/Day)
+To operate strictly within the user's budget ceiling of **maximum ₹10,000 to ₹15,000/month (₹350 to ₹500/day)**, Royal Agra Estate establishes two calibrated execution models using Ad Set Budget Optimization (ABO):
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│             BUDGET ARCHITECTURE COMPARISON: ₹500/DAY VS. ₹1,000/DAY         │
-├──────────────────────────────┬──────────────────────────────────────────────┤
-│ MODEL A: ₹500/DAY            │ MODEL B: ₹1,000/DAY                          │
-│ CONSERVATIVE (₹15,000/MONTH) │ RECOMMENDED GROWTH (₹30,000/MONTH)           │
-├──────────────────────────────┼──────────────────────────────────────────────┤
-│ Sequential Milestone Model   │ Parallel Multi-Tier Model (ABO -> CBO)       │
-│ • Weeks 1 & 2: 100% Budget   │ • Weeks 1 & 2 (ABO Split):                   │
-│   Plots (₹500/day x 14 days) │   - Budget Plots: ₹450/day (45%)             │
-│ • Week 3: 100% Mid-Tier      │   - Mid-Tier Homes: ₹350/day (35%)           │
-│   Homes (₹500/day x 7 days)  │   - Luxury Villas: ₹200/day (20%)            │
-│ • Week 4: 100% Luxury        │ • Weeks 3 & 4 (Transition to CBO):           │
-│   Villas (₹500/day x 7 days) │   - Advantage Budget with Spend Minimums     │
-└──────────────────────────────┴──────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                   CALIBRATED BUDGET ALLOCATION MATRIX (₹10,000–₹15,000/MONTH)                          │
+├─────────────────────┬──────────────────────────┬──────────────────────────┬────────────────────────────┤
+│ PARAMETER           │ TIER 1: BUDGET PLOTS     │ TIER 2: MID-TIER HOMES   │ TIER 3: LUXURY VILLAS      │
+├─────────────────────┼──────────────────────────┼──────────────────────────┼────────────────────────────┤
+│ Share of Ad Spend   │ 45% – 50%                │ 35%                      │ 15% – 20%                  │
+├─────────────────────┼──────────────────────────┼──────────────────────────┼────────────────────────────┤
+│ Model A: ₹350/Day   │ ₹175 / day (50%)         │ ₹125 / day (35%)         │ ₹50 / day (15%)            │
+│ (₹10,500 / month)   │ ₹5,250 / month           │ ₹3,750 / month           │ ₹1,500 / month             │
+├─────────────────────┼──────────────────────────┼──────────────────────────┼────────────────────────────┤
+│ Model B: ₹500/Day   │ ₹225 / day (45%)         │ ₹175 / day (35%)         │ ₹100 / day (20%)           │
+│ (₹15,000 / month)   │ ₹6,750 / month           │ ₹5,250 / month           │ ₹3,000 / month             │
+├─────────────────────┼──────────────────────────┼──────────────────────────┼────────────────────────────┤
+│ Destination Mix     │ 100% WhatsApp Concierge  │ Website + Floating WA    │ Website Immersive Showcase │
+├─────────────────────┼──────────────────────────┼──────────────────────────┼────────────────────────────┤
+│ Expected CPM        │ ₹100 – ₹160              │ ₹180 – ₹280              │ ₹350 – ₹550                │
+├─────────────────────┼──────────────────────────┼──────────────────────────┼────────────────────────────┤
+│ Expected CPL        │ ₹40 – ₹75                │ ₹110 – ₹180              │ ₹300 – ₹500                │
+├─────────────────────┼──────────────────────────┼──────────────────────────┼────────────────────────────┤
+│ Monthly Leads (Est.)│ 70 – 110 inquiries       │ 20 – 35 inquiries        │ 6 – 10 HNI inquiries       │
+├─────────────────────┼──────────────────────────┼──────────────────────────┼────────────────────────────┤
+│ Sales Velocity      │ 20 – 45 days             │ 45 – 90 days             │ 90 – 180 days              │
+└─────────────────────┴──────────────────────────┴──────────────────────────┴────────────────────────────┘
 ```
 
-#### 4.5.1 Model A: Conservative Sequential Architecture (₹500/Day | ₹15,000/Month)
-- **Weeks 1 & 2 (Days 1–14 / ₹7,000 total spend)**: **100% Allocation to Segment 1 (Budget Plots)**.
-  - Generates 5 to 8 inquiries daily (70–110 leads in 14 days) at CPL ₹60–₹95.
-  - Rapidly trains Meta’s conversion pixel, tests concierge response speed, and generates immediate site visit volume.
-- **Week 3 (Days 15–21 / ₹3,500 total spend)**: **100% Allocation to Segment 2 (Mid-Tier Homes)**.
-  - Generates 2 to 4 qualified leads daily (18–25 leads in 7 days) at CPL ₹140–₹190.
-- **Week 4 (Days 22–28 / ₹3,500 total spend)**: **100% Allocation to Segment 3 (Luxury Villas)**.
-  - Generates 1 high-intent lead every 24–36 hours (6–9 leads in 7 days) at CPL ₹400–₹550.
-- **Days 29–30**: Synthesize performance data and consolidate ongoing budget into the top-converting segment.
-
-#### 4.5.2 Model B: Recommended Growth Architecture (₹1,000/Day | ₹30,000/Month)
-With ₹1,000/day, Royal Agra Estate possesses sufficient liquidity to test all three segments **simultaneously in parallel**, avoiding cross-tier starvation:
-
-```
-                    ┌────────────────────────────────────────────────────────┐
-                    │               1 CAMPAIGN (OBJECTIVE: LEADS)            │
-                    │               Buying Type: Auction (ABO)               │
-                    └───────────────────────────┬────────────────────────────┘
-                                                │
-         ┌──────────────────────────────────────┼──────────────────────────────────────┐
-         ▼                                      ▼                                      ▼
-┌─────────────────────────────┐        ┌─────────────────────────────┐        ┌─────────────────────────────┐
-│          AD SET 1           │        │          AD SET 2           │        │          AD SET 3           │
-│     Budget Plots/Homes      │        │       Mid-Tier Homes        │        │      Luxury & Heritage      │
-│  Daily Budget: ₹450 (45%)   │        │  Daily Budget: ₹350 (35%)   │        │  Daily Budget: ₹200 (20%)   │
-│  Target: Rohta/Gwalior Rd   │        │  Target: Kamla/Sikandra/Sh. │        │  Target: Fatehabad/Dayalbagh│
-│  Radius: Agra + 40km        │        │  Radius: Agra + 20km        │        │  Radius: Agra + 15km + NCR  │
-└──────────────┬──────────────┘        └──────────────┬──────────────┘        └──────────────┬──────────────┘
-         ┌─────┴─────┐                          ┌─────┴─────┐                          ┌─────┴─────┐
-         ▼           ▼                          ▼           ▼                          ▼           ▼
-      [Ad 1.1]    [Ad 1.2]                   [Ad 2.1]    [Ad 2.2]                   [Ad 3.1]    [Ad 3.2]
-      (UGC Reel)  (Carousel)                 (HD Tour)   (Floorplan)                (4K Drone)  (Editorial)
-```
-
-- **Weeks 1 & 2 (ABO Forced Learning & Algorithmic Calibration)**:
-  - Ad Set 1 (Budget Plots): ₹450/day → 5 to 7 leads/day (70–98 leads across 14 days, ~42 leads/week).
-  - Ad Set 2 (Mid-Tier Homes): ₹350/day → 2 to 3 leads/day (28–42 leads across 14 days, ~14 leads/week).
-  - Ad Set 3 (Luxury Villas): ₹200/day → 1 lead every 48 hours (5–8 HNI leads across 14 days, ~2.8 leads/week).
-
-> ⚠️ **CRITICAL ALGORITHMIC SAFEGUARD: Preventing Meta's `Learning Limited` Trap on Ad Set 3**  
-> Meta's auction and delivery algorithm officially mandates **~50 optimization events per ad set within a 7-day rolling window** to exit the learning phase. In Model B:  
-> • *The Math Deficit*: Ad Set 3 (Luxury @ ₹200/day = ₹1,400/week) with a typical high-ticket CPL of ₹380–₹650 generates only **2.8 leads per week**—a massive deficit of ~47 events/week against Meta's 50-event threshold. Setting Ad Set 3 to optimize for bottom-of-funnel `Lead` events mathematically guarantees that it will remain permanently trapped in **`Learning Limited`**, causing volatile delivery, auction penalties, and inflated CPMs.  
-> • *Mandatory Optimization Safeguard*: In Model B, Ad Set 3 **must be optimized for `Landing Page Views`** (directing traffic to the immersive luxury web showcase on `royalagraestate.in`). At an average cost of ₹12–₹20 per landing page view, ₹200/day generates **70 to 115 optimization events/week** (> 100 events/week), easily surpassing Meta's 50-event threshold and stabilizing machine learning delivery. High-net-worth inquiries are then captured frictionlessly via the on-page VIP WhatsApp Concierge button and private callback modal.  
-> • *Month 1 Launch Recommendation*: Alternatively, for the first 30 days, Royal Agra Estate should deploy **Model A (Sequential Testing Architecture)** as the standard default launch vehicle even at ₹1,000/day (Weeks 1 & 2 concentrated on Budget Plots yielding 35–56 leads/week to calibrate pixel liquidity, followed by Mid-Tier and Luxury), transitioning to parallel ABO/CBO in Month 2 once account-level conversion history is deeply trained.
-
-- **Weeks 3 & 4 (Transition to Constrained CBO)**:
-  - Transition the campaign to Advantage Campaign Budget (CBO) with minimum spend rules: 30% Budget Plots (₹300/day cap), 45% Mid-Tier Homes (₹450/day scale target), and 25% Luxury (₹250/day). Meta dynamically routes remaining daily liquidity to the lowest marginal cost conversion across the pooled portfolio.
+> ⚠️ **CRITICAL ALGORITHMIC SAFEGUARD: Preventing Meta's `Learning Limited` Trap on Tier 3**  
+> Meta's delivery algorithm mandates **~50 optimization events per ad set within a 7-day rolling window** to exit the learning phase.  
+> At ₹50–₹100/day, Tier 3 generates ~2 leads per week, which is below Meta's 50-event threshold. Setting Tier 3 to optimize for bottom-of-funnel `Lead` causes permanent `Learning Limited` status, auction penalties, and inflated CPMs.  
+> **Mandatory Solution**: Tier 3 **must be optimized for `Landing Page Views`** (directing traffic to the immersive luxury web showcase on `royalagraestate.in`). At an average cost of ₹12–₹20 per landing page view, ₹100/day generates **35 to 60 optimization events/week**, easily satisfying Meta's machine learning delivery requirements. High-net-worth inquiries are then captured frictionlessly via the on-page VIP WhatsApp Concierge button and private callback modal.
 
 ### 4.6 Targeting Setup: Broad vs. Advantage+ & Geographic Micro-Radii
 In 2026, **Creative is the Targeting**. Stacking 15 restrictive interest tags chokes delivery and inflates CPMs by 50%+. Instead, configure broad targeting bounded by precise geographic radii:
@@ -727,61 +750,103 @@ In 2026, **Creative is the Targeting**. Stacking 15 restrictive interest tags ch
 └─────────────────────┴──────────────────────────┴───────────┴───────────────────────────────────────────┘
 ```
 
-### 4.7 Empirical KPI Benchmark Matrix, Unit Economics & 72–96 Hour Diagnostics
+### 4.7 High-Converting Localized Hindi/Hinglish Creative Copy Suites
 
-#### 4.7.1 Performance Benchmarks Across Agra Tiers:
+#### 4.7.1 Creative Suite 1: Budget Plots (Rohta / Gwalior Road & Shamshabad Road)
+- **Primary Video Ad Hook (First 3 Seconds)**:  
+  *Advisor standing on an open 30-foot paved road in Rohta, holding a boundary peg:*  
+  *"Agra mein har saal kiraya badhane wale makaan malik se pareshan? Jitna mahine ka kiraya dete ho, utne mein apna 100 gaj ka plot khareedo!"*
+- **Primary Text Copy (Hindi / Hinglish)**:  
+  🏠 **किराए के मकान से आज़ादी — अब आगरा में अपना खुद का प्लॉट!**  
+  
+  रोहता (ग्वालियर रोड) और शमसाबाद रोड पर 100% लीगल व वेरीफाइड रेजिडेंशियल प्लॉट्स।  
+  
+  ✅ **पक्की रजिस्ट्री और तुरंत दाखिल-खारिज**  
+  ✅ **धारा 80 (Section 80) गैर-कृषि अप्रूव्ड**  
+  ✅ **30 फीट चौड़ी पक्की सड़कें, बिजली के खंभे और मीठा पानी**  
+  ✅ **मौके पर तुरंत कब्ज़ा — बाउंड्री कराकर पजेशन लें**  
+  
+  मासिक बचत और आसान किश्तों की सुविधा उपलब्ध। मात्र ₹6.50 लाख से शुरू!  
+  
+  📲 नीचे दिए गए बटन पर क्लिक करें और सीधे व्हाट्सएप पर लेआउट मैप व रेट लिस्ट मंगाएं।  
+  **रॉयल आगरा एस्टेट — +91 91490 79913**
+- **Headline**: Rohta & Shamshabad Rd Plots | Pakki Registry | ₹6,500/gaj se shuru
+- **CTA**: Send WhatsApp Message
+
+#### 4.7.2 Creative Suite 2: Mid-Tier Family Homes (Sikandra, Shastripuram, Kamla Nagar)
+- **Primary Video Ad Hook (First 3 Seconds)**:  
+  *Walking from a spacious 2-car covered parking bay into a private elevator:*  
+  *"Purane Agra ke traffic aur roz ke car parking ke jhanjhat se thak chuke hain? Shastripuram aur Sikandra mein ready-to-move luxury independent homes!"*
+- **Primary Text Copy (Hinglish)**:  
+  ✨ **Upgrade Your Family to Space, Peace & Modern Luxury in Agra!**  
+  
+  Now move into spacious, newly built 3 BHK & 4 BHK independent luxury builder floors in Sikandra (near Highway) and Shastripuram.  
+  
+  🚗 **Dedicated 2-Car Covered Stilt Parking**  
+  🛗 **Automatic High-Speed Elevator for Elders**  
+  🌳 **Gated Community with 24x7 Security & Park Facing**  
+  🏛️ **ADA Sanctioned Map & 100% Clear Title Verification**  
+  🏦 **Pre-Approved Bank Loans from SBI & HDFC (Up to 80%)**  
+  
+  Verified genuine direct listings with complete address privacy. Inspect with our senior advisory team this Sunday.  
+  
+  👉 Click below to explore floor plans, photos, and book a private family walkthrough.  
+  **Royal Agra Estate Concierge: +91 91490 79913**
+- **Headline**: Ready 3 BHK Luxury Floors | Sikandra & Shastripuram | Bank Approved
+- **CTA**: Learn More / Book Site Visit
+
+#### 4.7.3 Creative Suite 3: Premium & Heritage Villas (Fatehabad Road & Dayalbagh)
+- **Primary Video Ad Hook (First 3 Seconds)**:  
+  *Cinematic 4K drone shot descending over a grand double-height foyer with chandeliers:*  
+  *"True luxury does not shout; it commands in silence. Introducing Agra's most exclusive private villa collection."*
+- **Primary Text Copy (English with Hinglish Touch)**:  
+  🏰 **A Legacy Residence for Generations to Come — Fatehabad Road VIP Corridor**  
+  
+  For Agra’s leading industrial families, senior professionals, and global NRIs seeking uncompromised architectural distinction.  
+  
+  • **Sprawling 350 to 600 Sq. Yard Signature Villas**  
+  • **Double-Height Living Foyers with Italian Statuario Marble**  
+  • **Private Terrace Garden, Home Theater & Personal Elevator**  
+  • **Complete Title Perfection with 30-Year Statutory Audit Dossier**  
+  
+  We respect your need for discretion. Exact addresses and client dossiers are shared strictly through private, confidential consultations.  
+  
+  📞 Direct Executive Concierge: +91 91490 79913  
+  Explore the Private Collection: royalagraestate.in
+- **Headline**: Private Villa Collection | Fatehabad Road | Confidential Showing
+- **CTA**: Contact Us / Request Private Brochure
+
+### 4.8 Empirical KPI Benchmark Matrix, Pipeline Efficiency & 72–96 Hour Diagnostics
+
+#### 4.8.1 Performance Benchmarks Across Agra Tiers:
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │                        EMPIRICAL PERFORMANCE BENCHMARKS (AGRA MARKET)                                  │
 ├───────────────────────────────────┬───────────────────┬────────────────────────┬───────────────────────┤
 │ METRIC                            │ TIER 1: PLOTS     │ TIER 2: MID-TIER HOMES │ TIER 3: LUXURY VILLAS │
 ├───────────────────────────────────┼───────────────────┼────────────────────────┼───────────────────────┤
-│ Expected CPM                      │ ₹120 – ₹190       │ ₹190 – ₹310            │ ₹380 – ₹650           │
+│ Expected CPM                      │ ₹100 – ₹160       │ ₹180 – ₹280            │ ₹350 – ₹550           │
 │ Hook Rate (3-sec Views / Imp)     │ > 28%             │ > 24%                  │ > 20%                 │
 │ Link CTR (Click-Through Rate)     │ 2.2% – 3.8%       │ 1.6% – 2.4%            │ 0.9% – 1.6%           │
 │ Cost Per Click (CPC)              │ ₹4.50 – ₹9.00     │ ₹9.00 – ₹18.00         │ ₹24.00 – ₹48.00       │
 │ Conversion Rate (Click to Lead)   │ 8% – 14%          │ 6% – 10%               │ 4% – 7%               │
-│ Cost Per Raw Lead (CPL)           │ ₹60 – ₹105        │ ₹135 – ₹220            │ ₹380 – ₹650           │
+│ Cost Per Raw Lead (CPL)           │ ₹40 – ₹75         │ ₹110 – ₹180            │ ₹300 – ₹500           │
 │ Lead Qualification Rate           │ 40% – 50%         │ 55% – 65%              │ 65% – 75%             │
-│ Cost Per Qualified Lead (CPQL)    │ ₹130 – ₹220       │ ₹230 – ₹380            │ ₹550 – ₹950           │
+│ Cost Per Qualified Lead (CPQL)    │ ₹100 – ₹160       │ ₹200 – ₹320            │ ₹450 – ₹750           │
 │ Site Visit Conversion Rate        │ 20% of Qual Leads │ 25% of Qual Leads      │ 30% of Qual Leads     │
-│ Cost Per Physical Site Visit      │ ₹650 – ₹1,100     │ ₹920 – ₹1,520          │ ₹1,800 – ₹3,100       │
+│ Cost Per Physical Site Visit      │ ₹500 – ₹800       │ ₹800 – ₹1,280          │ ₹1,500 – ₹2,500       │
 │ Average Sales Cycle               │ 20 – 45 Days      │ 45 – 90 Days           │ 90 – 180 Days         │
 └───────────────────────────────────┴───────────────────┴────────────────────────┴───────────────────────┘
 ```
 
-#### 4.7.2 Monthly Unit Economics & Brokerage Return on Ad Spend (ROAS):
-Operating on the Recommended Growth Testing Budget of **₹30,000/month (₹1,000/day)**:
-* **Total Monthly Ad Spend**: ₹30,000
-* **Total Inbound Inquiries**: 180 to 240 inquiries
-* **Qualified Buyer Leads Filtered**: 95 to 130 buyers
-* **Physical Site Visits Conducted**: 20 to 28 visits
-* **Estimated Monthly Closures**: 1 to 2 deals
+#### 4.8.2 Monthly Pipeline Generation at ₹10,000–₹15,000/Month:
+Operating on the calibrated ad spend of **₹10,000 to ₹15,000/month (₹350 to ₹500/day)**:
+* **Total Monthly Inbound Inquiries**: 95 to 155 leads across all tiers.
+* **Qualified Buyer Pipeline**: 50 to 80 vetted buyers in active follow-up.
+* **On-Ground Escorted Site Visits**: 12 to 20 physical family inspections conducted monthly.
+* **Transaction Closures**: Highly predictable pipeline yielding 1 to 2 transaction settlements every 30–60 days.
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                   PAYBACK & REVENUE REALIZATION SCENARIOS                   │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ SCENARIO A: 1 Mid-Tier Deal Close (₹55 Lakh 3 BHK Flat @ 1.25% Commission)  │
-│ • Gross Buyer Brokerage Earned: ₹68,750                                     │
-│ • Net Revenue After ₹30,000 Ad Spend: +₹38,750                              │
-│ • Immediate Payback ROAS: 2.29x                                             │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ SCENARIO B: Dual Closures (1 Budget Plot @ ₹12L + 1 Mid-Tier @ ₹70L)        │
-│ • Plot Brokerage (1.5%): ₹18,000                                            │
-│ • Mid-Tier Brokerage (1.25%): ₹87,500                                       │
-│ • Gross Brokerage Earned: ₹105,500                                          │
-│ • Net Revenue After ₹30,000 Ad Spend: +₹75,500                              │
-│ • Immediate Payback ROAS: 3.51x                                             │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ SCENARIO C: 1 Luxury Deal Close (₹2.50 Cr Villa @ 1.0% Commission)          │
-│ • Gross Buyer Brokerage Earned: ₹2,50,000                                    │
-│ • Net Revenue After ₹30,000 Ad Spend: +₹2,20,000                             │
-│ • Quarterly Pipeline ROAS: 8.33x                                            │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-#### 4.7.3 The 72–96 Hour Post-Launch Diagnostic Engine:
+#### 4.8.3 The 72–96 Hour Post-Launch Diagnostic Engine:
 To prevent killing winning campaigns prematurely, Royal Agra Estate strictly enforces the **72-to-96-Hour Silence Rule**—zero budget adjustments or ad edits for the first 4 days post-launch:
 
 ```
@@ -798,7 +863,7 @@ To prevent killing winning campaigns prematurely, Royal Agra Estate strictly enf
                                              [CTR < 1.2%]                  [CTR > 1.8%]
                                                     │                             │
                                         Sharpen the Offer & Copy:       Check Cost Per Lead (CPL)
-                                        • Highlight "0% Brokerage"                │
+                                        • Highlight Verified Title                │
                                         • State location proximity      ┌─────────┴─────────┐
                                         • Add strong WhatsApp CTA       ▼                   ▼
                                                                   [CPL Above Target]   [CPL On Target]
@@ -812,345 +877,310 @@ To prevent killing winning campaigns prematurely, Royal Agra Estate strictly enf
 
 ---
 
-# 5. Section R4: Buyer-Only Brokerage Business Model Strategy & Anti-Circumvention
+# 5. Section R4: Seller & Dealer Quality Control & ₹10,000 Buyer Advance Verification Workflow
 
-### 5.1 Disrupting the Legacy 1%–2% Bilateral Broker Cartel
-In Agra’s traditional real estate ecosystem, informal roadside brokers extract a **bilateral commission (1% to 2% from seller AND 1% to 2% from buyer)**. This model is plagued by structural failures:
-1. **Dual Agency & Divided Loyalty**: The broker cannot represent both sides faithfully. To close the deal, the broker misrepresents counteroffers to both parties.
-2. **Seller Friction & Inflated Prices**: Sellers resent paying ₹1 Lakh to ₹5 Lakhs to an agent who provided no professional marketing. Consequently, sellers inflate asking prices with a "brokerage buffer" or demand "net-in-hand", causing listings to sit unsold for months.
-3. **Buyer Disillusionment**: Buyers pay a full commission but receive zero title verification, zero circle rate advisory, and zero protection against unauthorized colony demolitions.
-
-### 5.2 Two-Sided Marketplace Dynamics & The Power of "0% Seller Commission"
-In real estate platforms, **liquidity is determined by the constrained side of the market**—which is universally **genuine, verified direct-owner inventory**. Buyers naturally gravitate to platforms possessing exclusive direct listings; conversely, buyers flee platforms saturated with unverified broker reposts.
+### 5.1 Local Dealer Psychology in Agra: The Fear of Deal Bypass
+In Tier-2 real estate markets like Agra, traditional property aggregators (MagicBricks, 99acres, Housing.com) fail to build lasting dealer networks because their operating model triggers intense **deal bypass panic**. 
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                   ROYAL AGRA ESTATE STRATEGIC FLYWHEEL                      │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                       │
-                                       ▼
-                ┌──────────────────────────────────────────────┐
-                │         0% Brokerage for Sellers             │
-                │   + Complete Address Privacy Masking         │
-                └──────────────────────────────────────────────┘
-                                       │
-                                       ▼ Unlocks pent-up genuine inventory
-                ┌──────────────────────────────────────────────┐
-                │       Exclusive Direct Owner Inventory       │
-                │  (Kothis, Villas, Plots, Prime Commercial)   │
-                └──────────────────────────────────────────────┘
-                                       │
-                                       ▼ Attracts serious capital
-                ┌──────────────────────────────────────────────┐
-                │    High-Intent HNIs, NRIs & Family Buyers    │
-                │    Willing to Pay for Fiduciary Advisory     │
-                └──────────────────────────────────────────────┘
-                                       │
-                                       ▼ High conversion velocity
-                ┌──────────────────────────────────────────────┐
-                │     1.0% - 1.5% Buyer Brokerage Realized     │
-                │    + Ancillary Legal, Loan & Registry Fees   │
-                └──────────────────────────────────────────────┘
-                                       │
-                                       ▼ Reinvested in platform
-                ┌──────────────────────────────────────────────┐
-                │   Brand Authority, Paid Meta Ads & Tech Moat │
-                └──────────────────────────────────────────────┘
-```
-
-#### How "0% Seller Commission" Disrupts the Agra Market:
-1. **Rapid Inventory Aggregation**: Eliminating seller commissions unlocks direct listings from Agra’s prominent doctors, industrialists, and old-city families who previously refused to deal with brokers.
-2. **True Market Pricing**: Without a 2% brokerage buffer, properties are listed at competitive market rates, accelerating inquiry volumes.
-3. **Exclusive Centralized Representation**: In exchange for 0% commission, Royal Agra Estate secures an exclusive 60-day marketing mandate, preventing the listing from being circulated across unverified WhatsApp groups.
-4. **Displacement of Competitors**: Informal brokers who survive by charging sellers 1% are starved of supply, while sellers receive professional 4K video walkthroughs and paid Meta Ads exposure completely free.
-
-### 5.3 Four Core Buyer Value Deliverables Justifying 1.0%–1.5% Success Fee
-To collect a 1.0% to 1.5% commission from buyers without friction, Royal Agra Estate provides a level of service so superior that buyers view the fee not as an expense, but as a **capital preservation guarantee**:
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                 FOUR PILLARS OF BUYER ADVISORY EXCELLENCE                   │
-├───────────────────────────────┬─────────────────────────────────────────────┤
-│ 1. Curated Discovery & Tours  │ • Private Chauffeur Architectural Tours     │
-│                               │ • Pre-screened, non-duplicate inventory     │
-├───────────────────────────────┼─────────────────────────────────────────────┤
-│ 2. 30-Year Legal & Compliance │ • UP Bhulekh Khatauni & Khasra audit        │
-│                               │ • IGRSUP 30-Year Barah Sala (Nil EC)        │
-│                               │ • ADA 2031 / Sec 80 & Heritage Buffer Audit │
-├───────────────────────────────┼─────────────────────────────────────────────┤
-│ 3. Financial & Registry Math  │ • Circle Rate vs Market Rate breakdown      │
-│                               │ • UP Stamp Duty (7% M / 6% F) & 1% Reg Fee  │
-│                               │ • Transparent closing cost settlement sheet │
-├───────────────────────────────┼─────────────────────────────────────────────┤
-│ 4. Hard-Nosed Price Advisory  │ • Micro-market Comparable Market Analysis   │
-│                               │ • Data-backed negotiation saving 5% - 10%   │
-└───────────────────────────────┴─────────────────────────────────────────────┘
-```
-
-#### 5.3.1 Pillar 1: Curated Discovery & Private Chauffeur Architectural Tours
-- Zero wasted time touring unapproved, overpriced, or disputed properties.
-- **The Chauffeur Experience**: Buyers are escorted in executive air-conditioned vehicles accompanied by a Senior Valuation Advisor. The advisor provides objective structural evaluations: carpet area efficiency, road width verification, groundwater sweetness (*meetha paani*), and neighborhood zoning.
-
-#### 5.3.2 Pillar 2: 30-Year Legal Title Search & Statutory Compliance Dossier
-Agra real estate is subject to strict statutory, revenue, and environmental regulations:
-- **ADA Sanctioned Urban Enclaves vs. Gram Panchayat Freehold Plots**: 
-  - *ADA Sanctioned Enclaves*: Properties within municipal development authority limits require formal layout approval under Sections 14 and 15 of the UP Urban Planning and Development Act, 1973, confirming conformity with the **ADA Master Plan 2031 (Agra Mahayojna 2031)** and absence of greenbelt (*Harit Patti*) or arterial road reservations.
-  - *Gram Panchayat / Peripheral Freehold Plots*: Peripheral budget plotted developments (e.g., Rohta, Kakua, Shamshabad Road, Bodla-Bichpuri @ ₹6,500/gaj) operate under **Section 80 of the UP Revenue Code, 2006 (non-agricultural declaration)** and **revenue mutation (*Daakhil-Kharij*)**. These are categorized as *Gram Panchayat / Peripheral Freehold Plots*, distinct from ADA Sanctioned Urban Enclaves. A Section 80 order legally confirms that agricultural land has been converted for non-agricultural use for revenue purposes, guaranteeing absolute *Bhumidhari* tenure rights, but does not constitute municipal ADA layout approval.
-  - *Mandatory UP RERA Screening*: Plotted colonies exceeding 500 square meters or 8 plots undergo mandatory screening for **UP RERA registration** under Sections 3 and 10 of RERA 2016, eliminating agent liability and buyer risk under Section 62 of RERA.
-- **Calibrated Taj Trapezium Zone (TTZ) & Heritage Buffers**:
-  - Individual residential homes and private plots do **not** require individual Supreme Court TTZ clearance (as TTZ mandates under *M.C. Mehta v. Union of India* primarily regulate air-polluting industrial units, foundries, glass works, brick kilns, and large industrial environmental clearances).
-  - Residential compliance strictly focuses on verifying non-encroachment on protected forest buffers, prohibited Yamuna riverbed/floodplain zones, and **Archaeological Survey of India (ASI) Monument Buffer Zones** under the Ancient Monuments and Archaeological Sites and Remains (AMASR) Act (100-meter prohibited zone and 200-meter regulated zone around monuments like the Taj Mahal, Agra Fort, Sikandra, and Itmad-ud-Daulah).
-
-**The Royal Agra Estate Legal Clearance Dossier Includes**:
-1. *30-Year Chain of Title Verification*: Tracing registered Sale Deeds (*Bainama*), Gift Deeds, Partition Deeds, and Wills through Agra Sub-Registrar offices.
-2. *Nil Encumbrance Certificate (Barah Sala / 12-to-30 Year EC)*: Retrieved via the UP Stamp and Registration portal (**IGRSUP** `igrsup.gov.in`).
-3. *Bhulekh UP Record of Rights Audit*: Inspecting official land records on **Bhulekh UP** (`upbhulekh.gov.in`) to verify Khasra numbers, Fasli year, and ownership categories (*Bhumidhar with transferable rights*).
-4. *Nagar Nigam / Gram Panchayat Mutation Audit*: Confirming municipal property tax (*House Tax*) payments or Tehsil revenue mutation (*Daakhil Kharij*) in official revenue records.
-5. *ADA Master Plan 2031 & Heritage Buffer Clearance*: Verifying layout sanctions for urban enclaves, Section 80 non-agricultural orders for peripheral plots, and certifying zero encroachment on greenbelts (*Harit Patti*), road widening reservations, or ASI/Yamuna flood buffers.
-
-#### 5.3.3 Pillar 3: Circle Rate vs. Market Rate Calculation & Stamp Duty Optimization
-Property valuation in Agra is split between the District Magistrate (DM) Circle Rate and the actual Market Rate.
-
-**Statutory Stamp Duty & Registration in Uttar Pradesh (Agra District)**:
-- **Male Buyer Stamp Duty**: 7.0% of consideration or circle rate value (whichever is higher).
-- **Female Buyer Stamp Duty**: 6.0% (1.0% state rebate granted by the Government of Uttar Pradesh to encourage female property ownership).
-- **Joint Ownership (Male + Female)**: 6.5% effective rate.
-- **Sub-Registrar Registration Fee**: Flat 1.0% across all Agra Sub-Registrar offices.
-
-**The Financial Settlement Sheet Deliverable**:
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│             SAMPLE FINANCIAL SETTLEMENT SHEET (250 SQ.YD PLOT)              │
-│                     Locality: Shamshabad Road, Agra                         │
-├─────────────────────────────────────────────────┬───────────────────────────┤
-│ Consideration / Negotiated Purchase Price       │ ₹75,00,000                │
-│ DM Circle Rate Valuation (e.g. ₹22,000/sq.m)    │ ₹46,00,000                │
-│ Taxable Base (Higher of Market vs Circle Rate)  │ ₹75,00,000                │
-│ Stamp Duty (Female Sole Ownership @ 6.0%)       │ ₹4,50,000                 │
-│ Sub-Registrar Registration Fee (@ 1.0%)         │ ₹75,000                   │
-│ Legal Drafting, Stamp Paper & Notary Charges    │ ₹15,000                   │
-│ Nagar Nigam Mutation (Dakhil Kharij) Fees       │ ₹10,000                   │
-│ Royal Agra Estate Advisory Fee (1.25%)          │ ₹93,750                   │
-├─────────────────────────────────────────────────┼───────────────────────────┤
-│ TOTAL CAPITAL OUTLAY AT REGISTRATION            │ ₹81,43,750                │
-└─────────────────────────────────────────────────┴───────────────────────────┘
-```
-
-#### 5.3.4 Pillar 4: Hard-Nosed Price Negotiation & Comparative Market Analysis (CMA)
-Because Royal Agra Estate operates as an exclusive buyer representative, it does not hesitate to negotiate aggressively:
-- Utilizes empirical transaction records across Agra localities to challenge inflated asking rates.
-- Leverages buyer liquidity (pre-sanctioned bank loans, ready token capital) to negotiate **5% to 10% reductions off asking prices**.
-- **Net Economic Calculus for the Buyer**:
-  $$\text{Asking Price} = ₹2,00,00,000$$
-  $$\text{Negotiated Price (via Royal Agra Estate)} = ₹1,85,00,000 \quad (\text{Direct Savings: } ₹15,00,000)$$
-  $$\text{Buyer Advisory Fee @ 1.0\%} = ₹1,85,000$$
-  $$\mathbf{\text{Net Financial Benefit to Buyer}} = ₹15,00,000 - ₹1,85,000 = \mathbf{₹13,15,000}$$
-  The advisory fee delivers a massive positive financial return alongside complete legal security.
-
-### 5.4 Risk Mitigation: The 4-Layer Deal Bypass Prevention Architecture
-In Tier-2 markets like Agra, the primary risk facing a buyer-only agency is **direct deal bypass** (*"party mil gayi, ab broker ko hatao"*). Royal Agra Estate deploys a **4-layer operational and legal safeguard system**:
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                      4-LAYER DEAL BYPASS DEFENSE SYSTEM                     │
+│                    AGRA BROKER BEHAVIORAL LOGIC CHAIN                       │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  LAYER 1: DIGITAL & PHYSICAL CLIENT REGISTRATION SLIP (NDNC)               │
-│  • Signed Client Agreement with 18-month non-circumvention & family clause  │
-│  • Admissible digital OTP audit logs under Section 63 of BSA, 2023         │
-│  • Pre-estimated liquidated damages aligned with Kailash Nath (2015)        │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  LAYER 2: STRICT ADDRESS & OWNER PRIVACY MASKING (CODEBASE INVARIANT)       │
-│  • Public views only macro locality via getMaskedProperty()                 │
-│  • Exact plot/house number & GPS restricted strictly to CEO account         │
-│  • Chauffeur-escorted visits; seller & buyer direct contact withheld        │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  LAYER 3: TRIPARTITE TOKEN ADVANCE (BIANA) ESCROW FACILITATION              │
-│  • Formal earnest deposit agreement executed at Royal Agra Estate office    │
-│  • Explicit brokerage lien and liquidated damages clause in Sale Agreement  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  LAYER 4: EXPEDITED SOLE ARBITRATION & CULTURAL MEDIATION IN AGRA          │
-│  • Express Sole Arbitration Clause under Arbitration & Conciliation Act 1996│
-│  • Enforceable directly as Civil Court Decree (Sec 36); Vyapar Mandal support│
+│ 1. Local Agra dealers operate without formal written seller contracts       │
+│    (relationships are based on informal neighborhood trust / "Pehchan").    │
+│                                    ▼                                        │
+│ 2. The dealer's sole commercial leverage is knowing the property location,  │
+│    the seller's identity, and holding the registry copy.                    │
+│                                    ▼                                        │
+│ 3. If a platform demands title documents (Bainama, Khatauni, Aadhaar)       │
+│    upfront at listing submission:                                           │
+│    → Dealer assumes: "Platform will call owner directly and cut me out."     │
+│    → Dealer experiences immediate bypass panic ("Dalali mar jayegi").       │
+│                                    ▼                                        │
+│ 4. Result: 95%+ of Agra dealers abandon registration, post fake details,    │
+│    or refuse to list their genuine high-value inventory.                    │
+│                                    ▼                                        │
+│ 5. SOLUTION: Royal Agra Estate eliminates upfront document demands entirely.│
+│    Dealers list with photos, specs, pricing, and general locality only.     │
+│    Title verification is deferred until a real buyer deposits ₹10,000 cash. │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-1. **Layer 1: Client Inspection Agreement, Digital NDNC & Affiliated Purchaser Covenant**:
-   - **Digital OTP Authentication & BSA 2023 Admissibility**: Prior to physical tours, buyers authenticate an inspection schedule via SMS/WhatsApp OTP, creating a legally binding contract. All digital time-stamps, property reference IDs, and click-wrap acknowledgments are cryptographically logged as electronic evidence admissible under **Section 63 of the Bharatiya Sakshya Adhiniyam, 2023 (BSA)** (which superseded Section 65B of the repealed Indian Evidence Act, 1872 on July 1, 2024).
-   - **Liquidated Damages Grounded in Sections 73 & 74 ICA (Kailash Nath Precedent)**: Under **Sections 73 and 74 of the Indian Contract Act, 1872**, any direct bypass triggers liquidated damages equal to 2.0% of property value plus legal expenses. To comply strictly with the three-judge bench Supreme Court precedent in ***Kailash Nath Associates v. Delhi Development Authority (2015) 4 SCC 136*** (which held that liquidated damages cannot operate as an *in terrorem* penalty and must reflect genuine pre-estimated compensation for actual loss), the contract explicitly defines the 2.0% fee as agreed, pre-estimated compensation for tangible professional services already delivered to the buyer prior to circumvention: (i) private executive chauffeur transportation and on-site valuation tours, (ii) senior architectural and structural due diligence, (iii) 30-year IGRSUP Barah Sala title searches, (iv) micro-market Comparable Market Analysis (CMA) valuation reports, and (v) seller price negotiation discovery.
-   - **Defeating the Straw Buyer Privity Defense (*Affiliated / Family Purchaser Clause*)**: A common loophole in Agra real estate is introducing a spouse, parent, sibling, or corporate shell (*"Maa ya Patni ke naam registry"*) to escape fee obligations under the common law doctrine of privity of contract reaffirmed in ***M.C. Chacko v. State Bank of Travancore (1970) 1 SCC 858***. To defeat this defense, the Client Inspection Agreement incorporates a mandatory Affiliated Purchaser Covenant:
-     > *"The client expressly covenants that should any property introduced, inspected, or evaluated by Royal Agra Estate be purchased, leased, assigned, or registered at the Sub-Registrar office within 18 months of introduction by the client, their spouse, immediate family members (parents, siblings, children, in-laws), business partners, nominees, or any corporate entity, LLP, partnership firm, or trust in which the client or family holds beneficial, managerial, or financial interest, the client shall remain personally, jointly, and severally liable for the full liquidated advisory fee, and irrevocably waives any defense grounded in lack of privity."*
+1. **Unorganized Agra Real Estate Ecosystem**:
+   In micro-markets like Kamla Nagar, Dayalbagh, Shastripuram, Fatehabad Road, and Sikandra, 85%+ of real estate transactions are brokered by neighborhood dealers operating from small commercial shops or home offices. These dealers rarely possess registered Power of Attorney (*Mukhtarnama*) or signed sole mandates. If a portal asks for a registered mandate or title deeds upfront, the dealer simply cannot comply without exposing their inventory to competitors.
+2. **Historical Aggregator Trauma**:
+   National portals charged dealers upfront listing subscription fees and frequently routed generated buyer leads to competing corporate developers or internal sales teams. Dealers view online aggregators with deep suspicion.
+3. **The Royal Agra Estate Zero-Friction Acquisition Moat**:
+   By eliminating upfront document requirements during listing creation, Royal Agra Estate removes all friction. A local dealer can onboard an authentic listing in under 4 minutes using their smartphone by entering photos, basic specs, asking price, and macro-locality. The dealer's relationship with the owner is preserved, and their fear of being bypassed is completely eliminated.
 
-2. **Layer 2: Programmatic Address Privacy Masking (`getMaskedProperty`)**: Exact house numbers, plot identifiers, seller contact details, and precise GPS coordinates are permanently stripped from public view. As implemented in `src/utils/security.ts`, unmasked location data is restricted strictly to the authenticated CEO account. Buyers cannot locate or contact sellers independently prior to formal qualification.
+### 5.2 The Zero-Upfront Document Policy at Listing Time
+- **Zero Document Uploads**: Neither property dealers, consultants, nor direct sellers are required to upload title deeds, Khatauni scans, or owner identity documents when listing a property on `royalagraestate.in`.
+- **Form State in Codebase**: As verified in `src/components/PostPropertyScreen.tsx`, Step 4 only asks for a regulatory authority name and an optional reference number (`verificationDocNumber`), explicitly labeled `(Optional)`. There are zero mandatory file inputs for legal documents.
+- **Partner Dealer Reassurance Banner**: To proactively eliminate anxiety, `PostPropertyScreen.tsx` displays a prominent reassurance notice directly above Step 4:
+  > *"Partner Dealers & Property Consultants: No upfront property ownership documents or deed papers are required to list. Verification documents are requested only after a genuine buyer submits a ₹10,000 refundable advance. Your listing address is 100% masked to protect your client relationship."*
+- **Programmatic Privacy**: Street addresses and exact GPS coordinates are masked via `getMaskedProperty()`, ensuring competing brokers cannot de-anonymize the listing.
 
-3. **Layer 3: Tripartite Token Advance (*Biana Agreement*)**: Token advance meetings occur exclusively at Royal Agra Estate’s executive office in Sanjay Place. The formal tripartite agreement names Royal Agra Estate as transaction facilitator, establishing an irrevocable legal lien for brokerage payment (50% at Biana execution, 50% at Sub-Registrar deed execution).
-
-4. **Layer 4: Expedited Sole Arbitration (Arbitration Act 1996) & Cultural Mediation**:
-   - **Elimination of Flawed Summary Suit & Cheque Dishonour Claims**: Common broker reliance on Order 37 CPC summary suits is ineffective in practice because defendants easily raise triable defenses (e.g., alleging prior knowledge or broker abandonment); under the Supreme Court ruling in *IDBI Trusteeship Services Ltd v. Hubtown Ltd (2017) 1 SCC 568*, courts must grant leave to defend, converting the case into a regular civil suit that languishes in Agra civil courts for 5 to 10 years. Similarly, Section 138 of the Negotiable Instruments Act 1881 requires a dishonoured cheque, whereas bypass buyers never tender cheques to the bypassed agency.
-   - **Pre-Inspection Mandate with Express Sole Arbitration Clause**: Royal Agra Estate replaces these slow civil suits with a mandatory **Sole Arbitration Clause under the Arbitration and Conciliation Act, 1996 (Agra Jurisdiction)**. The agreement stipulates fast-track arbitration under Section 29B conducted by a nominated sole arbitrator in Agra (a retired judicial officer or senior commercial advocate), requiring an award within 6 months.
-   - **Direct Execution as Court Decree (Section 36)**: Under **Section 36 of the Arbitration and Conciliation Act, 1996**, an arbitral award is directly enforceable in the District Court as a decree of the civil court without filing an independent lawsuit, enabling swift asset attachment and financial recovery.
-   - **Supplementary Cultural Mediation via Agra Vyapar Mandal**: For traditional mercantile families in old-city commercial hubs (Hing Ki Mandi, Belanganj, Rawatpara), informal mediation through the **Agra Vyapar Mandal** and local trade associations provides immediate commercial and social pressure, while the binding sole arbitration clause guarantees legal recovery against out-of-district buyers, corporate executives, and NRIs who have no local trade ties.
-
-### 5.5 Monetization Unit Economics & Ancillary High-Margin Revenue Streams
-1. **Core Buyer Brokerage Schedule**:
-   - Plots & Entry Housing (< ₹50 Lakhs): **1.50%**
-   - Mid-Tier Homes (₹50 Lakhs – ₹1.5 Crores): **1.25%**
-   - Luxury Villas & Heritage Estates (> ₹1.5 Crores): **1.00%**
-2. **High-Margin Ancillary Streams**:
-   - *Standalone Legal Title Dossier Package*: ₹15,000 – ₹25,000 charged to buyers who source properties independently but require 30-year Barah Sala title searches.
-   - *Home Loan Direct Selling Agent (DSA) Payouts*: Partnerships with HDFC Bank, SBI, and ICICI Bank yielding **0.35% to 0.65%** of loan disbursements.
-   - *Developer Project Mandates*: For newly launched gated communities, developers pay **2.0% to 3.5%** commission (buyer pays 0%).
-   - *Architectural & Interior Design Referrals*: 5% to 8% referral fee from empanelled interior designers.
-
----
-
-# 6. Section R5: Seller & Dealer Quality Control & Genuine Listing Acquisition
-
-### 6.1 The Plague of National Portals in Agra (99acres / MagicBricks / Housing.com)
-The collapse of user trust on national portals presents an extraordinary market opening for Royal Agra Estate:
+### 5.3 The Exact 6-Step Operational Verification Workflow (From Listing to Settlement)
+The complete operational lifecycle is structured across 6 transparent, sequential stages:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                 COMPARATIVE AUDIT: AGRA PROPERTY PLATFORMS                  │
-├───────────────────────┬──────────────────────────┬──────────────────────────┤
-│ EVALUATION METRIC     │ NATIONAL PORTALS         │ ROYAL AGRA ESTATE        │
-│                       │ (99acres / MagicBricks)  │ (royalagraestate.in)     │
-├───────────────────────┼──────────────────────────┼──────────────────────────┤
-│ Listing Authenticity  │ ~30% - 40% Genuine       │ 100% Physically Verified │
-│ Duplicate Spam        │ 8-15 entries per home    │ ZERO tolerance (1:1 canonical)│
-│ Rate Accuracy         │ Misleading "Bait" Rates  │ Audited Market Reality   │
-│ Location Privacy      │ Unmasked or completely fake│ Exact Masking (getMasked)│
-│ Legal Diligence       │ ZERO (Self-declared)     │ 5-Point Document Audit   │
-│ Stale Inventory Ratio │ > 50% sold/expired       │ 30-Day WhatsApp Cycle    │
-│ On-Ground Support     │ Call-center / Third-party│ Dedicated Senior Advisor │
-└───────────────────────┴──────────────────────────┴──────────────────────────┘
+┌───────────────────────────────────────────────────────────────────────────────────────────┐
+│              ROYAL AGRA ESTATE: ₹10,000 BUYER ADVANCE VERIFICATION WORKFLOW               │
+└───────────────────────────────────────────────────────────────────────────────────────────┘
+
+  STEP 1: ZERO-FRICTION LISTING (NO UPFRONT DOCS)
+  ├─ Dealer/Owner lists property on royalagraestate.in (photos, specs, pricing, locality).
+  ├─ NO title deeds, Khatauni, or owner Aadhaar required at this stage.
+  ├─ Programmatic privacy masking (getMaskedProperty) hides exact plot/house number & GPS.
+  └─ Listing status set to "Active" (admin) or "Pending Verification" (public).
+                                │
+                                ▼
+  STEP 2: HIGH-INTENT BUYER DISCOVERY & INTENT DECLARATION
+  ├─ Prospective buyer discovers property via website or targeted Meta Ads.
+  ├─ Submits inquiry via LeadInquiryModal or WhatsApp Concierge (+91 91490 79913).
+  └─ Buyer expresses serious purchase intent ("I want to proceed / schedule closing").
+                                │
+                                ▼
+  STEP 3: COLLECTION OF ₹10,000 REFUNDABLE VERIFICATION ADVANCE
+  ├─ Royal Agra Estate explains legal safety protocol to buyer.
+  ├─ Platform collects ~₹10,000 refundable advance via UPI / Bank Escrow Account.
+  ├─ Digital Escrow Deposit Receipt issued (Ref: RAE-ADV-XXXX).
+  └─ Clear contractual terms: 100% refundable if flawed; 100% credited if clear.
+                                │
+                                ▼
+  STEP 4: OFFICIAL DOCUMENT REQUEST TO LISTING BROKER/DEALER
+  ├─ Royal Agra Estate notifies listing dealer: "Qualified buyer has deposited ₹10k advance!"
+  ├─ Dealer experiences zero bypass fear (real buyer is on the table with committed capital).
+  ├─ Official 48–72 hour SLA document request sent via WhatsApp & phone call.
+  └─ Requested: Sale Deed (Bainama), Khatauni/Khasra, House Tax receipt, Sanction Plan.
+                                │
+                                ▼
+  STEP 5: COMPREHENSIVE 5-POINT STATUTORY LEGAL & REVENUE VETTING
+  ├─ 1. Sub-Registrar 30-Year Title Search (Chain of Bainama / Registry).
+  ├─ 2. Bhulekh UP Portal Audit (upbhulekh.gov.in: Bhumidhar rights & Khasra check).
+  ├─ 3. IGRSUP Encumbrance Search (igrsup.gov.in: 12-to-30 year Nil EC / Barah Sala).
+  ├─ 4. ADA Master Plan 2031 & Zoning (Harit Patti, road widening, ASI monument buffers).
+  └─ 5. Physical Site & Boundary Reality Check (approach road width, Shajra map match).
+                                │
+                                ▼
+  STEP 6: RESOLUTION & DUAL-PATH SETTLEMENT
+  ┌────────────────────────────┴─────────────────────────────┐
+  │                                                          │
+  ▼ PATH A: DOCUMENTS CLEAR & VERIFIED                       ▼ PATH B: DOCUMENTS FLAWED / DISPUTED
+  ├─ "Royal Title Clearance Certificate" issued.             ├─ 100% IMMEDIATE REFUND TO BUYER (₹10,000)
+  ├─ Scheduled private site visit & closing meeting.         │  returned within 24 hours via UPI/NEFT.
+  ├─ ₹10,000 advance CREDITED in full toward settlement.     ├─ Zero deductions, zero fees charged to buyer.
+  └─ Buyer, dealer, and platform proceed to final sale.      ├─ Listing IMMEDIATELY DELISTED from portal.
+                                                             └─ Defective listing penalized/blacklisted.
 ```
 
-### 6.2 Dual-Track Acquisition Engine: Direct Owners & Empanelled Dealers
-Royal Agra Estate rapidly scales inventory through a balanced dual-track acquisition engine:
-1. **Track A: Direct Property Owners**:
-   - Targeted Meta advertising highlighting: *"Sell Your Property in Agra with 0% Brokerage & 100% Address Privacy."*
-   - Frictionless digital submission through `PostPropertyScreen.tsx` with automated privacy guarantees.
-   - High-profile word-of-mouth referrals from Agra’s medical, judicial, and exporter networks.
-2. **Track B: Strategic Dealer Onboarding Program ("Royal Certified Partner")**:
-   - Co-opting the top 10% to 15% of reputable, ethical local dealers.
-   - Enforcing strict exclusivity rules and a **Zero-Tolerance Duplicate Policy**: if two dealers submit the same property, the first dealer with a verified seller mandate receives exclusive listing rights; unverified duplicates are permanently deleted.
+#### Detailed Operational Breakdown of Each Step:
 
-### 6.3 The 5-Step Operational Verification Pipeline (Zero Bypass)
-Every property submitted must clear an uncompromising 5-step verification pipeline before achieving active publication:
+* **Step 1: Zero-Friction Listing Submission**:
+  - Listing submitted via `PostPropertyScreen.tsx` with photos, specifications, asking price, and macro-locality.
+  - Submitter phone number verified via Mobile OTP.
+  - Public catalogue executes `getMaskedProperty()`, concealing exact address, house/plot numbers, owner contacts, and precise GPS pins.
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                 5-STEP OPERATIONAL VERIFICATION WORKFLOW                    │
-└─────────────────────────────────────────────────────────────────────────────┘
+* **Step 2: Buyer Intent & Discovery**:
+  - Inbound lead is captured via WhatsApp Concierge (+91 91490 79913) or `LeadInquiryModal`.
+  - Senior Advisory Desk conducts a 10-minute discovery call to confirm budget readiness and purchase timeline.
+  - Buyer states intent: *"I like this property and want to move forward with the purchase if documents are clear."*
 
- STEP 1: DIGITAL IDENTITY & MANDATORY AADHAAR-TO-TITLE KYC
- ├─ Mobile OTP verification via Firebase Auth / SMS Gateway
- ├─ Mandatory Aadhaar / PAN identity validation of listing author
- ├─ Aadhaar-to-Title Name Match against Khatauni / Sale Deed
- └─ 15-minute telephone intake call by Senior Advisory Desk
+* **Step 3: Platform Collects ₹10,000 Refundable Advance**:
+  - The Senior Advisor explains the legal due diligence protocol:
+    > *"In Agra real estate, 40%+ of properties suffer from undisclosed family disputes, unmutated revenue records, or ADA greenbelt overlaps. To ensure your capital is 100% secure before you pay token money, Royal Agra Estate conducts an exhaustive statutory legal and revenue audit. We collect a ₹10,000 refundable advance into our designated client escrow account. If documents have any legal defect or dispute, 100% of your ₹10,000 is immediately refunded to you with zero deductions. If verified clean, the entire ₹10,000 is credited in full toward your transaction settlement."*
+  - Digital Escrow Deposit Receipt issued (`RAE-ESC-YYYYMMDD-XXXX`).
 
- STEP 2: UP REVENUE, TITLE & STATUTORY COMPLIANCE SCREENING
- ├─ Plotted Land: Sale Deed (Bainama) + Bhulekh UP Khatauni (Bhumidhar match)
- ├─ Built-up Homes: Nagar Nigam House Tax receipt + Title Deed (DVVNL secondary)
- ├─ Authorized Reps / Dealers: Mandatory Registered Mukhtarnama / Sole Mandate
- ├─ Peripheral Plots: Section 80 UP Revenue Code non-agricultural audit
- └─ Statutory Buffers: ADA Master Plan 2031, UP RERA (>500 sq.m), ASI & Floodplain
+* **Step 4: Official Document Request to Broker/Dealer**:
+  - Advisor contacts the listing broker:
+    > *"Shri [Dealer Name] ji, Congratulations! A qualified buyer has deposited a formal ₹10,000 verification advance for your listing (Ref: RAE-XXXXXX). To schedule the buyer's site visit and token agreement, please share the title documents for our legal due diligence desk within 48 to 72 hours."*
+  - The broker willingly complies because committed buyer capital is waiting, eliminating any fear of deal bypass.
 
- STEP 3: PHYSICAL OR GEOTAGGED VIDEO SITE AUDIT
- ├─ Field executive visit with GPS-stamped inspection software
- ├─ Verification of physical boundaries, approach road width, & surroundings
- ├─ 4K architectural photography & verified asset tags
- └─ Issuance of Internal Audit Code: RAE-VER-XXXX
+* **Step 5: Comprehensive 5-Point Legal Audit**:
+  - Conducted within a strict **48 to 72-hour SLA** by Royal Agra Estate's legal and revenue advisory team.
 
- STEP 4: PROGRAMMATIC ADDRESS PRIVACY MASKING & LANDMARK GENERALIZATION
- ├─ Public View: Sanitized strictly via getMaskedProperty()
- ├─ Unmasked Access: Restricted exclusively to CEO Account (isCEO(user))
- ├─ Programmatic Landmark Generalization (stripping micro-location cues)
- ├─ Stripping of fullAddress, plotNumber, buildingName, ownerContact, mapUrl
- └─ GPS pinned to centralized Agra landmark (27.1767, 78.0081)
+* **Step 6: Dual-Path Resolution**:
+  - Path A (Clear Title): Advance credited in full toward transaction closing; private showing and final settlement scheduled.
+  - Path B (Defective Title): 100% immediate refund of ₹10,000 to the buyer within 24 hours; property delisted and dealer penalized.
 
- STEP 5: 30-DAY WHATSAPP RECERTIFICATION & POST-VISIT PROBE LIFECYCLE
- ├─ Automated Post-Site-Visit Buyer Probes (eliminating zombie listing lag)
- ├─ Automated WhatsApp bot ping at Day 25 to confirm price & availability
- ├─ Day 30 Human Concierge Call for Luxury (>₹1.5 Cr) / Senior Citizen inventory
- └─ Auto-archival & de-indexing at Day 33 if unconfirmed
-```
+### 5.4 The 5-Point Statutory Legal, Revenue & Master Plan Audit
+The 5-point audit protocol represents Royal Agra Estate's statutory due diligence standard:
+1. **Sub-Registrar 30-Year Title Search**: Tracing the registered chain of ownership (*Bainama*, Gift Deeds, Partition Deeds, Wills) across Agra Sub-Registrar offices (Sadar, Fatehabad, Kirawali, etc.).
+2. **Bhulekh UP Record of Rights Audit (`upbhulekh.gov.in`)**: Validating the recorded tenure holder (*Bhumidhar with transferable rights*), Khasra/Gata number, area in hectares, and checking for Gram Sabha/Ceiling/Panchayat land reservations.
+3. **IGRSUP Encumbrance Check (`igrsup.gov.in`)**: Executing a 12-to-30-year Barah Sala (Nil Encumbrance Certificate / EC) search to verify that the property has no active mortgages, bank liens, court attachments, or prior registered agreements to sell.
+4. **ADA Master Plan 2031 & Zoning Compliance**: Cross-referencing property coordinates against the **Agra Master Plan 2031 (Agra Mahayojna 2031)** to ensure no overlap with planned greenbelts (*Harit Patti*), road widening reserves, Yamuna floodplain zones, or Archaeological Survey of India (ASI) 100m prohibited / 200m regulated monument buffers.
+5. **Physical & Boundary Reality Check**: Verifying that physical on-ground boundaries match the revenue map (*Shajra*), approach road width meets minimum statutory standards (minimum 20–30 ft), and physical possession is undisputed.
 
-#### Mandatory Aadhaar-to-Title Identity Verification (Closing the Fraud & Scraping Loophole)
-A critical operational vulnerability in Tier-2 Indian real estate is the unauthorized listing of properties by rogue roadside brokers (*Chowk Ke Dalal*). Because the Government of Uttar Pradesh's **Bhulekh UP portal** (`upbhulekh.gov.in`) and **DVVNL electricity bill portals** (`upenergy.in`) are publicly accessible without authentication, unprincipled brokers can easily harvest genuine Khatauni land records or download consumer electricity bills, verify an arbitrary mobile number, and post unauthorized listings. Furthermore, under Indian property jurisprudence (reaffirmed by the Supreme Court in ***Suraj Lamp & Industries v. State of Haryana (2012) 1 SCC 656***), a utility bill or municipal tax receipt is proof of **occupancy/possession only**, NOT proof of **ownership title**.
+### 5.5 Dual-Path Resolution: 100% Immediate Buyer Refund Guarantee vs. Closing Credit
+- **Outcome A: Documents Clear & Verified**:
+  - "Royal Title Clearance Certificate" issued with audit reference.
+  - Buyer, listing broker, and seller convene for final negotiation and token agreement (*Biana*).
+  - The ₹10,000 verification advance is **credited in full** toward the buyer's transaction settlement.
+- **Outcome B: Documents Flawed, Disputed, or Unapproved**:
+  - Defect triggers: Recorded Bhumidhar does not match seller; property caught in Tehsil litigation; unregistered court stay; land falls under ADA greenbelt; or dealer fails to provide authentic papers within 72 hours.
+  - **100% Immediate Refund**: The full ₹10,000 is returned to the buyer's original bank account/UPI within 24 hours with **zero processing fees or deductions**.
+  - Defective listing is immediately marked `status: 'Rejected'`, unlisted from `royalagraestate.in`, and archived in Cloud Firestore.
+  - Listing broker is issued an integrity warning; repeat defective submissions result in permanent partner de-listing.
 
-To permanently close this vector, Steps 1 and 2 enforce **Mandatory Aadhaar-to-Title Identity Verification**:
-1. **Tenure Holder Cross-Matching**: The legal name and father's name on the uploader’s verified government Aadhaar/PAN **must strictly match the recorded tenure holder (*Bhumidhar with transferable rights*) on the Bhulekh UP Khatauni or the vendee on the registered Sale Deed (*Bainama*)**.
-2. **Mandatory Documentation for Representatives / Dealers**: If a property is listed by a family member, tenant, property manager, or empannelled dealer, the uploader must submit a **Registered Special Power of Attorney (*Mukhtarnama-Aam / Mukhtarnama-Khas*)** or a legally executed, signed **Sole Marketing Mandate Agreement**. Submissions lacking verifiable legal agency are rejected during the telephone intake call.
+### 5.6 Anti-Bypass & Platform Safeguards: Programmatic Masking (`getMaskedProperty`) & Intake Phone Checks
+To prevent buyers, sellers, or rogue agents from circumventing Royal Agra Estate during or after the verification process, three critical safeguards are enforced:
 
-#### Step 4 Codebase Compliance: `getMaskedProperty` & Repository Parity
-As implemented in `src/utils/security.ts` (line 120) and mandated by repository invariants, unmasked full address and GPS coordinate access on the website UI is restricted **exclusively to the authenticated CEO account (`isCEO(user)`)**:
-```typescript
-export const canViewFullAddress = (property: Property | null, user: UserProfile | null): boolean => {
-  if (!user) return false;
-  // Supreme access: Only the CEO account can view full unmasked address on the website
-  if (isCEO(user)) return true;
-  return false;
-};
+1. **Programmatic Address Privacy Masking (`getMaskedProperty`)**:
+   - Implemented in `src/utils/security.ts` (lines 258–304).
+   - Sanitizes property records on the client side:
+     * `fullAddress`, `buildingName`, `plotNumber`, `ownerContact`, `mapUrl`, and `locationLink` are deleted.
+     * Coordinates hardcoded to central Agra (`27.1767, 78.0081`).
+     * Contact card overwritten with Royal Agra Estate Concierge details (`+91 91490 79913`).
+   - Only the authenticated CEO account (`canViewFullAddress`) has unmasked access.
+   - Competing brokers or opportunistic buyers browsing the portal have zero access to exact street addresses or owner numbers, preventing direct contact before the ₹10,000 advance is deposited.
 
-export const getMaskedProperty = (property: Property, user: UserProfile | null): Property => {
-  if (canViewFullAddress(property, user)) {
-    return property; // Supreme access: CEO account only
-  }
+2. **Mobile OTP & Phone Call Verification for Listing Submitters**:
+   - Eliminates spam, duplicate listings, and anonymous rogue brokers.
+   - Every property poster must verify their phone number via mobile OTP.
+   - Royal Agra Estate Concierge conducts a mandatory intake verification phone call within 24 hours of submission to confirm:
+     * Submitter identity and broker agency name (if dealer).
+     * Asking price sanity against local Agra circle rates and recent comp sales.
+     * Active availability of the property.
+   - Listings from unverified phone numbers or uncooperative submitters remain in `Pending Verification` and are never displayed publicly.
 
-  const primaryLocality = formatAgraLocality(property.primaryAgraLocality || property.locality || property.location);
-  const baseLocality = primaryLocality.replace(', Agra', '').trim();
+3. **Dedicated Escrow Accounting & 72-Hour Verification SLA**:
+   - The ₹10,000 advance is held in a separate, ring-fenced client deposit account operated under strict internal accounting controls. It is never co-mingled with operating or marketing funds, ensuring 100% liquidity for immediate refunds.
+   - Real-time status updates are sent to the buyer via WhatsApp at every milestone (`Deposit Received` → `Documents Requested from Broker` → `Revenue Records Under Audit` → `Clearance Certificate Issued` OR `Refund Processed`).
 
-  const masked: Property = {
-    ...property,
-    location: primaryLocality,
-    locality: baseLocality,
-    primaryAgraLocality: primaryLocality,
-    address: primaryLocality,
-    fullAddress: undefined,
-    buildingName: undefined,
-    plotNumber: undefined,
-    landmarks: property.landmarks || [], // Nearby areas chosen by owner remain visible
-    ownerContact: undefined,
-    locationLink: undefined,
-    mapUrl: undefined,
-    googleMapsPinUrl: undefined,
-    privateLocationNote: undefined,
-    coordinates: { lat: 27.1767, lng: 78.0081 }, // Centralized Agra coordinate
-    agent: {
-      name: 'Royal Agra Estate Concierge',
-      role: 'Senior Advisory Desk',
-      phone: '+91 91490 79913',
-      email: 'contact@royalagraestate.in',
-      avatar: property.agent?.avatar || '/team/shrey-gupta.jpg',
-      experience: 'Verified Luxury Advisory'
-    }
-  };
+### 5.7 Production-Ready WhatsApp Operational Notification Templates (Buyer & Broker)
 
-  delete (masked as any).fullAddress;
-  delete (masked as any).buildingName;
-  delete (masked as any).plotNumber;
-  delete (masked as any).ownerContact;
-  delete (masked as any).locationLink;
-  delete (masked as any).mapUrl;
-  delete (masked as any).googleMapsPinUrl;
+#### Template 1: Buyer Advance Receipt & Verification Initiation (Sent to Buyer)
+```text
+🏰 *ROYAL AGRA ESTATE — ADVANCE DEPOSIT CONFIRMATION*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Namaste [Buyer Name] ji,
 
-  return masked;
-};
+We have successfully received your refundable verification advance of *₹10,000.00* for:
+📍 *Property:* [Property Title]
+🔖 *Ref ID:* [Property Ref Code]
+🧾 *Escrow Receipt No:* RAE-ESC-[ReceiptID]
+⏱️ *Verification SLA:* 48 – 72 Hours
+
+🛡️ *OUR 100% ADVANCE GUARANTEE:*
+Our legal and revenue due diligence desk has initiated the 5-point statutory title audit (Sub-Registrar Registry, Bhulekh UP Khatauni, IGRSUP 30-Year Barah Sala, and ADA Master Plan 2031).
+
+• *If documents are 100% verified & clean:* We will schedule your private site visit and credit this ₹10,000 in full toward your transaction closing.
+• *If documents are defective, disputed, or unapproved:* 100% of your ₹10,000 will be refunded to your account immediately with zero deductions.
+
+Track your status anytime by replying to this concierge desk.
+Warm regards,
+*Shrey Gupta & Team*
+Royal Agra Estate | +91 91490 79913
+royalagraestate.in
 ```
 
-> 🛡️ **Operational Parity & Programmatic Landmark Generalization Recommendation**  
-> • *CEO-Exclusive Access Parity*: The website client enforces maximum data compartmentalization: co-founders and administrators (such as `abhi9557138449@gmail.com`) receive the sanitized public view on the web client, reserving unmasked access strictly to the CEO account. Internal field advisors access full location dossiers through secured offline concierge channels during scheduled visits.  
-> • *Programmatic Landmark Generalization*: In `src/utils/security.ts` line 276, `property.landmarks` is currently passed to the client without filtering. If an owner enters hyper-specific landmarks (e.g., *"Behind Aggarwal Medical Store, 30 meters from Gate No. 2"*), local brokers can easily de-anonymize the physical property. It is recommended to enhance `getMaskedProperty` to programmatically filter micro-location markers (gate numbers, lane numbers, and immediate retail shop names within 100 meters), retaining only macro landmarks (e.g., *"Near Dayalbagh Educational Institute"* or *"Sikandra Highway Corridor"*) to ensure complete public anonymity.
+#### Template 2: Broker Document Request upon Buyer Advance (Sent to Listing Broker)
+```text
+🏰 *ROYAL AGRA ESTATE — VERIFIED BUYER ADVANCE NOTIFICATION*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Shri [Dealer Name] ji,
 
-### 6.4 The 3-Tier Royal Certified Partner Dealer Program
-Local dealers are structured into a disciplined channel hierarchy:
-1. **Tier 1: Registered Associate**: Independent agents. Basic KYC and office proof. Receives 30% split of buyer brokerage on closed deals; 24-hour callback SLA.
-2. **Tier 2: Royal Certified Partner**: Established firms (5+ years in Agra, min 5 exclusive listings). **"Certified Partner" Badge** on listings; 40% fee split; **15-minute callback SLA**; zero duplicate tolerance.
-3. **Tier 3: Elite Advisory Fellow**: Senior land consultants (> ₹10 Cr commercial/luxury deals). Co-branded dossiers, access to private NRI mandates; 50% fee split on joint mandates.
+🎉 *Great News!* A serious, financially qualified buyer has selected your listing:
+📍 *Property:* [Property Title] (Ref: [Property Ref Code])
+💰 *Deposit Status:* Buyer has deposited *₹10,000.00 Verification Advance* into Royal Agra Estate Escrow.
 
-### 6.5 The 30-Day Automated WhatsApp Recertification Engine & Dual Safeguard Lifecycle
-To eliminate zombie listings while strictly safeguarding valuable seed inventory, Royal Agra Estate deploys a dual-safeguard recertification workflow integrated with Cloud Firestore:
+To schedule the buyer's physical site visit and proceed directly to token negotiation (Biana), please share copies of the following documents for our legal due diligence desk within *48 hours*:
+1. Registered Sale Deed (*Bainama*) / Conveyance Deed
+2. Latest Bhulekh UP Khatauni / Khasra details (for land/plots)
+3. Nagar Nigam House Tax receipt (for built-up homes)
+4. Sanctioned Map / Section 80 Non-Agricultural Order
+
+⚠️ *Note:* As per Royal Agra Estate Partner Broker Policy, your deal and client relationship are 100% protected. Title documents are reviewed strictly for statutory verification.
+
+Please WhatsApp clear document PDFs/photos directly to this verified number.
+*Royal Agra Estate Partner Desk*
++91 91490 79913 | royalagraestate.in
+```
+
+#### Template 3: Verification Success & Site Visit Invitation (Sent to Buyer & Broker)
+```text
+🏰 *ROYAL AGRA ESTATE — TITLE CLEARANCE CERTIFICATE ISSUED*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Namaste [Buyer Name] ji,
+
+We are pleased to inform you that our legal advisory desk has completed the comprehensive statutory title audit for:
+📍 *Property:* [Property Title] (Ref: [Property Ref Code])
+
+✅ *VERIFICATION AUDIT RESULTS:*
+• Chain of Title (Bainama): *Clear & Verified (Sub-Registrar Agra)*
+• Bhulekh UP Khatauni: *Recorded Bhumidhar Matched (Zero Encumbrance)*
+• IGRSUP 30-Year Barah Sala: *Nil Encumbrance Confirmed*
+• ADA Master Plan 2031: *Zoning Approved (Zero Greenbelt/Road Encroachment)*
+
+💰 *Advance Accounting:* Your *₹10,000.00 advance* is securely credited toward your transaction closing.
+
+🚗 *NEXT STEP — PRIVATE ESCORTED SITE VISIT:*
+Our Senior Advisor is ready to accompany you and your family for the site visit and seller negotiation. Please reply with your preferred day and time slot:
+[ 1 ] Tomorrow Morning (11:00 AM)
+[ 2 ] Tomorrow Afternoon (3:30 PM)
+[ 3 ] Weekend Slot (Saturday 11:00 AM)
+
+*Royal Agra Estate Concierge Desk*
++91 91490 79913 | royalagraestate.in
+```
+
+#### Template 4: Verification Failure & 100% Immediate Refund Confirmation (Sent to Buyer)
+```text
+🏰 *ROYAL AGRA ESTATE — 100% REFUND ISSUANCE & SAFETY ALERT*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Namaste [Buyer Name] ji,
+
+During our rigorous statutory legal diligence for:
+📍 *Property:* [Property Title] (Ref: [Property Ref Code])
+
+❌ *OUR LEGAL DESK UNCOVERED CRITICAL DEFECTS:*
+[Specific Defect: e.g., "The recorded Bhumidhar on Bhulekh UP does not match seller identity / Property is situated within proposed ADA Master Plan greenbelt buffer / Active revenue litigation pending at Tehsil Sadar"].
+
+🛡️ *100% ZERO-DEDUCTION REFUND PROCESSED:*
+In accordance with our Buyer Protection Guarantee, we have immediately initiated a 100% refund of your *₹10,000.00 advance*.
+• *Refund Amount:* ₹10,000.00
+• *Deductions:* ₹0.00 (Zero)
+• *Transaction UTR:* [Bank UTR Reference]
+• *Payment Mode:* Original UPI / Bank Account
+
+Your safety is our highest priority. Royal Agra Estate has protected you from investing in a disputed property. Our concierge team is actively curating alternative, 100% legally verified properties matching your requirements.
+
+With utmost integrity,
+*Royal Agra Estate Advisory Desk*
++91 91490 79913 | royalagraestate.in
+```
+
+#### Template 5: Listing Defect / Fraud Rejection Notice (Sent to Listing Broker)
+```text
+🏰 *ROYAL AGRA ESTATE — LISTING DEFECT & UNLISTING NOTICE*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Shri [Dealer Name] ji,
+
+This is a formal notice regarding your listing:
+📍 *Property:* [Property Title] (Ref: [Property Ref Code])
+
+During our statutory legal audit conducted for a qualified buyer, the property failed verification due to:
+*Defect:* [Specific Reason: e.g., Disputed Khatauni ownership / Non-sanctioned layout / Inability to furnish authentic registry documents].
+
+🚨 *ACTION TAKEN:*
+1. The prospective buyer's ₹10,000 advance has been refunded in full.
+2. The property listing has been *DEACTIVATED and UNLISTED* from royalagraestate.in.
+3. This incident has been logged on your Partner Dealer record.
+
+To maintain trust with Agra buyers, Royal Agra Estate strictly lists properties with 100% verifiable title deeds. If you believe this is an error, please submit certified Sub-Registrar copies to our Sanjay Place office within 5 business days.
+
+*Royal Agra Estate Compliance Cell*
+contact@royalagraestate.in | +91 91490 79913
+```
+
+### 5.8 3-Tier Royal Certified Partner Dealer Program
+Local property dealers and consultants are organized into a collaborative, structured partnership hierarchy:
+1. **Tier 1: Registered Associate**: Independent local agents. Basic identity verification and office proof. Benefits include: access to verified buyer inquiries, automated address masking protection, and 24-hour concierge callback SLA.
+2. **Tier 2: Royal Certified Partner**: Established local firms (3+ years in Agra, min 5 verified listings). Benefits include: **"Certified Partner" Badge** on listings, priority placement in search results, **15-minute concierge callback SLA**, and direct promotion in weekly buyer broadcast lists.
+3. **Tier 3: Elite Advisory Fellow**: Senior land and commercial consultants (> 10 years experience). Benefits include: co-branded property dossiers, exclusive co-marketing on premium Meta ad campaigns, and priority access to out-of-district NRI investor inquiries.
+
+### 5.9 30-Day Automated WhatsApp Recertification Engine & Dual-Safeguard Lifecycle
+To eliminate zombie listings while strictly safeguarding valuable inventory, Royal Agra Estate deploys a dual-safeguard recertification workflow integrated with Cloud Firestore:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -1164,82 +1194,77 @@ To eliminate zombie listings while strictly safeguarding valuable seed inventory
 ```
 
 1. **Continuous Post-Site-Visit Buyer Probes (Eliminating 23-Day Zombie Advertising Lag)**:
-   - *The Operational Problem*: An owner who accepts an outside deposit (*Biana*) on Day 3 rarely informs the agency. In a pure 30-day bot cycle, Royal Agra Estate would continue burning Meta Ads capital and escorting buyers to a sold property for up to 23 days until the Day 25 bot fires.
-   - *The Instant Feedback Probe*: Exactly 4 hours after an advisor-escorted site visit concludes, an automated WhatsApp/SMS check is triggered to the prospective buyer:
+   - Exactly 4 hours after an advisor-escorted site visit concludes, an automated WhatsApp/SMS check is triggered to the prospective buyer:
      > *"Namaste [Buyer Name], thank you for touring [Property Title] today with Royal Agra Estate Concierge. Did you find the property available and matching the verified specifications during your visit?"*
-   - If the buyer reports that the seller disclosed an outside agreement or off-market sale, a priority verification alert is routed to the advisory desk. The listing is verified and delisted within **24 hours**, eliminating the 23-day lag.
-
+   - If the buyer reports that the seller disclosed an outside agreement or off-market sale, a priority verification alert is routed to the advisory desk. The listing is verified and delisted within **24 hours**, eliminating wasted ad spend.
 2. **Day 25 Automated WhatsApp Business Bot Ping**:
    - Automated message sent to lister via WhatsApp API (+91 91490 79913) with 3 interactive quick-reply buttons:
      - `[ 🟢 Still Available ]` → Automatically extends verified active status in Cloud Firestore for an additional 30 days.
      - `[ 🟡 Price Revised ]` → Triggers admin review of updated price against local circle rates and recent comp sales.
      - `[ 🔴 Sold / Off-Market ]` → Immediately updates Firestore status to `Sold` and de-indexes from public view.
-
 3. **Day 28 Second Automated Urgent Countdown**:
    - Automated follow-up reminder with an urgent 48-hour countdown sent to unconfirmed listers.
-
 4. **Day 30 Mandatory Human Concierge Call (Safeguarding High-Value HNI & Senior Inventory)**:
-   - *The False-Positive Delisting Risk*: Senior property owners (aged 60–75 in Civil Lines, Dayalbagh, Belanganj) and HNI sellers of luxury villas (> ₹1.5 Crores) frequently ignore automated business bots, view unfamiliar messages as spam, or travel abroad. In a rigid automated bot-only pipeline, Royal Agra Estate risks inadvertently de-indexing its premier inventory on Day 33, destroying catalog depth.
-   - *The Human Safeguard*: For all properties valued **above ₹1.5 Crores** or owned by senior citizens, a **mandatory Human Concierge Call Step at Day 30** is enforced. A Senior Advisory Executive personally phones the owner to verify availability, review pricing, and maintain executive rapport. No luxury listing is ever auto-archived without documented human concierge sign-off.
-
+   - For all properties valued **above ₹1.5 Crores** or owned by senior citizens, a **mandatory Human Concierge Call Step at Day 30** is enforced. A Senior Advisory Executive personally phones the owner to verify availability, review pricing, and maintain executive rapport. No luxury listing is ever auto-archived without documented human concierge sign-off.
 5. **Day 33 Scheduled Cloud Function De-Indexing**:
    - For standard, non-luxury inventory where the lister has not responded after 8 days and two WhatsApp alerts, a scheduled Google Cloud Function automatically transitions `status` to `pending_verification`, setting `isApproved: false` and removing the listing from public catalogues until re-verified.
 
 ---
 
-# 7. Section R6: Phased Execution Roadmap, Playbook & Invariant Compliance
+# 6. Section R5: Phased Execution Roadmap & Architectural Invariant Compliance
 
-### 7.1 Phase 1 (Days 1–30): Foundation, Tracking & Initial Acquisition
+### 6.1 Phase 1 (Days 1–30): Foundation, Setup & Initial Acquisition
 - **Infrastructure & Assets**:
   - Deploy standard Meta Pixel and server-side Conversions API (CAPI) on `royalagraestate.in`.
-  - Connect WhatsApp Business API (`+91 91490 79913`) with automated triage flows.
-  - Finalize legal templates: Client Inspection Mandate (NDNC) and Tripartite Biana Agreement.
+  - Connect WhatsApp Business (`+91 91490 79913`) with automated triage quick replies and color-coded labels.
+  - Set up the 16-column Google Sheets Master Lead Tracker with webhook integration.
 - **Inventory Seeding**:
   - Onboard seed portfolio of 30–40 verified Agra properties (15 Budget Plots, 15 Mid-Tier Homes, 10 Luxury Villas).
-  - Screen revenue documents (IGRSUP, Bhulekh UP, ADA Master Plan 2031).
+  - Deploy the Partner Broker Reassurance banner in `PostPropertyScreen.tsx`.
 - **Campaign Launch**:
-  - Deploy initial ₹500–₹1,000/day Meta Ads campaign (Instagram & Facebook Only; Audience Network strictly excluded).
+  - Deploy initial ₹350–₹500/day Meta Ads campaign (Instagram & Facebook Only; Audience Network strictly excluded).
   - Execute ABO split (45% Plots / 35% Mid-Tier / 20% Luxury).
   - Enforce the 72–96 Hour Post-Launch Silence Rule.
 
-### 7.2 Phase 2 (Days 31–60): Partner Onboarding, Funnel Optimization & Rebalancing
+### 6.2 Phase 2 (Days 31–60): Partner Onboarding, Verification & Lead Tracking Optimization
 - **Dealer Program Activation**:
   - Onboard top 10–15 ethical Agra dealers into the Royal Certified Partner program.
-  - Deploy on-site mobile audit app for field surveyors.
-- **Campaign Optimization**:
-  - Analyze 30-day CPQL and transition winning ad sets into Advantage Campaign Budget (CBO) with spend minimums.
+  - Educate partner dealers on the zero-upfront document policy and ₹10,000 buyer advance verification workflow.
+- **Funnel & CRM Optimization**:
+  - Analyze 30-day CPQL and lead pipeline progression in the Master Lead Tracker.
   - Scale winning creative angles by **15% to 20% every 48 to 72 hours**.
   - Launch retargeting ad sets driving bounced website visitors to WhatsApp Concierge.
 - **Recertification Engine**:
   - Run the first automated 30-day WhatsApp recertification cycle at Day 25, archiving stale inventory.
 
-### 7.3 Phase 3 (Days 61–90+): Scaling, Institutional Brand Dominance & Ancillary Expansion
+### 6.3 Phase 3 (Days 61–90+): Scaling, Institutional Brand Dominance & Micro-Market Expansion
 - **Growth & Scaling**:
-  - Scale daily ad spend to ₹2,000–₹5,000/day funded by collected buyer commissions.
-  - Launch targeted NRI campaigns in Delhi-NCR, Mumbai, Dubai, and Singapore.
-- **Ancillary Revenue Activation**:
-  - Formalize corporate DSA agreements with HDFC Bank and SBI for 0.40%–0.60% home loan payouts.
-  - Launch standalone legal title diligence packages (₹15,000–₹25,000) for unassisted buyers.
+  - Scale daily ad spend up to maximum ₹500/day (₹15,000/month) funded by closed transaction cash flow.
+  - Expand targeted campaigns to Delhi-NCR NRI investors for Fatehabad Road and Dayalbagh luxury properties.
+- **Ancillary Partnerships**:
+  - Formalize partnerships with nationalized and private banks (SBI, HDFC) for priority home loan processing.
+  - Launch standalone legal title diligence packages for unassisted buyers.
 - **Market Leadership**:
-  - Cement Royal Agra Estate as the undisputed #1 digital real estate authority in Agra.
+  - Cement Royal Agra Estate as the undisputed #1 verified digital real estate authority in Agra.
 
 ---
 
-### 7.4 Absolute Compliance with Royal Agra Estate Architectural Invariants
+### 6.4 Absolute Compliance with Royal Agra Estate Architectural Invariants
 This strategy adheres strictly to the architectural and operational rules defined in `.agents/rules/royal-agra-estate-invariants.md`:
-1. **Rule 1 — Cloud Firestore Persistence**: All property listings, lead inquiries, and dealer partner applications write directly to dedicated Cloud Firestore collections (`properties`, `leads`, `dealers`, `verificationDocuments`). No silent `localStorage` fallbacks are permitted.
-2. **Rule 2 — Admin Auto-Approval & Verification**: Property submissions by recognized administrators (`shrey123@gmail.com`, `abhi9557138449@gmail.com`, and `@royalagraestate.in`) automatically receive `status: 'Active'`, `isApproved: true`, and `verificationStatus: 'Verified'`. All public submissions enter `pending_verification` until the 5-step verification workflow is signed off.
+1. **Rule 1 — Cloud Firestore Persistence**: All property listings, lead inquiries, and dealer partner applications write directly to dedicated Cloud Firestore collections (`properties`, `leads`, `dealers`, `verificationDocuments`). No silent `localStorage`-only fallbacks are permitted.
+2. **Rule 2 — Admin Auto-Approval & Verification**: Property submissions by recognized administrators (`shrey123@gmail.com`, `abhi9557138449@gmail.com`, and `@royalagraestate.in`) automatically receive `status: 'Active'`, `isApproved: true`, and `verificationStatus: 'Verified'`. All public submissions enter `pending_verification` until the verification workflow is signed off.
 3. **Rule 3 — Location Privacy & Masking**: All public catalogue views (`PropertiesScreen`, `HeroSection`, `FeaturedProperties`, `PropertyCard`, `PropertyDetailModal`) strictly sanitize property objects via `getMaskedProperty(property, user)`. In strict parity with `src/utils/security.ts` (line 120), viewing unmasked full street addresses, building names, exact plot numbers, and precise GPS map pins on the website UI is restricted **exclusively to the authenticated CEO account (`isCEO(user)`)**, while non-CEO administrators and public viewers receive sanitized macro-locality representations.
 4. **Rule 4 — Lead Submission & WhatsApp Concierge Integration**: Inquiries write a structured `LeadSubmission` record to the Firestore `leads` collection while opening the WhatsApp concierge link (`https://wa.me/919149079913?text=...`) pre-populated with client name, property title, and reference ID.
 5. **Rule 5 — Zero-Error Verification Protocol**: All code changes maintain 0 TypeScript errors (`npx tsc --noEmit`) and compile cleanly (`npm run build`).
 
 ---
 
-### 7.5 Concluding Strategic Summary
-By coupling the **0% Seller Commission Model** with the uncompromising rigor of the **5-Step Verification & Privacy Moat**, Royal Agra Estate fundamentally alters the real estate landscape in Agra. 
-* Unorganized roadside brokers cannot compete against free seller listings and professional 4K production.
-* National portals cannot compete against 100% physically verified, non-duplicate ground reality.
-* Property buyers willingly pay a 1.0%–1.5% advisory fee to preserve their capital, secure clean title deeds, and acquire Agra's finest real estate with complete confidence and peace of mind.
+### 6.5 Concluding Strategic Summary
+By coupling the **Verified Listing Transparency Model** with the rigor of the **₹10,000 Refundable Buyer Advance Verification Workflow**, Royal Agra Estate fundamentally elevates the real estate ecosystem in Agra:
+* Unorganized roadside brokers gain a trusted partner who protects their client relationships through complete address privacy without demanding upfront title deeds.
+* Property buyers receive an uncompromising safety guarantee: an exhaustive 5-point statutory legal audit backed by an immediate, 100% zero-deduction refund if any title flaw or dispute is uncovered.
+* Capital-efficient, targeted Meta advertising within a disciplined ₹10,000–₹15,000/month budget delivers high-velocity qualified inquiries, supported by a free WhatsApp Business and Google Sheets lead tracking engine.
+* Royal Agra Estate establishes an unassailable brand moat rooted in fiduciary integrity, transparency, and client protection across every real estate tier in Agra.
 
 ---
 *Authored by Royal Agra Estate Strategic Advisory Group.*  
