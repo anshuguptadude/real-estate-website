@@ -361,8 +361,8 @@ To satisfy this scrutiny, Royal Agra Estate maintains a **Static Profile Hygiene
 ├──────────────────────────────────────────┼─────────────────────────────────────────────┤
 │ [POST 5: MID-TIER FAMILY HOMES SHOWCASE] │ [POST 6: THE PRIVATE LUXURY COLLECTION]     │
 │ Architectural carousel of verified 3 BHK │ Aesthetic architectural showcase of luxury  │
-│ builder floors in Kamla Nagar, Sikandra, │ villas on Fatehabad Road and Dayalbagh with │
-│ and Shastripuram with bank loan status.  │ private chauffeur-escorted tours.           │
+│ builder floors in Kamla Nagar, Dayalbagh,│ villas on Fatehabad Road and Dayalbagh with │
+│ Sikandra & Shastripuram (Bank Approved). │ private chauffeur-escorted tours.           │
 └──────────────────────────────────────────┴─────────────────────────────────────────────┘
 ```
 
@@ -891,7 +891,7 @@ In 2026, **Creative is the Targeting**. Stacking 15 restrictive interest tags ch
   
   📲 नीचे दिए गए बटन पर क्लिक करें और सीधे व्हाट्सएप पर लेआउट मैप व रेट लिस्ट मंगाएं।  
   **रॉयल आगरा एस्टेट — +91 91490 79913**
-- **Headline**: Rohta & Shamshabad Rd Plots | Pakki Registry | ₹6,500/gaj se shuru
+- **Headline**: Rohta & Shamshabad Rd Plots | Pakki Registry | ₹6,500/gaj
 - **CTA**: Send WhatsApp Message
 
 #### 4.7.2 Creative Suite 2: Prime Family Homes & Builder Floors (Agra-Wide: Kamla Nagar, Dayalbagh, Sikandra, Shastripuram)
@@ -934,7 +934,7 @@ In 2026, **Creative is the Targeting**. Stacking 15 restrictive interest tags ch
   
   📞 Direct Executive Concierge: +91 91490 79913  
   Explore the Private Collection: royalagraestate.in
-- **Headline**: Private Villa Collection | Fatehabad Road | Confidential Showing
+- **Headline**: Private Villa Collection | Fatehabad Road | VIP Showing
 - **CTA**: Contact Us / Request Private Brochure
 
 ### 4.8 Empirical KPI Benchmark Matrix, Pipeline Efficiency & 72–96 Hour Diagnostics
