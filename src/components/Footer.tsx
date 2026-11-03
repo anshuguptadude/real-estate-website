@@ -74,7 +74,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </div>
             <div className="flex items-center gap-2 pt-1">
               <Mail className="w-3.5 h-3.5 text-[#C5A869]" />
-              <span>concierge@royalagraestate.in</span>
+              <a href="mailto:contact@royalagraestate.in" className="hover:text-white transition-colors">
+                contact@royalagraestate.in
+              </a>
             </div>
           </div>
 
@@ -105,6 +107,26 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <span className="text-[#164E3D] hidden sm:inline">•</span>
             <a href="/luxury-villas-in-agra" className="hover:text-[#E4D5B7] transition-colors">
               Luxury Villas in Agra
+            </a>
+            <span className="text-[#164E3D] hidden sm:inline">•</span>
+            <a href="/plots-in-dayalbagh-agra" className="hover:text-[#E4D5B7] transition-colors">
+              Plots in Dayalbagh Agra
+            </a>
+            <span className="text-[#164E3D] hidden sm:inline">•</span>
+            <a href="/property-in-sikandra-agra" className="hover:text-[#E4D5B7] transition-colors">
+              Property in Sikandra Agra
+            </a>
+            <span className="text-[#164E3D] hidden sm:inline">•</span>
+            <a href="/plots-in-shastripuram-agra" className="hover:text-[#E4D5B7] transition-colors">
+              Plots in Shastri Puram Agra
+            </a>
+            <span className="text-[#164E3D] hidden sm:inline">•</span>
+            <a href="/plots-in-shamshabad-road-agra" className="hover:text-[#E4D5B7] transition-colors">
+              Plots on Shamshabad Road Agra
+            </a>
+            <span className="text-[#164E3D] hidden sm:inline">•</span>
+            <a href="/agricultural-land-in-agra" className="hover:text-[#E4D5B7] transition-colors">
+              Agricultural Land in Agra
             </a>
             <span className="text-[#164E3D] hidden sm:inline">•</span>
             <a href="/flats-for-rent-in-agra" className="hover:text-[#E4D5B7] transition-colors">

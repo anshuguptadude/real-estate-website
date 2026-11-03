@@ -340,10 +340,11 @@ Full social crawler and search engine preview cards are integrated:
 - `og:site_name` -> `Royal Agra Estate`
 - `og:title` & `og:description` -> Tailored to Agra verified real estate
 - `og:url` -> `https://royalagraestate.in/`
-- `og:image` -> `https://royalagraestate.in/properties/harish_nagar_1.jpg` (1200x630 high-resolution luxury property image)
+- `og:image` -> `https://royalagraestate.in/og-image.jpg` (1200x630 high-resolution luxury property social card, 1.905:1 ratio)
 - `og:locale` -> `en_IN`
 - `twitter:card` -> `summary_large_image`
 - `twitter:site` -> `@royalagraestate`
+- `twitter:url` -> `https://royalagraestate.in/`
 - `twitter:title`, `twitter:description`, `twitter:image` -> Synchronized for crisp rendering on X/Twitter and WhatsApp rich link previews.
 
 ### 3.3 Structured Data Markup (JSON-LD `@graph` Schema)
@@ -378,7 +379,7 @@ Full social crawler and search engine preview cards are integrated:
       "@type": "RealEstateAgent",
       "@id": "https://royalagraestate.in/#organization",
       "name": "Royal Agra Estate",
-      "image": "https://royalagraestate.in/properties/harish_nagar_1.jpg",
+      "image": "https://royalagraestate.in/og-image.jpg",
       "logo": "https://royalagraestate.in/logo.png",
       "url": "https://royalagraestate.in/",
       "telephone": "+919149079913",

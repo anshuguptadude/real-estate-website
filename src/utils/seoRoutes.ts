@@ -335,14 +335,20 @@ export const SCREEN_SEO_CONFIGS: Partial<Record<ActiveScreen, {
 export function getPropertySeoConfig(property: Property) {
   const formattedPrice = typeof property.price === 'number'
     ? '₹' + property.price.toLocaleString('en-IN')
-    : property.price;
+    : (property.price || property.priceDisplay || '');
   const bhkStr = property.bedrooms ? `${property.bedrooms} BHK ` : '';
-  const title = `${property.title} | ${property.locality}, Agra | Royal Agra Estate`;
-  const description = `${property.title} in ${property.locality}, Agra. ${formattedPrice} - ${bhkStr}${property.propertyType}. 100% legally verified listing on Royal Agra Estate.`;
+  const propTitle = property.title || 'Verified Property';
+  const propLocality = property.locality || 'Agra';
+  const propType = property.propertyType || 'Property';
+
+  const title = `${propTitle} | ${propLocality}, Agra | Royal Agra Estate`;
+  const description = `${propTitle} in ${propLocality}, Agra. ${formattedPrice} - ${bhkStr}${propType}. 100% legally verified listing on Royal Agra Estate.`;
   const canonicalUrl = `https://royalagraestate.in/?screen=properties&property=${property.id}`;
   const imageUrl = (typeof property.coverImage === 'string' && property.coverImage.startsWith('http'))
     ? property.coverImage
-    : 'https://royalagraestate.in/properties/harish_nagar_1.jpg';
+    : (typeof property.coverImage === 'string' && property.coverImage.startsWith('/'))
+      ? `https://royalagraestate.in${property.coverImage}`
+      : 'https://royalagraestate.in/og-image.jpg';
 
   return {
     title,
@@ -350,9 +356,9 @@ export function getPropertySeoConfig(property: Property) {
     canonicalUrl,
     imageUrl,
     keywords: [
-      property.title.toLowerCase(),
-      `property in ${property.locality.toLowerCase()} agra`,
-      `${property.propertyType.toLowerCase()} in agra`,
+      propTitle.toLowerCase(),
+      `property in ${propLocality.toLowerCase()} agra`,
+      `${propType.toLowerCase()} in agra`,
       'verified property agra'
     ]
   };
@@ -375,7 +381,7 @@ export function applySeoMetadata(target: SeoRouteConfig | ApplySeoOptions | null
   const defaultDesc = 'Discover verified luxury villas, ADA approved plots on Fatehabad Road, independent kothis, and commercial property across Agra with 100% legal title verification.';
   const defaultKeywords = 'buy house in agra, plots in fatehabad road agra, ada approved plots in agra, luxury villa in agra, flats for rent in agra, real estate agra, property in agra, plots in dayalbagh, plots in shastripuram agra';
   const defaultCanonical = 'https://royalagraestate.in/';
-  const defaultImage = 'https://royalagraestate.in/properties/harish_nagar_1.jpg';
+  const defaultImage = 'https://royalagraestate.in/og-image.jpg';
 
   let title = defaultTitle;
   let description = defaultDesc;
@@ -470,8 +476,13 @@ export function applySeoMetadata(target: SeoRouteConfig | ApplySeoOptions | null
   const twDesc = document.querySelector('meta[name="twitter:description"]');
   if (twDesc) twDesc.setAttribute('content', description);
 
-  const twUrl = document.querySelector('meta[name="twitter:url"]');
-  if (twUrl) twUrl.setAttribute('content', canonical);
+  let twUrl = document.querySelector('meta[name="twitter:url"]');
+  if (!twUrl) {
+    twUrl = document.createElement('meta');
+    twUrl.setAttribute('name', 'twitter:url');
+    document.head.appendChild(twUrl);
+  }
+  twUrl.setAttribute('content', canonical);
 
   const twImg = document.querySelector('meta[name="twitter:image"]');
   if (twImg) twImg.setAttribute('content', imageUrl);

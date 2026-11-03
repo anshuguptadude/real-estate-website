@@ -867,7 +867,7 @@ export default function App() {
             onResetFilters={() => {
               if (currentSeoConfig) {
                 setCurrentSeoConfig(null);
-                applySeoMetadata(null);
+                applySeoMetadata({ screen: 'properties' });
                 const url = new URL(window.location.href);
                 url.pathname = '/';
                 url.searchParams.set('screen', 'properties');
@@ -880,7 +880,7 @@ export default function App() {
               subtitle: currentSeoConfig.badgeSubtitle,
               onClear: () => {
                 setCurrentSeoConfig(null);
-                applySeoMetadata(null);
+                applySeoMetadata({ screen: 'properties' });
                 setFilterState(INITIAL_FILTER_STATE);
                 const url = new URL(window.location.href);
                 url.pathname = '/';
