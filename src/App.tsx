@@ -65,7 +65,9 @@ export default function App() {
     if (seo) return seo.screen;
     const params = new URLSearchParams(window.location.search);
     const scr = params.get('screen');
-    return scr ? (scr as ActiveScreen) : 'home';
+    if (scr) return scr as ActiveScreen;
+    if (params.get('search') || params.get('q')) return 'properties';
+    return 'home';
   });
 
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
@@ -182,6 +184,14 @@ export default function App() {
         ...seo.filterOverrides
       };
     }
+    const params = new URLSearchParams(window.location.search);
+    const searchParam = params.get('search') || params.get('q');
+    if (searchParam) {
+      return {
+        ...INITIAL_FILTER_STATE,
+        searchQuery: searchParam
+      };
+    }
     return INITIAL_FILTER_STATE;
   });
 
@@ -189,9 +199,9 @@ export default function App() {
   const [savedPropertyIds, setSavedPropertyIds] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem('royal_agra_saved_v2');
-      return stored ? JSON.parse(stored) : ['prop-1', 'prop-2'];
+      return stored ? JSON.parse(stored) : ['prop-user-1791755457589', 'prop-user-1792319503252'];
     } catch {
-      return ['prop-1', 'prop-2'];
+      return ['prop-user-1791755457589', 'prop-user-1792319503252'];
     }
   });
 
@@ -411,7 +421,6 @@ export default function App() {
     // Reset SEO state when navigating away to another screen
     if (currentSeoConfig) {
       setCurrentSeoConfig(null);
-      applySeoMetadata(null);
     }
 
     // Avoid pushing duplicate states into browser history
@@ -424,9 +433,11 @@ export default function App() {
 
     setActiveScreen(screen);
     
+    let foundProp: Property | null = null;
     if (propertyId) {
       const found = properties.find(p => p.id === propertyId);
       if (found) {
+        foundProp = found;
         setSelectedProperty(found);
         if (addToHistory) {
           hasOpenedModalInApp.current = true;
@@ -435,6 +446,9 @@ export default function App() {
     } else {
       setSelectedProperty(null);
     }
+
+    // Dynamically synchronize page SEO metadata for current screen / property
+    applySeoMetadata({ screen, property: foundProp, searchQuery: filterState.searchQuery });
     
     // Manage browser history
     if (addToHistory) {
@@ -532,7 +546,6 @@ export default function App() {
       }
 
       setCurrentSeoConfig(null);
-      applySeoMetadata(null);
 
       if (event.state) {
         const { screen, propertyId } = event.state;
@@ -543,7 +556,8 @@ export default function App() {
       } else {
         // Handle case where state is null (initial load or browser default)
         const params = new URLSearchParams(window.location.search);
-        const screen = normalizeScreenName(params.get('screen'));
+        const searchParam = params.get('search') || params.get('q');
+        const screen = normalizeScreenName(params.get('screen') || (searchParam ? 'properties' : 'home'));
         const propertyId = params.get('property');
         hasOpenedModalInApp.current = false;
         navigateTo(screen, propertyId, false);
@@ -552,6 +566,12 @@ export default function App() {
 
     // Initialize state on load
     const seo = getSeoRouteConfig(window.location.pathname);
+    const params = new URLSearchParams(window.location.search);
+    const searchParam = params.get('search') || params.get('q');
+    const screen = seo ? seo.screen : normalizeScreenName(params.get('screen') || (searchParam ? 'properties' : 'home'));
+    const propertyId = params.get('property');
+    const foundProp = propertyId ? properties.find(p => p.id === propertyId) || null : null;
+
     if (seo) {
       setCurrentSeoConfig(seo);
       applySeoMetadata(seo);
@@ -563,18 +583,19 @@ export default function App() {
         });
       }
     } else {
-      applySeoMetadata(null);
+      applySeoMetadata({ screen, property: foundProp, searchQuery: searchParam });
+      if (searchParam) {
+        setFilterState(prev => ({
+          ...prev,
+          searchQuery: searchParam
+        }));
+      }
     }
-
-    const params = new URLSearchParams(window.location.search);
-    const screen = seo ? seo.screen : normalizeScreenName(params.get('screen'));
-    const propertyId = params.get('property');
     
     // Set initial state without adding to history (it's already the current state)
     setActiveScreen(screen);
-    if (propertyId) {
-      const found = properties.find(p => p.id === propertyId);
-      if (found) setSelectedProperty(found);
+    if (foundProp) {
+      setSelectedProperty(foundProp);
     }
     
     // Replace current state with correct state object so popstate works for the first entry

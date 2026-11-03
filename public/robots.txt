@@ -4,7 +4,7 @@ Allow: /
 Disallow: /api/
 
 # Host
-Host: https://royalagraestate.in
+Host: royalagraestate.in
 
 # XML Sitemap
 Sitemap: https://royalagraestate.in/sitemap.xml

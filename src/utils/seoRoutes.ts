@@ -1,4 +1,4 @@
-import { ActiveScreen, FilterState, ListingType, PropertyType } from '../types';
+import { ActiveScreen, FilterState, ListingType, PropertyType, Property } from '../types';
 
 export interface SeoRouteConfig {
   path: string;
@@ -261,22 +261,166 @@ export function getSeoRouteConfig(pathname: string): SeoRouteConfig | null {
 }
 
 /**
- * Updates browser DOM <head> tags for SEO dynamically
+ * Screen-level SEO configurations for standard catalogue screens
  */
-export function applySeoMetadata(config: SeoRouteConfig | null) {
+export const SCREEN_SEO_CONFIGS: Partial<Record<ActiveScreen, {
+  title: string;
+  description: string;
+  keywords: string[];
+  canonicalUrl: string;
+}>> = {
+  properties: {
+    title: 'Verified Properties for Sale & Rent in Agra | Royal Agra Estate',
+    description: 'Explore verified plots, luxury villas, independent kothis, and commercial spaces across Agra. 100% legal title verification and direct concierge assistance.',
+    keywords: [
+      'property in agra',
+      'buy house in agra',
+      'plots in agra',
+      'luxury villas agra',
+      'flats for rent in agra',
+      'real estate agra'
+    ],
+    canonicalUrl: 'https://royalagraestate.in/?screen=properties'
+  },
+  projects: {
+    title: 'Featured Real Estate Projects & Townships in Agra | Royal Agra Estate',
+    description: 'Discover exclusive gated communities, integrated townships, and luxury residential projects along Fatehabad Road and Dayalbagh, Agra.',
+    keywords: [
+      'real estate projects in agra',
+      'gated community agra',
+      'townships in agra',
+      'new housing projects agra',
+      'luxury townships agra'
+    ],
+    canonicalUrl: 'https://royalagraestate.in/?screen=projects'
+  },
+  about: {
+    title: 'About Us | Royal Agra Estate - Agra\'s Premier Real Estate Advisory',
+    description: 'Learn about Royal Agra Estate, Agra\'s leading verified luxury real estate consultancy. Transparent legal verification, no hidden brokerage, and end-to-end guidance.',
+    keywords: [
+      'about royal agra estate',
+      'real estate consultant agra',
+      'property dealer agra',
+      'best real estate agent in agra'
+    ],
+    canonicalUrl: 'https://royalagraestate.in/?screen=about'
+  },
+  contact: {
+    title: 'Contact Concierge | Royal Agra Estate - Agra Property Advisory',
+    description: 'Connect directly with Royal Agra Estate concierge at +91 91490 79913 or contact@royalagraestate.in for verified properties, site visits, and property sales in Agra.',
+    keywords: [
+      'contact royal agra estate',
+      'property advisory contact agra',
+      'real estate phone number agra',
+      'fatehabad road real estate office'
+    ],
+    canonicalUrl: 'https://royalagraestate.in/?screen=contact'
+  },
+  'sell-rent': {
+    title: 'Sell or Rent Property in Agra | Free Listing | Royal Agra Estate',
+    description: 'Post your Agra property listing for free. Connect with genuine, verified buyers for plots, houses, and commercial land in Agra.',
+    keywords: [
+      'sell property in agra',
+      'post property free agra',
+      'list house in agra',
+      'property dealer in agra'
+    ],
+    canonicalUrl: 'https://royalagraestate.in/?screen=sell-rent'
+  }
+};
+
+/**
+ * Builds property-specific dynamic SEO metadata
+ */
+export function getPropertySeoConfig(property: Property) {
+  const formattedPrice = typeof property.price === 'number'
+    ? '₹' + property.price.toLocaleString('en-IN')
+    : property.price;
+  const bhkStr = property.bedrooms ? `${property.bedrooms} BHK ` : '';
+  const title = `${property.title} | ${property.locality}, Agra | Royal Agra Estate`;
+  const description = `${property.title} in ${property.locality}, Agra. ${formattedPrice} - ${bhkStr}${property.propertyType}. 100% legally verified listing on Royal Agra Estate.`;
+  const canonicalUrl = `https://royalagraestate.in/?screen=properties&property=${property.id}`;
+  const imageUrl = (typeof property.coverImage === 'string' && property.coverImage.startsWith('http'))
+    ? property.coverImage
+    : 'https://royalagraestate.in/properties/harish_nagar_1.jpg';
+
+  return {
+    title,
+    description,
+    canonicalUrl,
+    imageUrl,
+    keywords: [
+      property.title.toLowerCase(),
+      `property in ${property.locality.toLowerCase()} agra`,
+      `${property.propertyType.toLowerCase()} in agra`,
+      'verified property agra'
+    ]
+  };
+}
+
+export interface ApplySeoOptions {
+  seoConfig?: SeoRouteConfig | null;
+  screen?: ActiveScreen | null;
+  property?: Property | null;
+  searchQuery?: string | null;
+}
+
+/**
+ * Updates browser DOM <head> tags for SEO dynamically across routes, screens, and properties
+ */
+export function applySeoMetadata(target: SeoRouteConfig | ApplySeoOptions | null) {
   if (typeof document === 'undefined') return;
 
   const defaultTitle = 'Royal Agra Estate | Luxury Real Estate & Verified Properties in Agra';
   const defaultDesc = 'Discover verified luxury villas, ADA approved plots on Fatehabad Road, independent kothis, and commercial property across Agra with 100% legal title verification.';
   const defaultKeywords = 'buy house in agra, plots in fatehabad road agra, ada approved plots in agra, luxury villa in agra, flats for rent in agra, real estate agra, property in agra, plots in dayalbagh, plots in shastripuram agra';
   const defaultCanonical = 'https://royalagraestate.in/';
+  const defaultImage = 'https://royalagraestate.in/properties/harish_nagar_1.jpg';
 
-  const title = config ? config.title : defaultTitle;
-  const description = config ? config.description : defaultDesc;
-  const keywords = config ? config.keywords.join(', ') : defaultKeywords;
-  const canonical = config ? config.canonicalUrl : defaultCanonical;
+  let title = defaultTitle;
+  let description = defaultDesc;
+  let keywords = defaultKeywords;
+  let canonical = defaultCanonical;
+  let imageUrl = defaultImage;
 
-  // Title
+  if (target) {
+    if ('badgeTitle' in target) {
+      // It's a SeoRouteConfig
+      title = target.title;
+      description = target.description;
+      keywords = target.keywords.join(', ');
+      canonical = target.canonicalUrl;
+    } else {
+      // It's an ApplySeoOptions
+      if (target.property) {
+        const propConfig = getPropertySeoConfig(target.property);
+        title = propConfig.title;
+        description = propConfig.description;
+        keywords = propConfig.keywords.join(', ');
+        canonical = propConfig.canonicalUrl;
+        imageUrl = propConfig.imageUrl;
+      } else if (target.seoConfig) {
+        title = target.seoConfig.title;
+        description = target.seoConfig.description;
+        keywords = target.seoConfig.keywords.join(', ');
+        canonical = target.seoConfig.canonicalUrl;
+      } else if (target.screen && SCREEN_SEO_CONFIGS[target.screen]) {
+        const scrConfig = SCREEN_SEO_CONFIGS[target.screen]!;
+        title = scrConfig.title;
+        description = scrConfig.description;
+        keywords = scrConfig.keywords.join(', ');
+        canonical = scrConfig.canonicalUrl;
+      }
+
+      if (target.searchQuery && target.screen === 'properties' && !target.property) {
+        title = `Search: ${target.searchQuery} | Properties in Agra | Royal Agra Estate`;
+        description = `Verified properties matching "${target.searchQuery}" in Agra. Clear legal titles and direct builder/owner listings on Royal Agra Estate.`;
+        canonical = `https://royalagraestate.in/?screen=properties&search=${encodeURIComponent(target.searchQuery)}`;
+      }
+    }
+  }
+
+  // Document Title
   document.title = title;
 
   // Meta description
@@ -316,6 +460,9 @@ export function applySeoMetadata(config: SeoRouteConfig | null) {
   const ogUrl = document.querySelector('meta[property="og:url"]');
   if (ogUrl) ogUrl.setAttribute('content', canonical);
 
+  const ogImg = document.querySelector('meta[property="og:image"]');
+  if (ogImg) ogImg.setAttribute('content', imageUrl);
+
   // Twitter tags
   const twTitle = document.querySelector('meta[name="twitter:title"]');
   if (twTitle) twTitle.setAttribute('content', title);
@@ -325,4 +472,7 @@ export function applySeoMetadata(config: SeoRouteConfig | null) {
 
   const twUrl = document.querySelector('meta[name="twitter:url"]');
   if (twUrl) twUrl.setAttribute('content', canonical);
+
+  const twImg = document.querySelector('meta[name="twitter:image"]');
+  if (twImg) twImg.setAttribute('content', imageUrl);
 }

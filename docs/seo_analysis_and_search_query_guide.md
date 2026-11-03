@@ -435,7 +435,7 @@ Allow: /
 Disallow: /api/
 
 # Host
-Host: https://royalagraestate.in
+Host: royalagraestate.in
 
 # XML Sitemap
 Sitemap: https://royalagraestate.in/sitemap.xml
@@ -460,19 +460,23 @@ Located at `public/sitemap.xml` (and built directly into `dist/sitemap.xml`), co
   - `/commercial-property-in-agra`
   - `/sell-property-in-agra`
 - Catalogue & Section URLs (`?screen=properties`, `?screen=projects`, `?screen=about`, `?screen=contact`)
-- Active verified property listing detail endpoints (`?screen=properties&property=prop-1` through `prop-5`)
+- Active verified property listing detail endpoints:
+  - `?screen=properties&property=prop-user-1791755457589` (88, Harish Nagar, Sikandra)
+  - `?screen=properties&property=prop-user-1792319503252` (Near Industrial Area, Shastripuram)
+  - `?screen=properties&property=prop-user-1792320738640` (Kargil Petrol Pump, Shastripuram)
+  - `?screen=properties&property=prop-user-1792321411019` (Shastripuram Commercial/Residential)
+  - `?screen=properties&property=prop-user-1792513729453` (Shastripuram Rental Residence)
 
 ### 3.6 Dynamic Client-Side Route Metadata Synchronization (`src/utils/seoRoutes.ts`)
 
-In a Single Page Application (SPA), when a user navigates between pages or enters via deep links, the browser DOM `<head>` must reflect the new URL's metadata. The `applySeoMetadata(config)` function in `src/utils/seoRoutes.ts` dynamically updates:
-1. `document.title`
-2. `meta[name="description"]`
-3. `meta[name="keywords"]`
-4. `link[rel="canonical"]`
-5. `meta[property="og:title"]`, `og:description`, `og:url`
-6. `meta[name="twitter:title"]`, `twitter:description`, `twitter:url`
-
-This guarantees that both user browser history and dynamic client-side rendering remain synchronized with on-page SEO definitions.
+In a Single Page Application (SPA), when a user navigates between pages, opens property modals, or enters via deep links, the browser DOM `<head>` must reflect the exact content and URL metadata. The enhanced `applySeoMetadata(target)` engine dynamically updates:
+1. `document.title` (corridor-specific, catalogue-specific, or property-specific: e.g., *"88, Harish Nagar | Sikandra, Agra | Royal Agra Estate"*)
+2. `meta[name="description"]` (tailored CTR copy with price, BHK, and legal status)
+3. `meta[name="keywords"]` (localized micro-market keywords)
+4. `link[rel="canonical"]` (exact canonical consolidation matching `sitemap.xml`, preventing duplicate content penalties)
+5. `meta[property="og:title"]`, `og:description`, `og:url`, `og:image` (high-res property image or brand hero)
+6. `meta[name="twitter:title"]`, `twitter:description`, `twitter:url`, `twitter:image` (rich social card previews)
+7. Google Sitelinks Searchbox integration (`?screen=properties&search=...`) with instant query pre-filtering.
 
 ---
 
