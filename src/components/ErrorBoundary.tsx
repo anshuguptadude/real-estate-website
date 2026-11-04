@@ -52,7 +52,7 @@ export class ErrorBoundary extends Component<Props, State> {
     } catch (e) {
       // ignore
     }
-    window.location.href = '/?screen=home';
+    window.location.href = '/';
   };
 
   private handleReload = () => {

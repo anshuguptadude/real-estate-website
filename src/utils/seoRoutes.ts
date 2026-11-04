@@ -269,6 +269,22 @@ export const SCREEN_SEO_CONFIGS: Partial<Record<ActiveScreen, {
   keywords: string[];
   canonicalUrl: string;
 }>> = {
+  home: {
+    title: 'Royal Agra Estate | Luxury Real Estate & Verified Properties in Agra',
+    description: 'Discover verified luxury villas, ADA approved plots on Fatehabad Road, independent kothis, and commercial property across Agra with 100% legal title verification.',
+    keywords: [
+      'buy house in agra',
+      'plots in fatehabad road agra',
+      'ada approved plots in agra',
+      'luxury villa in agra',
+      'flats for rent in agra',
+      'real estate agra',
+      'property in agra',
+      'plots in dayalbagh',
+      'plots in shastripuram agra'
+    ],
+    canonicalUrl: 'https://royalagraestate.in/'
+  },
   properties: {
     title: 'Verified Properties for Sale & Rent in Agra | Royal Agra Estate',
     description: 'Explore verified plots, luxury villas, independent kothis, and commercial spaces across Agra. 100% legal title verification and direct concierge assistance.',
@@ -429,23 +445,20 @@ export function applySeoMetadata(target: SeoRouteConfig | ApplySeoOptions | null
   // Document Title
   document.title = title;
 
-  // Meta description
-  let metaDesc = document.querySelector('meta[name="description"]');
-  if (!metaDesc) {
-    metaDesc = document.createElement('meta');
-    metaDesc.setAttribute('name', 'description');
-    document.head.appendChild(metaDesc);
-  }
-  metaDesc.setAttribute('content', description);
+  // Defensive meta tag injector
+  const setMeta = (attrName: 'name' | 'property', attrVal: string, contentVal: string) => {
+    let el = document.querySelector(`meta[${attrName}="${attrVal}"]`);
+    if (!el) {
+      el = document.createElement('meta');
+      el.setAttribute(attrName, attrVal);
+      document.head.appendChild(el);
+    }
+    el.setAttribute('content', contentVal);
+  };
 
-  // Meta keywords
-  let metaKeywords = document.querySelector('meta[name="keywords"]');
-  if (!metaKeywords) {
-    metaKeywords = document.createElement('meta');
-    metaKeywords.setAttribute('name', 'keywords');
-    document.head.appendChild(metaKeywords);
-  }
-  metaKeywords.setAttribute('content', keywords);
+  // Meta description & keywords
+  setMeta('name', 'description', description);
+  setMeta('name', 'keywords', keywords);
 
   // Canonical Link
   let linkCanonical = document.querySelector('link[rel="canonical"]');
@@ -457,33 +470,58 @@ export function applySeoMetadata(target: SeoRouteConfig | ApplySeoOptions | null
   linkCanonical.setAttribute('href', canonical);
 
   // OpenGraph tags
-  const ogTitle = document.querySelector('meta[property="og:title"]');
-  if (ogTitle) ogTitle.setAttribute('content', title);
-
-  const ogDesc = document.querySelector('meta[property="og:description"]');
-  if (ogDesc) ogDesc.setAttribute('content', description);
-
-  const ogUrl = document.querySelector('meta[property="og:url"]');
-  if (ogUrl) ogUrl.setAttribute('content', canonical);
-
-  const ogImg = document.querySelector('meta[property="og:image"]');
-  if (ogImg) ogImg.setAttribute('content', imageUrl);
+  setMeta('property', 'og:title', title);
+  setMeta('property', 'og:description', description);
+  setMeta('property', 'og:url', canonical);
+  setMeta('property', 'og:image', imageUrl);
 
   // Twitter tags
-  const twTitle = document.querySelector('meta[name="twitter:title"]');
-  if (twTitle) twTitle.setAttribute('content', title);
+  setMeta('name', 'twitter:title', title);
+  setMeta('name', 'twitter:description', description);
+  setMeta('name', 'twitter:url', canonical);
+  setMeta('name', 'twitter:image', imageUrl);
+  setMeta('name', 'twitter:creator', '@royalagraestate');
 
-  const twDesc = document.querySelector('meta[name="twitter:description"]');
-  if (twDesc) twDesc.setAttribute('content', description);
-
-  let twUrl = document.querySelector('meta[name="twitter:url"]');
-  if (!twUrl) {
-    twUrl = document.createElement('meta');
-    twUrl.setAttribute('name', 'twitter:url');
-    document.head.appendChild(twUrl);
+  // Dynamic Property JSON-LD Structured Data
+  let propJsonLd = document.getElementById('property-schema-jsonld') as HTMLScriptElement | null;
+  if (target && !('badgeTitle' in target) && target.property) {
+    if (!propJsonLd) {
+      propJsonLd = document.createElement('script');
+      propJsonLd.type = 'application/ld+json';
+      propJsonLd.id = 'property-schema-jsonld';
+      document.head.appendChild(propJsonLd);
+    }
+    const p = target.property;
+    const formattedPrice = typeof p.price === 'number' ? p.price : undefined;
+    propJsonLd.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'SingleFamilyResidence',
+      '@id': `https://royalagraestate.in/?screen=properties&property=${p.id}#property`,
+      name: p.title || 'Verified Property in Agra',
+      description: `${p.title || 'Property'} in ${p.locality || 'Agra'}, Agra. Verified listing on Royal Agra Estate.`,
+      url: `https://royalagraestate.in/?screen=properties&property=${p.id}`,
+      image: (typeof p.coverImage === 'string' && p.coverImage.startsWith('http')) ? p.coverImage : 'https://royalagraestate.in/og-image.jpg',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: p.locality || 'Agra',
+        addressRegion: 'Uttar Pradesh',
+        addressCountry: 'IN'
+      },
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: 27.1612,
+        longitude: 78.0461
+      },
+      ...(formattedPrice ? {
+        offers: {
+          '@type': 'Offer',
+          price: formattedPrice,
+          priceCurrency: 'INR',
+          availability: p.status === 'Sold' ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock'
+        }
+      } : {})
+    });
+  } else if (propJsonLd) {
+    propJsonLd.remove();
   }
-  twUrl.setAttribute('content', canonical);
-
-  const twImg = document.querySelector('meta[name="twitter:image"]');
-  if (twImg) twImg.setAttribute('content', imageUrl);
 }

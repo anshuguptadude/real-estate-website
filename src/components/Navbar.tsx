@@ -52,7 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           
           {/* LEFT: Logo Icon + ONLY "Royal Agra Estate" */}
           <a
-            href="?screen=home"
+            href="/"
             id="brand-logo-btn"
             onClick={(e) => {
               if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {

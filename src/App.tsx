@@ -454,13 +454,17 @@ export default function App() {
     if (addToHistory) {
       const url = new URL(window.location.href);
       url.pathname = '/';
-      url.searchParams.set('screen', screen);
-      if (propertyId) {
-        url.searchParams.set('property', propertyId);
+      if (screen === 'home' && !propertyId) {
+        url.search = '';
       } else {
-        url.searchParams.delete('property');
+        url.searchParams.set('screen', screen);
+        if (propertyId) {
+          url.searchParams.set('property', propertyId);
+        } else {
+          url.searchParams.delete('property');
+        }
       }
-      window.history.pushState({ screen, propertyId }, '', url.pathname + url.search);
+      window.history.pushState({ screen, propertyId }, '', url.pathname + (url.search ? url.search : ''));
     }
     
     window.scrollTo({ top: 0, behavior: 'smooth' });
