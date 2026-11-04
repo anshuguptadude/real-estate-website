@@ -7,4 +7,5 @@ Disallow: /api/
 Host: royalagraestate.in
 
 # XML Sitemap
+Sitemap: https://royalagraestate.in/uploads/prop_1793755654_9862.xml
 Sitemap: https://royalagraestate.in/sitemap.xml

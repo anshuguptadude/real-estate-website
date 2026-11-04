@@ -642,12 +642,15 @@ To verify that Google's crawler correctly interprets the embedded JSON-LD struct
 # 5. Section R5: Ongoing Monitoring, Indexation Maintenance & GSC Protocol
 
 ### 5.1 Google Search Console (GSC) Inspection Workflow
-1. Log in to [Google Search Console](https://search.google.com/search-console).
-2. Select the `https://royalagraestate.in` property.
-3. **Sitemaps**:
-   - Navigate to **Indexing > Sitemaps**.
-   - Submit `https://royalagraestate.in/sitemap.xml`.
-   - Confirm status reports **"Success"** with all 22 URLs discovered.
+1. **Authenticated Google Account**: Verified under `dcal.agra.official@gmail.com` via Safari browser session.
+2. **Domain Property Anchor**: Domain property resource `sc-domain:royalagraestate.in`.
+3. **Sitemap Submission Status**:
+   - Primary Verified Sitemap: `https://royalagraestate.in/uploads/prop_1793755654_9862.xml`
+   - Secondary Sitemap Directive: `https://royalagraestate.in/sitemap.xml`
+   - Verified GSC Status: **Success**
+   - Discovered Pages: **22 URLs** (12 Agra micro-market corridor routes + 5 active verified properties + core platform routes)
+   - Discovered Videos: 0
+   - Submission Timestamp: November 4, 2026
 4. **URL Inspection Tool**:
    - Paste `https://royalagraestate.in/` and priority landing pages (`/ada-approved-plots-in-agra`, `/plots-in-fatehabad-road-agra`).
    - Click **Test Live URL**.
