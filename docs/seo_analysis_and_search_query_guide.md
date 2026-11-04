@@ -664,7 +664,7 @@ To dominate Google’s Local 3-Pack (the map listings that appear above organic 
 2. Set Primary Category to: **Real Estate Agency** / **Real Estate Consultant**.
 3. Align NAP (Name, Address, Phone) precisely with the JSON-LD schema:
    - Name: `Royal Agra Estate`
-   - Address: `Fatehabad Road, Agra, Uttar Pradesh 282001`
+   - Address: `Shastripuram, Agra, Uttar Pradesh 282007`
    - Phone: `+91 91490 79913`
    - Website: `https://royalagraestate.in/`
 4. Add secondary categories: *Commercial Real Estate Agency*, *Real Estate Appraiser*.
