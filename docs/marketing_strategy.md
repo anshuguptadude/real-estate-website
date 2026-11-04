@@ -387,7 +387,7 @@ Selecting the destination for ad clicks is the single most critical determinant 
 │                       │ already open in device memory.    │ navigation menus cause rapid bounces.      │
 ├───────────────────────┼───────────────────────────────────┼────────────────────────────────────────────┤
 │ 2. Speed-to-Lead      │ REAL-TIME (< 60 seconds)          │ DELAYED (15 mins – several hours)          │
-│                       │ Immediate two-way chat notification│ Lead stored in DB; manual follow-up call   │
+│                       │ Immediate 2-way chat notification │ Lead stored in DB; manual follow-up call   │
 │                       │ on senior concierge mobile device.│ frequently flagged as "Spam" by Truecaller.│
 ├───────────────────────┼───────────────────────────────────┼────────────────────────────────────────────┤
 │ 3. Cultural & Trust   │ MAXIMUM LOCAL TRUST               │ INSTITUTIONAL CREDIBILITY                  │
@@ -591,7 +591,7 @@ A standardized, 16-column master spreadsheet titled **`Royal Agra Estate — Mas
 │      │                      │                         │ Luxury Villas (>₹1.5Cr)                        │
 │ G    │ Preferred_Locality   │ Text / Tags             │ Rohta, Shamshabad Rd, Kamla Nagar, Sikandra,   │
 │      │                      │                         │ Shastripuram, Dayalbagh, Fatehabad Rd          │
-│ H    │ Budget_Range         │ Dropdown                │ <₹15L, ₹15L–₹35L, ₹35L–₹75L, ₹75L–₹1.5Cr, >₹1.5Cr│
+│ H    │ Budget_Range         │ Dropdown                │ <₹15L, ₹15L–35L, ₹35L–75L, ₹75L–1.5Cr, >₹1.5Cr │
 │ I    │ Buying_Timeline      │ Dropdown                │ Immediate (<30 days), 1–3 Months, Exploring    │
 │ J    │ Pipeline_Stage       │ Dropdown (Color Coded)  │ 1. New Lead → 2. Contacted → 3. Qualified →    │
 │      │                      │                         │ 4. Visit Booked → 5. Visit Done →              │
@@ -735,7 +735,7 @@ In 2026, **Creative is the Targeting**. Stacking 15 restrictive interest tags ch
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                 TARGETING ARCHITECTURE MATRIX BY SEGMENT                              │
+│                                 TARGETING ARCHITECTURE MATRIX BY SEGMENT                               │
 ├─────────────────────┬──────────────────────────┬───────────┬───────────────────────────────────────────┤
 │ SEGMENT             │ GEOGRAPHIC PARAMETERS    │ AGE RANGE │ AUDIENCE SIGNALS / ADVANTAGE+ SUGGESTIONS │
 ├─────────────────────┼──────────────────────────┼───────────┼───────────────────────────────────────────┤
@@ -853,7 +853,7 @@ In 2026, **Creative is the Targeting**. Stacking 15 restrictive interest tags ch
 
 - **Headline Variations (Meta Ads Manager Character-Budget Optimized)**:
   - *Headline 1 (Full)*: `Dayalbagh, Fatehabad Rd, Sikandra | Verified Agra Homes` (55 chars)
-  - *Headline 2 (Multi-Area)*: `Kamla Nagar se Fatehabad Rd | Verified Kothis | Direct Rates` (60 chars)
+  - *Headline 2 (Multi-Area)*: `Kamla Nagar se Fatehabad Rd | Verified Kothis & Plots` (53 chars)
   - *Headline 3 (Action-Oriented)*: `Agra Prime Corridors: Verified Properties | 30-Yr Audit` (55 chars)
   - *Headline 4 (Mobile Compact < 45 chars)*: `Dayalbagh to Fatehabad Rd | Agra Homes` (38 chars)
   - *Headline 5 (Corridors < 45 chars)*: `Agra Corridors | Verified Plots & Kothis` (40 chars)
@@ -921,9 +921,9 @@ In 2026, **Creative is the Targeting**. Stacking 15 restrictive interest tags ch
   *Cinematic 4K drone shot descending over a grand double-height foyer with chandeliers:*  
   *"True luxury does not shout; it commands in silence. Introducing Agra's most exclusive private villa collection."*
 - **Primary Text Copy (English with Hinglish Touch)**:  
-  🏰 **A Legacy Residence for Generations to Come — Fatehabad Road VIP Corridor**  
+  🏰 **A Legacy Residence for Generations to Come — Fatehabad Road & Dayalbagh**  
   
-  For Agra’s leading industrial families, senior professionals, and global NRIs seeking uncompromised architectural distinction.  
+  For Agra’s leading industrial families, senior professionals, and global NRIs seeking uncompromised architectural distinction across Agra's premier luxury enclaves.  
   
   • **Sprawling 350 to 600 Sq. Yard Signature Villas**  
   • **Double-Height Living Foyers with Italian Statuario Marble**  
@@ -934,7 +934,7 @@ In 2026, **Creative is the Targeting**. Stacking 15 restrictive interest tags ch
   
   📞 Direct Executive Concierge: +91 91490 79913  
   Explore the Private Collection: royalagraestate.in
-- **Headline**: Private Villa Collection | Fatehabad Road | VIP Showing
+- **Headline**: Private Villa Collection | Fatehabad Rd & Dayalbagh
 - **CTA**: Contact Us / Request Private Brochure
 
 ### 4.8 Empirical KPI Benchmark Matrix, Pipeline Efficiency & 72–96 Hour Diagnostics
@@ -1015,7 +1015,7 @@ In Tier-2 real estate markets like Agra, traditional property aggregators (Magic
 │                                    ▼                                        │
 │ 3. If a platform demands title documents (Bainama, Khatauni, Aadhaar)       │
 │    upfront at listing submission:                                           │
-│    → Dealer assumes: "Platform will call owner directly and cut me out."     │
+│    → Dealer assumes: "Platform will call owner directly and cut me out."    │
 │    → Dealer experiences immediate bypass panic ("Dalali mar jayegi").       │
 │                                    ▼                                        │
 │ 4. Result: 95%+ of Agra dealers abandon registration, post fake details,    │
