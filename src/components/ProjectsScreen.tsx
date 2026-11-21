@@ -59,6 +59,7 @@ export const ProjectsScreen: React.FC<ProjectsScreenProps> = ({
   const [isBrochureSubmitting, setIsBrochureSubmitting] = useState(false);
   const [brochureError, setBrochureError] = useState('');
   const [brochureDownloadedSuccess, setBrochureDownloadedSuccess] = useState(false);
+  const [brochureWaUrl, setBrochureWaUrl] = useState('');
 
   // Form state for create/edit project modal
   const [formName, setFormName] = useState('');
@@ -109,13 +110,15 @@ export const ProjectsScreen: React.FC<ProjectsScreenProps> = ({
     try {
       setIsBrochureSubmitting(true);
       const leadId = `LEAD-${Date.now()}`;
+      const cleanEmail = brochureEmail.trim().toLowerCase();
+
       const brochureLead: LeadSubmission = {
         id: leadId,
         propertyId: `project-${brochureModalProject.id}`,
         propertyTitle: `Project Brochure: ${brochureModalProject.name}`,
         buyerName: brochureName.trim(),
         phone: cleanPhone,
-        email: brochureEmail.trim().toLowerCase() || `${cleanPhone}@brochure.royalagraestate.in`,
+        email: cleanEmail,
         preferredTime: `Dossier Download | Timeline: ${brochureTimeline} | Project: ${brochureModalProject.name} | Locality: ${brochureModalProject.locality}`,
         timestamp: new Date().toLocaleString(),
         createdAt: new Date().toISOString(),
@@ -125,34 +128,39 @@ export const ProjectsScreen: React.FC<ProjectsScreenProps> = ({
         timeline: brochureTimeline
       };
 
-      // 1. Save lead directly to Hostinger persistence API (/api/leads.php)
-      await saveFirestoreLead(brochureLead);
-      if (onLeadSubmitted) {
-        onLeadSubmitted(brochureLead);
-      }
-
-      // 2. Deliver Styled Luxury Digital Dossier (.html executive printable dossier)
+      // 1. Deliver Styled Luxury Digital Dossier (.html executive printable dossier) immediately
       downloadLuxuryDossier(brochureModalProject, brochureName.trim(), cleanPhone);
 
-      // 3. Connect to WhatsApp concierge desk at +91 9149079913
+      // 2. Prepare & launch WhatsApp concierge desk at +91 9149079913 in the same user click tick
+      const waText = encodeURIComponent(
+        `🏰 *Royal Agra Estate — Project Dossier Request*\n\n` +
+        `👤 *Client:* ${brochureLead.buyerName}\n` +
+        `📱 *Mobile:* ${brochureLead.phone}\n` +
+        (brochureLead.email ? `📧 *Email:* ${brochureLead.email}\n` : '') +
+        `🏢 *Project:* ${brochureModalProject.name}\n` +
+        `📍 *Location:* ${brochureModalProject.locality}\n` +
+        `💰 *Starting Price:* ${brochureModalProject.priceStarting}\n` +
+        `⏱️ *Timeline:* ${brochureTimeline}\n\n` +
+        `Hello Royal Agra Estate, I have downloaded the Luxury Dossier for ${brochureModalProject.name} and would like to arrange a private site inspection.`
+      );
+      const waUrl = `https://wa.me/919149079913?text=${waText}`;
+      setBrochureWaUrl(waUrl);
+
       try {
-        const waText = encodeURIComponent(
-          `🏰 *Royal Agra Estate — Project Dossier Request*\n\n` +
-          `👤 *Client:* ${brochureLead.buyerName}\n` +
-          `📱 *Mobile:* ${brochureLead.phone}\n` +
-          (brochureLead.email ? `📧 *Email:* ${brochureLead.email}\n` : '') +
-          `🏢 *Project:* ${brochureModalProject.name}\n` +
-          `📍 *Location:* ${brochureModalProject.locality}\n` +
-          `💰 *Starting Price:* ${brochureModalProject.priceStarting}\n` +
-          `⏱️ *Timeline:* ${brochureTimeline}\n\n` +
-          `Hello Royal Agra Estate, I have downloaded the Luxury Dossier for ${brochureModalProject.name} and would like to arrange a private site inspection.`
-        );
-        window.open(`https://wa.me/919149079913?text=${waText}`, '_blank');
+        window.open(waUrl, '_blank');
       } catch (err) {
         console.warn('Failed to open WhatsApp window:', err);
       }
 
+      // 3. Save lead directly to Hostinger persistence API (/api/leads.php) without duplicate requests
+      if (onLeadSubmitted) {
+        onLeadSubmitted(brochureLead);
+      } else {
+        await saveFirestoreLead(brochureLead);
+      }
+
       setDownloadSuccess(brochureModalProject.name);
+      setTimeout(() => setDownloadSuccess(null), 5000);
       setBrochureDownloadedSuccess(true);
     } catch (err) {
       console.error('Failed to process dossier request:', err);
@@ -507,7 +515,18 @@ export const ProjectsScreen: React.FC<ProjectsScreenProps> = ({
                       Thank you, <strong className="text-gray-900">{brochureName}</strong>. The executive digital dossier for <strong className="text-[#0F382C]">{brochureModalProject.name}</strong> has been saved to your downloads. Our advisory desk has also opened WhatsApp to assist with private site inspections.
                     </p>
                   </div>
-                  <div className="pt-2">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                    {brochureWaUrl && (
+                      <a
+                        href={brochureWaUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="w-full sm:w-auto px-5 py-2.5 bg-[#25D366] hover:bg-[#1ebd54] text-white text-xs font-bold rounded-lg shadow-sm flex items-center justify-center gap-2"
+                      >
+                        <Phone className="w-3.5 h-3.5 fill-white" />
+                        <span>Connect on WhatsApp</span>
+                      </a>
+                    )}
                     <button
                       type="button"
                       onClick={() => setBrochureModalProject(null)}
@@ -522,8 +541,9 @@ export const ProjectsScreen: React.FC<ProjectsScreenProps> = ({
                   {/* Project Quick Overview Banner */}
                   <div className="flex items-center gap-3 bg-[#FAF8F5] p-3 rounded-xl border border-gray-200">
                     <img
-                      src={brochureModalProject.coverImage || (brochureModalProject as any).image}
+                      src={brochureModalProject.coverImage || (brochureModalProject as any).image || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80'}
                       alt={brochureModalProject.name}
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80'; }}
                       className="w-14 h-14 rounded-lg object-cover border border-gray-300 shrink-0"
                     />
                     <div className="min-w-0 flex-1">

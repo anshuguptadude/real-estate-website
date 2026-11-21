@@ -1,8 +1,8 @@
 import { Project } from '../types';
 
-const escapeHtml = (text: string): string => {
-  if (!text) return '';
-  return text
+const escapeHtml = (text: any): string => {
+  if (text === null || text === undefined) return '';
+  return String(text)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -27,9 +27,12 @@ export const generateLuxuryDossierHtml = (
   const safeDescription = escapeHtml(project.description);
   const safeClientName = escapeHtml(clientName);
   const safeClientPhone = escapeHtml(clientPhone);
+  const safeCoverImage = escapeHtml(project.coverImage || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80');
 
-  const highlights = project.highlights && project.highlights.length > 0
+  const rawHighlights = (project.highlights && project.highlights.length > 0)
     ? project.highlights
+    : ((project as any).features && (project as any).features.length > 0)
+    ? (project as any).features
     : [
         'Prime Agra Strategic Location',
         'ADA Sanctioned & UP RERA Registered',
@@ -38,12 +41,17 @@ export const generateLuxuryDossierHtml = (
         '100% Power Redundancy with High-Speed Elevators',
         'High Capital Appreciation Corridor'
       ];
+  const highlights = rawHighlights;
 
-  const configs = project.unitConfigurations && project.unitConfigurations.length > 0
+  const rawConfigs = (project.unitConfigurations && project.unitConfigurations.length > 0)
     ? project.unitConfigurations
+    : ((project as any).typologies && (project as any).typologies.length > 0)
+    ? (project as any).typologies
     : ['3 BHK Luxury Residences', '4 BHK Grand Imperial Suites', 'Limited Sky Penthouses'];
+  const configs = rawConfigs;
 
-  const dossierId = `RAE-DOSSIER-${project.id.toUpperCase()}-${Date.now().toString().slice(-5)}`;
+  const rawProjId = (project.id || 'PROJECT').replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase();
+  const dossierId = `RAE-DOSSIER-${rawProjId}-${Date.now().toString().slice(-5)}`;
   const generationDate = new Date().toLocaleDateString('en-IN', {
     day: 'numeric',
     month: 'long',
@@ -494,7 +502,7 @@ export const generateLuxuryDossierHtml = (
 
     <!-- Project Hero Image Banner -->
     <div class="hero-banner">
-      <img src="${project.coverImage || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80'}" alt="${safeName}" onerror="this.src='https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80'">
+      <img src="${safeCoverImage}" alt="${safeName}" onerror="this.src='https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80'">
       <div class="hero-overlay">
         <span class="status-tag">${safeStatus}</span>
         <h2>${safeName}</h2>
@@ -618,12 +626,15 @@ export const downloadLuxuryDossier = (
   clientName: string,
   clientPhone: string
 ): void => {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
   const htmlContent = generateLuxuryDossierHtml(project, clientName, clientPhone);
   const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  const fileName = `${project.name.replace(/[^a-zA-Z0-9]/g, '_')}_Luxury_Dossier.html`;
+  const cleanName = (project.name || 'Project').replace(/[^a-zA-Z0-9]/g, '_') || 'Project';
+  const fileName = `${cleanName}_Luxury_Dossier.html`;
   link.download = fileName;
   document.body.appendChild(link);
   link.click();

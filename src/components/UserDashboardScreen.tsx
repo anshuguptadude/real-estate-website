@@ -1772,15 +1772,17 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                       {validSenderLeads.map((lead) => {
                         const linkedProp = (allProperties || userProperties).find(p => p.id === lead.propertyId);
                         const cleanPhoneDigits = lead.phone.replace(/[^0-9]/g, '');
+                        const waClientPhone = cleanPhoneDigits.length === 10 ? `91${cleanPhoneDigits}` : cleanPhoneDigits;
                         const isLoanLead = lead.propertyId === 'home-loan-dsa' || lead.inquiryType === 'Home Loan Assistance';
                         const isProjectLead = lead.propertyId?.startsWith('project-') || lead.inquiryType === 'Project Brochure Download';
+                        const projectDisplayTitle = lead.projectTitle || lead.propertyTitle.replace(/^Project Brochure:\s*/i, '');
 
                         const waText = encodeURIComponent(
                           isLoanLead
                             ? `🏦 *Royal Agra Estate — Home Loan Advisory Follow-up*\n\n` +
                               `👤 *Client:* ${lead.buyerName}\n` +
                               `📱 *Mobile:* ${lead.phone}\n` +
-                              `📧 *Email:* ${lead.email}\n` +
+                              (lead.email ? `📧 *Email:* ${lead.email}\n` : '') +
                               `📋 *Application:* ${lead.propertyTitle}\n` +
                               `📊 *Details:* ${lead.preferredTime}\n\n` +
                               `Hello ${lead.buyerName}, thank you for applying for home loan pre-approval through Royal Agra Estate. Our banking advisory desk is ready to process your application with the lowest ROI.`
@@ -1788,14 +1790,14 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                             ? `🏰 *Royal Agra Estate — Project Dossier Follow-up*\n\n` +
                               `👤 *Client:* ${lead.buyerName}\n` +
                               `📱 *Mobile:* ${lead.phone}\n` +
-                              `📧 *Email:* ${lead.email}\n` +
-                              `🏢 *Project:* ${lead.propertyTitle}\n` +
+                              (lead.email ? `📧 *Email:* ${lead.email}\n` : '') +
+                              `🏢 *Project:* ${projectDisplayTitle}\n` +
                               `⏱️ *Details:* ${lead.preferredTime}\n\n` +
-                              `Hello ${lead.buyerName}, thank you for downloading the Luxury Dossier for ${lead.propertyTitle}. Would you like to schedule an executive site visit?`
+                              `Hello ${lead.buyerName}, thank you for downloading the Luxury Dossier for ${projectDisplayTitle}. Would you like to schedule an executive site visit?`
                             : `🏰 *Royal Agra Estate — Client Inquiry Follow-up*\n\n` +
                               `👤 *Client:* ${lead.buyerName} (${lead.phone})\n` +
                               `📱 *Mobile:* ${lead.phone}\n` +
-                              `📧 *Email:* ${lead.email}\n` +
+                              (lead.email ? `📧 *Email:* ${lead.email}\n` : '') +
                               `📍 *Property:* ${lead.propertyTitle} (ID: #${lead.propertyId})\n` +
                               (linkedProp ? `💰 *Price:* ${linkedProp.priceDisplay} | *Locality:* ${linkedProp.locality}\n` : '') +
                               `🗓️ *Requested Time:* ${lead.preferredTime || 'Immediate Advisory'}\n\n` +
@@ -1852,7 +1854,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                                 <Phone className="w-3 h-3 shrink-0" />
                                 <span>{lead.phone}</span>
                               </a>
-                              <span className="text-gray-500 text-[11px] block mt-0.5">{lead.email}</span>
+                              {lead.email ? <span className="text-gray-500 text-[11px] block mt-0.5">{lead.email}</span> : null}
                             </td>
                             <td className="p-4 align-top font-medium text-gray-700">
                               <span className="bg-amber-50 border border-amber-200 px-2 py-1 rounded-md text-[11px] text-amber-950 inline-block">
@@ -1862,7 +1864,7 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                             <td className="p-4 text-right align-top">
                               <div className="flex items-center justify-end gap-2">
                                 <a
-                                  href={`https://wa.me/${cleanPhoneDigits}?text=${waText}`}
+                                  href={`https://wa.me/${waClientPhone}?text=${waText}`}
                                   target="_blank"
                                   rel="noreferrer"
                                   className="px-3 py-1.5 bg-[#25D366] hover:bg-[#1ebd54] text-white rounded-lg font-bold text-[11px] shadow-xs flex items-center gap-1.5 transition-all"
@@ -2325,15 +2327,21 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                                       <Phone className="w-3.5 h-3.5 text-emerald-600" />
                                       <span>Call User</span>
                                     </a>
-                                    <a
-                                      href={`https://wa.me/${activeData.phone.replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(activeData.name || 'there')}%2C%20this%20is%20Royal%20Agra%20Estate%20Management.`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs"
-                                    >
-                                      <MessageSquare className="w-3.5 h-3.5" />
-                                      <span>WhatsApp</span>
-                                    </a>
+                                    {(() => {
+                                      const uDigits = activeData.phone ? activeData.phone.replace(/[^0-9]/g, '') : '';
+                                      const uWaPhone = uDigits.length === 10 ? `91${uDigits}` : uDigits;
+                                      return (
+                                        <a
+                                          href={`https://wa.me/${uWaPhone}?text=Hello%20${encodeURIComponent(activeData.name || 'there')}%2C%20this%20is%20Royal%20Agra%20Estate%20Management.`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs"
+                                        >
+                                          <MessageSquare className="w-3.5 h-3.5" />
+                                          <span>WhatsApp</span>
+                                        </a>
+                                      );
+                                    })()}
                                   </>
                                 )}
                                 {activeData.email && (

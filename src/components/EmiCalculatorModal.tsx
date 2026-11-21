@@ -32,6 +32,7 @@ export const EmiCalculatorModal: React.FC<EmiCalculatorModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [lastWaUrl, setLastWaUrl] = useState('');
 
   useEffect(() => {
     if (initialPrice) {
@@ -89,15 +90,20 @@ export const EmiCalculatorModal: React.FC<EmiCalculatorModalProps> = ({
       setIsSubmitting(true);
       const leadId = `LEAD-${Date.now()}`;
       const loanCr = ((loanAmount || 0) / 10000000).toFixed(2);
+      const formattedLoan = (loanAmount || 0) >= 10000000
+        ? `₹${loanCr} Cr`
+        : `₹${(((loanAmount || 0) / 100000)).toFixed(2)} Lacs`;
       const formattedEmi = isNaN(emi) ? '0' : emi.toLocaleString('en-IN');
+      const cleanEmail = email.trim().toLowerCase();
+
       const lead: LeadSubmission = {
         id: leadId,
         propertyId: 'home-loan-dsa',
-        propertyTitle: `Home Loan Pre-Approval: ${preferredBank} (₹${loanCr} Cr)`,
+        propertyTitle: `Home Loan Pre-Approval: ${preferredBank} (${formattedLoan})`,
         buyerName: fullName.trim(),
         phone: cleanPhone,
-        email: email.trim().toLowerCase() || `${cleanPhone}@advisory.royalagraestate.in`,
-        preferredTime: `Pre-Approved Loan: ${preferredBank} | Loan: ₹${loanCr} Cr | EMI: ₹${formattedEmi}/mo | Tenure: ${tenureYears} Yrs`,
+        email: cleanEmail,
+        preferredTime: `Pre-Approved Loan: ${preferredBank} | Loan: ${formattedLoan} | EMI: ₹${formattedEmi}/mo | Tenure: ${tenureYears} Yrs`,
         timestamp: new Date().toLocaleString(),
         createdAt: new Date().toISOString(),
         status: 'new',
@@ -109,28 +115,34 @@ export const EmiCalculatorModal: React.FC<EmiCalculatorModalProps> = ({
         preferredBank
       };
 
-      await saveFirestoreLead(lead);
-      if (onLeadSubmitted) {
-        onLeadSubmitted(lead);
-      }
+      // Prepare WhatsApp concierge URL
+      const waText = encodeURIComponent(
+        `🏦 *Royal Agra Estate — Home Loan Pre-Approval Application*\n\n` +
+        `👤 *Applicant:* ${lead.buyerName}\n` +
+        `📱 *Mobile:* ${lead.phone}\n` +
+        (lead.email ? `📧 *Email:* ${lead.email}\n` : '') +
+        `🏛️ *Preferred Bank:* ${preferredBank}\n` +
+        `💰 *Loan Amount:* ${formattedLoan} (₹${(loanAmount || 0).toLocaleString('en-IN')})\n` +
+        `📊 *Tenure:* ${tenureYears} Years (${totalMonths} Months)\n` +
+        `📈 *Interest Rate:* ${interestRate}% p.a.\n` +
+        `💳 *Estimated Monthly EMI:* ₹${formattedEmi} / month\n\n` +
+        `Hello Royal Agra Estate Advisory Desk, I have applied for home loan pre-approval. Please assist with my application.`
+      );
+      const waUrl = `https://wa.me/919149079913?text=${waText}`;
+      setLastWaUrl(waUrl);
 
-      // WhatsApp Concierge Launch
+      // Open WhatsApp synchronously within user interaction tick to prevent browser popup blockers
       try {
-        const waText = encodeURIComponent(
-          `🏦 *Royal Agra Estate — Home Loan Pre-Approval Application*\n\n` +
-          `👤 *Applicant:* ${lead.buyerName}\n` +
-          `📱 *Mobile:* ${lead.phone}\n` +
-          (lead.email ? `📧 *Email:* ${lead.email}\n` : '') +
-          `🏛️ *Preferred Bank:* ${preferredBank}\n` +
-          `💰 *Loan Amount:* ₹${loanCr} Cr (₹${(loanAmount || 0).toLocaleString('en-IN')})\n` +
-          `📊 *Tenure:* ${tenureYears} Years (${totalMonths} Months)\n` +
-          `📈 *Interest Rate:* ${interestRate}% p.a.\n` +
-          `💳 *Estimated Monthly EMI:* ₹${formattedEmi} / month\n\n` +
-          `Hello Royal Agra Estate Advisory Desk, I have applied for home loan pre-approval. Please assist with my application.`
-        );
-        window.open(`https://wa.me/919149079913?text=${waText}`, '_blank');
+        window.open(waUrl, '_blank');
       } catch (err) {
         console.warn('Failed to open WhatsApp window:', err);
+      }
+
+      // Persist lead directly to Hostinger API without duplicating requests
+      if (onLeadSubmitted) {
+        onLeadSubmitted(lead);
+      } else {
+        await saveFirestoreLead(lead);
       }
 
       setSubmittedSuccess(true);
@@ -173,7 +185,7 @@ export const EmiCalculatorModal: React.FC<EmiCalculatorModalProps> = ({
               <div className="flex justify-between text-xs font-bold text-gray-700 mb-1">
                 <span>Loan Amount</span>
                 <span className="font-mono text-[#0F382C] text-sm font-extrabold">
-                  ₹{((loanAmount || 0) / 10000000).toFixed(2)} Cr (₹{(loanAmount || 0).toLocaleString('en-IN')})
+                  {(loanAmount || 0) >= 10000000 ? `₹${((loanAmount || 0) / 10000000).toFixed(2)} Cr` : `₹${(((loanAmount || 0) / 100000)).toFixed(2)} Lacs`} (₹{(loanAmount || 0).toLocaleString('en-IN')})
                 </span>
               </div>
               <input
@@ -181,17 +193,17 @@ export const EmiCalculatorModal: React.FC<EmiCalculatorModalProps> = ({
                 name="loanAmount"
                 aria-label="Loan Amount in Rupees"
                 type="range"
-                min="1000000"
-                max="100000000"
-                step="500000"
+                min="500000"
+                max={Math.max(100000000, loanAmount || 0)}
+                step="100000"
                 value={loanAmount}
                 onChange={(e) => setLoanAmount(Number(e.target.value))}
                 className="w-full accent-[#0F382C] cursor-pointer"
               />
               <div className="flex justify-between text-[11px] text-gray-400">
-                <span>₹10 Lacs</span>
+                <span>₹5 Lacs</span>
                 <span>₹5.00 Cr</span>
-                <span>₹10.00 Cr</span>
+                <span>₹{Math.max(10, Math.ceil((loanAmount || 0) / 10000000)).toFixed(2)} Cr</span>
               </div>
             </div>
 
@@ -287,24 +299,35 @@ export const EmiCalculatorModal: React.FC<EmiCalculatorModalProps> = ({
                   Home Loan Pre-Approval Submitted!
                 </h4>
                 <p className="text-xs text-gray-600 mt-1 max-w-md mx-auto">
-                  Thank you, <span className="font-bold text-gray-900">{fullName}</span>. Your pre-approval inquiry for <span className="font-bold text-emerald-800">₹{((loanAmount || 0) / 10000000).toFixed(2)} Cr</span> ({preferredBank}) has been securely recorded. Our banking advisory concierge has opened WhatsApp to finalize your documentation.
+                  Thank you, <span className="font-bold text-gray-900">{fullName}</span>. Your pre-approval inquiry for <span className="font-bold text-emerald-800">{(loanAmount || 0) >= 10000000 ? `₹${((loanAmount || 0) / 10000000).toFixed(2)} Cr` : `₹${(((loanAmount || 0) / 100000)).toFixed(2)} Lacs`}</span> ({preferredBank}) has been securely recorded. Our banking advisory concierge has opened WhatsApp to finalize your documentation.
                 </p>
               </div>
-              <div className="flex items-center justify-center gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                {lastWaUrl && (
+                  <a
+                    href={lastWaUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full sm:w-auto px-5 py-2.5 bg-[#25D366] hover:bg-[#1ebd54] text-white rounded-lg text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all"
+                  >
+                    <span>Connect on WhatsApp</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
+                )}
                 <button
                   type="button"
                   onClick={() => {
                     setSubmittedSuccess(false);
                     setShowLoanForm(false);
                   }}
-                  className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg text-xs font-semibold hover:bg-gray-50"
+                  className="w-full sm:w-auto px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg text-xs font-semibold hover:bg-gray-50"
                 >
                   Calculate Another Loan
                 </button>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-5 py-2 bg-[#0F382C] text-white rounded-lg text-xs font-semibold hover:bg-[#164E3D]"
+                  className="w-full sm:w-auto px-5 py-2 bg-[#0F382C] text-white rounded-lg text-xs font-semibold hover:bg-[#164E3D]"
                 >
                   Done
                 </button>
@@ -444,8 +467,9 @@ export const EmiCalculatorModal: React.FC<EmiCalculatorModalProps> = ({
                   <div className="flex items-center gap-2 w-full sm:w-auto">
                     <button
                       type="button"
+                      disabled={isSubmitting}
                       onClick={() => setShowLoanForm(false)}
-                      className="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-gray-600 hover:text-gray-800"
+                      className="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-gray-600 hover:text-gray-800 disabled:opacity-50"
                     >
                       Cancel
                     </button>
