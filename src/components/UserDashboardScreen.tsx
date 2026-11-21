@@ -1772,15 +1772,34 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                       {validSenderLeads.map((lead) => {
                         const linkedProp = (allProperties || userProperties).find(p => p.id === lead.propertyId);
                         const cleanPhoneDigits = lead.phone.replace(/[^0-9]/g, '');
+                        const isLoanLead = lead.propertyId === 'home-loan-dsa' || lead.inquiryType === 'Home Loan Assistance';
+                        const isProjectLead = lead.propertyId?.startsWith('project-') || lead.inquiryType === 'Project Brochure Download';
+
                         const waText = encodeURIComponent(
-                          `🏰 *Royal Agra Estate — Client Inquiry Follow-up*\n\n` +
-                          `👤 *Client:* ${lead.buyerName} (${lead.phone})\n` +
-                          `📱 *Mobile:* ${lead.phone}\n` +
-                          `📧 *Email:* ${lead.email}\n` +
-                          `📍 *Property:* ${lead.propertyTitle} (ID: #${lead.propertyId})\n` +
-                          (linkedProp ? `💰 *Price:* ${linkedProp.priceDisplay} | *Locality:* ${linkedProp.locality}\n` : '') +
-                          `🗓️ *Requested Time:* ${lead.preferredTime || 'Immediate Advisory'}\n\n` +
-                          `Hello ${lead.buyerName}, thank you for reaching out to Royal Agra Estate regarding ${lead.propertyTitle}. How may we assist with your schedule and site viewing?`
+                          isLoanLead
+                            ? `🏦 *Royal Agra Estate — Home Loan Advisory Follow-up*\n\n` +
+                              `👤 *Client:* ${lead.buyerName}\n` +
+                              `📱 *Mobile:* ${lead.phone}\n` +
+                              `📧 *Email:* ${lead.email}\n` +
+                              `📋 *Application:* ${lead.propertyTitle}\n` +
+                              `📊 *Details:* ${lead.preferredTime}\n\n` +
+                              `Hello ${lead.buyerName}, thank you for applying for home loan pre-approval through Royal Agra Estate. Our banking advisory desk is ready to process your application with the lowest ROI.`
+                            : isProjectLead
+                            ? `🏰 *Royal Agra Estate — Project Dossier Follow-up*\n\n` +
+                              `👤 *Client:* ${lead.buyerName}\n` +
+                              `📱 *Mobile:* ${lead.phone}\n` +
+                              `📧 *Email:* ${lead.email}\n` +
+                              `🏢 *Project:* ${lead.propertyTitle}\n` +
+                              `⏱️ *Details:* ${lead.preferredTime}\n\n` +
+                              `Hello ${lead.buyerName}, thank you for downloading the Luxury Dossier for ${lead.propertyTitle}. Would you like to schedule an executive site visit?`
+                            : `🏰 *Royal Agra Estate — Client Inquiry Follow-up*\n\n` +
+                              `👤 *Client:* ${lead.buyerName} (${lead.phone})\n` +
+                              `📱 *Mobile:* ${lead.phone}\n` +
+                              `📧 *Email:* ${lead.email}\n` +
+                              `📍 *Property:* ${lead.propertyTitle} (ID: #${lead.propertyId})\n` +
+                              (linkedProp ? `💰 *Price:* ${linkedProp.priceDisplay} | *Locality:* ${linkedProp.locality}\n` : '') +
+                              `🗓️ *Requested Time:* ${lead.preferredTime || 'Immediate Advisory'}\n\n` +
+                              `Hello ${lead.buyerName}, thank you for reaching out to Royal Agra Estate regarding ${lead.propertyTitle}. How may we assist with your schedule and site viewing?`
                         );
 
                         return (
@@ -1791,20 +1810,33 @@ export const UserDashboardScreen: React.FC<UserDashboardScreenProps> = ({
                             </td>
                             <td className="p-4 align-top">
                               <div className="flex items-start gap-2.5">
-                                {linkedProp?.coverImage && (
+                                {linkedProp?.coverImage ? (
                                   <img
                                     src={linkedProp.coverImage}
                                     alt={lead.propertyTitle}
                                     className="w-12 h-12 rounded-lg object-cover border border-gray-200 shrink-0"
                                   />
+                                ) : isLoanLead ? (
+                                  <div className="w-12 h-12 rounded-lg bg-[#0F382C] text-[#E4D5B7] flex items-center justify-center shrink-0 border border-[#164E3D]">
+                                    <Building2 className="w-6 h-6" />
+                                  </div>
+                                ) : (
+                                  <div className="w-12 h-12 rounded-lg bg-amber-50 text-amber-800 flex items-center justify-center shrink-0 border border-amber-200">
+                                    <Building2 className="w-6 h-6" />
+                                  </div>
                                 )}
                                 <div>
-                                  <span className="font-bold text-[#0F382C] block hover:underline cursor-pointer" onClick={() => linkedProp && onViewProperty(linkedProp)}>
+                                  <span
+                                    className={`font-bold text-[#0F382C] block ${linkedProp ? 'hover:underline cursor-pointer' : ''}`}
+                                    onClick={() => linkedProp && onViewProperty(linkedProp)}
+                                  >
                                     {lead.propertyTitle}
                                   </span>
                                   <div className="flex items-center gap-2 text-[11px] text-gray-500 mt-0.5">
                                     {linkedProp?.priceDisplay && <span className="font-bold text-emerald-800">{linkedProp.priceDisplay}</span>}
                                     {linkedProp?.locality && <span>• {linkedProp.locality}</span>}
+                                    {isLoanLead && <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Mortgage Pre-Approval</span>}
+                                    {isProjectLead && <span className="font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">Gated Project Dossier</span>}
                                   </div>
                                   <span className="text-[10px] font-mono text-gray-400 block">Ref: #{lead.propertyId}</span>
                                 </div>

@@ -953,6 +953,8 @@ export default function App() {
           <ProjectsScreen
             projects={projectsList}
             isAdminUser={isAdmin(user)}
+            user={user}
+            onLeadSubmitted={handleLeadSubmitted}
             onContactProject={() => {
               navigateTo('contact');
             }}
@@ -1024,6 +1026,8 @@ export default function App() {
         isOpen={emiModalOpen}
         onClose={() => setEmiModalOpen(false)}
         initialPrice={emiInitialPrice}
+        user={user}
+        onLeadSubmitted={handleLeadSubmitted}
       />
 
       {/* Compare Matrix Modal */}

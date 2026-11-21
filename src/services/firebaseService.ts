@@ -137,6 +137,8 @@ export const saveFirestoreLead = async (lead: LeadSubmission): Promise<boolean> 
   }
 };
 
+export const saveLeadToFirestore = saveFirestoreLead;
+
 export const fetchFirestoreLeads = async (): Promise<LeadSubmission[]> => {
   try {
     const data = await apiRequest<LeadSubmission[]>('/leads.php');

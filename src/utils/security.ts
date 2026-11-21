@@ -11,6 +11,15 @@ export interface LeadSubmission {
   timestamp: string;
   createdAt?: string;
   status?: string;
+  inquiryType?: string;
+  loanAmount?: number;
+  tenureYears?: number;
+  interestRate?: number;
+  calculatedEmi?: number;
+  preferredBank?: string;
+  projectTitle?: string;
+  timeline?: string;
+  notes?: string;
 }
 
 // UNIFIED SUPER ADMIN PERMISSIONS SET
