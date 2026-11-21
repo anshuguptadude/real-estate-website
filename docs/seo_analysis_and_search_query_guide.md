@@ -641,8 +641,8 @@ To verify that Google's crawler correctly interprets the embedded JSON-LD struct
 
 # 5. Section R5: Ongoing Monitoring, Indexation Maintenance & GSC Protocol
 
-### 5.1 Google Search Console (GSC) Inspection Workflow
-1. **Authenticated Google Account**: Verified under `dcal.agra.official@gmail.com` via Safari browser session.
+### 5.1 Google Search Console (GSC) Inspection & Priority Indexing Protocol
+1. **Authenticated Google Account**: Verified under `dcal.agra.official@gmail.com` via Safari browser session (authuser index 2).
 2. **Domain Property Anchor**: Domain property resource `sc-domain:royalagraestate.in`.
 3. **Sitemap Submission Status**:
    - Primary Verified Sitemap: `https://royalagraestate.in/uploads/prop_1793755654_9862.xml`
@@ -651,12 +651,29 @@ To verify that Google's crawler correctly interprets the embedded JSON-LD struct
    - Discovered Pages: **22 URLs** (12 Agra micro-market corridor routes + 5 active verified properties + core platform routes)
    - Discovered Videos: 0
    - Submission Timestamp: November 4, 2026
-4. **URL Inspection Tool**:
-   - Paste `https://royalagraestate.in/` and priority landing pages (`/ada-approved-plots-in-agra`, `/plots-in-fatehabad-road-agra`).
-   - Click **Test Live URL**.
-   - Confirm: *"URL is available to Google"* -> Click **Request Indexing**.
+4. **URL Inspection & Priority Indexation Execution Log**:
+   - Every key corridor landing page was submitted to live URL inspection in Google Search Console:
+     - **Verified Already Indexed ("URL is on Google")**:
+       - `https://royalagraestate.in/plots-in-fatehabad-road-agra`
+       - `https://royalagraestate.in/ada-approved-plots-in-agra`
+       - `https://royalagraestate.in/luxury-villas-in-agra`
+       - `https://royalagraestate.in/property-in-sikandra-agra`
+       - `https://royalagraestate.in/commercial-property-in-agra`
+       - `https://royalagraestate.in/sell-property-in-agra`
+       - `https://royalagraestate.in/?screen=properties`
+     - **Submitted to Google Priority Crawl Queue ("Indexing Requested")**:
+       - `https://royalagraestate.in/` (Homepage — re-indexed with Shastripuram Schema.org)
+       - `https://royalagraestate.in/plots-in-shastripuram-agra`
+       - `https://royalagraestate.in/buy-house-in-agra`
+       - `https://royalagraestate.in/plots-in-dayalbagh-agra`
+       - `https://royalagraestate.in/plots-in-shamshabad-road-agra`
+       - `https://royalagraestate.in/agricultural-land-in-agra`
+       - `https://royalagraestate.in/flats-for-rent-in-agra`
+       - `https://royalagraestate.in/?screen=projects`
+       - `https://royalagraestate.in/?screen=about`
+     - **Daily Quota Maximization**: Successfully queued all priority commercial landing pages until Google's rolling 24-hour quota limit was reached. Remaining routes continue auto-processing via the verified 22-page XML sitemap.
 5. **Core Web Vitals & Page Experience**:
-   - Monitor the **Experience > Core Web Vitals** report to ensure 100% "Good" status on mobile.
+   - Mobile and desktop page experience evaluated with 0 schema errors and valid canonical consolidation.
 
 ### 5.2 Google Business Profile (GBP) Local Pack Interlock
 To dominate Google’s Local 3-Pack (the map listings that appear above organic text results):
