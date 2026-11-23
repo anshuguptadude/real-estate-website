@@ -33,3 +33,14 @@ trigger: always_on
   4. Commit changes with a descriptive message and push directly to `origin/main`.
   5. Keep local Mac files in 100% clean synchronization with GitHub and Hostinger.
 
+## 6. Paid Advertising & Meta Campaign Invariants
+* **Draft-Only Protection**: All ad campaigns, ad sets, and creatives in Meta Ads Manager or Google Ads must remain strictly in `DRAFT` status until explicit user authorization to publish. Never trigger Publish, Boost, or Payment methods automatically.
+* **Conversion Architecture**:
+  - Priority 1: Direct Click-to-WhatsApp when WhatsApp Business is connected to the Facebook Page.
+  - Priority 2 (Fallback): Higher-Intent Instant Lead Form with custom qualification dropdowns (Corridor & Budget) routing to WhatsApp Concierge (`+91 91490 79913` / `https://wa.me/919149079913`) on completion.
+  - Avoid routing cold low-budget ad traffic to website landing pages unless Meta Pixel / Conversions API is verified active.
+* **Placement & Audience Hygiene**:
+  - Exclude Audience Network (`apps_and_sites`) to prevent junk mobile game clicks.
+  - Explicitly disable automatic location expansion (`geo: 0`) to enforce strict residency in targeted Agra corridors.
+* **Brand & Creative Compliance**: Ad copies and creatives must cite `royalagraestate.in`, 30-year legal due diligence, and ADA approval to reinforce trust.
+
